@@ -1,0 +1,713 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tang-strategy.local/schema/strategy.schema.json",
+  "title": "Tang Strategy JSON Schema",
+  "description": "Schema for Tang strategy definitions used by Daily Review. It validates the shared strategy contract while allowing version-specific modules.",
+  "type": "object",
+  "required": [
+    "name",
+    "version",
+    "description",
+    "trend",
+    "signals",
+    "scoring",
+    "exit",
+    "filter",
+    "hard_blocks"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable strategy name, for example Tang v4.4 Slope."
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Strategy version. Keep as string so 0.4 and 4.4 are both preserved exactly."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "candles": {
+      "$ref": "#/$defs/module"
+    },
+    "indicators": {
+      "$ref": "#/$defs/indicators"
+    },
+    "display": {
+      "$ref": "#/$defs/module"
+    },
+    "trend": {
+      "$ref": "#/$defs/trend"
+    },
+    "multi_timeframe": {
+      "$ref": "#/$defs/multiTimeframe"
+    },
+    "slope_filter": {
+      "$ref": "#/$defs/module"
+    },
+    "touch_logic": {
+      "$ref": "#/$defs/module"
+    },
+    "confluence": {
+      "$ref": "#/$defs/module"
+    },
+    "level_inertia": {
+      "$ref": "#/$defs/module"
+    },
+    "elite_strong": {
+      "$ref": "#/$defs/module"
+    },
+    "signals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/signal"
+      }
+    },
+    "entry_requirements": {
+      "$ref": "#/$defs/module"
+    },
+    "volume_validation": {
+      "$ref": "#/$defs/module"
+    },
+    "structure_playbooks": {
+      "$ref": "#/$defs/module"
+    },
+    "options_context": {
+      "$ref": "#/$defs/module"
+    },
+    "space_check": {
+      "$ref": "#/$defs/module"
+    },
+    "scoring": {
+      "$ref": "#/$defs/scoring"
+    },
+    "profit_management": {
+      "$ref": "#/$defs/module"
+    },
+    "position_state": {
+      "$ref": "#/$defs/module"
+    },
+    "cooldown": {
+      "$ref": "#/$defs/module"
+    },
+    "exit": {
+      "$ref": "#/$defs/exit"
+    },
+    "filter": {
+      "$ref": "#/$defs/filter"
+    },
+    "hard_blocks": {
+      "$ref": "#/$defs/hardBlocks"
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/alert"
+      }
+    },
+    "options": {
+      "$ref": "#/$defs/options"
+    }
+  },
+  "additionalProperties": {
+    "$ref": "#/$defs/jsonValue"
+  },
+  "$defs": {
+    "module": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "jsonValue": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "pine_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "indicator_title": {
+          "type": "string"
+        },
+        "strategy_title": {
+          "type": "string"
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "overlay": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "indicators": {
+      "type": "object",
+      "properties": {
+        "moving_averages": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/movingAverage"
+          }
+        },
+        "vwap": {
+          "$ref": "#/$defs/indicator"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "indicator": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "movingAverage": {
+      "type": "object",
+      "required": [
+        "type",
+        "source",
+        "length"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "sma",
+            "ema",
+            "wma",
+            "hma",
+            "rma"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "role": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "trend": {
+      "type": "object",
+      "required": [
+        "method",
+        "timeframe"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timeframe": {
+          "$ref": "#/$defs/timeframe"
+        },
+        "description": {
+          "type": "string"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fast_ma": {
+          "type": "string"
+        },
+        "slow_ma": {
+          "type": "string"
+        },
+        "slope_bars": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bullish": {
+          "$ref": "#/$defs/conditionMap"
+        },
+        "bearish": {
+          "$ref": "#/$defs/conditionMap"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "multiTimeframe": {
+      "type": "object",
+      "properties": {
+        "primary_bias_tf": {
+          "$ref": "#/$defs/timeframe"
+        },
+        "execution_tf": {
+          "$ref": "#/$defs/timeframe"
+        },
+        "higher_tf_priority": {
+          "type": "boolean"
+        },
+        "conflict_policy": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "signal": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "direction"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "conditions"
+          ]
+        },
+        {
+          "required": [
+            "extends"
+          ]
+        },
+        {
+          "required": [
+            "extra_conditions"
+          ]
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_\\-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "enum": [
+            "bullish",
+            "bearish",
+            "neutral"
+          ]
+        },
+        "style": {
+          "type": "string"
+        },
+        "anchor_side": {
+          "enum": [
+            "top",
+            "bottom",
+            "above",
+            "below",
+            "none"
+          ]
+        },
+        "extends": {
+          "type": "string"
+        },
+        "conditions": {
+          "$ref": "#/$defs/conditionMap"
+        },
+        "extra_conditions": {
+          "$ref": "#/$defs/conditionMap"
+        },
+        "confirm": {
+          "$ref": "#/$defs/conditionMap"
+        },
+        "trend_required": {
+          "enum": [
+            "bullish",
+            "bearish",
+            "none"
+          ]
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "conditionMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/conditionValue"
+      }
+    },
+    "conditionValue": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/comparison"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/conditionValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/conditionValue"
+          }
+        }
+      ]
+    },
+    "comparison": {
+      "type": "object",
+      "required": [
+        "field",
+        "operator",
+        "target"
+      ],
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            ">",
+            ">=",
+            "<",
+            "<=",
+            "==",
+            "!=",
+            "crosses_above",
+            "crosses_below"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "label": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "text_color": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "scoring": {
+      "type": "object",
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "dimensions": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/scoringDimension"
+          }
+        },
+        "max_total": {
+          "type": "number",
+          "minimum": 0
+        },
+        "replaced_by": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "scoringDimension": {
+      "type": "object",
+      "required": [
+        "max"
+      ],
+      "properties": {
+        "max": {
+          "type": "number",
+          "minimum": 0
+        },
+        "desc": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "exit": {
+      "type": "object",
+      "properties": {
+        "_comment": {
+          "type": "string"
+        },
+        "tp_bars": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_stop_bars": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ma_stop_line": {
+          "type": "string"
+        },
+        "L1_technical": {
+          "$ref": "#/$defs/exitLayer"
+        },
+        "L2_hard_stops": {
+          "$ref": "#/$defs/exitLayer"
+        },
+        "L3_trailing": {
+          "$ref": "#/$defs/exitLayer"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "exitLayer": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "filter": {
+      "type": "object",
+      "properties": {
+        "min_score": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "session": {
+          "$ref": "#/$defs/session"
+        },
+        "entangle_threshold": {
+          "type": "number",
+          "minimum": 0
+        },
+        "entangle_threshold_ratio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "space_threshold": {
+          "type": "number",
+          "minimum": 0
+        },
+        "space_threshold_ratio": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "session": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/timeOfDay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/timeOfDay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "source_note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "hardBlocks": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "alert": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "signal_id": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "default_iv": {
+          "type": "number",
+          "minimum": 0
+        },
+        "risk_free_rate": {
+          "type": "number"
+        },
+        "dte_mode": {
+          "type": "string"
+        },
+        "dte_auto_switch": {
+          "$ref": "#/$defs/timeOfDay"
+        },
+        "strike_method": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "timeframe": {
+      "type": "string",
+      "pattern": "^[0-9]+[smhdwM]$"
+    },
+    "timeOfDay": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+    }
+  }
+}

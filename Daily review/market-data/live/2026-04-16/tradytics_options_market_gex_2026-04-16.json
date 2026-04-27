@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "title": "Tradytics Options Market GEX 2026-04-16",
+    "source": "Tradytics options-market free delayed page",
+    "symbol_scope": "market",
+    "date": "2026-04-16",
+    "extracted_at": "2026-04-18T00:00:00+08:00",
+    "fields": [
+      "gex_market",
+      "vanna_market",
+      "charm_market"
+    ]
+  },
+  "data": {
+    "date": "2026-04-16",
+    "gex_market": -1930683.4668999868,
+    "vanna_market": -271804.8611339077,
+    "charm_market": 237249.02763145816
+  }
+}
