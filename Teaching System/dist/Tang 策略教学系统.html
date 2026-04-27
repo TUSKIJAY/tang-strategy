@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tang 策略教学系统</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Space+Grotesk:wght@400;500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#fdf8f7",
+        "surface-dim": "#ddd9d8",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f7f3f1",
+        "surface-container": "#f1edec",
+        "surface-container-high": "#ebe7e6",
+        "surface-container-highest": "#e6e2e0",
+        "surface-variant": "#e6e2e0",
+        "on-surface": "#1c1b1b",
+        "on-surface-variant": "#494740",
+        "inverse-surface": "#313030",
+        "inverse-on-surface": "#f4f0ef",
+        "outline": "#7a776f",
+        "outline-variant": "#cbc6bd",
+        "primary": "#000000",
+        "on-primary": "#ffffff",
+        "primary-container": "#1d1b18",
+        "secondary": "#285fa2",
+        "on-secondary": "#ffffff",
+        "secondary-container": "#85b5fe",
+        "on-secondary-container": "#004585",
+        "secondary-fixed": "#d5e3ff",
+        "secondary-fixed-dim": "#a7c8ff",
+        "error": "#ba1a1a",
+        "on-error": "#ffffff",
+        "error-container": "#ffdad6",
+        "on-error-container": "#93000a",
+        "background": "#fdf8f7",
+        "on-background": "#1c1b1b",
+      },
+      borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem" },
+      spacing: { "gutter": "24px", "stack-lg": "32px", "stack-sm": "8px", "unit": "4px", "margin": "48px", "stack-md": "16px", "container-max": "1280px" },
+    }
+  }
+};
+</script>
+<style>
+  body { background-color: #f4f2ec; }
+  * { scrollbar-width: thin; scrollbar-color: #cbc6bd transparent; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  /* 嵌入教学页时由 KlineView 控制高度，避免引擎默认高度撑破外壳 */
+  .kline-host--evidence .kline-engine__toolbar,
+  .kline-host--evidence .kline-engine__hud { display: none !important; }
+  .kline-host--lab .kline-engine__hud { display: none !important; }
+  /* Compact lab toolbar so the chart canvas keeps as much vertical space as
+     possible; the React-side header already shows the case title + tf, so we
+     hide the engine's own title/meta block too. */
+  .kline-host--lab .kline-engine__toolbar { gap: 4px; padding: 4px 8px; flex-wrap: wrap; }
+  .kline-host--lab .kline-engine__toolbar-group:first-child { display: none !important; }
+  .kline-host--lab .kline-engine__toolbar-group { gap: 4px; }
+  .kline-host--lab .kline-engine__button { min-height: 26px; padding: 3px 8px; font-size: 12px; }
+  /* Hide engine toolbar MA buttons in product modes — MA toggles are exposed
+     via the React MaLegend above the chart instead, to avoid duplicate UI. */
+  .kline-host--lab .kline-engine__ma-button { display: none !important; }
+  /* Replay-drill phase: hide engine playback/zoom/follow buttons so the user
+     can only advance bars via the right-rail "等待" button. Timeframe + theme
+     + HA + MA stay accessible. Re-enabled automatically when the host class
+     drops in submitted/review phase. */
+  .kline-host--replay-locked .kline-engine__button[data-action="play"],
+  .kline-host--replay-locked .kline-engine__button[data-action="step-back"],
+  .kline-host--replay-locked .kline-engine__button[data-action="step-forward"],
+  .kline-host--replay-locked .kline-engine__button[data-action="speed"],
+  .kline-host--replay-locked .kline-engine__button[data-action="follow"],
+  .kline-host--replay-locked .kline-engine__button[data-action="zoom-in"],
+  .kline-host--replay-locked .kline-engine__button[data-action="zoom-out"] { display: none !important; }
+  .kline-host { width: 100%; min-height: 0; }
+  .kline-host .kline-engine {
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+  .kline-host .kline-engine__viewport {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .kline-host .kline-engine__canvas-wrap,
+  .kline-host .kline-engine__canvas {
+    height: 100%;
+    min-height: 0;
+  }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="kline-engine/kline-engine.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="shared.jsx?v=20260426k"></script>
+<script type="text/babel" src="pages-1.jsx?v=20260426k"></script>
+<script type="text/babel" src="pages-2.jsx?v=20260426k"></script>
+
+<script type="text/babel">
+function App() {
+  const dataState = useAppData();
+  const { route, navigate } = useHashRouter();
+
+  if (dataState.loading || dataState.error) {
+    return <LoadingScreen error={dataState.error} />;
+  }
+
+  const nav = (r) => {
+    window.location.hash = r;
+  };
+
+  // Parse route
+  const parts = route.split('/');
+  const page = parts[0];
+  const param = parts.slice(1).join('/');
+
+  switch (page) {
+    case 'hub':
+    case '':
+      return <HubPage navigate={nav} />;
+    case 'module':
+      return <ModulePage moduleId={param} navigate={nav} />;
+    case 'case':
+      return <CasePage caseId={param} navigate={nav} />;
+    case 'training':
+      return <TrainingPage moduleId={param} navigate={nav} />;
+    case 'mistakes':
+      return <MistakesPage navigate={nav} />;
+    case 'mistake':
+      return <MistakeDetailPage mistakeId={param} navigate={nav} />;
+    case 'playbook':
+      return <PlaybookPage navigate={nav} />;
+    case 'archives':
+      return <ArchivesPage navigate={nav} />;
+    default:
+      return <HubPage navigate={nav} />;
+  }
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+//@version=5
+indicator("小汤系统 V3.3.1 - 极简火焰版", overlay=true)
+
+// ==========================
+// 1. 强制内核计算 HA 数据
+// ==========================
+var float ha_open = na
+ha_close = (open + high + low + close) / 4
+ha_open := na(ha_open[1]) ? (open + close) / 2 : (ha_open[1] + ha_close[1]) / 2
+ha_high = math.max(high, math.max(ha_open, ha_close))
+ha_low = math.min(low, math.min(ha_open, ha_close))
+
+is_green = ha_close > ha_open
+is_red = ha_close < ha_open
+
+// ==========================
+// 2. 核心均线群与机构关卡
+// ==========================
+ma10 = ta.sma(ha_close, 10)
+ma20 = ta.sma(ha_close, 20)
+ma30 = ta.sma(ha_close, 30)
+ma50 = ta.sma(ha_close, 50)
+ma200 = ta.sma(ha_close, 200)
+vwap = ta.vwap(ha_close)
+
+plot(ma10, color=color.new(#b86800, 0), title="MA10 (触发线)", linewidth=2)
+plot(ma20, color=color.new(#9e9e9e, 0), title="MA20 (短期防线)")
+plot(ma30, color=color.new(#78909c, 0), title="MA30 (辅助防线)")
+plot(ma50, color=color.new(#1a5090, 0), title="MA50 (多空分界)", linewidth=2)
+plot(ma200, color=color.new(#187040, 0), title="MA200 (生死线)", linewidth=2)
+plot(vwap, color=color.new(#6030a0, 0), title="VWAP", linewidth=2, style=plot.style_cross)
+
+// ==========================
+// 3. 5分钟大势侦测 (强化 MA20/MA30 支撑逻辑)
+// ==========================
+ha_ticker = ticker.heikinashi(syminfo.tickerid)
+ma10_5m = request.security(ha_ticker, "5", ta.sma(close, 10))
+ma20_5m = request.security(ha_ticker, "5", ta.sma(close, 20))
+ma30_5m = request.security(ha_ticker, "5", ta.sma(close, 30))
+
+// 5分钟级别要求 10, 20, 30 顺势发散，确保重要支撑有效
+trend_up_5m = ma10_5m > ma20_5m and ma20_5m > ma30_5m
+trend_down_5m = ma10_5m < ma20_5m and ma20_5m < ma30_5m
+
+// ==========================
+// 4. 禁做条件 (物理熔断)
+// ==========================
+is_after_10am = hour(time, "America/New_York") >= 10 or (hour(time, "America/New_York") == 9 and minute(time, "America/New_York") >= 30)
+
+// 均线缠绕检测 (包含 MA20 和 MA30)
+ma_max = math.max(ma10, math.max(ma20, math.max(ma30, ma50)))
+ma_min = math.min(ma10, math.min(ma20, math.min(ma30, ma50)))
+is_tangled = ((ma_max - ma_min) / ha_close) < 0.0003
+bgcolor(is_tangled ? color.new(#9e9e9e, 90) : na, title="Tangled Zone")
+
+// ==========================
+// 5. 空间检测 (Reward OK >= 0.15%)
+// ==========================
+min_dist = ha_close * 0.0015 
+
+dist_up_ma50 = (ma50 > ha_close) ? (ma50 - ha_close) : 999999
+dist_up_ma200 = (ma200 > ha_close) ? (ma200 - ha_close) : 999999
+dist_up_vwap = (vwap > ha_close) ? (vwap - ha_close) : 999999
+space_ok_call = math.min(dist_up_ma50, math.min(dist_up_ma200, dist_up_vwap)) >= min_dist
+
+dist_down_ma50 = (ma50 < ha_close) ? (ha_close - ma50) : 999999
+dist_down_ma200 = (ma200 < ha_close) ? (ha_close - ma200) : 999999
+dist_down_vwap = (vwap < ha_close) ? (ha_close - vwap) : 999999
+space_ok_put = math.min(dist_down_ma50, math.min(dist_down_ma200, dist_down_vwap)) >= min_dist
+
+can_trade_call = is_after_10am and not is_tangled and space_ok_call
+can_trade_put = is_after_10am and not is_tangled and space_ok_put
+
+// ==========================
+// 6. 多线共振侦测器 (打分系统包含 MA30)
+// ==========================
+rej_ma10  = ha_high >= ma10  and ha_close <= ma10  and ha_open <= ma10
+rej_ma20  = ha_high >= ma20  and ha_close <= ma20  and ha_open <= ma20
+rej_ma30  = ha_high >= ma30  and ha_close <= ma30  and ha_open <= ma30
+rej_ma50  = ha_high >= ma50  and ha_close <= ma50  and ha_open <= ma50
+rej_ma200 = ha_high >= ma200 and ha_close <= ma200 and ha_open <= ma200
+rej_vwap  = ha_high >= vwap  and ha_close <= vwap  and ha_open <= vwap
+
+put_score = (rej_ma10 ? 1 : 0) + (rej_ma20 ? 1 : 0) + (rej_ma30 ? 1 : 0) + (rej_ma50 ? 1 : 0) + (rej_ma200 ? 1 : 0) + (rej_vwap ? 1 : 0)
+
+sup_ma10  = ha_low <= ma10  and ha_close >= ma10  and ha_open >= ma10
+sup_ma20  = ha_low <= ma20  and ha_close >= ma20  and ha_open >= ma20
+sup_ma30  = ha_low <= ma30  and ha_close >= ma30  and ha_open >= ma30
+sup_ma50  = ha_low <= ma50  and ha_close >= ma50  and ha_open >= ma50
+sup_ma200 = ha_low <= ma200 and ha_close >= ma200 and ha_open >= ma200
+sup_vwap  = ha_low <= vwap  and ha_close >= vwap  and ha_open >= vwap
+
+call_score = (sup_ma10 ? 1 : 0) + (sup_ma20 ? 1 : 0) + (sup_ma30 ? 1 : 0) + (sup_ma50 ? 1 : 0) + (sup_ma200 ? 1 : 0) + (sup_vwap ? 1 : 0)
+
+// ==========================
+// 7. 信号触发系统 (分级)
+// ==========================
+green_pullback = is_green and rej_ma10
+red_pullback = is_red and sup_ma10
+
+signal_put_base = green_pullback[1] and is_red and trend_down_5m and can_trade_put
+signal_call_base = red_pullback[1] and is_green and trend_up_5m and can_trade_call
+
+// 信号分级
+put_normal = signal_put_base and put_score[1] == 1
+put_strong = signal_put_base and put_score[1] >= 2
+
+call_normal = signal_call_base and call_score[1] == 1
+call_strong = signal_call_base and call_score[1] >= 2
+
+// ==========================
+// 8. 视觉绘制与状态机防线
+// ==========================
+// 极简英文标签
+plotshape(put_normal, title="Normal PUT", style=shape.labeldown, location=location.abovebar, color=color.new(#c62828, 0), size=size.small, text="PUT", textcolor=color.white)
+plotshape(call_normal, title="Normal CALL", style=shape.labelup, location=location.belowbar, color=color.new(#2e7d32, 0), size=size.small, text="CALL", textcolor=color.white)
+
+// 🔥 加上火焰的高优信号 🔥
+plotshape(put_strong, title="Strong PUT", style=shape.labeldown, location=location.abovebar, color=color.new(#d84315, 0), size=size.normal, text="🔥 Strong PUT", textcolor=color.white)
+plotshape(call_strong, title="Strong CALL", style=shape.labelup, location=location.belowbar, color=color.new(#00695c, 0), size=size.normal, text="🔥 Strong CALL", textcolor=color.white)
+
+// 虚拟仓位过滤止损
+var int position = 0
+if signal_put_base
+    position := -1
+if signal_call_base
+    position := 1
+
+// 灾难防线：K线实体贯穿 MA50
+sl_put = ha_close > ma50 and ha_open < ma50
+sl_call = ha_close < ma50 and ha_open > ma50
+is_sl_triggered = (position == -1 and sl_put) or (position == 1 and sl_call)
+
+if is_sl_triggered
+    position := 0
+
+bgcolor(is_sl_triggered ? color.new(#ef5350, 85) : na, title="Stop Loss Alert")
+plotshape(is_sl_triggered, title="STOP", style=shape.labeldown, location=location.top, color=color.new(#b71c1c, 0), size=size.small, text="STOP", textcolor=color.white)
+
+// 弹窗警报 (纯英文)
+alertcondition(put_normal or call_normal, title="Normal Signal", message="1m Reject/Support confirmed.")
+alertcondition(put_strong or call_strong, title="Strong Signal", message="Multi-MA Confluence detected! Strong setup.")
+alertcondition(is_sl_triggered, title="STOP", message="MA50 broken. Exit position immediately.")

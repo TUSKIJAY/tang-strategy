@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate JSON data
+        run: |
+          python -m json.tool cases/index.json > /dev/null
+          python -m json.tool rules/compiled/index.json > /dev/null
+          python -m json.tool data/processed/teaching_segments.json > /dev/null
+          python -m json.tool training/checkpoints.json > /dev/null
+
+      - name: Build standalone HTML
+        run: python scripts/build_standalone.py
+
+      - name: Ensure standalone is committed
+        run: git diff --exit-code -- "dist/Tang 策略教学系统-standalone.html"

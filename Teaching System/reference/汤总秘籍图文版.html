@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小汤交易攻略 图文完整版</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#f9f7f3;
+  --bg2:#f2efe9;
+  --bg3:#e9e5dd;
+  --border:#ddd9d0;
+  --border2:#ccc8be;
+  --text:#1e1c18;
+  --muted:#94908a;
+  --green:#1d7a4a;
+  --green-bg:#e8f5ee;
+  --green-bd:#a8d4bc;
+  --red:#9e2a1a;
+  --red-bg:#f5e8e6;
+  --red-bd:#d4a8a0;
+  --blue:#1a3f7a;
+  --blue-bg:#e6edf5;
+  --blue-bd:#90aed0;
+  --amber:#7a4a0a;
+  --amber-bg:#f5eede;
+  --amber-bd:#d0a860;
+  --ma10:#b86800;
+  --ma50:#1a5090;
+  --ma200:#187040;
+  --vwap:#6030a0;
+  --cg:#1e8a50;
+  --cr:#b02818;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;font-size:14px;line-height:1.8;padding:2.5rem 2rem;max-width:780px;margin:0 auto}
+h1{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:.3rem}
+.sub{color:var(--muted);font-size:13px;margin-bottom:1.5rem}
+.legend{display:flex;flex-wrap:wrap;gap:12px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:3rem}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.ld{height:3px;width:20px;border-radius:2px}
+.ch{margin-bottom:2.5rem}
+.ch-hd{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.ch-n{width:26px;height:26px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.ch-t{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:.65rem}
+.lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;font-family:'JetBrains Mono',monospace}
+.body{font-size:14px;line-height:1.8}
+.rule{border-left:2px solid var(--blue-bd);padding:.7rem 1rem;background:var(--blue-bg);border-radius:0 8px 8px 0;margin-bottom:.65rem;font-size:14px;line-height:1.8}
+.danger{border-left:2px solid var(--red-bd);padding:.7rem 1rem;background:var(--red-bg);border-radius:0 8px 8px 0;margin-bottom:.65rem;font-size:14px;line-height:1.8}
+.warn{border-left:2px solid var(--amber-bd);padding:.7rem 1rem;background:var(--amber-bg);border-radius:0 8px 8px 0;margin-bottom:.65rem;font-size:14px;line-height:1.8}
+.ok{border-left:2px solid var(--green-bd);padding:.7rem 1rem;background:var(--green-bg);border-radius:0 8px 8px 0;margin-bottom:.65rem;font-size:14px;line-height:1.8}
+.step{display:flex;gap:10px;margin-bottom:.55rem;align-items:flex-start}
+.sn{width:20px;height:20px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.st{font-size:14px;line-height:1.8}
+.st b{font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.65rem}
+.tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:4px;margin-right:3px;font-family:'JetBrains Mono',monospace;vertical-align:middle}
+.tg{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.tr{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.tb{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+.tw{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+.tn{background:var(--bg2);color:var(--muted);border:1px solid var(--border)}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:6px 10px;color:var(--muted);font-weight:400;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+.tbl tr:last-child td{border-bottom:none}
+.cl{list-style:none}
+.cl li{display:flex;gap:8px;font-size:14px;padding:4px 0;line-height:1.7}
+.cl li::before{content:"✓";color:var(--green);font-size:12px;flex-shrink:0;margin-top:2px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.cl li.no::before{content:"✕";color:var(--red)}
+.q{font-size:13px;color:var(--muted);font-style:italic;border-left:1px solid var(--border2);padding-left:10px;margin-top:8px;line-height:1.7}
+.hr{border:none;border-top:1px solid var(--border);margin:2.5rem 0}
+.dw{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem .9rem .4rem;margin-bottom:.65rem}
+.dt{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.7rem;font-family:'JetBrains Mono',monospace}
+.ex{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;margin-bottom:.65rem;font-size:13px;line-height:1.75}
+.ex-l{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.fs{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:13px;text-align:center;margin-bottom:4px}
+.fs.g{background:var(--green-bg);border-color:var(--green-bd);color:var(--green)}
+.fs.r{background:var(--red-bg);border-color:var(--red-bd);color:var(--red)}
+.arr{text-align:center;color:var(--muted);font-size:11px;margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<h1>小汤交易攻略 · 图文完整版</h1>
+<div class="sub">SPY / SPX / QQQ · 平均K（Heikin-Ashi）· 1分钟 + 5分钟</div>
+
+<div class="legend">
+  <div class="li"><div class="ld" style="background:var(--ma10)"></div>MA10</div>
+  <div class="li"><div class="ld" style="background:var(--ma50)"></div>MA50</div>
+  <div class="li"><div class="ld" style="background:var(--ma200)"></div>MA200</div>
+  <div class="li"><div class="ld" style="background:var(--vwap)"></div>VWAP</div>
+  <div class="li"><div class="ld" style="background:var(--cg);height:12px;width:10px;border-radius:2px"></div>绿K</div>
+  <div class="li"><div class="ld" style="background:var(--cr);height:12px;width:10px;border-radius:2px"></div>红K</div>
+</div>
+
+<!-- 01 基本配置 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">01</div><div class="ch-t">基本配置</div></div>
+
+<div class="card">
+<div class="lbl">交易标的</div>
+<div class="body">SPY为主。SPX / QQQ同样完全适用这套方法，形态一样标准。小汤个人偏好SPY，标的选择取决于自己的习惯。</div>
+</div>
+
+<div class="card">
+<div class="lbl">K线类型 — 平均K（Heikin-Ashi）影线特征</div>
+<div class="dw" style="margin-top:8px;margin-bottom:8px">
+<div class="dt">平均K的影线只在单边出现</div>
+<svg width="100%" viewBox="0 0 680 150" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+  <!-- 左：下跌趋势红K 只有下影线 -->
+  <text x="100" y="16" fill="#94908a" font-size="11" text-anchor="middle">下跌趋势：红K只有下影线</text>
+  <!-- 无上影线，只有小下影线 -->
+  <rect x="18" y="28" width="14" height="24" fill="#b02818" rx="2"/>
+  <line x1="25" y1="52" x2="25" y2="58" stroke="#b02818" stroke-width="1.5"/>
+
+  <rect x="44" y="42" width="14" height="26" fill="#b02818" rx="2"/>
+  <line x1="51" y1="68" x2="51" y2="74" stroke="#b02818" stroke-width="1.5"/>
+
+  <rect x="70" y="59" width="14" height="28" fill="#b02818" rx="2"/>
+  <line x1="77" y1="87" x2="77" y2="93" stroke="#b02818" stroke-width="1.5"/>
+
+  <rect x="96" y="76" width="14" height="26" fill="#b02818" rx="2"/>
+  <line x1="103" y1="102" x2="103" y2="108" stroke="#b02818" stroke-width="1.5"/>
+
+  <rect x="122" y="91" width="14" height="26" fill="#b02818" rx="2"/>
+  <line x1="129" y1="117" x2="129" y2="124" stroke="#b02818" stroke-width="1.5"/>
+
+  <rect x="148" y="104" width="14" height="24" fill="#b02818" rx="2"/>
+  <line x1="155" y1="128" x2="155" y2="135" stroke="#b02818" stroke-width="1.5"/>
+
+  <text x="100" y="145" fill="#9e2a1a" font-size="10" text-anchor="middle">无上影线 · 有小下影线</text>
+
+  <!-- 分隔 -->
+  <line x1="210" y1="8" x2="210" y2="142" stroke="#ddd9d0" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <!-- 右：上涨趋势绿K 只有上影线 -->
+  <text x="450" y="16" fill="#94908a" font-size="11" text-anchor="middle">上涨趋势：绿K只有上影线</text>
+  <rect x="228" y="112" width="14" height="22" fill="#1e8a50" rx="2"/>
+  <line x1="235" y1="108" x2="235" y2="112" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <rect x="254" y="96" width="14" height="24" fill="#1e8a50" rx="2"/>
+  <line x1="261" y1="92" x2="261" y2="96" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <rect x="280" y="80" width="14" height="24" fill="#1e8a50" rx="2"/>
+  <line x1="287" y1="76" x2="287" y2="80" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <rect x="306" y="64" width="14" height="24" fill="#1e8a50" rx="2"/>
+  <line x1="313" y1="60" x2="313" y2="64" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <rect x="332" y="50" width="14" height="22" fill="#1e8a50" rx="2"/>
+  <line x1="339" y1="46" x2="339" y2="50" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <rect x="358" y="36" width="14" height="22" fill="#1e8a50" rx="2"/>
+  <line x1="365" y1="32" x2="365" y2="36" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <text x="300" y="145" fill="#1d7a4a" font-size="10" text-anchor="middle">无下影线 · 有小上影线</text>
+
+  <!-- 衰竭提示 右侧 -->
+  <text x="560" y="16" fill="#94908a" font-size="11" text-anchor="middle">趋势衰竭：影线变长</text>
+  <rect x="470" y="68" width="14" height="18" fill="#b02818" rx="2"/>
+  <line x1="477" y1="86" x2="477" y2="100" stroke="#b02818" stroke-width="1.5"/>
+
+  <rect x="496" y="72" width="14" height="14" fill="#1e8a50" rx="2"/>
+  <line x1="503" y1="58" x2="503" y2="72" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <rect x="522" y="66" width="14" height="16" fill="#b02818" rx="2"/>
+  <line x1="529" y1="82" x2="529" y2="98" stroke="#b02818" stroke-width="1.5"/>
+
+  <rect x="548" y="70" width="14" height="14" fill="#1e8a50" rx="2"/>
+  <line x1="555" y1="56" x2="555" y2="70" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <text x="523" y="115" fill="#7a4a0a" font-size="10" text-anchor="middle">影线变长→趋势要结束</text>
+</svg>
+</div>
+<div class="warn">平均K的影线只在单边出现。下跌红K只有下影线，上涨绿K只有上影线。影线开始变长 = 趋势衰竭的早期信号，准备出场。</div>
+</div>
+
+<div class="g2">
+<div class="card"><div class="lbl">主图（进出场）</div><div style="font-size:22px;font-weight:700;margin:4px 0;color:var(--blue)">1分钟</div><div class="body">盯进场点、出场点、K线质量</div></div>
+<div class="card"><div class="lbl">副图（大方向）</div><div style="font-size:22px;font-weight:700;margin:4px 0;color:var(--vwap)">5分钟</div><div class="body">确认趋势、判断持仓时间</div></div>
+</div>
+
+<div class="card">
+<div class="lbl">均线设置（全部用SMA）</div>
+<table class="tbl" style="margin-top:6px">
+<tr><th>均线</th><th>颜色</th><th>分类</th><th>作用</th></tr>
+<tr><td><b>MA10</b></td><td><span style="color:var(--ma10);font-weight:700">■</span></td><td><span class="tag tw">核心</span></td><td>唯一触发进出场的线，整套系统灵魂</td></tr>
+<tr><td>MA20 / MA30</td><td><span style="color:#8050c0;font-weight:700">■</span></td><td><span class="tag tn">轻量</span></td><td>辅助判断排列方向，力度弱，不作主要依据</td></tr>
+<tr><td><b>MA50</b></td><td><span style="color:var(--ma50);font-weight:700">■</span></td><td><span class="tag tb">关卡</span></td><td>强支撑/阻力，信号B的额外确认条件</td></tr>
+<tr><td><b>MA200</b></td><td><span style="color:var(--ma200);font-weight:700">■</span></td><td><span class="tag tb">关卡</span></td><td>多空终极分界，远离时下方空间最大</td></tr>
+<tr><td><b>VWAP</b></td><td><span style="color:var(--vwap);font-weight:700">■</span></td><td><span class="tag tb">关卡</span></td><td>当日多空背景确认，与MA50/MA200同等对待</td></tr>
+</table>
+</div>
+</div>
+
+<hr class="hr">
+
+<!-- 02 核心逻辑 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">02</div><div class="ch-t">核心逻辑</div></div>
+<div class="rule"><b>趋势已经成型 → 等信号 → 顺势进场 → 趋势破坏立刻出场</b><br>不预测方向，只等确认。顺延永远比反转容易。不做反手，不猜底，不猜顶。</div>
+
+<div class="dw">
+<div class="dt">多头排列 vs 空头排列</div>
+<svg width="100%" viewBox="0 0 680 235" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+  <!-- ===== 多头排列 (Bull) ===== -->
+  <text x="155" y="16" fill="#1d7a4a" font-size="12" text-anchor="middle" font-weight="500">多头排列 → 找CALL</text>
+
+  <!-- 均线：平滑曲线，向上发散 -->
+  <path d="M 18,202 C 110,199 200,190 295,180" fill="none" stroke="#187040" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <path d="M 18,188 C 110,184 200,164 295,148" fill="none" stroke="#6030a0" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <path d="M 18,175 C 110,170 200,142 295,118" fill="none" stroke="#1a5090" stroke-width="1.8"/>
+  <path d="M 18,162 C 110,155 200,115 295,78" fill="none" stroke="#b86800" stroke-width="2.5"/>
+
+  <!-- 绿K：上涨趋势，只有上影线 -->
+  <line x1="28" y1="137" x2="28" y2="141" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="22" y="141" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="61" y1="128" x2="61" y2="132" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="55" y="132" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="94" y1="118" x2="94" y2="122" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="88" y="122" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="127" y1="107" x2="127" y2="111" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="121" y="111" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="160" y1="95" x2="160" y2="99" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="154" y="99" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="193" y1="83" x2="193" y2="87" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="187" y="87" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="226" y1="70" x2="226" y2="74" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="220" y="74" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="259" y1="58" x2="259" y2="62" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="253" y="62" width="13" height="18" fill="#1e8a50" rx="2"/>
+
+  <!-- 多头标签 -->
+  <text x="298" y="76" fill="#b86800" font-size="9" font-weight="500">MA10</text>
+  <text x="298" y="116" fill="#1a5090" font-size="9">MA50</text>
+  <text x="298" y="146" fill="#6030a0" font-size="9">VWAP</text>
+  <text x="298" y="178" fill="#187040" font-size="9">MA200</text>
+  <text x="155" y="225" fill="#94908a" font-size="10" text-anchor="middle">价格 > MA10 > MA50 > VWAP > MA200 向上发散</text>
+
+  <!-- 分隔线 -->
+  <line x1="328" y1="8" x2="328" y2="225" stroke="#ddd9d0" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <!-- ===== 空头排列 (Bear) ===== -->
+  <text x="500" y="16" fill="#9e2a1a" font-size="12" text-anchor="middle" font-weight="500">空头排列 → 找PUT</text>
+
+  <!-- 均线：平滑曲线，向下发散 -->
+  <path d="M 345,30 C 440,34 540,42 640,52" fill="none" stroke="#187040" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <path d="M 345,44 C 440,52 540,68 640,82" fill="none" stroke="#6030a0" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <path d="M 345,58 C 440,70 540,94 640,112" fill="none" stroke="#1a5090" stroke-width="1.8"/>
+  <path d="M 345,72 C 440,88 540,120 640,152" fill="none" stroke="#b86800" stroke-width="2.5"/>
+
+  <!-- 红K：下跌趋势，只有下影线 -->
+  <rect x="356" y="77" width="13" height="18" fill="#b02818" rx="2"/>
+  <line x1="362" y1="95" x2="362" y2="100" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="389" y="89" width="13" height="18" fill="#b02818" rx="2"/>
+  <line x1="395" y1="107" x2="395" y2="113" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="422" y="101" width="13" height="18" fill="#b02818" rx="2"/>
+  <line x1="428" y1="119" x2="428" y2="125" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="455" y="112" width="13" height="20" fill="#b02818" rx="2"/>
+  <line x1="461" y1="132" x2="461" y2="138" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="488" y="124" width="13" height="20" fill="#b02818" rx="2"/>
+  <line x1="494" y1="144" x2="494" y2="150" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="521" y="134" width="13" height="18" fill="#b02818" rx="2"/>
+  <line x1="527" y1="152" x2="527" y2="158" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="554" y="144" width="13" height="18" fill="#b02818" rx="2"/>
+  <line x1="560" y1="162" x2="560" y2="168" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="587" y="152" width="13" height="18" fill="#b02818" rx="2"/>
+  <line x1="593" y1="170" x2="593" y2="176" stroke="#b02818" stroke-width="1.5"/>
+
+  <!-- 空头标签 -->
+  <text x="644" y="50" fill="#187040" font-size="9">MA200</text>
+  <text x="644" y="80" fill="#6030a0" font-size="9">VWAP</text>
+  <text x="644" y="110" fill="#1a5090" font-size="9">MA50</text>
+  <text x="644" y="150" fill="#b86800" font-size="9" font-weight="500">MA10</text>
+  <text x="500" y="225" fill="#94908a" font-size="10" text-anchor="middle">MA200 > VWAP > MA50 > MA10 > 价格 向下发散</text>
+</svg>
+</div>
+</div>
+
+<hr class="hr">
+
+<!-- 03 信号A -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">03</div><div class="ch-t">进场信号A — Reject / Support MA10</div></div>
+<div class="body" style="color:var(--muted);margin-bottom:10px">日常主力信号，一天可出现多次。下方有关卡时快进快出。</div>
+
+<!-- Reject图 -->
+<div class="dw">
+<div class="dt">空头排列 → Reject MA10 → 买PUT（绿K上影线必须真正碰到MA10）</div>
+<svg width="100%" viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+  <!-- MA10 下降 -->
+  <polyline points="18,52 75,68 138,86 200,106 262,126 325,145 388,161 450,174 530,185 620,193" fill="none" stroke="#b86800" stroke-width="2.5"/>
+  <text x="628" y="197" fill="#b86800" font-size="11">MA10</text>
+
+  <!-- 空头背景红K，只有下影线 -->
+  <rect x="24" y="36" width="13" height="20" fill="#b02818" rx="2"/>
+  <line x1="30" y1="56" x2="30" y2="61" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="50" y="50" width="13" height="22" fill="#b02818" rx="2"/>
+  <line x1="56" y1="72" x2="56" y2="77" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="76" y="66" width="13" height="22" fill="#b02818" rx="2"/>
+  <line x1="82" y1="88" x2="82" y2="93" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="102" y="82" width="13" height="22" fill="#b02818" rx="2"/>
+  <line x1="108" y1="104" x2="108" y2="109" stroke="#b02818" stroke-width="1.5"/>
+
+  <!-- 绿K反弹，上影线触到MA10，无下影线 -->
+  <rect x="128" y="92" width="13" height="10" fill="#1e8a50" rx="2"/>
+  <line x1="134" y1="86" x2="134" y2="100" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <rect x="154" y="96" width="13" height="8" fill="#1e8a50" rx="2"/>
+  <line x1="160" y1="90" x2="160" y2="120" stroke="#1e8a50" stroke-width="1.5"/>
+
+  <!-- Reject标注框 -->
+  <rect x="122" y="82" width="52" height="26" rx="4" fill="none" stroke="#b86800" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="148" y="76" fill="#b86800" font-size="10" text-anchor="middle" font-weight="500">上影线触MA10</text>
+  <text x="148" y="64" fill="#b86800" font-size="10" text-anchor="middle">Reject!</text>
+  <text x="148" y="130" fill="#94908a" font-size="9" text-anchor="middle">绿K实体没穿过MA10</text>
+
+  <!-- 进场确认K -->
+  <rect x="180" y="100" width="13" height="24" fill="#b02818" rx="2"/>
+  <line x1="186" y1="124" x2="186" y2="129" stroke="#b02818" stroke-width="1.5"/>
+  <line x1="186" y1="82" x2="186" y2="100" stroke="#1a3f7a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="186" y="76" fill="#1a3f7a" font-size="10" text-anchor="middle" font-weight="500">进场</text>
+
+  <!-- 继续下跌 -->
+  <rect x="206" y="114" width="13" height="24" fill="#b02818" rx="2"/>
+  <line x1="212" y1="138" x2="212" y2="143" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="232" y="130" width="13" height="26" fill="#b02818" rx="2"/>
+  <line x1="238" y1="156" x2="238" y2="161" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="258" y="148" width="13" height="26" fill="#b02818" rx="2"/>
+  <line x1="264" y1="174" x2="264" y2="179" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="284" y="162" width="13" height="24" fill="#b02818" rx="2"/>
+  <line x1="290" y1="186" x2="290" y2="191" stroke="#b02818" stroke-width="1.5"/>
+
+  <!-- 第二次Reject -->
+  <rect x="310" y="145" width="13" height="10" fill="#1e8a50" rx="2"/>
+  <line x1="316" y1="145" x2="316" y2="136" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="336" y="147" width="13" height="8" fill="#1e8a50" rx="2"/>
+  <line x1="342" y1="147" x2="342" y2="140" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="306" y="133" width="46" height="28" rx="4" fill="none" stroke="#b86800" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="333" y="120" fill="#b86800" font-size="10" text-anchor="middle">再次Reject</text>
+
+  <!-- 第二段下跌 -->
+  <rect x="362" y="150" width="13" height="24" fill="#b02818" rx="2"/>
+  <line x1="368" y1="174" x2="368" y2="179" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="388" y="164" width="13" height="24" fill="#b02818" rx="2"/>
+  <line x1="394" y1="188" x2="394" y2="193" stroke="#b02818" stroke-width="1.5"/>
+
+  <!-- 出场绿K -->
+  <rect x="414" y="145" width="13" height="24" fill="#1e8a50" rx="2"/>
+  <line x1="420" y1="140" x2="420" y2="168" stroke="#1e8a50" stroke-width="1.5"/>
+  <line x1="420" y1="132" x2="420" y2="168" stroke="#9e2a1a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="420" y="140" fill="#9e2a1a" font-size="10" text-anchor="middle" font-weight="500">止损位</text>
+  <text x="420" y="130" fill="#94908a" font-size="9" text-anchor="middle">绿K突破MA10</text>
+</svg>
+</div>
+
+<!-- Support图 修正版 -->
+<div class="dw">
+<div class="dt">多头排列 → Support MA10 → 买CALL（红K下影线必须真正触及MA10）</div>
+<svg width="100%" viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+  <!-- MA10 上升 -->
+  <polyline points="18,180 75,165 138,148 200,130 262,112 325,94 388,78 450,65 530,52 620,44" fill="none" stroke="#b86800" stroke-width="2.5"/>
+  <text x="628" y="48" fill="#b86800" font-size="11">MA10</text>
+
+  <!-- 多头背景绿K，只有上影线 -->
+  <line x1="30" y1="164" x2="30" y2="168" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="24" y="168" width="13" height="16" fill="#1e8a50" rx="2"/>
+  <line x1="56" y1="148" x2="56" y2="152" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="50" y="152" width="13" height="16" fill="#1e8a50" rx="2"/>
+  <line x1="82" y1="131" x2="82" y2="135" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="76" y="135" width="13" height="16" fill="#1e8a50" rx="2"/>
+  <line x1="108" y1="115" x2="108" y2="119" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="102" y="119" width="13" height="16" fill="#1e8a50" rx="2"/>
+
+  <!-- 红K回调，下影线必须触及MA10，无上影线 -->
+  <!-- 第一根：实体在MA10上方，下影线刚好触到MA10 -->
+  <rect x="128" y="126" width="13" height="14" fill="#b02818" rx="2"/>
+  <line x1="134" y1="130" x2="134" y2="155" stroke="#b02818" stroke-width="1.5"/>
+
+  <!-- 第二根：实体更短，下影线也触到MA10 -->
+  <rect x="154" y="122" width="13" height="12" fill="#b02818" rx="2"/>
+  <line x1="160" y1="110" x2="160" y2="145" stroke="#b02818" stroke-width="1.5"/>
+
+  <!-- Support标注 -->
+  <rect x="122" y="112" width="52" height="26" rx="4" fill="none" stroke="#b86800" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="148" y="154" fill="#b86800" font-size="10" text-anchor="middle" font-weight="500">下影线触MA10</text>
+  <text x="148" y="166" fill="#b86800" font-size="10" text-anchor="middle">Support!</text>
+  <text x="148" y="106" fill="#94908a" font-size="9" text-anchor="middle">红K实体没跌穿MA10</text>
+
+  <!-- 进场确认绿K -->
+  <line x1="186" y1="101" x2="186" y2="105" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="180" y="105" width="13" height="20" fill="#1e8a50" rx="2"/>
+  <line x1="186" y1="86" x2="186" y2="101" stroke="#1a3f7a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="186" y="80" fill="#1a3f7a" font-size="10" text-anchor="middle" font-weight="500">进场</text>
+
+  <!-- 继续上涨，绿K只有上影线 -->
+  <line x1="212" y1="90" x2="212" y2="94" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="206" y="94" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="238" y1="76" x2="238" y2="80" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="232" y="80" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="264" y1="62" x2="264" y2="66" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="258" y="66" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="290" y1="50" x2="290" y2="54" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="284" y="54" width="13" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="316" y1="40" x2="316" y2="44" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="310" y="44" width="13" height="18" fill="#1e8a50" rx="2"/>
+
+
+  <!-- 出场红K跌破MA10，无上影线 -->
+  <rect x="336" y="44" width="13" height="28" fill="#b02818" rx="2"/>
+  <line x1="342" y1="72" x2="342" y2="78" stroke="#b02818" stroke-width="1.5"/>
+  <line x1="342" y1="28" x2="342" y2="44" stroke="#9e2a1a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="342" y="22" fill="#9e2a1a" font-size="10" text-anchor="middle" font-weight="500"></text>
+  <text x="342" y="12" fill="#94908a" font-size="9" text-anchor="middle">K线实体缩小或没有创新高应止盈 实体跌破MA10则止损</text>
+</svg>
+</div>
+
+<div class="danger">
+<b>无效的情况：</b>红K（做多时）或绿K（做空时）根本没有碰到MA10就自己反弹 → 这不是有效的Support/Reject，不能进场。影线或实体必须真正触及MA10才算数。
+</div>
+
+<div class="card">
+<div class="lbl">注意事项</div>
+<ul class="cl" style="margin-top:4px">
+<li>必须等确认K完整收完再进，不能看到一半就下单</li>
+<li>影线触及MA10但实体没穿过 = 有效信号</li>
+<li>实体完全穿过MA10 = 无效，不做</li>
+<li>那根K开盘是红但收盘变绿 = 无效，不要被骗</li>
+<li class="no">反弹/回调没有碰到MA10 = 无效，不做</li>
+<li class="no">反弹绿K太长太强 = 多头力量强，不适合这次做空</li>
+</ul>
+</div>
+
+<div class="ex">
+<div class="ex-l">实盘参考 — 图2（02/13 15:08 · 1分钟）</div>
+教科书级空头排列Reject MA10。从684.93跌至682.24，连续实心红K只有下影线，中途绿K反弹上影线碰到MA10被压回，趋势延续。这是信号A最完整的形态。
+</div>
+<div class="ex">
+<div class="ex-l">实盘参考 — 图9（01/07 12:07 · 1分钟）</div>
+多头排列Support MA10。价格从692.275涨至693.87，中途红K回调下影线踩到MA10被撑住，随后绿K确认继续上涨。注意看红K的下影线是否真正触及MA10，没碰到就不算。
+</div>
+</div>
+
+<hr class="hr">
+
+<!-- 04 信号B -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">04</div><div class="ch-t">进场信号B — 大空间信号</div></div>
+<div class="rule">和信号A同样是Reject MA10进场。区别在于多了三个额外条件，使得下方空间更大。两者本质是同一个信号，只是信号B出现的那次Reject恰好同时打穿了MA50，且下方空旷。</div>
+
+<div class="dw">
+<div class="dt">信号B完整形态 — 2-3根红K setup → 测试MA10 → Reject同时跌破MA50 → 下方空旷</div>
+<svg width="100%" viewBox="0 0 680 255" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+  <!-- MA50 水平虚线 -->
+  <line x1="18" y1="95" x2="655" y2="95" stroke="#1a5090" stroke-width="1.8" stroke-dasharray="8 4"/>
+  <text x="23" y="89" fill="#1a5090" font-size="11" font-weight="500">MA50</text>
+
+  <!-- MA10 先平后下降 -->
+  <polyline points="18,72 80,70 155,68 210,74 255,85 300,100 350,118 405,136 460,152 520,165 590,174" fill="none" stroke="#b86800" stroke-width="2.5"/>
+  <text x="598" y="178" fill="#b86800" font-size="11">MA10</text>
+
+  <!-- MA200 远在下方 -->
+  <line x1="18" y1="228" x2="655" y2="228" stroke="#187040" stroke-width="1.5" stroke-dasharray="8 4"/>
+  <text x="23" y="222" fill="#187040" font-size="11">MA200</text>
+  <text x="338" y="244" fill="#94908a" font-size="10" text-anchor="middle">下方空旷，MA200离得很远</text>
+
+  <!-- 之前上涨绿K，只有上影线 -->
+  <line x1="28" y1="52" x2="28" y2="56" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="22" y="56" width="12" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="54" y1="44" x2="54" y2="48" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="48" y="48" width="12" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="80" y1="38" x2="80" y2="42" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="74" y="42" width="12" height="18" fill="#1e8a50" rx="2"/>
+  <line x1="106" y1="36" x2="106" y2="40" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="100" y="40" width="12" height="18" fill="#1e8a50" rx="2"/>
+
+  <!-- Setup: 2-3根红K，在MA50上方，只有下影线 -->
+  <rect x="124" y="42" width="50" height="48" rx="4" fill="none" stroke="#7a4a0a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="151" y="110" fill="#7a4a0a" font-size="9" text-anchor="middle" font-weight="500">Setup: 2-3根红K</text>
+
+  <rect x="130" y="48" width="12" height="24" fill="#b02818" rx="2"/>
+  <line x1="136" y1="72" x2="136" y2="78" stroke="#b02818" stroke-width="1.5"/>
+
+  <rect x="156" y="56" width="12" height="28" fill="#b02818" rx="2"/>
+  <line x1="162" y1="84" x2="162" y2="90" stroke="#b02818" stroke-width="1.5"/>
+
+  <!-- 小绿K测试MA10，上影线触MA10 -->
+  <rect x="182" y="70" width="12" height="10" fill="#1e8a50" rx="2"/>
+  <line x1="188" y1="64" x2="188" y2="70" stroke="#1e8a50" stroke-width="1.5"/>
+  <text x="188" y="58" fill="#b86800" font-size="8" text-anchor="middle">触MA10</text>
+
+  <!-- 进场关键K：Reject MA10，同时实体穿过MA50 -->
+  <rect x="208" y="72" width="14" height="40" fill="#b02818" rx="2"/>
+  <line x1="215" y1="112" x2="215" y2="118" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="200" y="62" width="32" height="60" rx="4" fill="none" stroke="#9e2a1a" stroke-width="2"/>
+  <text x="216" y="54" fill="#9e2a1a" font-size="9" text-anchor="middle" font-weight="500">进场!</text>
+  <text x="216" y="44" fill="#94908a" font-size="8" text-anchor="middle">Reject MA10</text>
+  <text x="216" y="34" fill="#94908a" font-size="8" text-anchor="middle">同时穿过MA50</text>
+
+  <!-- 之后加速下跌，红K只有下影线 -->
+  <rect x="235" y="112" width="12" height="32" fill="#b02818" rx="2"/>
+  <line x1="241" y1="144" x2="241" y2="150" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="260" y="136" width="12" height="34" fill="#b02818" rx="2"/>
+  <line x1="266" y1="170" x2="266" y2="176" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="285" y="158" width="12" height="32" fill="#b02818" rx="2"/>
+  <line x1="291" y1="190" x2="291" y2="196" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="310" y="178" width="12" height="30" fill="#b02818" rx="2"/>
+  <line x1="316" y1="208" x2="316" y2="214" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="335" y="194" width="12" height="26" fill="#b02818" rx="2"/>
+  <line x1="341" y1="220" x2="341" y2="225" stroke="#b02818" stroke-width="1.5"/>
+
+  <text x="285" y="130" fill="#94908a" font-size="9" text-anchor="middle">连续实心红K</text>
+  <text x="285" y="118" fill="#94908a" font-size="9" text-anchor="middle">加速下跌</text>
+
+  <!-- 第一根绿K 出场 -->
+  <rect x="360" y="210" width="12" height="14" fill="#1e8a50" rx="2"/>
+  <line x1="366" y1="204" x2="366" y2="210" stroke="#1e8a50" stroke-width="1.5"/>
+  <line x1="366" y1="194" x2="366" y2="210" stroke="#9e2a1a" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="366" y="188" fill="#9e2a1a" font-size="9" text-anchor="middle" font-weight="500"></text>
+  <text x="366" y="178" fill="#94908a" font-size="8" text-anchor="middle">第一根绿K</text>
+  <text x="366" y="168" fill="#94908a" font-size="8" text-anchor="middle">不再追进 应止盈</text>
+</svg>
+</div>
+
+<div class="card">
+<div class="lbl">五步条件缺一不可</div>
+<div style="margin-top:8px">
+<div class="fs">空头排列成型</div>
+<div class="arr">↓</div>
+<div class="fs">先出现2-3根红K的setup</div>
+<div class="arr">↓</div>
+<div class="fs r">Reject MA10，且那根K同时跌破MA50</div>
+<div class="arr">↓</div>
+<div class="fs r">下方VWAP和MA200都离得很远，没有关卡拦着 </div>
+<div class="arr">↓</div>
+<div class="fs r">5分钟K线图需要形成支撑或跌破，近处没有关卡拦着 </div>
+</div>
+</div>
+
+<div class="warn">
+<b>注意均线缠绕：</b>MA10、MA20、MA50挤在一起价格来回穿 → 不做。必须等均线清晰发散，排列稳定后才找进场点。缠绕期间进场没有依据。
+</div>
+
+<div class="g2">
+<div class="card"><div class="lbl">止损</div><div class="body">价格实体收回MA50上方 → 立刻出场，进场依据消失</div></div>
+<div class="card"><div class="lbl">目标位</div><div class="body">下方最近关卡（VWAP或MA200），分批止盈</div></div>
+</div>
+<div class="danger">第一根绿K出现后绝对不追。大概率只有这一段，绿K之后进场是亏钱的。</div>
+
+<div class="ex">
+<div class="ex-l">实盘参考 — 图18（03/31 10:30 · 1分钟）</div>
+完整信号B。涨到642.700高位后出现卖压，形成2-3根红K的setup，绿K测试MA10上影线触顶被拒，那根关键红K同时跌破MA50（641.855），下方VWAP（640.825）和MA200（639.710）都有距离。教科书级别信号B。
+</div>
+<div class="ex">
+<div class="ex-l">实盘参考 — 图14（03/26 13:52 · 5分钟）</div>
+5分钟大级别空头排列，已跌破MA50（651.198），MA200（653.041）在上方遥远。从654.85跌至647.19，这种5分钟大趋势下，1分钟每次Reject MA10都是进场机会。
+</div>
+</div>
+
+<hr class="hr">
+
+<!-- 05 均线缠绕 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">05</div><div class="ch-t">均线缠绕 — 最危险的时刻</div></div>
+
+<div class="dw">
+<div class="dt">均线缠绕 vs 均线发散</div>
+<svg width="100%" viewBox="0 0 680 170" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+  <text x="130" y="16" fill="#9e2a1a" font-size="12" text-anchor="middle" font-weight="500">缠绕 → 绝对不做</text>
+  <polyline points="18,88 46,82 74,94 102,86 130,96 158,80 186,90 214,84 242,94" fill="none" stroke="#b86800" stroke-width="2"/>
+  <polyline points="18,94 46,100 74,84 102,96 130,82 158,94 186,78 214,92 242,86" fill="none" stroke="#8050c0" stroke-width="1.5"/>
+  <polyline points="18,100 46,90 74,102 102,80 130,96 158,86 186,98 214,82 242,94" fill="none" stroke="#1a5090" stroke-width="1.5"/>
+  <!-- 乱K长影线两侧都有 -->
+  <line x1="30" y1="66" x2="30" y2="76" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="24" y="76" width="12" height="16" fill="#b02818" rx="2"/>
+  <line x1="30" y1="92" x2="30" y2="106" stroke="#b02818" stroke-width="1.5"/>
+  <line x1="58" y1="64" x2="58" y2="74" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="52" y="74" width="12" height="14" fill="#1e8a50" rx="2"/>
+  <line x1="58" y1="88" x2="58" y2="104" stroke="#1e8a50" stroke-width="1.5"/>
+  <line x1="86" y1="68" x2="86" y2="78" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="80" y="78" width="12" height="16" fill="#b02818" rx="2"/>
+  <line x1="86" y1="94" x2="86" y2="108" stroke="#b02818" stroke-width="1.5"/>
+  <line x1="112" y1="62" x2="112" y2="74" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="106" y="74" width="12" height="14" fill="#1e8a50" rx="2"/>
+  <line x1="112" y1="88" x2="112" y2="102" stroke="#1e8a50" stroke-width="1.5"/>
+  <text x="120" y="140" fill="#9e2a1a" font-size="10" text-anchor="middle">均线纠缠 + 长影线两侧都有</text>
+  <text x="120" y="155" fill="#9e2a1a" font-size="10" text-anchor="middle">→ 不做，等方向</text>
+
+  <line x1="270" y1="8" x2="270" y2="162" stroke="#ddd9d0" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <text x="480" y="16" fill="#1d7a4a" font-size="12" text-anchor="middle" font-weight="500">发散 → 可以找信号</text>
+  <polyline points="288,46 326,60 364,76 402,94 440,112 478,128 516,142" fill="none" stroke="#b86800" stroke-width="2"/>
+  <polyline points="288,36 326,48 364,62 402,78 440,94 478,108 516,122" fill="none" stroke="#8050c0" stroke-width="1.5"/>
+  <polyline points="288,28 326,37 364,48 402,62 440,76 478,88 516,100" fill="none" stroke="#1a5090" stroke-width="1.5"/>
+  <!-- 干净红K只有下影线 -->
+  <rect x="295" y="38" width="12" height="18" fill="#b02818" rx="2"/>
+  <line x1="301" y1="56" x2="301" y2="61" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="321" y="54" width="12" height="20" fill="#b02818" rx="2"/>
+  <line x1="327" y1="74" x2="327" y2="79" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="347" y="70" width="12" height="20" fill="#b02818" rx="2"/>
+  <line x1="353" y1="90" x2="353" y2="95" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="373" y="88" width="12" height="20" fill="#b02818" rx="2"/>
+  <line x1="379" y1="108" x2="379" y2="113" stroke="#b02818" stroke-width="1.5"/>
+  <text x="400" y="140" fill="#1d7a4a" font-size="10" text-anchor="middle">均线清晰发散 + 干净实心K</text>
+  <text x="400" y="155" fill="#1d7a4a" font-size="10" text-anchor="middle">→ 找Reject MA10进场</text>
+</svg>
+</div>
+
+<div class="ex">
+<div class="ex-l">实盘参考 — 图6（01/16 15:32 · 5分钟）均线缠绕典型</div>
+MA5、MA10、MA20、MA30全部缠绕在692.3-692.7的极小范围，K线两侧都有长影线，红绿交替，完全没有方向。这就是小汤说的"垃圾时间"，一单不开。
+</div>
+</div>
+
+<hr class="hr">
+
+<!-- 06 K线质量 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">06</div><div class="ch-t">K线质量判断（平均K）</div></div>
+<div class="dw">
+<div class="dt">趋势强 vs 趋势弱</div>
+<svg width="100%" viewBox="0 0 680 165" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+  <text x="115" y="16" fill="#1d7a4a" font-size="12" text-anchor="middle" font-weight="500">趋势强 — 肥实心柱，影线极短</text>
+  <!-- 下跌：红K只有小下影线 -->
+  <rect x="20" y="30" width="15" height="24" fill="#b02818" rx="2"/>
+  <line x1="27" y1="54" x2="27" y2="58" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="46" y="46" width="15" height="26" fill="#b02818" rx="2"/>
+  <line x1="53" y1="72" x2="53" y2="76" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="72" y="64" width="15" height="28" fill="#b02818" rx="2"/>
+  <line x1="79" y1="92" x2="79" y2="96" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="98" y="84" width="15" height="26" fill="#b02818" rx="2"/>
+  <line x1="105" y1="110" x2="105" y2="114" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="124" y="102" width="15" height="26" fill="#b02818" rx="2"/>
+  <line x1="131" y1="128" x2="131" y2="132" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="150" y="118" width="15" height="24" fill="#b02818" rx="2"/>
+  <line x1="157" y1="142" x2="157" y2="146" stroke="#b02818" stroke-width="1.5"/>
+  <text x="90" y="158" fill="#1d7a4a" font-size="10" text-anchor="middle">肥柱 + 小下影线 = 放心拿</text>
+
+  <line x1="210" y1="8" x2="210" y2="158" stroke="#ddd9d0" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <text x="450" y="16" fill="#9e2a1a" font-size="12" text-anchor="middle" font-weight="500">趋势弱 — 影线变长，实体变小</text>
+  <!-- 影线变长，红K下影线拉长，绿K上影线也出现 -->
+  <rect x="248" y="58" width="14" height="18" fill="#b02818" rx="2"/>
+  <line x1="255" y1="76" x2="255" y2="92" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="274" y="62" width="14" height="14" fill="#1e8a50" rx="2"/>
+  <line x1="281" y1="50" x2="281" y2="62" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="300" y="58" width="14" height="16" fill="#b02818" rx="2"/>
+  <line x1="307" y1="74" x2="307" y2="90" stroke="#b02818" stroke-width="1.5"/>
+  <rect x="326" y="60" width="14" height="14" fill="#1e8a50" rx="2"/>
+  <line x1="333" y1="46" x2="333" y2="60" stroke="#1e8a50" stroke-width="1.5"/>
+  <rect x="352" y="56" width="14" height="16" fill="#b02818" rx="2"/>
+  <line x1="359" y1="72" x2="359" y2="90" stroke="#b02818" stroke-width="1.5"/>
+  <text x="310" y="118" fill="#9e2a1a" font-size="10" text-anchor="middle">实体变小 + 影线变长 + 红绿交替</text>
+  <text x="310" y="133" fill="#9e2a1a" font-size="10" text-anchor="middle">→ 准备出场，趋势快结束了</text>
+</svg>
+</div>
+</div>
+
+<hr class="hr">
+
+<!-- 07 关卡 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">07</div><div class="ch-t">三条重要关卡（MA50 / MA200 / VWAP）</div></div>
+<div class="rule">三条线本质相同，都是有实质力度的支撑/阻力关卡。用途完全一样，只是强度不同。MA200突破后空间最大。</div>
+
+<div class="diagram-wrap">
+  <div class="diagram-title">关卡的支撑与阻力作用</div>
+  <svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- VWAP线 -->
+    <line x1="20" y1="70" x2="660" y2="70" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="25" y="64" fill="#c084fc" font-size="11">VWAP</text>
+    <!-- MA50线 -->
+    <line x1="20" y1="120" x2="660" y2="120" stroke="#5b9cf6" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="25" y="114" fill="#5b9cf6" font-size="11">MA50</text>
+    <!-- MA200线 -->
+    <line x1="20" y1="175" x2="660" y2="175" stroke="#3dd68c" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="25" y="169" fill="#3dd68c" font-size="11">MA200</text>
+
+    <!-- 价格下跌，被VWAP支撑反弹 -->
+    <rect x="80" y="35" width="16" height="24" fill="#f05050" rx="2"/>
+    <rect x="107" y="50" width="16" height="22" fill="#f05050" rx="2"/>
+    <rect x="134" y="60" width="16" height="13" fill="#f05050" rx="2"/>
+    <line x1="142" y1="60" x2="142" y2="55" stroke="#f05050" stroke-width="1.5"/>
+    <!-- 触到VWAP反弹 -->
+    <rect x="161" y="62" width="16" height="10" fill="#3dd68c" rx="2"/>
+    <rect x="188" y="52" width="16" height="14" fill="#3dd68c" rx="2"/>
+    <text x="175" y="90" fill="#c084fc" font-size="10" text-anchor="middle">VWAP撑住</text>
+    <text x="175" y="102" fill="#6b6b6b" font-size="10" text-anchor="middle">→ 注意反弹</text>
+
+    <!-- 再次下跌突破VWAP -->
+    <rect x="215" y="58" width="16" height="22" fill="#f05050" rx="2"/>
+    <rect x="242" y="75" width="16" height="28" fill="#f05050" rx="2"/>
+    <rect x="269" y="98" width="16" height="25" fill="#f05050" rx="2"/>
+    <!-- 触到MA50 -->
+    <rect x="296" y="110" width="16" height="12" fill="#3dd68c" rx="2"/>
+    <text x="310" y="146" fill="#5b9cf6" font-size="10" text-anchor="middle">MA50撑住</text>
+    <text x="310" y="158" fill="#6b6b6b" font-size="10" text-anchor="middle">→ 注意反弹</text>
+
+    <!-- 继续下跌突破MA50 -->
+    <rect x="323" y="118" width="16" height="30" fill="#f05050" rx="2"/>
+    <rect x="350" y="138" width="16" height="28" fill="#f05050" rx="2"/>
+    <rect x="377" y="156" width="16" height="22" fill="#f05050" rx="2"/>
+    <!-- 触到MA200 -->
+    <rect x="404" y="168" width="16" height="10" fill="#3dd68c" rx="2"/>
+    <text x="420" y="196" fill="#3dd68c" font-size="10" text-anchor="middle">MA200！大关卡</text>
+
+    <!-- 注释空间 -->
+    <text x="175" y="40" fill="#6b6b6b" font-size="10" text-anchor="middle">进场前：目标方向有关卡？</text>
+    <text x="175" y="28" fill="#6b6b6b" font-size="10" text-anchor="middle">太近 → 空间不够 → 不做</text>
+  </svg>
+</div>
+
+<div class="card"><div class="lbl">进场前 — 看空间够不够</div><div class="body">目标方向最近的关卡在哪里？进场后没走几步就碰到 → 空间太小，不做。</div></div>
+<div class="card"><div class="lbl">持仓中 — 接近关卡要警惕</div><div class="body">持PUT接近MA50/MA200/VWAP → 小心支撑反弹，准备减仓。<br>持CALL接近这三条线 → 小心阻力压制，准备减仓。</div></div>
+<div class="card"><div class="lbl">MA200的特殊地位</div><div class="body">价格在MA200上方 → 多头背景，优先找CALL<br>价格在MA200下方 → 空头背景，优先找PUT<br>价格在MA200附近反复 → <b>不做或极轻仓</b><br><br>Reject MA10同时Reject VWAP → 双重确认，信号更强。</div></div>
+<div class="ex">
+<div class="ex-l">实盘参考 — 图17（03/17 15:43 · 1分钟）</div>
+价格在VWAP（668.855）下方运行，空头背景得到VWAP确认。连续大实心红K，只有下影线，均线发散清晰。空头排列+价格在VWAP下方的完整组合。
+</div>
+</div>
+
+<hr class="hr">
+
+<!-- 08 1分钟+5分钟 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">08</div><div class="ch-t">1分钟 + 5分钟配合</div></div>
+<div class="step"><div class="sn">1</div><div class="st"><b>先开5分钟图</b> → 确认大方向。5分钟没有趋势 = 等，不动。</div></div>
+<div class="step"><div class="sn">2</div><div class="st"><b>看5分钟关卡位置</b> → 目标方向有没有紧挨着的关卡？太近不做。</div></div>
+<div class="step"><div class="sn">3</div><div class="st"><b>切换1分钟图</b> → 等MA10的Reject或Support，盯到K线收完确认。</div></div>
+<div class="step"><div class="sn">4</div><div class="st"><b>进场后</b> → 1分钟盯MA10，5分钟影线变长就警惕出场。</div></div>
+<div class="card" style="margin-top:.25rem"><div class="lbl">5分钟越强，可以拿越久</div><div class="body">5分钟连续大实心K均线极度发散 → 可以多拿几根K。5分钟趋势一般 → 快进快出，不要贪。</div></div>
+<div class="ex">
+<div class="ex-l">实盘参考 — 图5（01/30 12:10 · 5分钟）</div>
+5分钟级别极强空头排列，均线极度发散，连续大实心红K只有小下影线。这种大趋势下，切到1分钟找每次Reject MA10进场，可以多拿几根K再出。
+</div>
+</div>
+
+<hr class="hr">
+
+<!-- 09 进场检查 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">09</div><div class="ch-t">进场前八步检查 — 全部通过才下单</div></div>
+<div class="rule">任何一条让你犹豫，答案就是不做。</div>
+<div class="step"><div class="sn">1</div><div class="st"><b>5分钟有趋势吗？</b> 排列清晰发散？没有 → 停手。</div></div>
+<div class="step"><div class="sn">2</div><div class="st"><b>均线有缠绕吗？</b> MA线缠在一起 → 不做，等发散。</div></div>
+<div class="step"><div class="sn">3</div><div class="st"><b>VWAP站哪边？</b> 和趋势方向一致？</div></div>
+<div class="step"><div class="sn">4</div><div class="st"><b>目标方向有关卡拦着吗？</b> MA50、MA200、VWAP太近 → 不做。</div></div>
+<div class="step"><div class="sn">5</div><div class="st"><b>MA10给信号了吗？</b> 影线或实体真正触及MA10了？还没 → 等。</div></div>
+<div class="step"><div class="sn">6</div><div class="st"><b>确认K收完了吗？</b> 没收完 → 等，哪怕少吃几分钱。</div></div>
+<div class="step"><div class="sn">7</div><div class="st"><b>K线质量好不好？</b> 影线开始变长，实体变小 → 等下一根。</div></div>
+<div class="step"><div class="sn">8</div><div class="st"><b>IV高不高？</b> 高了就更挑剔，不够完美就不做。</div></div>
+</div>
+
+<hr class="hr">
+
+<!-- 10 止损 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">10</div><div class="ch-t">止损规则</div></div>
+<div class="rule"><b>进场逻辑 = 出场逻辑。进场的理由消失，立刻出场。没有"再等等"。</b></div>
+<table class="tbl">
+<tr><th>进场原因</th><th>止损条件（立刻出）</th></tr>
+<tr><td>空头排列 Reject MA10 买PUT</td><td>绿K实体完全突破MA10</td></tr>
+<tr><td>多头排列 Support MA10 买CALL</td><td>红K实体完全跌破MA10</td></tr>
+<tr><td>信号B，Reject MA10+跌破MA50</td><td>价格实体收回MA50上方</td></tr>
+<tr><td>跌破MA200做空</td><td>价格实体收回MA200上方</td></tr>
+<tr><td>突破MA200做多</td><td>价格跌破MA200</td></tr>
+</table>
+</div>
+
+<hr class="hr">
+
+<!-- 11 止盈 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">11</div><div class="ch-t">止盈规则</div></div>
+<div class="step"><div class="sn">1</div><div class="st"><b>分批止盈</b> → 分2-3次出，不要一次全卖。</div></div>
+<div class="step"><div class="sn">2</div><div class="st"><b>趋势衰竭信号出现时减仓</b> → 影线变长、K线不再创新低、红绿开始交替 → 开始出。</div></div>
+<div class="step"><div class="sn">3</div><div class="st"><b>接近5分钟关卡减仓</b> → MA50、MA200、VWAP附近分批出。</div></div>
+<div class="step"><div class="sn">4</div><div class="st"><b>尾盘不贪</b> → 有利润就走。</div></div>
+<div class="step"><div class="sn">5</div><div class="st"><b>Robinhood注意</b> → 必须在下跌/上涨过程中卖出，回头卖会滑点严重或卖不出。</div></div>
+<div class="q" style="margin-top:.5rem">卖飞了不可惜。利润回撤比亏损更伤心态。</div>
+</div>
+
+<hr class="hr">
+
+<!-- 12 不做 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">12</div><div class="ch-t">什么时候绝对不做</div></div>
+<ul class="cl">
+<li class="no">5分钟没有趋势，均线缠绕 → 不做，等出方向</li>
+<li class="no">均线之间有压制，价格在关卡群里穿来穿去 → 不做</li>
+<li class="no">价格在MA200附近反复 → 不做</li>
+<li class="no">开盘前30分钟（9:30-10:00）→ 通常震荡，等10点后</li>
+<li class="no">连续长影线，红绿交替 → 不做</li>
+<li class="no">IV太高 → 更挑剔或不做</li>
+<li class="no">看不明白当前情况 → 不做</li>
+<li class="no">进场点离关卡太近 → 不做</li>
+<li class="no">趋势已走很长，价格已很低/很高 → 不吃鱼尾</li>
+<li class="no">刚做错一单心态不稳 → 先停，不要急着找回</li>
+<li class="no">没想清楚进场理由就想进 → 不做</li>
+</ul>
+<div class="q" style="margin-top:8px">不赚好过亏钱。一天什么都不做，远好过乱做一堆亏损的单。</div>
+</div>
+
+<hr class="hr">
+
+<!-- 13 开盘 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">13</div><div class="ch-t">早上开盘特别规则</div></div>
+<div class="card"><div class="body">开盘通常有一段震荡，均线乱、方向不明。等10:30甚至11点之后方向清晰再看。<br><br>如果开盘直接出现两根大阳/大阴柱突破MA200 → 例外，可以考虑跟进，但要确认1分钟图形态。</div></div>
+<div class="warn">早上磨了很久没方向 → 下午往往反而好做。不要因为早上没做就急躁，机会后面有的是。</div>
+</div>
+
+<hr class="hr">
+
+<!-- 14 仓位 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">14</div><div class="ch-t">仓位管理</div></div>
+<div class="g2">
+<div class="card"><div class="lbl">每天开单数量</div><div style="font-size:24px;font-weight:700;margin:4px 0;color:var(--blue);font-family:'JetBrains Mono',monospace">1 — 2单</div><div class="body">最多不超过3单。多了头昏眼花，越做越错。</div></div>
+<div class="card"><div class="lbl">仓位原则</div><div class="body" style="margin-top:4px">不确定 → 轻仓<br>信号极完美 → 正常仓位<br>亏损状态 → 绝对不充值</div></div>
+</div>
+<ul class="cl">
+<li class="no">不要因为别人暴利就想重仓，先保证稳定赚钱</li>
+<li class="no">不要不断补仓，会恶性循环</li>
+<li class="no">不稳定盈利之前不充值</li>
+</ul>
+</div>
+
+<hr class="hr">
+
+<!-- 15 心态 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">15</div><div class="ch-t">心态管理</div></div>
+<div class="rule">技术好掌握，掌握了就不太会忘。心态每天都要拧一拧。</div>
+<ul class="cl">
+<li>卖飞了不可惜，机会永远有下一个</li>
+<li>买定离手，出了就不要再想</li>
+<li>盯盘累了就休息，累时操作最容易变形</li>
+<li>今天没机会就不做，等明天</li>
+<li class="no">不要overtrade，盈利再吐回比直接亏损更伤心态</li>
+<li class="no">不要急着找回刚亏的那笔，下一单更容易错</li>
+<li class="no">不要看别人操作就乱跟，找自己适合的方法</li>
+<li class="no">市场有时会故意骗你，被骗出来就行，不要赌气</li>
+</ul>
+<div class="q" style="margin-top:8px">市场只会奖励遵守纪律的人。在没看到信号时进场，亏钱是活该。</div>
+</div>
+
+<hr class="hr">
+
+<!-- 16 复盘 -->
+<div class="ch">
+<div class="ch-hd"><div class="ch-n">16</div><div class="ch-t">每日复盘</div></div>
+<div class="step"><div class="sn">1</div><div class="st"><b>重点复盘做对的单</b> → 从盈利单中找自己的模式。</div></div>
+<div class="step"><div class="sn">2</div><div class="st"><b>标记当天所有符合条件的信号</b> → 进了哪个，漏了哪个，为什么。</div></div>
+<div class="step"><div class="sn">3</div><div class="st"><b>分析亏损原因</b> → 90%是"没按策略"或"急了"，找出具体哪步走偏。</div></div>
+<div class="step"><div class="sn">4</div><div class="st"><b>记备忘录</b> → 把符合标准的图记下来，看多了自然直接反应。</div></div>
+<div class="step"><div class="sn">5</div><div class="st"><b>每天说一遍</b> → 没看到关键信号，不参与。</div></div>
+</div>
+
+</body>
+</html>
