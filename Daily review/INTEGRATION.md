@@ -313,5 +313,152 @@ annotation 常用字段：
 - 当前最完整配置之一：`strategies/tang_v3_5_1_full.json`
 - 当前最新斜率版配置：`strategies/tang_v4_4_slope.json`
 - 信号扫描：`app-data/scripts/scan_signals.py`
+- 分享版 HTML 生成：`app-data/scripts/build_reviewed_html.py`
 - 回测：`app-data/scripts/backtest.py`
 - 示例 reviewed：`reviewed/kline-engine-v2-full-day.json`
+- V4.4 扫描器交付说明：`HANDOFF_v4_4_scanner.md` §8
+
+## 13. 浏览器端扫描器架构
+
+`daily-review.html` 内置两条扫描路径，通过特征探测路由（**不绑 version 字段**）：
+
+### 路由规则
+
+`isStrategyDeclarative(strategy)` 检查：
+- `strategy.signals[]` 必须存在且非空
+- 至少有一个 signal 的 `conditions` 字典里出现以下键之一（"V4 风格键"集合）：
+  ```
+  trend_5m / ma10_slope / space_ok / not_tangled /
+  previous_range_touch / previous_close_filter /
+  current_bar_color / previous_elite / can_trigger
+  ```
+
+任何一条匹配 → 走声明式扫描器 `scanSignalsDeclarative`；否则 fallback 到老路径
+`detectRejectMA10 / detectSupportMA10 / detectSignalB`。
+
+> **为什么不看 version**：v3 的 `signals[].conditions` 也是字典，但用
+> `candle_color / wick_touch / body_below_1 / body_above_2 / confirm /
+> trend_required` 这套老风格键。如果只看「conditions 是不是 dict」，v3 会被
+> 误路由到声明式 scanner，所有键走 default 分支 → 每根 K 都 emit。
+
+### 声明式扫描器（V4 路径）
+
+每根 1m bar 计算 12 个特征（trend / slopeUp / slopeDown / isGreen / isRed /
+touchPrev / closeFilterCall / closeFilterPut / spaceCall / spacePut /
+notTangled / previousElite），再对每个 signal def 跑
+`matchesConditions(features, def.conditions)`：
+
+| condition 键 | 特征对应 | 取值约定 |
+|---|---|---|
+| `trend_5m` | features.trend | `'bullish'` / `'bearish'` |
+| `ma10_slope` | features.slopeUp / slopeDown | `'up'` / `'down'` |
+| `space_ok` | features.spaceCall / spacePut | `'call'` / `'put'` |
+| `not_tangled` | features.notTangled | `true` / `false` |
+| `previous_range_touch` | features.touchPrev | truthy 即要求触碰 |
+| `previous_close_filter` | features.closeFilterCall / Put | 表达式串，含 `>=` 视为 call，含 `<=` 视为 put |
+| `current_bar_color` | features.isGreen / isRed | `'green'` / `'red'` |
+| `previous_elite` | features.previousElite | `true` / `false` |
+| `can_trigger` | (外部 gate) | 任意值都不 block；冷却/持仓在循环外检查 |
+
+第一个全 match 的 signal emit；维护 `activePos` + `lastSignalBar`。出场（虚拟）：
+若 `exit.L2_hard_stops.ma50_ha_close_break: true`，长仓 `hC < m50` / 短仓 `hC > m50` 即触发，重置 `lastSignalBar = -Infinity` 立即解锁冷却。
+
+### 顶层 block 都数据驱动
+
+| JSON 字段 | 用途 |
+|---|---|
+| `trend.method = "regular_close_5m_ma_stack"` | 启用 stack 趋势算法 |
+| `trend.lines: ["m10","m20","m30"]` | stack 算法用哪几条线 |
+| `touch_logic.trend_touch_levels` | previous_range_touch 检查哪几条线 |
+| `space_check.call_barriers_above` / `put_barriers_below` | space_ok 检查的屏障线 |
+| `space_check.min_distance_pct_of_price` | 空间阈值百分比（0.15 → 0.0015 ratio） |
+| `filter.entangle_threshold_ratio` | 缠绕阈值 ratio（默认 0.0003） |
+| `filter.entangle_lines` | 缠绕检查包含的线 |
+| `cooldown.enabled` / `cooldown.bars` | 信号后锁多少根 K |
+| `position_state.enabled` | 是否启用虚拟持仓互斥 |
+| `exit.L2_hard_stops.ma50_ha_close_break` | 是否启用 V4 出场（HA close vs MA50） |
+| `elite_strong.major_barriers` | （建议新增字段）elite 判定的次级屏障线，默认 `["m50","m200","vw"]` |
+
+### 加新信号
+
+在 `signals[]` 里加 dict，复用上表 condition 键，**0 行代码改动**就能扫到。
+未识别的 condition 键会触发一次 console.warn（每个键只 warn 一次/页面），但不会 block 信号。
+
+### Setup tracer 与扫描器一致性
+
+`traceSetups`（曾名 `simulateTrades`）和 `scanSignalsDeclarative` 的虚拟出场用同一条规则
+（`hC vs m50` 或 v3 body-cross MA10），保证「scanner 状态机虚拟解锁」的时点和
+「tracer 实际出场」的 bar 对齐，避免一个允许新信号、另一个还在持仓的 race。
+
+### Wheel handler 读 live viewport（Round 3 修复，2026-04-28）
+
+旧实现里 wheel handler 用 `lastRenderContext.visible.count` 计算 `nextCount = count * 1.12`。
+当外部代码（如 Daily Review 的 `viewSetupRange`）直接修改 `viewportManager.zoomScale` 后，
+`lastRenderContext` 是异步 rAF 才更新的，下一帧前的 wheel 事件读到 stale count。
+
+实际后果：刚点完信号卡（视图 96 根）立即滚轮 → 用 stale 的 390 算 nextCount = 437 →
+clamp 到 maxCount → 整张图弹回全天。
+
+修复：wheel handler 改读 `viewportManager.getVisibleWindow(...)` 的 live 状态，
+不再依赖 render 缓存。已应用到：
+- [Daily review/daily-review.html](daily-review.html) inline 引擎
+- [Dream bigger/dist/kline-engine/kline-engine.js](../Dream bigger/dist/kline-engine/kline-engine.js)
+- [Teaching System/dist/kline-engine/kline-engine.js](../Teaching System/dist/kline-engine/kline-engine.js)
+- [Fragment Lab/dist/kline-engine/kline-engine.js](../Fragment Lab/dist/kline-engine/kline-engine.js)
+
+四份引擎文件 byte-identical。同步修改时务必：
+
+```bash
+cp "Dream bigger/dist/kline-engine/kline-engine.js" "Teaching System/dist/kline-engine/kline-engine.js"
+cp "Dream bigger/dist/kline-engine/kline-engine.js" "Fragment Lab/dist/kline-engine/kline-engine.js"
+md5sum [3 files]  # 验证一致
+```
+
+如果只在一处改动而忘了另外两处，运行时表现会不一致 — Daily Review 里测试通过、
+Teaching System 实际是旧逻辑。
+
+## 14. 复盘语义（不是回测）
+
+**Daily Review 是复盘工具，不是回测器**。这个边界由代码强制：
+
+| 能力 | 状态 | 原因 |
+|---|---|---|
+| 策略止损/失效检测 | ✅ 有 | 策略 JSON 声明的，机器替你看条件 |
+| MFE / MAE / 时长 | ✅ 有 | 客观数据，给人判断止盈节奏的参考 |
+| 止盈逻辑 | ❌ 不做 | 止盈是人决定的事，机器不替你按 |
+| 胜率 | ❌ 不算 | 假设固定出场点 = 假装是回测 |
+| 移动止损 / Trailing | ❌ 不做 | 同上 |
+| Premium % SL/TP | ❌ 不做 | 期权语境下机器没法准确预估 |
+| 时间止损 | ❌ 不做 | 任意拍脑门 |
+
+`traceSetups` 输出的字段：
+
+```js
+{
+  signal_index, entry_index, exit_index, direction,
+  entry_price, exit_price, spy_move, spy_move_pct, bars_held,
+  invalidation_type,       // 'invalidated' / 'eod'
+  invalidation_reason,     // human label (e.g. "信号失效: hC 712.95 < MA50 712.85")
+  invalidation_line,       // 'm50' / 'm10' / null
+  invalidation_value,      // line value at invalidation bar
+  mfe, mfe_pct, mfe_bar_offset,
+  mae, mae_pct, mae_bar_offset,
+}
+```
+
+**注意**：`spy_move` 在新模型里只是「失效那一刻是否仍在有利方向」的描述
+（用于 UI 着色），**不代表赢亏**。
+
+### 信号详情 panel
+
+`scanSignalsDeclarative` 在 emit 每个 annotation 时，附 `_conditions` 数组和
+`_invalidation` 对象：
+
+- `_conditions: [{key, label, pass, detail}, ...]` — 9 个条件每条带具体数值
+- `_invalidation: {line, rule, direction, initial_value, human}` — 失效规则 + 入场时的 MA50 值
+
+UI 的 `buildSignalDetail()` 渲染成三块（触发条件 / 信号失效 / 期间数据）。
+新增 condition key 时步骤是：
+1. `computeBarFeatures` 算出对应 boolean
+2. `matchesConditions` switch 加 case 做求值
+3. `explainConditions` switch 加 case 生成「人话 label + 实际数值 detail」
