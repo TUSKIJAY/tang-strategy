@@ -6,13 +6,13 @@ This repository is organized as a multi-project workspace. Each project is kept 
 
 ## Projects
 
-- `Daily review/`  
+- `Daily review/`
   Local SPY intraday review tool. Loads market data, strategy JSON, reviewed annotations, and supports signal review/backtesting workflows.
 
-- `Fragment Lab/`  
+- `Fragment Lab/`
   Strategy fragment screening and review workspace. To be uploaded separately later.
 
-- `Teaching System/`  
+- `Teaching System/`
   Interactive learning and replay system. To be uploaded separately later.
 
 ## Current Upload
@@ -20,4 +20,3 @@ This repository is organized as a multi-project workspace. Each project is kept 
 The first uploaded project is `Daily review/`.
 
 See `Daily review/README.md` for usage and `Daily review/INTEGRATION.md` for development handoff notes.
-
