@@ -193,8 +193,12 @@ body {
 .signal-card[data-style="red"]    { border-left-color: var(--signal-red); }
 .signal-card[data-style="green"]  { border-left-color: var(--signal-green); }
 .signal-card[data-style="orange"] { border-left-color: var(--signal-orange); }
+.signal-card[data-style="teal"]   { border-left-color: #00B8A9; }
 .signal-card[data-style="blue"]   { border-left-color: var(--signal-blue); }
 .signal-card[data-style="purple"] { border-left-color: var(--signal-purple); }
+.signal-card[data-life="setup"] { background: rgba(64, 158, 255, 0.04); }
+.signal-card[data-life="expired"] { background: rgba(168, 85, 247, 0.05); }
+.signal-card[data-life="activated"] { background: rgba(0, 184, 148, 0.035); }
 
 .signal-time {
   font-family: var(--font-mono);
@@ -235,6 +239,70 @@ body {
 }
 .signal-dir--put { color: #e74c3c; background: rgba(231,76,60,0.15); }
 .signal-dir--call { color: #00b894; background: rgba(0,184,148,0.15); }
+
+.lifecycle-id {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 0 4px;
+  border-radius: 2px;
+  color: var(--text-secondary);
+  background: var(--surface-elevated);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.lifecycle-status {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 4px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+}
+.lifecycle-status.activated { color: var(--signal-green); background: rgba(0,184,148,0.15); }
+.lifecycle-status.expired { color: var(--signal-purple); background: rgba(168,85,247,0.16); }
+.lifecycle-status.pending { color: var(--signal-blue); background: rgba(64,158,255,0.16); }
+
+.lifecycle-flow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+.lifecycle-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--surface-bg);
+}
+.lifecycle-node.setup { background: var(--signal-blue); }
+.lifecycle-node.activated { background: var(--signal-green); }
+.lifecycle-node.expired { background: var(--signal-purple); }
+.lifecycle-arrow { color: var(--text-muted); }
+
+.lifecycle-metrics {
+  margin-top: 5px;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 8px;
+  row-gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.lifecycle-metrics .label { color: var(--text-muted); }
+.lifecycle-metrics .value { color: var(--text-secondary); }
+.lifecycle-metrics .value.warn { color: var(--signal-purple); }
+.lifecycle-metrics .value.ok { color: var(--signal-green); }
 
 .signal-warn { font-size: 10px; color: var(--signal-orange); }
 .signal-ok { font-size: 10px; color: var(--signal-green); opacity: 0.7; }
@@ -584,6 +652,8 @@ input[type="file"] { display: none; }
         <option value="tang_v2">Tang v2</option>
         <option value="tang_v3">Tang v3</option>
         <option value="tang_v4_4">Tang v4.4 Slope</option>
+        <option value="tang_v4_4_activation">Tang v4.4 Activation</option>
+        <option value="tang_v4_4_activation_wick">Tang v4.4 Activation Wick</option>
       </select>
       <span>or</span>
       <button class="upload-btn" id="btn-upload-strategy">Open JSON</button>
@@ -1214,6 +1284,7 @@ input[type="file"] { display: none; }
 
         _normalizeAnnotations(rawAnnotations, timeframe) {
           return (rawAnnotations || []).map((annotation) => ({
+            ...annotation,
             bar_index: annotation.bar_index ?? 0,
             timeframe: annotation.timeframe || timeframe,
             title: annotation.title || '',
@@ -2564,6 +2635,7 @@ input[type="file"] { display: none; }
         static ANNO_COLORS = {
           red:    { fill: '#e74c3c', stroke: '#e74c3c', dim: 'rgba(231,76,60,0.4)' },
           green:  { fill: '#00b894', stroke: '#00b894', dim: 'rgba(0,184,148,0.4)' },
+          teal:   { fill: '#00b8a9', stroke: '#00b8a9', dim: 'rgba(0,184,169,0.4)' },
           blue:   { fill: '#409eff', stroke: '#409eff', dim: 'rgba(64,158,255,0.4)' },
           orange: { fill: '#e6a23c', stroke: '#e6a23c', dim: 'rgba(230,162,60,0.4)' },
           purple: { fill: '#a855f7', stroke: '#a855f7', dim: 'rgba(168,85,247,0.4)' },
@@ -4242,6 +4314,189 @@ input[type="file"] { display: none; }
     return true;
   }
 
+  function signalStyle(def, isCall, isStrong) {
+    return def.style || (isCall ? (isStrong ? 'teal' : 'green') : (isStrong ? 'orange' : 'red'));
+  }
+
+  function signalAnchor(def, isCall) {
+    return def.anchor_side || (isCall ? 'bottom' : 'top');
+  }
+
+  function buildV4Invalidation(isCall, bar, useMa50Exit) {
+    if (!useMa50Exit) return null;
+    return {
+      line: 'm50',
+      rule: isCall ? 'hC < MA50' : 'hC > MA50',
+      direction: isCall ? 'long' : 'short',
+      initial_value: bar.m50,
+      human: isCall
+        ? '当 HA close 跌破 MA50（信号方向被证伪）'
+        : '当 HA close 升破 MA50（信号方向被证伪）',
+    };
+  }
+
+  function activationMethodText(method, isCall) {
+    if (method === 'strong_wick') {
+      return isCall ? '强势刺破' : '强势下破';
+    }
+    return isCall ? '收盘突破' : '收盘跌破';
+  }
+
+  function activationRequirementText(confirmPrice, isCall) {
+    if (confirmPrice === 'close_or_strong_wick' || confirmPrice === 'strong_wick_or_close') {
+      return isCall ? '收盘突破或强势刺破' : '收盘跌破或强势下破';
+    }
+    return isCall ? '收盘突破' : '收盘跌破';
+  }
+
+  function buildActivationBody(pending, activationBar, breakoutLevel, delayBars, confirmMethod) {
+    const setupBar = pending.setupBar;
+    const setupTime = setupBar ? setupBar.t : `#${pending.index}`;
+    const activationTime = activationBar ? activationBar.t : '';
+    const priceText = fmtPx(breakoutLevel);
+    const direction = pending.isCall ? 'CALL' : 'PUT';
+    const methodText = activationMethodText(confirmMethod, pending.isCall);
+    return `#${pending.setupId} Setup ${setupTime} -> Activation ${activationTime} · 启动延迟 ${delayBars}min · ${direction} ${methodText} ${priceText} · 原始 ${pending.sigId}`;
+  }
+
+  function buildSetupBody(def, features, maxWaitBars, setupId) {
+    return `#${setupId} ${buildSignalBody(def, features)} · 候选 setup，等待 ${maxWaitBars} 根内启动确认`;
+  }
+
+  function buildExpiredBody(pending, expireBar, maxWaitBars) {
+    const setupTime = pending.setupBar ? pending.setupBar.t : `#${pending.index}`;
+    const expireTime = expireBar ? expireBar.t : '';
+    const direction = pending.isCall ? 'CALL' : 'PUT';
+    const requirementText = activationRequirementText(pending.activationConfirmPrice, pending.isCall);
+    const levelText = fmtPx(pending.lastBreakoutLevel);
+    const bestCloseText = fmtPx(pending.bestClose);
+    const missBy = Number.isFinite(pending.missBy) ? Math.max(0, pending.missBy) : null;
+    const missText = missBy == null ? '' : `，差 ${fmtPx(missBy)}`;
+    const gateText = pending.expiryGateReason ? ` · ${pending.expiryGateReason}` : '';
+    return `#${pending.setupId} Setup ${setupTime} -> Expired ${expireTime} · 等待 ${maxWaitBars} 根未启动 · ${direction} 未形成启动确认：${requirementText} ${levelText}，窗口最佳收盘 ${bestCloseText}${missText}${gateText} · 原始 ${pending.sigId}`;
+  }
+
+  function activationProbe(pending, bars1m, i, features, activationCfg) {
+    if (!pending || i <= pending.index) return null;
+    const bar = bars1m[i];
+    if (!bar || bar.C == null) return null;
+
+    const confirmPrice = activationCfg.confirm_price || 'close';
+    const allowStrongWick = confirmPrice === 'close_or_strong_wick'
+      || confirmPrice === 'strong_wick_or_close';
+    const strongWickCfg = activationCfg.strong_wick || {};
+    const closePositionMin = strongWickCfg.close_position_min != null
+      ? Number(strongWickCfg.close_position_min)
+      : 0.6;
+    const requireSameDirection = activationCfg.require_same_direction_bar !== false;
+    const requireSlope = activationCfg.require_ma10_slope_still_aligned !== false;
+    const colorOk = pending.isCall ? features.isGreen : features.isRed;
+    const slopeOk = pending.isCall ? features.slopeUp : features.slopeDown;
+
+    const range = bars1m.slice(pending.index, i);
+    if (!range.length) return null;
+    const highs = range.map(b => b.H).filter(v => v != null && isFinite(v));
+    const lows = range.map(b => b.L).filter(v => v != null && isFinite(v));
+    let breakoutLevel = null;
+    let closeConfirmed = false;
+    let wickConfirmed = false;
+    let closePosition = null;
+    let strongWickConfirmed = false;
+    if (pending.isCall) {
+      if (!highs.length) return null;
+      breakoutLevel = Math.max(...highs);
+      closeConfirmed = bar.C > breakoutLevel;
+      wickConfirmed = bar.H > breakoutLevel;
+    } else {
+      if (!lows.length) return null;
+      breakoutLevel = Math.min(...lows);
+      closeConfirmed = bar.C < breakoutLevel;
+      wickConfirmed = bar.L < breakoutLevel;
+    }
+    if (bar.H != null && bar.L != null && bar.H > bar.L) {
+      closePosition = (bar.C - bar.L) / (bar.H - bar.L);
+      strongWickConfirmed = pending.isCall
+        ? closePosition >= closePositionMin
+        : closePosition <= (1 - closePositionMin);
+    }
+    const priceConfirmed = closeConfirmed || (allowStrongWick && wickConfirmed && strongWickConfirmed);
+    const confirmMethod = closeConfirmed ? 'close' : (
+      allowStrongWick && wickConfirmed && strongWickConfirmed ? 'strong_wick' : null
+    );
+    const missBy = pending.isCall ? breakoutLevel - bar.C : bar.C - breakoutLevel;
+    const isActivation = priceConfirmed
+      && (!requireSameDirection || colorOk)
+      && (!requireSlope || slopeOk);
+    return {
+      breakoutLevel,
+      close: bar.C,
+      high: bar.H,
+      low: bar.L,
+      priceConfirmed,
+      closeConfirmed,
+      wickConfirmed,
+      closePosition,
+      strongWickConfirmed,
+      allowStrongWick,
+      confirmMethod,
+      colorOk,
+      slopeOk,
+      requireSameDirection,
+      requireSlope,
+      missBy,
+      isActivation,
+    };
+  }
+
+  function updatePendingActivationStats(pending, probe, bar, index) {
+    if (!pending || !probe) return;
+    pending.lastCheckedIndex = index;
+    pending.lastCheckedTime = bar ? bar.t : '';
+    pending.lastBreakoutLevel = probe.breakoutLevel;
+    if (Number.isFinite(probe.close)) {
+      pending.bestClose = Number.isFinite(pending.bestClose)
+        ? (pending.isCall ? Math.max(pending.bestClose, probe.close) : Math.min(pending.bestClose, probe.close))
+        : probe.close;
+    }
+    const wickValue = pending.isCall ? probe.high : probe.low;
+    if (Number.isFinite(wickValue)) {
+      pending.bestWick = Number.isFinite(pending.bestWick)
+        ? (pending.isCall ? Math.max(pending.bestWick, wickValue) : Math.min(pending.bestWick, wickValue))
+        : wickValue;
+    }
+    if (Number.isFinite(pending.bestClose) && Number.isFinite(probe.breakoutLevel)) {
+      pending.missBy = pending.isCall
+        ? probe.breakoutLevel - pending.bestClose
+        : pending.bestClose - probe.breakoutLevel;
+    }
+    if (probe.allowStrongWick && probe.wickConfirmed) {
+      pending.wickConfirmedCount = (pending.wickConfirmedCount || 0) + 1;
+      pending.lastWickConfirmedProbe = probe;
+    }
+    if (probe.priceConfirmed) {
+      pending.priceConfirmedCount = (pending.priceConfirmedCount || 0) + 1;
+      pending.lastPriceConfirmedProbe = probe;
+    }
+    const failedGates = [];
+    const gateProbe = pending.lastPriceConfirmedProbe || pending.lastWickConfirmedProbe || probe;
+    if (gateProbe.priceConfirmed) {
+      if (gateProbe.requireSameDirection && !gateProbe.colorOk) failedGates.push('HA 颜色未顺向');
+      if (gateProbe.requireSlope && !gateProbe.slopeOk) failedGates.push('MA10 斜率未顺向');
+    }
+    if (pending.priceConfirmedCount > 0 && failedGates.length) {
+      pending.expiryGateReason = `曾触价但${failedGates.join('、')}`;
+    } else if (pending.priceConfirmedCount > 0) {
+      pending.expiryGateReason = '曾触价但未形成完整确认';
+    } else if (pending.wickConfirmedCount > 0 && gateProbe.closePosition != null) {
+      const posText = `${Math.round(gateProbe.closePosition * 100)}%`;
+      pending.expiryGateReason = pending.isCall
+        ? `曾刺破确认线，但收盘位置不够强（${posText}）`
+        : `曾刺破确认线，但收盘位置不够弱（${posText}）`;
+    } else {
+      pending.expiryGateReason = `窗口内没有${activationRequirementText(pending.activationConfirmPrice, pending.isCall)}`;
+    }
+  }
+
   function scanSignalsDeclarative(bars1m, bars5m, strategy) {
     const trends5m = detectTrendsRouted(bars5m, strategy);
     const trends1m = map1mTo5mTrends(bars1m, bars5m, trends5m);
@@ -4254,6 +4509,7 @@ input[type="file"] { display: none; }
     const touchCfg = strategy.touch_logic || {};
     const eliteCfg = strategy.elite_strong || {};
     const spaceCfg = strategy.space_check || {};
+    const activationCfg = strategy.entry_activation || {};
 
     const entangleLineKeys = Array.isArray(filterCfg.entangle_lines) && filterCfg.entangle_lines.length
       ? filterCfg.entangle_lines
@@ -4277,12 +4533,16 @@ input[type="file"] { display: none; }
     const useCooldown = cooldownCfg.enabled === true;
     const cooldownBars = cooldownCfg.bars != null ? cooldownCfg.bars : 0;
     const useMa50Exit = !!(exitCfg.L2_hard_stops && exitCfg.L2_hard_stops.ma50_ha_close_break);
+    const useActivation = activationCfg.enabled === true;
+    const activationMaxWait = activationCfg.max_wait_bars != null ? activationCfg.max_wait_bars : 8;
 
     const entangleLinesText = entangleLineKeys.map(lineLabel).join('/');
 
     const annotations = [];
     let activePos = 0;
     let lastSignalBar = -Infinity;
+    let pendingSetup = null;
+    let setupSeq = 0;
 
     for (let i = 1; i < bars1m.length; i++) {
       const bar = bars1m[i];
@@ -4298,10 +4558,82 @@ input[type="file"] { display: none; }
         }
       }
 
+      const features = computeBarFeatures(bar, prev, trends1m[i], featureOpts);
+
+      if (useActivation && pendingSetup) {
+        if ((i - pendingSetup.index) > activationMaxWait) {
+          annotations.push({
+            bar_index: i, type: 'expired',
+            title: `#${pendingSetup.setupId} ${pendingSetup.isCall ? 'CALL' : 'PUT'} setup 过期`,
+            direction: pendingSetup.isCall ? 'CALL' : 'PUT',
+            body: buildExpiredBody(pendingSetup, bar, activationMaxWait),
+            style: 'purple',
+            anchor_side: pendingSetup.anchor_side,
+            _signal_id: pendingSetup.sigId,
+            _conditions: pendingSetup.reasons,
+            _invalidation: pendingSetup.invalidation,
+            _setup_id: pendingSetup.setupId,
+            _setup_time: pendingSetup.setupBar ? pendingSetup.setupBar.t : '',
+            _setup_title: pendingSetup.title,
+            _setup_bar_index: pendingSetup.index,
+            _expire_bar_index: i,
+            _expire_time: bar.t,
+            _activation_delay_bars: i - pendingSetup.index,
+            _activation_window_bars: activationMaxWait,
+            _activation_level: pendingSetup.lastBreakoutLevel,
+            _best_close_in_window: pendingSetup.bestClose,
+            _best_wick_in_window: pendingSetup.bestWick,
+            _wick_confirmed_count: pendingSetup.wickConfirmedCount || 0,
+            _miss_by: pendingSetup.missBy,
+            _last_checked_bar_index: pendingSetup.lastCheckedIndex,
+            _last_checked_time: pendingSetup.lastCheckedTime,
+            _expiry_gate_reason: pendingSetup.expiryGateReason,
+            _activation_confirm_price: pendingSetup.activationConfirmPrice,
+            _raw_signal_id: pendingSetup.sigId,
+          });
+          pendingSetup = null;
+        } else {
+          const activation = activationProbe(pendingSetup, bars1m, i, features, activationCfg);
+          if (activation) updatePendingActivationStats(pendingSetup, activation, bar, i);
+          if (activation && activation.isActivation) {
+            const delayBars = i - pendingSetup.index;
+            annotations.push({
+              bar_index: i, type: 'signal',
+              title: `#${pendingSetup.setupId} ${pendingSetup.title}`,
+              direction: pendingSetup.isCall ? 'CALL' : 'PUT',
+              body: buildActivationBody(pendingSetup, bar, activation.breakoutLevel, delayBars, activation.confirmMethod),
+              style: pendingSetup.style,
+              anchor_side: pendingSetup.anchor_side,
+              score: pendingSetup.score,
+              _trendAligned: true,
+              _signal_id: pendingSetup.sigId,
+              _conditions: pendingSetup.reasons,
+              _invalidation: pendingSetup.invalidation,
+              _setup_id: pendingSetup.setupId,
+              _setup_time: pendingSetup.setupBar ? pendingSetup.setupBar.t : '',
+              _setup_title: pendingSetup.title,
+              _setup_bar_index: pendingSetup.index,
+              _activation_bar_index: i,
+              _activation_time: bar.t,
+              _activation_delay_bars: delayBars,
+              _activation_breakout_price: activation.breakoutLevel,
+              _activation_confirm_method: activation.confirmMethod,
+              _activation_close_position: activation.closePosition,
+              _activation_window_bars: activationMaxWait,
+              _activation_confirm_price: pendingSetup.activationConfirmPrice,
+              _raw_signal_id: pendingSetup.sigId,
+            });
+            if (usePosition) activePos = pendingSetup.isCall ? 1 : -1;
+            lastSignalBar = i;
+            pendingSetup = null;
+            continue;
+          }
+          continue;
+        }
+      }
+
       if (usePosition && activePos !== 0) continue;
       if (useCooldown && lastSignalBar !== -Infinity && (i - lastSignalBar) <= cooldownBars) continue;
-
-      const features = computeBarFeatures(bar, prev, trends1m[i], featureOpts);
 
       for (const def of sigDefs) {
         if (!def || !def.conditions) continue;
@@ -4311,6 +4643,8 @@ input[type="file"] { display: none; }
         const sigId = def.id || (isCall ? 'call' : 'put');
         const isStrong = def.conditions.previous_elite === true;
         const labelEl = def.label || {};
+        const style = signalStyle(def, isCall, isStrong);
+        const anchorSide = signalAnchor(def, isCall);
 
         const cooldownDistance = lastSignalBar === -Infinity
           ? null
@@ -4322,25 +4656,57 @@ input[type="file"] { display: none; }
           entangleLinesText,
         });
 
-        const invalidation = useMa50Exit
-          ? {
-              line: 'm50',
-              rule: isCall ? 'hC < MA50' : 'hC > MA50',
-              direction: isCall ? 'long' : 'short',
-              initial_value: bar.m50,
-              human: isCall
-                ? '当 HA close 跌破 MA50（信号方向被证伪）'
-                : '当 HA close 升破 MA50（信号方向被证伪）',
-            }
-          : null;
+        const invalidation = buildV4Invalidation(isCall, bar, useMa50Exit);
+
+        if (useActivation) {
+          setupSeq += 1;
+          pendingSetup = {
+            index: i,
+            setupBar: bar,
+            def,
+            isCall,
+            isStrong,
+            sigId,
+            setupId: setupSeq,
+            title: def.name || labelEl.text || sigId,
+            style,
+            anchor_side: anchorSide,
+            score: isStrong ? '10/10' : '7/10',
+            reasons,
+            invalidation,
+            activationConfirmPrice: activationCfg.confirm_price || 'close',
+          };
+          annotations.push({
+            bar_index: i, type: 'setup',
+            title: `#${pendingSetup.setupId} ${pendingSetup.title} setup`,
+            direction: isCall ? 'CALL' : 'PUT',
+            body: buildSetupBody(def, features, activationMaxWait, pendingSetup.setupId),
+            style: 'blue',
+            anchor_side: anchorSide,
+            _trendAligned: true,
+            _signal_id: sigId,
+            _conditions: reasons,
+            _invalidation: invalidation,
+            _setup_id: pendingSetup.setupId,
+            _setup_time: bar.t,
+            _setup_title: pendingSetup.title,
+            _setup_bar_index: i,
+            _activation_window_bars: activationMaxWait,
+            _activation_window_start_bar_index: i + 1,
+            _activation_window_end_bar_index: i + activationMaxWait,
+            _activation_confirm_price: activationCfg.confirm_price || 'close',
+            _raw_signal_id: sigId,
+          });
+          break;
+        }
 
         annotations.push({
           bar_index: i, type: 'signal',
           title: def.name || labelEl.text || sigId,
           direction: isCall ? 'CALL' : 'PUT',
           body: buildSignalBody(def, features),
-          style: def.style || (isCall ? (isStrong ? 'teal' : 'green') : (isStrong ? 'orange' : 'red')),
-          anchor_side: def.anchor_side || (isCall ? 'bottom' : 'top'),
+          style,
+          anchor_side: anchorSide,
           score: isStrong ? '10/10' : '7/10',
           _trendAligned: true,
           _signal_id: sigId,
@@ -4612,6 +4978,21 @@ input[type="file"] { display: none; }
       // Debug exposure: useful for poking the engine from the console.
       // Not load-bearing; safe to remove.
       if (typeof window !== 'undefined') window.__engine = engine;
+
+      engine.on('annotation:click', (anno) => {
+        const normalized = { ...anno, timeframe: anno.timeframe || engine.getTimeframe() };
+        const key = setupGroupKey(normalized);
+        const cards = Array.from(signalList.querySelectorAll('.signal-card'));
+        const card = key
+          ? cards.find(c => c.dataset.setupKey === key)
+          : cards.find(c => Number(c.dataset.barIndex) === normalized.bar_index && c.dataset.timeframe === normalized.timeframe);
+        if (card) {
+          card.scrollIntoView({ block: 'nearest' });
+          card.click();
+        } else {
+          viewSetupRange(normalized, null, normalized.timeframe || '1m');
+        }
+      });
     } catch (err) {
       chartLoading.textContent = `Engine load failed: ${err.message}`;
       console.error('Engine load error:', err);
@@ -4619,12 +5000,131 @@ input[type="file"] { display: none; }
   }
 
   // --- Data Loading ---
+  // Default RTH window for chart display. Extended JSON (session_mode === 'extended')
+  // contains 04:00-19:59 ET bars whose MA fields are already computed against the
+  // continuous extended sequence. We slice off pre/post bars at load time so the
+  // chart shows only RTH while keeping the warmed-up MA values on every RTH bar.
+  //
+  // Side effect: any pre-baked annotations / _trades whose bar_index references the
+  // extended bar array (e.g. produced by Python scan_signals.py against the extended
+  // JSON) must be filtered and re-indexed. Otherwise they'd point at wrong bars or
+  // be out of bounds after slicing. Annotations that anchor to pre/post bars are
+  // dropped (they have no place on the RTH-only chart).
+  const RTH_START = '09:30';
+  const RTH_END   = '16:00';   // exclusive
+  const RTH_5M_END = '16:00';
+
+  function sliceToRTH(payload) {
+    if (!payload || !payload.meta || payload.meta.session_mode !== 'extended') {
+      return payload;
+    }
+    const within = (t, end) => typeof t === 'string' && t >= RTH_START && t < end;
+
+    const oldBars1m = payload.bars_1m || [];
+    const oldBars5m = payload.bars_5m || [];
+
+    // Build old-index → new-index maps while filtering to RTH.
+    const bars1m = [];
+    const map1m = new Map();
+    oldBars1m.forEach((b, oldIdx) => {
+      if (within(b.t, RTH_END)) {
+        map1m.set(oldIdx, bars1m.length);
+        bars1m.push(b);
+      }
+    });
+    const bars5m = [];
+    const map5m = new Map();
+    oldBars5m.forEach((b, oldIdx) => {
+      if (within(b.t, RTH_5M_END)) {
+        map5m.set(oldIdx, bars5m.length);
+        bars5m.push(b);
+      }
+    });
+
+    const remapAnnos = (annos, idxMap) => {
+      if (!Array.isArray(annos)) return annos;
+      const out = [];
+      for (const a of annos) {
+        if (a == null) continue;
+        const newIdx = idxMap.get(a.bar_index);
+        if (newIdx === undefined) continue;   // anchored outside RTH → drop
+        const next = { ...a, bar_index: newIdx };
+        for (const k of [
+          '_setup_bar_index',
+          '_activation_bar_index',
+          '_expire_bar_index',
+          '_activation_window_start_bar_index',
+          '_activation_window_end_bar_index',
+          '_last_checked_bar_index',
+        ]) {
+          if (typeof next[k] === 'number') {
+            const remapped = idxMap.get(next[k]);
+            next[k] = remapped === undefined ? null : remapped;
+          }
+        }
+        out.push(next);
+      }
+      return out;
+    };
+
+    // _trades (a.k.a. setups) reference 1m bars. Each may have entry / invalidation /
+    // exit bar indices; remap whichever fields are present.
+    const remapTrades = (trades, idxMap) => {
+      if (!Array.isArray(trades)) return trades;
+      const out = [];
+      for (const t of trades) {
+        if (t == null) continue;
+        const fix = (k) => {
+          if (typeof t[k] === 'number') {
+            const newIdx = idxMap.get(t[k]);
+            if (newIdx === undefined) return false;
+            t = { ...t, [k]: newIdx };
+          }
+          return true;
+        };
+        // Try common keys; if entry can't be remapped (anchored in pre/post) drop the trade.
+        const ENTRY_KEYS = ['entry_bar_index', 'signal_bar_index', 'bar_index'];
+        let entryOk = true;
+        for (const k of ENTRY_KEYS) {
+          if (typeof t[k] === 'number') {
+            if (!fix(k)) { entryOk = false; break; }
+          }
+        }
+        if (!entryOk) continue;
+        // Optional exits: remap if present, but missing is OK (trade just won't show exit marker)
+        for (const k of ['invalidation_bar_index', 'exit_bar_index', 'mfe_bar_index', 'mae_bar_index']) {
+          if (typeof t[k] === 'number') {
+            const newIdx = idxMap.get(t[k]);
+            t = newIdx === undefined ? { ...t, [k]: null } : { ...t, [k]: newIdx };
+          }
+        }
+        out.push(t);
+      }
+      return out;
+    };
+
+    const sliced = {
+      ...payload,
+      bars_1m: bars1m,
+      bars_5m: bars5m,
+      annotations_1m: remapAnnos(payload.annotations_1m, map1m),
+      annotations_5m: remapAnnos(payload.annotations_5m, map5m),
+      _trades: remapTrades(payload._trades, map1m),
+    };
+    sliced.meta = {
+      ...payload.meta,
+      display_window: `${RTH_START}-${RTH_END} ET (sliced from ${payload.meta.session_window || 'extended'})`,
+    };
+    return sliced;
+  }
+
   function loadData(payload) {
     if (!engineReady) {
       console.error('Engine not ready');
       return;
     }
 
+    payload = sliceToRTH(payload);
     currentData = payload;
     chartLoading.style.display = 'none';
 
@@ -4692,6 +5192,11 @@ input[type="file"] { display: none; }
     if (setup && Number.isFinite(setup.entry_index) && Number.isFinite(setup.exit_index)) {
       rangeStart = Math.min(setup.signal_index, setup.entry_index);
       rangeEnd = setup.exit_index;
+    } else if (anno && Number.isFinite(anno._setup_bar_index)) {
+      rangeStart = anno._setup_bar_index;
+      rangeEnd = Number.isFinite(anno._activation_bar_index)
+        ? anno._activation_bar_index
+        : (Number.isFinite(anno._expire_bar_index) ? anno._expire_bar_index : anno.bar_index);
     } else {
       rangeStart = anno.bar_index - 20;
       rangeEnd = anno.bar_index + 20;
@@ -4871,7 +5376,7 @@ input[type="file"] { display: none; }
       const rows = [];
       if (invalidation) {
         rows.push(`<span class="label">规则</span><span class="value">${escapeHtml(invalidation.human || invalidation.rule)}</span>`);
-        rows.push(`<span class="label">入场时 ${escapeHtml(lineLabel(invalidation.line))}</span><span class="value">${fmtPx(invalidation.initial_value)}</span>`);
+        rows.push(`<span class="label">${anno.type === 'signal' ? '入场时' : 'Setup 时'} ${escapeHtml(lineLabel(invalidation.line))}</span><span class="value">${fmtPx(invalidation.initial_value)}</span>`);
       }
       if (setup) {
         const exitBar = bars1m[setup.exit_index];
@@ -4883,9 +5388,10 @@ input[type="file"] { display: none; }
           rows.push(`<span class="label">收盘状态</span><span class="value">仍有效（持续 ${setup.bars_held} 根 K）</span>`);
         }
       }
+      const invalidationTitle = anno.type === 'signal' ? '信号失效' : '若激活后的失效规则';
       invalidationBlock = `
         <div class="detail-section">
-          <h5>信号失效</h5>
+          <h5>${invalidationTitle}</h5>
           <div class="invalidation-block">${rows.join('')}</div>
         </div>`;
     }
@@ -4913,16 +5419,98 @@ input[type="file"] { display: none; }
     return `<div class="signal-detail">${triggersBlock}${invalidationBlock}${excursionBlock}</div>`;
   }
 
+  function annotationTime(anno, bars1m, bars5m) {
+    const bars = anno.timeframe === '5m' ? bars5m : bars1m;
+    const bar = bars[anno.bar_index];
+    return bar ? bar.t : `#${anno.bar_index}`;
+  }
+
+  function setupGroupKey(anno) {
+    if (!anno || anno.timeframe !== '1m') return null;
+    if (anno._setup_id != null) return `setup:${anno._setup_id}`;
+    if (anno._setup_bar_index != null) return `setup:${anno._setup_bar_index}:${anno._signal_id || ''}`;
+    if (anno.type === 'setup') return `setup:${anno.bar_index}:${anno._signal_id || ''}`;
+    return null;
+  }
+
+  function cleanSetupTitle(anno) {
+    const raw = anno._setup_title || anno.title || '';
+    return String(raw).replace(/^#\d+\s+/, '').replace(/\s+setup$/, '');
+  }
+
+  function lifecycleMetricsHTML(outcome, status) {
+    const rows = [];
+    if (status === 'activated') {
+      const isCall = outcome.direction !== 'PUT';
+      const methodText = activationMethodText(outcome._activation_confirm_method, isCall);
+      rows.push(['路径', `Setup ${outcome._setup_time || '?'} -> Activation ${outcome._activation_time || '?'}`]);
+      rows.push(['延迟', `${outcome._activation_delay_bars ?? '?'} min`]);
+      rows.push(['启动确认线', `${outcome.direction || ''} ${methodText} ${fmtPx(outcome._activation_breakout_price)}`]);
+      if (outcome._activation_confirm_method === 'strong_wick' && Number.isFinite(outcome._activation_close_position)) {
+        rows.push(['收盘位置', `${Math.round(outcome._activation_close_position * 100)}%`]);
+      }
+      rows.push(['解释', '这是入场确认线，不是目标价/止盈价']);
+      rows.push(['原始信号', outcome._raw_signal_id || outcome._signal_id || '--']);
+    } else if (status === 'expired') {
+      const isCall = outcome.direction !== 'PUT';
+      const requirementText = activationRequirementText(outcome._activation_confirm_price, isCall);
+      const miss = Number.isFinite(outcome._miss_by) ? Math.max(0, outcome._miss_by) : null;
+      rows.push(['路径', `Setup ${outcome._setup_time || '?'} -> Expired ${outcome._expire_time || '?'}`]);
+      rows.push(['等待', `${outcome._activation_window_bars || 8}/${outcome._activation_window_bars || 8} 根未启动`]);
+      rows.push(['启动确认线', `${outcome.direction || ''} ${requirementText} ${fmtPx(outcome._activation_level)}（setup 后运行区间）`]);
+      rows.push(['窗口最佳收盘', `${fmtPx(outcome._best_close_in_window)}${miss == null ? '' : `，仍差 ${fmtPx(miss)}`}`]);
+      if (Number.isFinite(outcome._best_wick_in_window)) {
+        rows.push([isCall ? '窗口最高价' : '窗口最低价', `${fmtPx(outcome._best_wick_in_window)}${outcome._wick_confirmed_count ? `（刺破 ${outcome._wick_confirmed_count} 次）` : ''}`]);
+      }
+      rows.push(['结果', outcome._expiry_gate_reason || '候选过期，后续突破不回头激活', 'warn']);
+      rows.push(['解释', '这是入场确认线，不是目标价/止盈价']);
+    } else {
+      rows.push(['状态', `等待 ${outcome._activation_window_bars || 8} 根内启动确认`]);
+      rows.push(['原始信号', outcome._raw_signal_id || outcome._signal_id || '--']);
+    }
+    return `<div class="lifecycle-metrics">${rows.map(([label, value, tone]) => `
+      <span class="label">${escapeHtml(label)}</span>
+      <span class="value ${tone || ''}">${escapeHtml(value)}</span>
+      `).join('')}</div>`;
+  }
+
+  function lifecycleSummaryText(outcome, status) {
+    if (status === 'activated') {
+      const methodText = activationMethodText(outcome._activation_confirm_method, outcome.direction !== 'PUT');
+      return `已启动：${outcome._activation_delay_bars ?? '?'}min 后${methodText}启动确认线 ${fmtPx(outcome._activation_breakout_price)}`;
+    }
+    if (status === 'expired') {
+      const requirementText = activationRequirementText(outcome._activation_confirm_price, outcome.direction !== 'PUT');
+      const miss = Number.isFinite(outcome._miss_by) ? `，仍差 ${fmtPx(Math.max(0, outcome._miss_by))}` : '';
+      return `已过期：${outcome._activation_window_bars || 8} 根内未${requirementText}启动确认线 ${fmtPx(outcome._activation_level)}${miss}`;
+    }
+    return `候选中：等待 ${outcome._activation_window_bars || 8} 根内启动确认`;
+  }
+
+  function lifecycleFlowHTML(setupAnno, outcome, status, bars1m, bars5m) {
+    const setupTime = setupAnno ? annotationTime(setupAnno, bars1m, bars5m) : (outcome._setup_time || '?');
+    const outcomeTime = status === 'activated'
+      ? (outcome._activation_time || annotationTime(outcome, bars1m, bars5m))
+      : status === 'expired'
+        ? (outcome._expire_time || annotationTime(outcome, bars1m, bars5m))
+        : 'waiting';
+    const nodeClass = status === 'activated' ? 'activated' : (status === 'expired' ? 'expired' : 'setup');
+    const nodeText = status === 'activated' ? 'A' : (status === 'expired' ? 'X' : '...');
+    return `
+      <div class="lifecycle-flow">
+        <span class="lifecycle-node setup">S</span><span>Setup ${escapeHtml(setupTime)}</span>
+        <span class="lifecycle-arrow">-></span>
+        <span class="lifecycle-node ${nodeClass}">${nodeText}</span><span>${escapeHtml(status === 'pending' ? 'Waiting' : outcomeTime)}</span>
+      </div>`;
+  }
+
   function renderSignalList(data) {
     const annos1m = (data.annotations_1m || []).map(a => ({...a, timeframe: '1m'}));
     const annos5m = (data.annotations_5m || []).map(a => ({...a, timeframe: '5m'}));
-    const all = [...annos1m, ...annos5m];
-
-    // Sort by bar_index
-    all.sort((a, b) => a.bar_index - b.bar_index);
 
     const bars1m = data.bars_1m || [];
     const bars5m = data.bars_5m || [];
+    const all = [...annos1m, ...annos5m];
 
     if (all.length === 0) {
       emptyState.style.display = 'flex';
@@ -4933,7 +5521,12 @@ input[type="file"] { display: none; }
     }
 
     emptyState.style.display = 'none';
-    $('#signal-count').textContent = `(${all.length})`;
+    const officialCount = annos1m.filter(a => a.type === 'signal').length;
+    const setupCount = annos1m.filter(a => a.type === 'setup').length;
+    const expiredCount = annos1m.filter(a => a.type === 'expired').length;
+    $('#signal-count').textContent = setupCount || expiredCount
+      ? `(${officialCount} signals · ${setupCount} setup / ${expiredCount} expired)`
+      : `(${all.length})`;
 
     // Clear previous cards
     signalList.querySelectorAll('.signal-card').forEach(c => c.remove());
@@ -4946,7 +5539,33 @@ input[type="file"] { display: none; }
       }
     }
 
-    for (const anno of all) {
+    const items = [];
+    const grouped = new Map();
+    for (const anno of annos1m) {
+      const key = setupGroupKey(anno);
+      if (!key) {
+        items.push({ kind: 'anno', anno, sort: anno.bar_index });
+        continue;
+      }
+      if (!grouped.has(key)) grouped.set(key, { kind: 'lifecycle', key, annos: [] });
+      grouped.get(key).annos.push(anno);
+    }
+    for (const group of grouped.values()) {
+      group.annos.sort((a, b) => a.bar_index - b.bar_index);
+      group.setup = group.annos.find(a => a.type === 'setup') || group.annos[0];
+      group.signal = group.annos.find(a => a.type === 'signal') || null;
+      group.expired = group.annos.find(a => a.type === 'expired') || null;
+      group.outcome = group.signal || group.expired || group.setup;
+      group.sort = group.setup ? group.setup.bar_index : group.outcome.bar_index;
+      items.push(group);
+    }
+    for (const anno of annos5m) {
+      items.push({ kind: 'anno', anno, sort: anno.bar_index });
+    }
+
+    items.sort((a, b) => a.sort - b.sort);
+
+    function appendRegularCard(anno) {
       const bars = anno.timeframe === '5m' ? bars5m : bars1m;
       const bar = bars[anno.bar_index];
       const time = bar ? bar.t : `#${anno.bar_index}`;
@@ -5026,6 +5645,91 @@ input[type="file"] { display: none; }
 
       signalList.appendChild(card);
     }
+
+    function appendLifecycleCard(group) {
+      const setupAnno = group.setup;
+      const outcome = group.outcome;
+      const status = group.signal ? 'activated' : (group.expired ? 'expired' : 'pending');
+      const setupId = outcome._setup_id || setupAnno._setup_id || '?';
+      const statusText = status === 'activated' ? 'Activated' : (status === 'expired' ? 'Expired' : 'Setup');
+      const statusClass = status === 'activated' ? 'activated' : (status === 'expired' ? 'expired' : 'pending');
+      const setup = group.signal ? tradeLookup[group.signal.bar_index] : null;
+
+      const card = document.createElement('div');
+      card.className = 'signal-card';
+      card.dataset.style = status === 'expired' ? 'purple' : (group.signal ? group.signal.style : 'blue');
+      card.dataset.life = status;
+      card.dataset.setupKey = group.key;
+      card.dataset.barIndex = outcome.bar_index;
+      card.dataset.timeframe = '1m';
+
+      const dirBadge = outcome.direction
+        ? `<span class="signal-dir signal-dir--${outcome.direction === 'PUT' ? 'put' : 'call'}">${outcome.direction}</span>`
+        : '';
+      const scoreHTML = group.signal && group.signal.score
+        ? `<span class="signal-score">${escapeHtml(group.signal.score)}</span> `
+        : '';
+      const title = cleanSetupTitle(setupAnno || outcome);
+      const timeText = setupAnno ? annotationTime(setupAnno, bars1m, bars5m) : (outcome._setup_time || annotationTime(outcome, bars1m, bars5m));
+      const summaryText = lifecycleSummaryText(outcome, status);
+      const detailHTML = buildSignalDetail(outcome, setup, bars1m);
+      const expandToggle = detailHTML
+        ? `<span class="signal-expand-toggle" data-role="expand">展开详情</span>`
+        : '';
+
+      let setupHTML = '';
+      if (setup) {
+        const moveStr = setup.spy_move >= 0
+          ? `+${setup.spy_move.toFixed(2)}`
+          : setup.spy_move.toFixed(2);
+        const pnlClass = setup.spy_move > 0 ? 'positive' : 'negative';
+        const resultClass = setup.invalidation_type === 'eod'
+          ? 'eod'
+          : (setup.spy_move > 0 ? 'favorable' : 'adverse');
+        const exitBar = bars1m[setup.exit_index];
+        const exitTime = exitBar ? exitBar.t : '?';
+        const tag = setup.invalidation_type === 'eod' ? 'EOD' : '信号失效';
+        setupHTML = `
+          <div class="trade-result ${resultClass}">
+            <span class="trade-pnl ${pnlClass}">${moveStr}</span>
+            <span class="trade-exit-reason">${tag}</span>
+            <span class="trade-exit-reason">· ${setup.bars_held}m · → ${exitTime}</span>
+          </div>`;
+      }
+
+      card.innerHTML = `
+        <div class="signal-time"><span class="lifecycle-id">#${setupId}</span> ${timeText} · 1m ${dirBadge} <span class="lifecycle-status ${statusClass}">${statusText}</span></div>
+        <div class="signal-title">${escapeHtml(title)} 候选生命周期</div>
+        ${lifecycleFlowHTML(setupAnno, outcome, status, bars1m, bars5m)}
+        <div class="signal-meta">${scoreHTML}${escapeHtml(summaryText)}</div>
+        ${lifecycleMetricsHTML(outcome, status)}
+        ${setupHTML}
+        ${expandToggle}
+        ${detailHTML}
+      `;
+
+      card.addEventListener('click', (ev) => {
+        const isToggle = ev.target && ev.target.dataset && ev.target.dataset.role === 'expand';
+        if (isToggle) {
+          card.classList.toggle('expanded');
+          ev.target.textContent = card.classList.contains('expanded') ? '收起详情' : '展开详情';
+          return;
+        }
+        signalList.querySelectorAll('.signal-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        viewSetupRange(outcome, setup, '1m');
+      });
+
+      signalList.appendChild(card);
+    }
+
+    for (const item of items) {
+      if (item.kind === 'lifecycle') {
+        appendLifecycleCard(item);
+      } else {
+        appendRegularCard(item.anno);
+      }
+    }
   }
 
   // --- File Upload Handlers ---
@@ -5082,6 +5786,34 @@ input[type="file"] { display: none; }
       tang_v3: {"name":"Tang v3","version":"0.3","description":"v2 + 三层止盈止损（技术出场 / 硬止损 / Trailing）","trend":{"method":"relaxed","timeframe":"5m","fast_ma":"m10","slow_ma":"m50","slope_bars":3},"signals":[{"id":"reject_ma10","name":"Reject MA10","direction":"bearish","style":"red","anchor_side":"top","conditions":{"candle_color":"green","wick_touch":{"field":"hH","operator":">=","target":"m10"},"body_below_1":{"field":"hC","operator":"<=","target":"m10"},"body_below_2":{"field":"hO","operator":"<=","target":"m10"}},"confirm":{"next_bar_color":"red"},"trend_required":"bearish"},{"id":"support_ma10","name":"Support MA10","direction":"bullish","style":"green","anchor_side":"bottom","conditions":{"candle_color":"red","wick_touch":{"field":"hL","operator":"<=","target":"m10"},"body_above_1":{"field":"hC","operator":">=","target":"m10"},"body_above_2":{"field":"hO","operator":">=","target":"m10"}},"confirm":{"next_bar_color":"green"},"trend_required":"bullish"},{"id":"signal_b","name":"Signal B","direction":"bearish","style":"orange","anchor_side":"top","extends":"reject_ma10","extra_conditions":{"break_below":{"field":"hC","operator":"<=","target":"m50"},"prev_above":{"field":"hO","operator":">","target":"m50"},"space_m200":{"min_distance":2.0},"space_vw":{"min_distance":1.0}}}],"scoring":{"enabled":true,"dimensions":{"trend_clarity":{"max":2},"entangle_distance":{"max":2},"vwap_alignment":{"max":1},"space_to_barrier":{"max":2},"kline_quality":{"max":2}},"max_total":10},"exit":{"L1_technical":{"tp_bars":2,"time_stop_bars":5,"ma_stop_line":"m10","eod_close":"15:59"},"L2_hard_stops":{"spy_adverse_max":0.50,"premium_sl_pct":50,"premium_tp_pct":80,"max_hold_minutes":20},"L3_trailing":{"pullback_pct":30,"activate_above_pct":10}},"filter":{"min_score":3,"session":{"start":"10:00","end":"15:45"},"entangle_threshold":0.12,"space_threshold":0.30},"hard_blocks":{"no_trend":true,"entangle":true,"no_space":true}},
       tang_v4_4: {"name":"Tang v4.4 Slope","version":"4.4","description":"由 Downloads/message (3).txt 转换：终极实战斜率修正版。HA 用于信号颜色、影线和 MA50 止损判定；均线/VWAP 使用普通 close 对齐券商；5m MA10/20/30 顺势过滤；加入 MA10 斜率过滤、持仓状态机、10 根 K 冷却，以及 MA10 叠加 MA50/MA200/VWAP 的 elite Strong 判定。","source":{"type":"tradingview_pine","pine_version":5,"indicator_title":"小汤系统 V4.4 - 终极实战斜率修正版","source_file":"Downloads/message (3).txt","overlay":true},"candles":{"type":"heikin_ashi_for_signal_and_stop","price_alignment":"broker_close_for_ma_vwap","variable_prefix":"xt","fields":{"hC":"(open + high + low + close) / 4","hO":"first_bar ? (open + close) / 2 : (prior_hO + prior_hC) / 2","hH":"max(high, hO, hC)","hL":"min(low, hO, hC)"},"color_rules":{"green":"hC > hO","red":"hC < hO"}},"indicators":{"moving_averages":{"m10":{"type":"sma","source":"close","length":10,"role":"trigger_line"},"m20":{"type":"sma","source":"close","length":20,"role":"touch_filter_line"},"m30":{"type":"sma","source":"close","length":30,"role":"touch_filter_line"},"m50":{"type":"sma","source":"close","length":50,"role":"bull_bear_boundary_and_stop_line"},"m200":{"type":"sma","source":"close","length":200,"role":"major_barrier"}},"vwap":{"id":"vw","type":"vwap","source":"close","role":"institutional_level"}},"display":{"plotted_lines":["m10","m50","m200","vw"],"hidden_but_used_lines":["m20","m30"]},"trend":{"method":"regular_close_5m_ma_stack","timeframe":"5m","description":"跨周期过滤：使用普通 close 计算 5m MA10/MA20/MA30；10>20>30 才是真多头，10<20<30 才是真空头。","lines":["m10","m20","m30"],"bullish":{"m10_above_m20":{"field":"m10_5m","operator":">","target":"m20_5m"},"m20_above_m30":{"field":"m20_5m","operator":">","target":"m30_5m"}},"bearish":{"m10_below_m20":{"field":"m10_5m","operator":"<","target":"m20_5m"},"m20_below_m30":{"field":"m20_5m","operator":"<","target":"m30_5m"}}},"multi_timeframe":{"primary_bias_tf":"5m","execution_tf":"1m","higher_tf_priority":true,"trend_required_for_signal":true,"description":"CALL 必须 5m 三线多头排列；PUT 必须 5m 三线空头排列。"},"slope_filter":{"enabled":true,"line":"m10","lookback_bars":1,"bullish":{"ma10_pointing_up":{"field":"m10","operator":">","target":"m10[1]"}},"bearish":{"ma10_pointing_down":{"field":"m10","operator":"<","target":"m10[1]"}},"description":"防止 V 型反转时 5m 大势滞后导致误触；做多要求 1m MA10 向上，做空要求 1m MA10 向下。"},"touch_logic":{"method":"v3_4_sensitive_overlap","trend_touch_levels":["m10","m20","m30"],"support_touch":{"id":"t_trend_u","rule":"prior HA range overlaps any of m10/m20/m30","conditions":[{"field":"hL[1]","operator":"<=","target":"m10[1]"},{"field":"hH[1]","operator":">=","target":"m10[1]"},{"logic":"or_same_overlap_for","targets":["m20[1]","m30[1]"]}]},"resistance_touch":{"id":"t_trend_d","rule":"prior HA range overlaps any of m10/m20/m30","conditions":[{"field":"hH[1]","operator":">=","target":"m10[1]"},{"field":"hL[1]","operator":"<=","target":"m10[1]"},{"logic":"or_same_overlap_for","targets":["m20[1]","m30[1]"]}]},"ma10_close_filter":{"support":{"field":"hC[1]","operator":">=","target":"m10[1]"},"resistance":{"field":"hC[1]","operator":"<=","target":"m10[1]"}}},"elite_strong":{"enabled":true,"method":"ma10_plus_major_level_overlap","base_touch":{"t_10":"hL <= m10 and hH >= m10"},"major_touch_any":{"t_50":"hL <= m50 and hH >= m50","t_200":"hL <= m200 and hH >= m200","t_vwap":"hL <= vw and hH >= vw"},"rule":"t_10 and (t_50 or t_200 or t_vwap)","signal_uses_previous_bar":true,"description":"Strong 不再使用多线计分，而是要求上一根 K 同时触碰 MA10，并叠加触碰 MA50、MA200 或 VWAP 之一。"},"signals":[{"id":"call_normal","name":"Normal CALL","direction":"bullish","style":"green","anchor_side":"bottom","conditions":{"can_trigger":true,"trend_5m":"bullish","ma10_slope":"up","space_ok":"call","not_tangled":true,"previous_range_touch":"t_trend_u","previous_close_filter":"hC[1] >= m10[1]","current_bar_color":"green","previous_elite":false},"label":{"text":"CALL","size":"small","color":"#2e7d32","text_color":"#ffffff"}},{"id":"call_strong","name":"Strong CALL","direction":"bullish","style":"teal","anchor_side":"bottom","conditions":{"can_trigger":true,"trend_5m":"bullish","ma10_slope":"up","space_ok":"call","not_tangled":true,"previous_range_touch":"t_trend_u","previous_close_filter":"hC[1] >= m10[1]","current_bar_color":"green","previous_elite":true},"label":{"text":"Strong CALL","prefix":"flame","size":"normal","color":"#00695c","text_color":"#ffffff"}},{"id":"put_normal","name":"Normal PUT","direction":"bearish","style":"red","anchor_side":"top","conditions":{"can_trigger":true,"trend_5m":"bearish","ma10_slope":"down","space_ok":"put","not_tangled":true,"previous_range_touch":"t_trend_d","previous_close_filter":"hC[1] <= m10[1]","current_bar_color":"red","previous_elite":false},"label":{"text":"PUT","size":"small","color":"#c62828","text_color":"#ffffff"}},{"id":"put_strong","name":"Strong PUT","direction":"bearish","style":"orange","anchor_side":"top","conditions":{"can_trigger":true,"trend_5m":"bearish","ma10_slope":"down","space_ok":"put","not_tangled":true,"previous_range_touch":"t_trend_d","previous_close_filter":"hC[1] <= m10[1]","current_bar_color":"red","previous_elite":true},"label":{"text":"Strong PUT","prefix":"flame","size":"normal","color":"#d84315","text_color":"#ffffff"}}],"entry_requirements":{"pattern_required":true,"continuation_confirmation_required":true,"confirmation_bar_source":"current_bar_color_after_prior_touch","space_check_required":true,"space_threshold_pct":0.15,"trend_required":true,"slope_required":true,"not_tangled_required":true,"flat_position_required":true,"cooldown_required":true,"description":"无持仓且冷却结束后，上一根 HA 区间触碰 MA10/MA20/MA30 并按 MA10 收盘过滤，当前 K 变色确认；同时要求 5m 顺势、1m MA10 斜率同向、非缠绕、目标方向空间足够。"},"space_check":{"enabled":true,"min_distance_pct_of_price":0.15,"threshold_formula":"close * 0.0015","call_barriers_above":["m50","m200","vw"],"put_barriers_below":["m50","m200","vw"],"call_rule":"nearest upper m50/m200/vw - close >= close * 0.0015","put_rule":"close - nearest lower m50/m200/vw >= close * 0.0015","barrier_source":"regular_close_based_levels"},"scoring":{"enabled":false,"replaced_by":"elite_strong","description":"V4.4 不使用数字打分；Strong 由上一根 elite 条件决定。"},"position_state":{"enabled":true,"virtual_position":true,"states":{"flat":0,"long":1,"short":-1},"set_long_on":"signal_call","set_short_on":"signal_put","reset_on_stop":true},"cooldown":{"enabled":true,"bars":10,"last_signal_bar_initial":0,"can_trigger_rule":"active_pos == 0 and bar_index - last_signal_bar > 10","reset_last_signal_bar_on_stop":0,"description":"普通信号后等待 10 根 K；止损事件会把 last_signal_bar 重置为 0，源码注释为立即解锁。"},"exit":{"_comment":"V4.4 的止损使用 HA close 与 MA50，而不是 V3.5.1 的普通 open/close 实体贯穿。","L1_technical":{"tp_bars":0,"time_stop_bars":0,"ma_stop_line":"m50"},"L2_hard_stops":{"ma50_ha_close_break":true,"price_source":"heikin_ashi_close","long_stop":{"hC_below_m50":{"field":"hC","operator":"<","target":"m50"}},"short_stop":{"hC_above_m50":{"field":"hC","operator":">","target":"m50"}}},"L3_trailing":{"enabled":false}},"filter":{"min_score":null,"session":{"start":null,"end":null,"timezone":"America/New_York","source_note":"V4.4 源码没有时间锁。"},"entangle_threshold":0.03,"entangle_threshold_ratio":0.0003,"entangle_lines":["m10","m20","m30","m50"],"entangle_source":"regular_close_based_mas","space_threshold":0.15,"space_threshold_ratio":0.0015},"hard_blocks":{"no_trend":true,"entangle":true,"no_space":true,"mtf_conflict":true,"wrong_ma10_slope":true,"active_position":true,"cooldown_active":true},"alerts":[],"options":{"default_iv":0.22,"risk_free_rate":0.045,"dte_mode":"auto","dte_auto_switch":"14:00","strike_method":"atm"}},
     };
+    presetStrategies.tang_v4_4_activation = JSON.parse(JSON.stringify(presetStrategies.tang_v4_4));
+    Object.assign(presetStrategies.tang_v4_4_activation, {
+      name: 'Tang v4.4 Activation',
+      version: '4.4-activation',
+      description: `${presetStrategies.tang_v4_4.description} 派生版：原 v4.4 信号先作为 setup 候选，8 根 1m K 内收盘突破 setup 后运行区间才生成正式 activation 入场信号。`,
+      entry_activation: {
+        enabled: true,
+        max_wait_bars: 8,
+        mode: 'breakout_after_setup',
+        confirm_price: 'close',
+        reference: 'running_range_since_setup',
+        require_same_direction_bar: true,
+        require_ma10_slope_still_aligned: true,
+      },
+    });
+    presetStrategies.tang_v4_4_activation_wick = JSON.parse(JSON.stringify(presetStrategies.tang_v4_4_activation));
+    Object.assign(presetStrategies.tang_v4_4_activation_wick, {
+      name: 'Tang v4.4 Activation Wick',
+      version: '4.4-activation-wick',
+      description: `${presetStrategies.tang_v4_4_activation.description} 实盘友好版：除收盘突破/跌破外，也允许强势刺破/下破确认线并收在顺向半边的 K 线触发 activation。`,
+      entry_activation: {
+        ...presetStrategies.tang_v4_4_activation.entry_activation,
+        confirm_price: 'close_or_strong_wick',
+        strong_wick: {
+          close_position_min: 0.6,
+        },
+      },
+    });
 
     $('#strategy-select').addEventListener('change', (e) => {
       const val = e.target.value;

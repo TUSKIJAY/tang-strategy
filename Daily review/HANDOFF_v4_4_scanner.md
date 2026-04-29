@@ -306,3 +306,114 @@ V3 Setups 数量与重构前完全一致（30 信号 / 8 setups）。无控制�
 - `currentIndex` 双语义未拆分（拆成 `playHead` + `viewportRightAnchor` 才是终极解，但要动教学系统的 reveal 机制）
 
 这些都是「下次想优化时的入口点」，不是当前阻塞。
+
+---
+
+## 11. Round 4 交付（2026-04-29，Activation 入场确认派生版）
+
+### 11.1 起因
+
+用户复盘 2026-04-24 时发现：原 v4.4 在早期横盘位置给出信号，但真正启动至少要等约 20 分钟。
+如果按原信号立即进场，期权磨损会很大。因此新增一个派生策略，把原 v4.4 信号降级为
+setup 候选，只有价格真正启动时才画正式入场信号。
+
+### 11.2 保留边界
+
+- `strategies/tang_v4_4_slope.json` 不删、不改、不覆盖，继续作为原版基线。
+- `Tang v4.4 Slope` 下拉项保留，选择它时信号数量和位置保持原行为。
+- `build_reviewed_html.py` 的默认行为不改；要使用 activation 逻辑必须显式传入
+  `--strategy strategies/tang_v4_4_activation.json`。
+
+### 11.3 新增/修改的文件
+
+- [strategies/tang_v4_4_activation.json](strategies/tang_v4_4_activation.json) — 从原 v4.4 Slope 派生，新增 `entry_activation` 顶层模块。
+- [daily-review.html](daily-review.html) — 下拉新增 `Tang v4.4 Activation`，浏览器端扫描器支持 setup / signal / expired 三态。
+- [app-data/scripts/scan_signals.py](app-data/scripts/scan_signals.py) — Python 扫描器同步实现 activation gating，保持前后端正式信号一致。
+- [README.md](README.md) / [INTEGRATION.md](INTEGRATION.md) — 记录新策略语义、CLI 用法和统计口径。
+
+### 11.4 扫描语义
+
+`entry_activation.enabled: true` 时：
+
+- 原 v4.4 match bar 生成 `type: "setup"`，style `blue`，不计入正式信号数。
+- setup 后最多等待 `max_wait_bars = 8` 根 1m K。
+- CALL activation：当前 regular close 突破 `setup..上一根` 的最高价，且当前 HA 为 green、1m MA10 斜率仍向上。
+- PUT activation：当前 regular close 跌破 `setup..上一根` 的最低价，且当前 HA 为 red、1m MA10 斜率仍向下。
+- activation bar 生成 `type: "signal"`，使用原信号颜色和强弱样式，计入正式信号数。
+- 超过 8 根仍未启动时生成 `type: "expired"`，style `purple`，body 写明「等待 8 根未启动，候选过期」。
+- `activePos` 和 cooldown 只在 activation 后启动。setup 不锁仓、不触发冷却。
+
+### 11.5 2026-04-24 回归
+
+同一份 `market-data/live/2026-04-24/SPY_2026-04-24.json`：
+
+| 策略 | 正式 signals | setup | expired | 说明 |
+|---|---:|---:|---:|---|
+| `tang_v4_4_slope.json` | 8 | 0 | 0 | 原版行为不变 |
+| `tang_v4_4_activation.json` | 3 | 7 | 4 | 早期横盘候选过期，20 分钟后的突破不会回头激活 |
+
+Activation 版事件序列：
+
+- 06:53 setup -> 06:55 signal
+- 08:29 setup -> 08:38 expired
+- 09:26 setup -> 09:30 signal
+- 10:26 setup -> 10:35 expired
+- 11:22 setup -> 11:23 signal
+- 12:51 setup -> 13:00 expired
+- 15:41 setup -> 15:50 expired
+
+### 11.6 验证命令
+
+```powershell
+python -m py_compile "Daily review\app-data\scripts\scan_signals.py"
+python -m json.tool "Daily review\strategies\tang_v4_4_activation.json" > $env:TEMP\tang_v4_4_activation.validated.json
+node -e "const fs=require('fs'); const html=fs.readFileSync('Daily review/daily-review.html','utf8'); const scripts=[...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]); for (let i=0;i<scripts.length;i++) new Function(scripts[i]); console.log('parsed scripts:', scripts.length);"
+python "Daily review\app-data\scripts\scan_signals.py" --data "Daily review\market-data\live\2026-04-24\SPY_2026-04-24.json" --strategy "Daily review\strategies\tang_v4_4_activation.json" --out "$env:TEMP\SPY_2026-04-24_activation_final.json"
+python "Daily review\app-data\scripts\scan_signals.py" --data "Daily review\market-data\live\2026-04-24\SPY_2026-04-24.json" --strategy "Daily review\strategies\tang_v4_4_slope.json" --out "$env:TEMP\SPY_2026-04-24_v44_final.json"
+```
+
+---
+
+## 12. Round 5 交付（2026-04-29，Activation Wick 实盘友好变体）
+
+### 12.1 起因
+
+严格 Activation 只认 regular close 突破/跌破 setup 后运行区间。用户提出一个实盘问题：
+如果 8 根窗口内价格一直用影线刺破上一根最高/最低，但收盘没有完成严格突破，是否会漏掉快速启动。
+
+### 12.2 新增策略
+
+- 新增 [strategies/tang_v4_4_activation_wick.json](strategies/tang_v4_4_activation_wick.json)。
+- 原 `tang_v4_4_slope.json` 不删、不改。
+- 原 `tang_v4_4_activation.json` 保留为严格收盘突破版。
+- `daily-review.html` 下拉新增 `Tang v4.4 Activation Wick`。
+
+### 12.3 扫描语义
+
+`entry_activation.confirm_price = "close_or_strong_wick"` 时：
+
+- CALL activation：regular close 突破 `setup..上一根` 最高价，或当前 high 刺破确认线且 close 位于 K 线区间 60% 以上。
+- PUT activation：regular close 跌破 `setup..上一根` 最低价，或当前 low 下破确认线且 close 位于 K 线区间 40% 以下。
+- HA 颜色和 MA10 斜率仍必须顺向。
+- activation 事件会带上 `_activation_confirm_method`：`close` 或 `strong_wick`。
+- expired 事件会带上 `_best_wick_in_window`、`_wick_confirmed_count`，方便判断是完全没触发，还是刺破过但收盘位置不够强/弱。
+
+### 12.4 2026-04-28 对比
+
+同一份 `market-data/live/2026-04-28/SPY_2026-04-28.json` 全时段扫描：
+
+| 策略 | 正式 signals | setup | expired | 差异 |
+|---|---:|---:|---:|---|
+| `tang_v4_4_activation.json` | 4 | 9 | 5 | 09:47 CALL setup 在 09:56 过期 |
+| `tang_v4_4_activation_wick.json` | 5 | 9 | 4 | 09:47 CALL setup 在 09:48 以 `strong_wick` 激活 |
+
+09:48 这根 CALL 的确认线是 712.51，确认方式是 `strong_wick`，收盘位置约 87%。
+
+### 12.5 验证命令
+
+```powershell
+python -m py_compile "Daily review\app-data\scripts\scan_signals.py"
+python -m json.tool "Daily review\strategies\tang_v4_4_activation_wick.json" > $env:TEMP\tang_v4_4_activation_wick.validated.json
+node -e "const fs=require('fs'); const html=fs.readFileSync('Daily review/daily-review.html','utf8'); const scripts=[...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]); for (let i=0;i<scripts.length;i++) new Function(scripts[i]); console.log('parsed scripts:', scripts.length);"
+python "Daily review\app-data\scripts\scan_signals.py" --data "Daily review\market-data\live\2026-04-28\SPY_2026-04-28.json" --strategy "Daily review\strategies\tang_v4_4_activation_wick.json" --out "$env:TEMP\SPY_2026-04-28_activation_wick.json"
+```

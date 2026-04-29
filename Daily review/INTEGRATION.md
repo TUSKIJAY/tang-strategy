@@ -41,6 +41,8 @@
    - `tang_v3_3_1_flame.json`
    - `tang_v3_5_1_full.json`
    - `tang_v4_4_slope.json`
+   - `tang_v4_4_activation.json`
+   - `tang_v4_4_activation_wick.json`
 
    如果新增策略需要新模块，优先扩展 schema，而不是绕过 schema。
 
@@ -232,6 +234,8 @@ annotation 常用字段：
 - v3 系列加入多周期冲突、空间、成交量、分批止盈、期权上下文。
 - v3.3.1 / v3.5.1 / v4.4 是从 PineScript/消息转换来的更完整配置。
 - v4.4 Slope 加入 5m MA10/20/30 顺势过滤、1m MA10 斜率、持仓状态机、10 根 K 冷却、elite Strong 判定。
+- v4.4 Activation 是 v4.4 Slope 的派生版：原 v4.4 命中只产生 `setup` 候选，只有 8 根 1m K 内收盘突破 setup 后运行区间，且 HA 颜色 / MA10 斜率仍顺向，才产生正式 `signal`。
+- v4.4 Activation Wick 是 Activation 的实盘友好变体：仍使用同一个 setup 生命周期，但允许 `close_or_strong_wick`，即收盘突破/跌破，或影线刺破/下破确认线且收盘位置在顺向半边。
 
 不要把某一版的规则硬套到所有版本。执行层应读取策略 JSON，而不是用文件名猜规则。
 
@@ -312,6 +316,8 @@ annotation 常用字段：
 - 策略 schema：`strategies/strategy.schema.json`
 - 当前最完整配置之一：`strategies/tang_v3_5_1_full.json`
 - 当前最新斜率版配置：`strategies/tang_v4_4_slope.json`
+- 当前入场确认派生版配置：`strategies/tang_v4_4_activation.json`
+- 当前入场确认实盘友好版配置：`strategies/tang_v4_4_activation_wick.json`
 - 信号扫描：`app-data/scripts/scan_signals.py`
 - 分享版 HTML 生成：`app-data/scripts/build_reviewed_html.py`
 - 回测：`app-data/scripts/backtest.py`
@@ -363,6 +369,25 @@ notTangled / previousElite），再对每个 signal def 跑
 第一个全 match 的 signal emit；维护 `activePos` + `lastSignalBar`。出场（虚拟）：
 若 `exit.L2_hard_stops.ma50_ha_close_break: true`，长仓 `hC < m50` / 短仓 `hC > m50` 即触发，重置 `lastSignalBar = -Infinity` 立即解锁冷却。
 
+### Activation 派生策略
+
+如果策略顶层声明 `entry_activation.enabled: true`，声明式扫描器进入 setup -> activation 模式。
+没有这个字段，或 `enabled` 为 false 时，继续走原 v4.4 Slope 行为。
+
+Activation 模式的语义：
+
+- 原 v4.4 match bar 只 emit `type: "setup"`，style 为 `blue`，不计入正式信号数。
+- 扫描器同一时间只维护一个 pending setup。setup 不启动 `activePos`，也不写入 cooldown。
+- 在 `entry_activation.max_wait_bars`（默认 8）内，严格版要求 CALL 当前 regular close 突破 `setup..上一根` 的最高价，PUT 当前 regular close 跌破 `setup..上一根` 的最低价。
+- 如果 `entry_activation.confirm_price = "close_or_strong_wick"`，则 CALL 还允许当前 high 刺破确认线且 close 位于 K 线区间上半部；PUT 还允许当前 low 下破确认线且 close 位于 K 线区间下半部。默认阈值是 `strong_wick.close_position_min = 0.6`，即 CALL 收在区间 60% 以上、PUT 收在区间 40% 以下。
+- 如果 `require_same_direction_bar` 为 true，activation bar 还必须保持 CALL=HA green / PUT=HA red。
+- 如果 `require_ma10_slope_still_aligned` 为 true，activation bar 还必须保持 CALL=MA10 slope up / PUT=MA10 slope down。
+- activation bar emit `type: "signal"`，沿用原 signal 的方向、score、style，并从这一刻启动 `activePos` 和 cooldown。
+- 超过等待窗口仍未 activation 时 emit `type: "expired"`，style 为 `purple`，不计入正式信号数。过期 setup 不能被 20 分钟后的突破回头激活。
+
+统计口径：顶部信号数、多空分布和 `scan_signals.py` 的正式信号数量只统计
+`type === "signal"`。`setup` / `expired` 只用于观察当时是否存在候选机会。
+
 ### 顶层 block 都数据驱动
 
 | JSON 字段 | 用途 |
@@ -376,6 +401,7 @@ notTangled / previousElite），再对每个 signal def 跑
 | `filter.entangle_lines` | 缠绕检查包含的线 |
 | `cooldown.enabled` / `cooldown.bars` | 信号后锁多少根 K |
 | `position_state.enabled` | 是否启用虚拟持仓互斥 |
+| `entry_activation.enabled` / `max_wait_bars` | 是否启用 setup -> activation 入场确认，以及最多等待几根 1m K |
 | `exit.L2_hard_stops.ma50_ha_close_break` | 是否启用 V4 出场（HA close vs MA50） |
 | `elite_strong.major_barriers` | （建议新增字段）elite 判定的次级屏障线，默认 `["m50","m200","vw"]` |
 
