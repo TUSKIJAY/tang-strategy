@@ -5,7 +5,7 @@ window.__EMBEDDED_*__ globals, and patches init() to consume them.
 
 Usage:
     python build_reviewed_html.py --date 2026-04-27 \
-        --strategy ../../strategies/tang_v4_4_slope.json
+        --strategy ../../strategies/json/tang_v4_4_slope.json
 """
 from __future__ import annotations
 

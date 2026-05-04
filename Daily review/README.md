@@ -10,7 +10,7 @@ This project is designed for local use first: open the HTML file, load data, cho
 - Supports Heikin-Ashi and regular OHLC views.
 - Loads raw market JSON from `market-data/live/YYYY-MM-DD/`.
 - Loads reviewed JSON with precomputed annotations from `reviewed/`.
-- Loads strategy definitions from `strategies/tang_*.json`. v1 / v2 / v3 / **v4.4 Slope** / **v4.4 Activation** / **v4.4 Activation Wick** are inlined as preset options in the dropdown — no upload needed.
+- Loads strategy definitions from `strategies/json/tang_*.json`. v1 / v2 / v3 / **v4.4 Slope** / **v4.4 Activation** / **v4.4 Activation Wick** are inlined as preset options in the dropdown — no upload needed.
 - Browser-side scanner runs strategy logic directly: v1~v3 use the legacy
   Reject/Support/SignalB detectors; **v4.4 (and any future declarative
   strategy) is driven by the `signals[].conditions` dict** — see
@@ -44,7 +44,7 @@ This is a *review* tool, not a backtester or paper-trading system.
 ## Tang v4.4 Activation
 
 `Tang v4.4 Activation` is an additive derivative of `Tang v4.4 Slope`.
-The original `strategies/tang_v4_4_slope.json` is the baseline and should not
+The original `strategies/json/tang_v4_4_slope.json` is the baseline and should not
 be deleted, edited, or overwritten for this experiment.
 
 Use Activation when reviewing whether a v4.4 setup was actually executable:
@@ -76,7 +76,7 @@ CLI scan example:
 ```powershell
 python "app-data/scripts/scan_signals.py" `
   --data "market-data/live/2026-04-24/SPY_2026-04-24.json" `
-  --strategy "strategies/tang_v4_4_activation.json" `
+  --strategy "strategies/json/tang_v4_4_activation.json" `
   --out "reviewed/SPY_2026-04-24.tang_v4_4_activation.json"
 ```
 
@@ -85,7 +85,7 @@ Wick variant:
 ```powershell
 python "app-data/scripts/scan_signals.py" `
   --data "market-data/live/2026-04-24/SPY_2026-04-24.json" `
-  --strategy "strategies/tang_v4_4_activation_wick.json" `
+  --strategy "strategies/json/tang_v4_4_activation_wick.json" `
   --out "reviewed/SPY_2026-04-24.tang_v4_4_activation_wick.json"
 ```
 
@@ -189,7 +189,7 @@ Start-Process ".\daily-review.html"
 Then use the page controls to load:
 
 - Market data: `market-data/live/YYYY-MM-DD/SPY_YYYY-MM-DD.json`
-- Strategy JSON: `strategies/tang_v*.json`
+- Strategy JSON: `strategies/json/tang_v*.json`
 - Reviewed data: `reviewed/*.json`
 
 No build step is required.
@@ -229,7 +229,7 @@ Validate strategy files with:
 ```powershell
 npx --yes ajv-cli@5 validate --spec=draft2020 `
   -s "strategies/strategy.schema.json" `
-  -d "strategies/tang_v*.json"
+  -d "strategies/json/tang_v*.json"
 ```
 
 Recommended strategy file header:
@@ -248,7 +248,7 @@ Recommended strategy file header:
 ```powershell
 python "app-data/scripts/scan_signals.py" `
   --data "market-data/live/2026-04-22/SPY_2026-04-22.json" `
-  --strategy "strategies/tang_v3_5_1_full.json" `
+  --strategy "strategies/json/tang_v3_5_1_full.json" `
   --out "reviewed/SPY_2026-04-22.tang_v3_5_1_full.json"
 ```
 
@@ -260,7 +260,7 @@ inline the day's market JSON + strategy into `daily-review.html`:
 ```powershell
 python "app-data/scripts/build_reviewed_html.py" `
   --date 2026-04-27 `
-  --strategy "strategies/tang_v4_4_slope.json"
+  --strategy "strategies/json/tang_v4_4_slope.json"
 # → reviewed/SPY_2026-04-27_review.html
 ```
 
@@ -275,7 +275,7 @@ the derived strategy explicitly:
 ```powershell
 python "app-data/scripts/build_reviewed_html.py" `
   --date 2026-04-24 `
-  --strategy "strategies/tang_v4_4_activation.json"
+  --strategy "strategies/json/tang_v4_4_activation.json"
 ```
 
 Use the Wick variant explicitly when you want close breakout or strong-wick
@@ -284,7 +284,7 @@ activation:
 ```powershell
 python "app-data/scripts/build_reviewed_html.py" `
   --date 2026-04-24 `
-  --strategy "strategies/tang_v4_4_activation_wick.json"
+  --strategy "strategies/json/tang_v4_4_activation_wick.json"
 ```
 
 ## Backtest
