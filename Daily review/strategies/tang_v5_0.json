@@ -1,0 +1,198 @@
+{
+  "name": "Tang v5.0",
+  "version": "5.0",
+  "description": "基于终极狙击版 V5.0。自适应缩放兼容 SPY/SPX/个股。放弃小均线纠缠，专注于单根 K 线的实体与成交量爆发（is_burst），要求价格瞬间穿透关键大均线，并在 5 分钟图上方/下方有足够的真空获利空间（min_space）。新增止盈目标位设定（基于距离大均线的提前量 tp_offset）以及强制止盈（tp_event）。防守为普通 close 跌破或突破 MA50。",
+
+  "source": {
+    "type": "tradingview_pine",
+    "pine_version": 5,
+    "indicator_title": "小汤系统 V5.0 - 终极狙击版",
+    "source_file": "tang_v5_0_indicator.pine",
+    "overlay": true
+  },
+
+  "parameters": {
+    "base_min_space": {
+      "type": "float",
+      "default": 2.0,
+      "min": 0.1,
+      "description": "最小获利空间 (基准点数)"
+    },
+    "base_tp_offset": {
+      "type": "float",
+      "default": 0.5,
+      "min": 0.0,
+      "description": "止盈提前量 (基准点数)"
+    },
+    "cd_bars": {
+      "type": "integer",
+      "default": 10,
+      "min": 1,
+      "description": "信号冷却期 (Bar数)"
+    }
+  },
+
+  "dynamic_normalization": {
+    "enabled": true,
+    "factor": "close / 5000.0",
+    "applied_to": ["min_space", "tp_offset"]
+  },
+
+  "candles": {
+    "type": "heikin_ashi_and_regular",
+    "price_alignment": "broker_close_for_ma_vwap",
+    "variable_prefix": "xt",
+    "fields": {
+      "hC": "(open + high + low + close) / 4",
+      "hO": "first_bar ? (open + close) / 2 : (prior_hO + prior_hC) / 2"
+    }
+  },
+
+  "indicators": {
+    "moving_averages": {
+      "m50": { "type": "sma", "source": "hC", "length": 50, "role": "breakout_and_stop_line" },
+      "m200": { "type": "sma", "source": "hC", "length": 200, "role": "major_barrier" }
+    },
+    "vwap": {
+      "id": "custom_vwap",
+      "type": "vwap",
+      "source": "hlc3",
+      "session_reset": "time('D')",
+      "role": "institutional_level"
+    },
+    "volume_analysis": {
+      "body_size": "abs(hC - hO)",
+      "avg_body": { "type": "sma", "source": "body_size", "length": 20 },
+      "is_burst": "(body_size > avg_body * 1.2) and (volume > ta.sma(volume, 20) * 1.5)"
+    }
+  },
+
+  "multi_timeframe": {
+    "primary_bias_tf": "5m",
+    "execution_tf": "1m",
+    "higher_tf_indicators": {
+      "m50_5m": { "type": "sma", "source": "close", "length": 50, "timeframe": "5m" },
+      "m200_5m": { "type": "sma", "source": "close", "length": 200, "timeframe": "5m" },
+      "vwap_5m": { "type": "vwap", "source": "hlc3", "timeframe": "5m" }
+    }
+  },
+
+  "breakout_logic": {
+    "break_up": "crossover(close, m50) or crossover(close, m200) or crossover(close, custom_vwap)",
+    "break_dn": "crossunder(close, m50) or crossunder(close, m200) or crossunder(close, custom_vwap)"
+  },
+
+  "vacuum_space_check": {
+    "enabled": true,
+    "method": "absolute_points",
+    "min_space_param": "min_space",
+    "call_barriers_above": ["m50_5m", "m200_5m", "vwap_5m"],
+    "put_barriers_below": ["m50_5m", "m200_5m", "vwap_5m"],
+    "call_rule": "nearest upper 5m barrier - close >= min_space",
+    "put_rule": "close - nearest lower 5m barrier >= min_space"
+  },
+
+  "signals": [
+    {
+      "id": "call_sniper",
+      "name": "狙击 CALL",
+      "direction": "bullish",
+      "style": "green",
+      "anchor_side": "bottom",
+      "conditions": {
+        "can_trigger": true,
+        "is_burst": true,
+        "break_up": true,
+        "is_vacuum_up": "next_res - close >= min_space"
+      },
+      "label": {
+        "text": "狙击 CALL",
+        "size": "normal",
+        "color": "#00c853",
+        "text_color": "#ffffff"
+      }
+    },
+    {
+      "id": "put_sniper",
+      "name": "狙击 PUT",
+      "direction": "bearish",
+      "style": "blue",
+      "anchor_side": "top",
+      "conditions": {
+        "can_trigger": true,
+        "is_burst": true,
+        "break_dn": true,
+        "is_vacuum_dn": "close - next_sup >= min_space"
+      },
+      "label": {
+        "text": "狙击 PUT",
+        "size": "normal",
+        "color": "#448aff",
+        "text_color": "#ffffff"
+      }
+    }
+  ],
+
+  "position_state": {
+    "enabled": true,
+    "virtual_position": true,
+    "states": {
+      "flat": 0,
+      "long": 1,
+      "short": -1
+    },
+    "set_long_on": "sig_call",
+    "set_short_on": "sig_put",
+    "reset_on_stop_or_tp": true
+  },
+
+  "cooldown": {
+    "enabled": true,
+    "bars_param": "cd_bars",
+    "can_trigger_rule": "active_pos == 0 and bar_index - last_sig_bar > cd_bars"
+  },
+
+  "exit": {
+    "L1_technical": {
+      "tp_event": {
+        "enabled": true,
+        "long_rule": "high >= current_tp",
+        "short_rule": "low <= current_tp",
+        "current_tp_long": "next_res - tp_offset",
+        "current_tp_short": "next_sup + tp_offset"
+      }
+    },
+    "L2_hard_stops": {
+      "price_source": "regular_close",
+      "long_stop": {
+        "close_below_m50": { "field": "close", "operator": "<", "target": "m50" }
+      },
+      "short_stop": {
+        "close_above_m50": { "field": "close", "operator": ">", "target": "m50" }
+      }
+    }
+  },
+
+  "alerts": [
+    {
+      "name": "狙击 CALL",
+      "condition": "sig_call",
+      "message": "狙击 CALL 触发"
+    },
+    {
+      "name": "狙击 PUT",
+      "condition": "sig_put",
+      "message": "狙击 PUT 触发"
+    },
+    {
+      "name": "落袋为安",
+      "condition": "tp_event",
+      "message": "落袋为安触发"
+    },
+    {
+      "name": "逃生",
+      "condition": "sl_event",
+      "message": "假突破逃生触发"
+    }
+  ]
+}
