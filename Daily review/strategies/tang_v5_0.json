@@ -1,28 +1,28 @@
 {
   "name": "Tang v5.0",
   "version": "5.0",
-  "description": "基于狙击版 V5。放弃小均线纠缠，专注于单根 K 线的实体与成交量爆发（is_burst），要求价格瞬间穿透关键大均线，并在 5 分钟图上方/下方有足够的真空获利空间（min_space）。新增止盈目标位设定（基于距离大均线的提前量 tp_offset）以及强制止盈（tp_event）。防守为普通 close 跌破或突破 MA50。",
+  "description": "基于终极狙击版 V5.0。自适应缩放兼容 SPY/SPX/个股。放弃小均线纠缠，专注于单根 K 线的实体与成交量爆发（is_burst），要求价格瞬间穿透关键大均线，并在 5 分钟图上方/下方有足够的真空获利空间（min_space）。新增止盈目标位设定（基于距离大均线的提前量 tp_offset）以及强制止盈（tp_event）。防守为普通 close 跌破或突破 MA50。",
 
   "source": {
     "type": "tradingview_pine",
     "pine_version": 5,
-    "indicator_title": "小汤系统 V5 - 狙击版",
+    "indicator_title": "小汤系统 V5.0 - 终极狙击版",
     "source_file": "tang_v5_0_indicator.pine",
     "overlay": true
   },
 
   "parameters": {
-    "min_space": {
+    "base_min_space": {
       "type": "float",
       "default": 2.0,
-      "min": 0.5,
-      "description": "最小获利空间 (点数)"
+      "min": 0.1,
+      "description": "最小获利空间 (基准点数)"
     },
-    "tp_offset": {
+    "base_tp_offset": {
       "type": "float",
       "default": 0.5,
       "min": 0.0,
-      "description": "止盈提前量 (点数)"
+      "description": "止盈提前量 (基准点数)"
     },
     "cd_bars": {
       "type": "integer",
@@ -30,6 +30,12 @@
       "min": 1,
       "description": "信号冷却期 (Bar数)"
     }
+  },
+
+  "dynamic_normalization": {
+    "enabled": true,
+    "factor": "close / 5000.0",
+    "applied_to": ["min_space", "tp_offset"]
   },
 
   "candles": {
