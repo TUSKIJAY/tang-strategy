@@ -7,6 +7,7 @@
     "type": "tradingview_pine",
     "pine_version": 5,
     "indicator_title": "小汤系统 V4.8 - 终极对齐报警版",
+    "source_file": "tang_v4_5_indicator.pine",
     "overlay": true
   },
 
