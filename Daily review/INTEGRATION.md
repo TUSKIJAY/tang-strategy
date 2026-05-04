@@ -25,7 +25,7 @@
 
 1. 维护策略 JSON
 
-   所有策略版本放在 `strategies/tang_*.json`。不要覆盖旧版本，新增版本用新文件名。每个文件要写清楚 `name`、`version`、`description`，并尽量加：
+   所有策略版本放在 `strategies/json/tang_*.json`。不要覆盖旧版本，新增版本用新文件名。每个文件要写清楚 `name`、`version`、`description`，并尽量加：
 
    ```json
    "$schema": "./strategy.schema.json"
@@ -55,7 +55,7 @@
    改策略时要同步检查：
 
    - 人工规则：`strategies/STRATEGY.md`
-   - 机器配置：`strategies/tang_*.json`
+   - 机器配置：`strategies/json/tang_*.json`
    - 执行逻辑：`daily-review.html` / `app-data/scripts/scan_signals.py` / `app-data/scripts/backtest.py`
 
 ## 3. 怎么干
@@ -82,7 +82,7 @@ Start-Process ".\daily-review.html"
 
 - `market-data/live/YYYY-MM-DD/SPY_YYYY-MM-DD.json`
 - `reviewed/*.json`
-- `strategies/tang_*.json`
+- `strategies/json/tang_*.json`
 
 ### 校验策略 JSON
 
@@ -91,7 +91,7 @@ Start-Process ".\daily-review.html"
 ```powershell
 npx --yes ajv-cli@5 validate --spec=draft2020 `
   -s "strategies/strategy.schema.json" `
-  -d "strategies/tang_v*.json"
+  -d "strategies/json/tang_v*.json"
 ```
 
 期望所有 `tang_v*.json` 都 valid。若失败，先判断是策略文件真的缺字段，还是 schema 对已有合理结构收得太紧。
@@ -101,7 +101,7 @@ npx --yes ajv-cli@5 validate --spec=draft2020 `
 ```powershell
 python "app-data/scripts/scan_signals.py" `
   --data "market-data/live/2026-04-22/SPY_2026-04-22.json" `
-  --strategy "strategies/tang_v3_5_1_full.json" `
+  --strategy "strategies/json/tang_v3_5_1_full.json" `
   --out "reviewed/SPY_2026-04-22.tang_v3_5_1_full.json"
 ```
 
@@ -141,8 +141,10 @@ Daily review/
   strategies/
     STRATEGY.md                     # Tang Strategy 人工规范
     strategy.schema.json            # 策略 JSON Schema
-    tang_v*.json                    # 策略配置版本
-    tang_*.pine                     # PineScript 实现或参考
+    json/
+      tang_v*.json                  # 策略配置版本
+    pine/
+      tang_*.pine                   # PineScript 实现或参考
 ```
 
 ## 5. 数据契约
@@ -314,10 +316,10 @@ annotation 常用字段：
 - 页面入口：`daily-review.html`
 - 策略文字规范：`strategies/STRATEGY.md`
 - 策略 schema：`strategies/strategy.schema.json`
-- 当前最完整配置之一：`strategies/tang_v3_5_1_full.json`
-- 当前最新斜率版配置：`strategies/tang_v4_4_slope.json`
-- 当前入场确认派生版配置：`strategies/tang_v4_4_activation.json`
-- 当前入场确认实盘友好版配置：`strategies/tang_v4_4_activation_wick.json`
+- 当前最完整配置之一：`strategies/json/tang_v3_5_1_full.json`
+- 当前最新斜率版配置：`strategies/json/tang_v4_4_slope.json`
+- 当前入场确认派生版配置：`strategies/json/tang_v4_4_activation.json`
+- 当前入场确认实盘友好版配置：`strategies/json/tang_v4_4_activation_wick.json`
 - 信号扫描：`app-data/scripts/scan_signals.py`
 - 分享版 HTML 生成：`app-data/scripts/build_reviewed_html.py`
 - 回测：`app-data/scripts/backtest.py`

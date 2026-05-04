@@ -13,7 +13,7 @@
 1. yfinance 下载 2026-04-27 SPY 1min → `Dream bigger/data/raw/daily/`
 2. `build_json.py --auto-warmup` → `Dream bigger/data/processed/SPY_2026-04-27.json`
 3. 复制到 `Daily review/market-data/live/2026-04-27/`
-4. Python 脚本把 JSON + `strategies/tang_v4_4_slope.json` 注入 daily-review.html，输出 `reviewed/SPY_2026-04-27_review.html`
+4. Python 脚本把 JSON + `strategies/json/tang_v4_4_slope.json` 注入 daily-review.html，输出 `reviewed/SPY_2026-04-27_review.html`
 
 预期：嵌入 V4.4 策略后，扫描器输出与 TradingView Pine 端 (`小汤系统 V4.4 - 终极实战斜率修正版`) 一致。
 
@@ -34,7 +34,7 @@
 
 ## 3. V4.4 扫描器缺失的能力清单
 
-[strategies/tang_v4_4_slope.json](strategies/tang_v4_4_slope.json) 定义了一整套新语义，daily-review.html 全部未实现：
+[strategies/json/tang_v4_4_slope.json](strategies/json/tang_v4_4_slope.json) 定义了一整套新语义，daily-review.html 全部未实现：
 
 | 字段 | V4.4 定义位置 | 作用 | 当前状态 |
 |------|--------------|------|---------|
@@ -61,7 +61,7 @@
 | `daily-review.html:3801+` | `simulateTrades` 三层出场模拟器（也要改 L2 用 MA50） |
 | `daily-review.html:3987` | `function loadData(payload)` |
 | `daily-review.html:4318` | `window.DailyReview = { loadData }` 公共 API |
-| [strategies/tang_v4_4_slope.json](strategies/tang_v4_4_slope.json) | 目标策略定义（**真理来源**） |
+| [strategies/json/tang_v4_4_slope.json](strategies/json/tang_v4_4_slope.json) | 目标策略定义（**真理来源**） |
 | [strategies/STRATEGY.md](strategies/STRATEGY.md) | 策略 schema 文档（如果存在） |
 | [strategies/strategy.schema.json](strategies/strategy.schema.json) | JSON schema |
 | [reviewed/SPY_2026-04-27_review.html](reviewed/SPY_2026-04-27_review.html) | 今天产出的分享版 HTML（验证用基线） |
@@ -319,14 +319,14 @@ setup 候选，只有价格真正启动时才画正式入场信号。
 
 ### 11.2 保留边界
 
-- `strategies/tang_v4_4_slope.json` 不删、不改、不覆盖，继续作为原版基线。
+- `strategies/json/tang_v4_4_slope.json` 不删、不改、不覆盖，继续作为原版基线。
 - `Tang v4.4 Slope` 下拉项保留，选择它时信号数量和位置保持原行为。
 - `build_reviewed_html.py` 的默认行为不改；要使用 activation 逻辑必须显式传入
-  `--strategy strategies/tang_v4_4_activation.json`。
+  `--strategy strategies/json/tang_v4_4_activation.json`。
 
 ### 11.3 新增/修改的文件
 
-- [strategies/tang_v4_4_activation.json](strategies/tang_v4_4_activation.json) — 从原 v4.4 Slope 派生，新增 `entry_activation` 顶层模块。
+- [strategies/json/tang_v4_4_activation.json](strategies/json/tang_v4_4_activation.json) — 从原 v4.4 Slope 派生，新增 `entry_activation` 顶层模块。
 - [daily-review.html](daily-review.html) — 下拉新增 `Tang v4.4 Activation`，浏览器端扫描器支持 setup / signal / expired 三态。
 - [app-data/scripts/scan_signals.py](app-data/scripts/scan_signals.py) — Python 扫描器同步实现 activation gating，保持前后端正式信号一致。
 - [README.md](README.md) / [INTEGRATION.md](INTEGRATION.md) — 记录新策略语义、CLI 用法和统计口径。
@@ -383,7 +383,7 @@ python "Daily review\app-data\scripts\scan_signals.py" --data "Daily review\mark
 
 ### 12.2 新增策略
 
-- 新增 [strategies/tang_v4_4_activation_wick.json](strategies/tang_v4_4_activation_wick.json)。
+- 新增 [strategies/json/tang_v4_4_activation_wick.json](strategies/json/tang_v4_4_activation_wick.json)。
 - 原 `tang_v4_4_slope.json` 不删、不改。
 - 原 `tang_v4_4_activation.json` 保留为严格收盘突破版。
 - `daily-review.html` 下拉新增 `Tang v4.4 Activation Wick`。
