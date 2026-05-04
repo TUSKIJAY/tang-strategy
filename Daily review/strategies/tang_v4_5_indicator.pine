@@ -1,0 +1,131 @@
+//@version=5
+indicator("小汤系统 V4.5 - 终极对齐报警版", overlay=true)
+
+
+// ==========================
+// 1. HA 数据内核 (XT命名，防止变量重定义)
+// ==========================
+var float xt_ha_open = na
+xt_ha_close = (open + high + low + close) / 4
+xt_ha_open := na(xt_ha_open[1]) ? (open + close) / 2 : (xt_ha_open[1] + xt_ha_close[1]) / 2
+xt_ha_high  = math.max(high, math.max(xt_ha_open, xt_ha_close))
+xt_ha_low   = math.min(low, math.min(xt_ha_open, xt_ha_close))
+
+is_green = xt_ha_close > xt_ha_open
+is_red   = xt_ha_close < xt_ha_open
+
+// ==========================
+// 2. 均线系统 (VWAP 全时段修正)
+// ==========================
+ma10  = ta.sma(close, 10)
+ma20  = ta.sma(close, 20)
+ma30  = ta.sma(close, 30)
+ma50  = ta.sma(close, 50)
+ma200 = ta.sma(close, 200)
+
+// --- 全时段对齐修正 ---
+// 使用 time("D") 意味着只要日期更换（ES通常在18:00更换交易日），VWAP就重置
+is_new_session = ta.change(time("D")) 
+custom_vwap = ta.vwap(hlc3, is_new_session) 
+
+// 绘图
+plot(ma10,  color=color.new(#b86800, 0),  title="MA10", linewidth=2)
+plot(ma50,  color=color.new(#1a5090, 0),  title="MA50", linewidth=2)
+plot(ma200, color=color.new(#187040, 0),  title="MA200", linewidth=2)
+plot(custom_vwap, color=color.new(#7b1fa2, 0), title="Aligned VWAP", linewidth=3)
+
+// ==========================
+// 3. 5分钟大势司令部 (跨周期过滤)
+// ==========================
+ma10_5m = request.security(syminfo.tickerid, "5", ta.sma(close, 10))
+ma20_5m = request.security(syminfo.tickerid, "5", ta.sma(close, 20))
+ma30_5m = request.security(syminfo.tickerid, "5", ta.sma(close, 30))
+
+trend_up_5m   = (ma10_5m > ma20_5m) and (ma20_5m > ma30_5m)
+trend_down_5m = (ma10_5m < ma20_5m) and (ma20_5m < ma30_5m)
+
+// ==========================
+// 4. 环境与空间过滤
+// ==========================
+ma_range = math.max(ma10, ma20, ma30, ma50) - math.min(ma10, ma20, ma30, ma50)
+is_tangled = (ma_range / close) < 0.0003
+bgcolor(is_tangled ? color.new(#9e9e9e, 90) : na)
+
+reward_threshold = close * 0.0015
+target_up = 10e10
+if ma50 > close
+    target_up := math.min(target_up, ma50)
+if ma200 > close
+    target_up := math.min(target_up, ma200)
+if custom_vwap > close
+    target_up := math.min(target_up, custom_vwap)
+space_ok_call = (target_up - close) >= reward_threshold
+
+target_down = -10e10
+if ma50 < close
+    target_down := math.max(target_down, ma50)
+if ma200 < close
+    target_down := math.max(target_down, ma200)
+if custom_vwap < close
+    target_down := math.max(target_down, custom_vwap)
+space_ok_put = (close - target_down) >= reward_threshold
+
+// ==========================
+// 5. 核心触碰判定
+// ==========================
+t_trend_u = (xt_ha_low <= ma10 and xt_ha_high >= ma10) or (xt_ha_low <= ma20 and xt_ha_high >= ma20) or (xt_ha_low <= ma30 and xt_ha_high >= ma30)
+t_trend_d = (xt_ha_high >= ma10 and xt_ha_low <= ma10) or (xt_ha_high >= ma20 and xt_ha_low <= ma20) or (xt_ha_high >= ma30 and xt_ha_low <= ma30)
+
+h_sup = (xt_ha_close >= ma10)
+h_res = (xt_ha_close <= ma10)
+
+is_elite = (xt_ha_low <= ma10 and xt_ha_high >= ma10) and ( (xt_ha_low <= ma50 and xt_ha_high >= ma50) or (xt_ha_low <= ma200 and xt_ha_high >= ma200) or (xt_ha_low <= custom_vwap and xt_ha_high >= custom_vwap) )
+
+// ==========================
+// 6. 状态机、冷却与斜率修正
+// ==========================
+var int active_pos = 0
+var int last_signal_bar = 0
+cooldown_bars = 10
+
+ma10_pointing_up   = ma10 > ma10[1]
+ma10_pointing_down = ma10 < ma10[1]
+
+sl_event = (active_pos == 1 and xt_ha_close < ma50) or (active_pos == -1 and xt_ha_close > ma50)
+
+if sl_event
+    active_pos := 0
+    last_signal_bar := 0
+
+can_trigger = (active_pos == 0) and (bar_index - last_signal_bar > cooldown_bars)
+
+signal_call = can_trigger and trend_up_5m and ma10_pointing_up and space_ok_call and not is_tangled and t_trend_u[1] and h_sup[1] and is_green
+signal_put  = can_trigger and trend_down_5m and ma10_pointing_down and space_ok_put and not is_tangled and t_trend_d[1] and h_res[1] and is_red
+
+if signal_call
+    active_pos := 1
+    last_signal_bar := bar_index
+if signal_put
+    active_pos := -1
+    last_signal_bar := bar_index
+
+// ==========================
+// 7. 视觉绘制
+// ==========================
+plotshape(signal_call and is_elite[1], "Strong CALL", shape.labelup, location.belowbar, #00695c, size=size.normal, text="🔥 Strong CALL", textcolor=color.white)
+plotshape(signal_put and is_elite[1], "Strong PUT", shape.labeldown, location.abovebar, #d84315, size=size.normal, text="🔥 Strong PUT", textcolor=color.white)
+
+plotshape(signal_call and not is_elite[1], "Normal CALL", shape.labelup, location.belowbar, #2e7d32, size=size.small, text="CALL", textcolor=color.white)
+plotshape(signal_put and not is_elite[1], "Normal PUT", shape.labeldown, location.abovebar, #c62828, size=size.small, text="PUT", textcolor=color.white)
+
+bgcolor(sl_event ? color.new(#ef5350, 85) : na)
+plotshape(sl_event, "STOP", shape.labeldown, location.top, #b71c1c, size=size.small, text="STOP", textcolor=color.white)
+
+// ==========================
+// 8. 原生报警系统
+// ==========================
+alertcondition(signal_call and is_elite[1],     title="🔥 Strong CALL", message="🔥 Strong CALL on {{ticker}} {{interval}} @ {{close}}")
+alertcondition(signal_put  and is_elite[1],     title="🔥 Strong PUT",  message="🔥 Strong PUT on {{ticker}} {{interval}} @ {{close}}")
+alertcondition(signal_call and not is_elite[1], title="Normal CALL",    message="Normal CALL on {{ticker}} {{interval}} @ {{close}}")
+alertcondition(signal_put  and not is_elite[1], title="Normal PUT",     message="Normal PUT on {{ticker}} {{interval}} @ {{close}}")
+alertcondition(sl_event,                        title="STOP",           message="STOP triggered on {{ticker}} {{interval}} @ {{close}}")
