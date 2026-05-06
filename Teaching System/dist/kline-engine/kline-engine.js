@@ -859,15 +859,18 @@
           this._lastEmittedHoverTf = null;
           this.boundKeydown = null;
 
-          // Theme + MA visibility + candle type (persisted per-session via localStorage)
+          // Theme + MA visibility + candle type/fill (persisted per-session via localStorage)
           this.theme = 'dark';
           this.candleType = 'ha'; // 'ha' = Heikin-Ashi (Tang 策略默认) | 'normal' = 真实 OHLC
+          this.candleFillMode = 'solid'; // 'solid' = filled bodies | 'hollow' = outline bodies
           this.maVisibility = { m5: true, m10: true, m20: true, m30: true, m50: true, m60: true, m120: true, m200: true, vw: true };
           try {
             const savedTheme = window.localStorage?.getItem('klineEngineV2:theme');
             if (savedTheme === 'light' || savedTheme === 'dark') this.theme = savedTheme;
             const savedCandle = window.localStorage?.getItem('klineEngineV2:candleType');
             if (savedCandle === 'ha' || savedCandle === 'normal') this.candleType = savedCandle;
+            const savedCandleFill = window.localStorage?.getItem('klineEngineV2:candleFillMode');
+            if (savedCandleFill === 'solid' || savedCandleFill === 'hollow') this.candleFillMode = savedCandleFill;
             const savedMA = window.localStorage?.getItem('klineEngineV2:maVisibility');
             if (savedMA) {
               const parsed = JSON.parse(savedMA);
@@ -957,6 +960,7 @@
               <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m200" title="Toggle MA200"><span class="kline-engine__swatch"></span>MA200</button>
               <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="vw"   title="Toggle VWAP"><span class="kline-engine__swatch"></span>VWAP</button>
               <button class="kline-engine__button" data-action="candle-type" title="Toggle Heikin-Ashi / normal candles">HA</button>
+              <button class="kline-engine__button" data-action="candle-fill" title="Toggle filled / hollow candles">Solid</button>
               <button class="kline-engine__button" data-action="theme" title="Toggle black/white theme">&#9788; Light</button>
             </div>
           `;
@@ -1097,6 +1101,11 @@
               return;
             }
 
+            if (action === 'candle-fill') {
+              this.setCandleFillMode(this.candleFillMode === 'solid' ? 'hollow' : 'solid');
+              return;
+            }
+
             // (fixture switching removed — now handled by DevPanel or external caller)
           });
         }
@@ -1130,6 +1139,20 @@
           return this.candleType;
         }
 
+        setCandleFillMode(mode) {
+          const next = mode === 'hollow' ? 'hollow' : 'solid';
+          if (next === this.candleFillMode) return;
+          this.candleFillMode = next;
+          try { window.localStorage?.setItem('klineEngineV2:candleFillMode', next); } catch (_) {}
+          this._updateToolbarState();
+          this.emit('candlefill:changed', { candleFillMode: next });
+          this.scheduleRender();
+        }
+
+        getCandleFillMode() {
+          return this.candleFillMode;
+        }
+
         _bindCanvasHover() {
           const updateHover = (event) => {
             const rect = this.canvas.getBoundingClientRect();
@@ -1159,10 +1182,29 @@
             if (!bars.length || !this.lastRenderContext) {
               return;
             }
+            // Read live viewport state instead of `lastRenderContext.visible`.
+            // The cached render context is updated only on the next rAF tick;
+            // any code that mutates viewportManager directly (e.g., a host
+            // app that pre-positions the viewport) leaves it stale. Using
+            // a stale count would compute nextCount = stale * 1.12 — when
+            // stale=fullDay and the live view is zoomed in, this snaps the
+            // chart back to the full day. Reading live keeps wheel-zoom
+            // incremental.
+            const liveVisible = this.viewportManager.getVisibleWindow({
+              totalBars: bars.length,
+              currentIndex: this.currentIndex,
+              timeframe: this.currentTimeframe,
+              chartWidth: this._getChartWidth(),
+            });
             const factor = event.deltaY > 0 ? 1.12 : 1 / 1.12;
-            const anchorIndex = this.lastRenderContext.barIndexForX(this.hover.x);
-            const anchorRatio = (anchorIndex - this.lastRenderContext.visible.start) / Math.max(1, this.lastRenderContext.visible.count - 1);
-            const nextCount = Math.round(this.lastRenderContext.visible.count * factor);
+            // anchorIndex still comes from the rendered slot layout (only
+            // available post-render). Clamp it into the live visible range
+            // so anchorRatio stays in [0, 1] even if the layout cache lags
+            // by one frame.
+            const rawAnchor = this.lastRenderContext.barIndexForX(this.hover.x);
+            const anchorIndex = clamp(rawAnchor, liveVisible.start, liveVisible.start + liveVisible.count - 1);
+            const anchorRatio = (anchorIndex - liveVisible.start) / Math.max(1, liveVisible.count - 1);
+            const nextCount = Math.round(liveVisible.count * factor);
             this.viewportManager.applyZoom(nextCount, {
               anchorIndex,
               anchorRatio,
@@ -1324,6 +1366,16 @@
               ? 'Currently Heikin-Ashi — click to switch to real OHLC candles'
               : 'Currently real OHLC — click to switch to Heikin-Ashi';
             candleBtn.classList.toggle('is-active', this.candleType === 'normal');
+          }
+
+          const candleFillBtn = this.root.querySelector('button[data-action="candle-fill"]');
+          if (candleFillBtn) {
+            const isSolid = this.candleFillMode === 'solid';
+            candleFillBtn.textContent = isSolid ? 'Solid' : 'Hollow';
+            candleFillBtn.title = isSolid
+              ? 'Currently filled candles — click to switch to hollow bodies'
+              : 'Currently hollow candles — click to switch to filled bodies';
+            candleFillBtn.classList.toggle('is-active', isSolid);
           }
         }
 
@@ -1526,7 +1578,9 @@
             const top = rc.yForPrice(Math.max(oScaled, cScaled));
             const bottom = rc.yForPrice(Math.min(oScaled, cScaled));
 
-            ctx.strokeStyle = isBull ? '#00b894' : '#e74c3c';
+            const candleColor = isBull ? '#00b894' : '#e74c3c';
+            ctx.strokeStyle = candleColor;
+            ctx.fillStyle = candleColor;
             ctx.lineWidth = 1;
 
             const yHigh = rc.yForPrice(hScaled);
@@ -1557,7 +1611,11 @@
               ctx.lineTo(bodyX + rc.bodyWidth, top);
               ctx.stroke();
             } else {
-              ctx.strokeRect(bodyX, top, rc.bodyWidth, bodyHeight);
+              if (this.candleFillMode === 'solid') {
+                ctx.fillRect(bodyX, top, rc.bodyWidth, bodyHeight);
+              } else {
+                ctx.strokeRect(bodyX, top, rc.bodyWidth, bodyHeight);
+              }
             }
           });
           ctx.restore();
