@@ -1,0 +1,75 @@
+name: Publish static reviews
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: static-reviews-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      TANG_STATIC_REVIEW_LIMIT: "10"
+      TANG_STATIC_REVIEW_TICKER: "SPY"
+      TANG_STATIC_REVIEW_STRATEGY_FAMILIES: "v3,v4,v5"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use SQLite DB from dev branch
+        run: |
+          git fetch origin dev
+          git checkout origin/dev -- data/sqlite/tang_strategy_live_extended.db
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: Export latest static review payloads
+        working-directory: backend
+        run: PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit "$TANG_STATIC_REVIEW_LIMIT" --ticker "$TANG_STATIC_REVIEW_TICKER" --strategy-families "$TANG_STATIC_REVIEW_STRATEGY_FAMILIES"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build static review site
+        working-directory: frontend
+        env:
+          VITE_STATIC_REVIEWS: "true"
+        run: npm run build:static-reviews
+
+      - name: Prepare Pages artifact
+        run: |
+          touch frontend/dist/.nojekyll
+          cp -R frontend/dist /tmp/tang-static-reviews
+
+      - name: Publish to gh-pages branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages || true
+          git checkout --orphan gh-pages
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R /tmp/tang-static-reviews/. .
+          git add .
+          git commit -m "chore: publish static reviews"
+          git push --force origin gh-pages
