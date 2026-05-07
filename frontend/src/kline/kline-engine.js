@@ -343,34 +343,6 @@
             pointer-events: none;
           }
 
-          .kline-engine__hud {
-            position: absolute;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 10px;
-            border-radius: 12px;
-            background: var(--kline-hud-bg);
-            border: 1px solid var(--kline-hud-border);
-            backdrop-filter: blur(14px);
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
-            font-size: 12px;
-            top: 14px;
-            left: 14px;
-            color: var(--kline-text-strong);
-          }
-
-          .kline-engine__hud strong {
-            color: var(--kline-text-bright);
-            font-weight: 600;
-          }
-
-          .kline-engine__hud [data-ma-tag].is-off {
-            opacity: 0.35;
-            text-decoration: line-through;
-          }
-
           .kline-engine__metric {
             display: inline-flex;
             align-items: baseline;
@@ -536,11 +508,6 @@
 
             .kline-engine__toolbar {
               padding: 8px;
-            }
-
-            .kline-engine__hud {
-              max-width: calc(100% - 24px);
-              gap: 6px;
             }
 
             .kline-engine__viewport,
@@ -721,9 +688,22 @@
             return 0;
           }
 
+          const target = String(targetValue || '');
+          const targetClock = target.includes('T') ? target.slice(11, 16) : target.slice(0, 5);
+          const exactIndex = bars.findIndex((bar) => {
+            const ts = String(bar?.ts || '');
+            const t = String(bar?.t || '');
+            return ts === target || t === target || (targetClock && t.slice(0, 5) === targetClock);
+          });
+          if (exactIndex >= 0) {
+            return exactIndex;
+          }
+
           let nearestIndex = 0;
           for (let index = 0; index < bars.length; index += 1) {
-            if (this._timeValue(bars[index]) <= targetValue) {
+            const barValue = target.includes('T') ? String(this._timeValue(bars[index]) || '') : String(bars[index]?.t || '').slice(0, 5);
+            const compareTarget = target.includes('T') ? target : targetClock;
+            if (barValue <= compareTarget) {
               nearestIndex = index;
             } else {
               break;
@@ -808,11 +788,6 @@
             start = Math.max(0, end - view.count + 1);
           }
 
-          if (start >= maxStart) {
-            start = maxStart;
-            this.followMode = true;
-          }
-
           this.viewStart = start;
           return { ...view, start, end, maxStart };
         }
@@ -861,6 +836,7 @@
           this._destroyed = false;
           this.hover = { x: -1, y: -1, inside: false };
           this.dragState = null;
+          this.priceOffsetRatio = 0;
           this.lastRenderContext = null;
           // Track last emitted hover bar index so `hover:bar` only fires on
           // transitions (null → idx, idx → null, idx_a → idx_b), not every frame.
@@ -895,6 +871,8 @@
           // to render/play. null = unbounded. Cleared on loadData(). Used by
           // teaching integrations to hide future bars during step-by-step training.
           this.revealCutoff = { '1m': null, '5m': null };
+          this.replayReveal = { enabled: false };
+          this.replayStartTime = null;
 
           // Highlight ranges: translucent band drawn behind candles to point the
           // reader at a specific span (e.g. validation panel -> "MA10 trigger"
@@ -988,9 +966,6 @@
 
           this.overlay = document.createElement('div');
           this.overlay.className = 'kline-engine__overlay';
-          this.overlay.innerHTML = `
-            <div class="kline-engine__hud" data-role="hud"></div>
-          `;
 
           this.annoTooltip = document.createElement('div');
           this.annoTooltip.className = 'kline-engine__anno-tooltip';
@@ -1020,7 +995,6 @@
           this.container.appendChild(this.root);
 
           this.metaEl = this.root.querySelector('[data-role="meta"]');
-          this.hudEl = this.root.querySelector('[data-role="hud"]');
         }
 
         _bindControls() {
@@ -1180,10 +1154,13 @@
               return;
             }
             const dx = this.dragState.startX - this.hover.x;
+            const dy = this.hover.y - this.dragState.startY;
             const offsetBars = Math.round(dx / Math.max(1, this.dragState.slotWidth));
-            const maxStart = Math.max(0, this.currentIndex - this.dragState.viewCount + 1);
+            const maxStart = Math.max(0, this.dragState.totalBars - this.dragState.viewCount);
             this.viewportManager.viewStart = clamp(this.dragState.startViewStart + offsetBars, 0, maxStart);
-            this.viewportManager.setFollowMode(this.viewportManager.viewStart >= maxStart);
+            this.viewportManager.setFollowMode(false);
+            const offsetDelta = dy / Math.max(1, this.dragState.priceHeight);
+            this.priceOffsetRatio = clamp(this.dragState.startPriceOffsetRatio + offsetDelta, -3, 3);
             this.emit('viewport:changed', this._getViewportPayload());
             this.scheduleRender();
           });
@@ -1193,37 +1170,29 @@
             if (!bars.length || !this.lastRenderContext) {
               return;
             }
-            // Read live viewport state instead of `lastRenderContext.visible`.
-            // The cached render context is updated only on the next rAF tick;
-            // any code that mutates viewportManager directly (e.g., a host
-            // app that pre-positions the viewport) leaves it stale. Using
-            // a stale count would compute nextCount = stale * 1.12 — when
-            // stale=fullDay and the live view is zoomed in, this snaps the
-            // chart back to the full day. Reading live keeps wheel-zoom
-            // incremental.
             const liveVisible = this.viewportManager.getVisibleWindow({
               totalBars: bars.length,
               currentIndex: this.currentIndex,
               timeframe: this.currentTimeframe,
               chartWidth: this._getChartWidth(),
             });
-            const factor = event.deltaY > 0 ? 1.12 : 1 / 1.12;
-            // anchorIndex still comes from the rendered slot layout (only
-            // available post-render). Clamp it into the live visible range
-            // so anchorRatio stays in [0, 1] even if the layout cache lags
-            // by one frame.
             const rawAnchor = this.lastRenderContext.barIndexForX(this.hover.x);
-            const anchorIndex = clamp(rawAnchor, liveVisible.start, liveVisible.start + liveVisible.count - 1);
+            const anchorIndex = clamp(rawAnchor, liveVisible.start, liveVisible.end);
             const anchorRatio = (anchorIndex - liveVisible.start) / Math.max(1, liveVisible.count - 1);
-            const nextCount = Math.round(liveVisible.count * factor);
+            const normalizedDelta = Math.min(2, Math.max(0.25, Math.abs(event.deltaY) / 100));
+            const zoomFactor = event.deltaY > 0
+              ? 1 + 0.096 * normalizedDelta
+              : 1 / (1 + 0.096 * normalizedDelta);
+            const nextCount = Math.round(liveVisible.count * zoomFactor);
             this.viewportManager.applyZoom(nextCount, {
               anchorIndex,
               anchorRatio,
               totalBars: bars.length,
-              currentIndex: this.currentIndex,
+              currentIndex: bars.length - 1,
               timeframe: this.currentTimeframe,
               chartWidth: this._getChartWidth(),
             });
+            this.viewportManager.setFollowMode(false);
             this.emit('viewport:changed', this._getViewportPayload());
             this.scheduleRender();
           }, { passive: false });
@@ -1235,15 +1204,20 @@
             this.dragState = {
               pointerId: event.pointerId,
               startX: this.hover.x,
+              startY: this.hover.y,
               startViewStart: this.viewportManager.viewStart,
+              startPriceOffsetRatio: this.priceOffsetRatio,
               slotWidth: this.lastRenderContext.slotWidth,
+              priceHeight: this.lastRenderContext.priceHeight,
               viewCount: this.lastRenderContext.visible.count,
+              totalBars: this.lastRenderContext.bars.length,
             };
           });
           this.canvas.addEventListener('pointerup', (event) => {
             if (this.dragState && event.pointerId === this.dragState.pointerId) {
               const dx = Math.abs(this.hover.x - this.dragState.startX);
-              this._wasDragging = dx > 3;
+              const dy = Math.abs(this.hover.y - this.dragState.startY);
+              this._wasDragging = dx > 3 || dy > 3;
               this.dragState = null;
               this.canvas.releasePointerCapture(event.pointerId);
             }
@@ -1477,6 +1451,10 @@
           const pricePadding = Math.max((priceMax - priceMin) * 0.02, 0.01);
           priceMin -= pricePadding;
           priceMax += pricePadding;
+          const priceRange = Math.max(0.0001, priceMax - priceMin);
+          const priceOffset = priceRange * this.priceOffsetRatio;
+          priceMin += priceOffset;
+          priceMax += priceOffset;
 
           const slotWidth = area.w / Math.max(1, visible.count);
           const bodyWidth = Math.max(2, slotWidth * 0.65);
@@ -1815,38 +1793,9 @@
           return { bar, price };
         }
 
-        updatePanels(rc, focusBar, crosshairState) {
+        updatePanels() {
           const meta = this.dataManager.getMeta();
-          const change = focusBar.C != null && focusBar.O != null ? focusBar.C - focusBar.O : 0;
-          const changePct = focusBar.O ? (change / focusBar.O) * 100 : 0;
-          const volumeText = focusBar.V != null ? focusBar.V.toLocaleString('en-US') : '-';
-
           this.metaEl.textContent = `${meta.title || 'Untitled'} | ${meta.date || 'n/a'} | tf=${this.currentTimeframe}`;
-          const maRow = (key, label, color, first) => {
-            const val = focusBar[key]?.toFixed?.(3) ?? '-';
-            const cls = this.maVisibility[key] ? '' : 'is-off';
-            const ml = first ? ';margin-left:12px' : '';
-            return `<span data-ma-tag="${key}" class="${cls}" style="color:${color}${ml}">${label} ${val}</span>`;
-          };
-          this.hudEl.innerHTML = `
-            <strong>O ${focusBar.O?.toFixed?.(3) ?? '-'}</strong>
-            <span>H ${focusBar.H?.toFixed?.(3) ?? '-'}</span>
-            <span>L ${focusBar.L?.toFixed?.(3) ?? '-'}</span>
-            <span>C ${focusBar.C?.toFixed?.(3) ?? '-'}</span>
-            <span style="color:${change >= 0 ? '#00b894' : '#e74c3c'}">${change >= 0 ? '+' : ''}${change.toFixed(3)} / ${changePct.toFixed(2)}%</span>
-            <span>VOL ${volumeText}</span>
-            ${maRow('m5',   'MA5',   '#eab308', true)}
-            ${maRow('m10',  'MA10',  '#e6a23c')}
-            ${maRow('m20',  'MA20',  '#ec4899')}
-            ${maRow('m30',  'MA30',  '#14b8a6')}
-            ${maRow('m50',  'MA50',  '#409eff')}
-            ${maRow('m60',  'MA60',  '#6366f1')}
-            ${maRow('m120', 'MA120', '#f43f5e')}
-            ${maRow('m200', 'MA200', '#67c23a')}
-            ${maRow('m250', 'MA250', '#22c55e')}
-            ${maRow('m500', 'MA500', '#94a3b8')}
-            ${maRow('vw',   'VWAP',  '#a855f7')}
-          `;
         }
 
         // ============================================================
@@ -1856,6 +1805,11 @@
         play() {
           if (this._playing || this._destroyed) return;
           const bars = this.dataManager.getBars(this.currentTimeframe);
+          if (!this.replayReveal.enabled && this.replayStartTime && this._cutoffForCurrent() == null) {
+            const startIndex = this.dataManager.findNearestIndexByTime(this.currentTimeframe, this.replayStartTime);
+            this.replayReveal = { enabled: true };
+            this.setCurrentIndex(startIndex, { follow: true });
+          }
           // Respect reveal cutoff — if already at the teaching boundary, do nothing.
           const cutoff = this._cutoffForCurrent();
           const endIdx = cutoff != null ? Math.min(cutoff, bars.length - 1) : bars.length - 1;
@@ -2214,8 +2168,8 @@
             return;
           }
           let idx = rc.barIndexForX(this.hover.x);
-          // Respect reveal cutoff so the hover card doesn't leak future bars.
-          const cutoff = this._cutoffForCurrent();
+          // Respect the effective render boundary so the hover card doesn't leak future bars.
+          const cutoff = this._renderCutoffForCurrent();
           if (cutoff != null && idx > cutoff) idx = cutoff;
           const bar = rc.bars[idx];
           if (!bar) { this._hideHoverCard(); return; }
@@ -2287,17 +2241,19 @@
 
         scrollTo(target) {
           // Normalize arguments: scrollTo(142) or scrollTo({barIndex, timeframe, ...})
-          let barIndex, timeframe, highlight, center;
+          let barIndex, timeframe, highlight, center, timeValue;
           if (typeof target === 'number') {
             barIndex = target;
             timeframe = this.currentTimeframe;
             highlight = false;
             center = true;
+            timeValue = null;
           } else {
             barIndex = target.barIndex ?? 0;
             timeframe = target.timeframe || this.currentTimeframe;
             highlight = target.highlight ?? false;
-            center = target.center ?? true;
+            center = target.center ?? false;
+            timeValue = target.ts || target.time || target.t || null;
           }
 
           this.pause();
@@ -2312,8 +2268,15 @@
           const bars = this.dataManager.getBars(this.currentTimeframe);
           if (!bars.length) return;
 
-          barIndex = clamp(barIndex, 0, bars.length - 1);
+          if (timeValue) {
+            barIndex = this.dataManager.findNearestIndexByTime(this.currentTimeframe, timeValue);
+          } else {
+            barIndex = clamp(barIndex, 0, bars.length - 1);
+          }
 
+          const hardCutoff = this._cutoffForCurrent();
+          const upper = hardCutoff != null ? Math.min(hardCutoff, bars.length - 1) : bars.length - 1;
+          barIndex = clamp(barIndex, 0, upper);
           this.currentIndex = barIndex;
 
           if (center) {
@@ -2324,8 +2287,28 @@
             const halfView = Math.floor(viewInfo.count / 2);
             this.viewportManager.viewStart = clamp(barIndex - halfView, 0, Math.max(0, bars.length - viewInfo.count));
             this.viewportManager.setFollowMode(false);
-          } else {
+          } else if (this.replayReveal.enabled) {
+            // In replay mode this keeps the selected kbar as the visible boundary:
+            // the target is reachable, but future bars stay hidden.
             this.viewportManager.setFollowMode(true);
+          } else {
+            const chartWidth = this._getChartWidth();
+            const viewInfo = this.viewportManager.getResolvedViewCount(bars.length, this.currentTimeframe, chartWidth);
+            const maxStart = Math.max(0, bars.length - viewInfo.count);
+            const visible = this.viewportManager.getVisibleWindow({
+              totalBars: bars.length,
+              currentIndex: Math.max(this.currentIndex, bars.length - 1),
+              timeframe: this.currentTimeframe,
+              chartWidth,
+            });
+            let nextStart = visible.start;
+            if (barIndex < visible.start) {
+              nextStart = barIndex;
+            } else if (barIndex > visible.end) {
+              nextStart = barIndex - viewInfo.count + 1;
+            }
+            this.viewportManager.viewStart = clamp(nextStart, 0, maxStart);
+            this.viewportManager.setFollowMode(false);
           }
 
           if (highlight) {
@@ -2361,6 +2344,7 @@
           // the teaching adapter) may set cutoff/highlight during the event.
           // If we cleared after, those values would be wiped.
           this.revealCutoff = { '1m': null, '5m': null };
+          this.replayReveal = { enabled: false };
           this.highlightRanges = [];
           const summary = this.dataManager.loadData(json);
           this.currentTimeframe = this.dataManager.getTimeframe();
@@ -2432,6 +2416,27 @@
 
         _cutoffForCurrent() {
           return this.revealCutoff[this.currentTimeframe];
+        }
+
+        _renderCutoffForCurrent() {
+          const hardCutoff = this._cutoffForCurrent();
+          const replayCutoff = this.replayReveal.enabled ? this.currentIndex : null;
+          if (hardCutoff == null) return replayCutoff;
+          if (replayCutoff == null) return hardCutoff;
+          return Math.min(hardCutoff, replayCutoff);
+        }
+
+        setReplayReveal(input = true) {
+          const enabled = typeof input === 'boolean' ? input : input?.enabled !== false;
+          this.pause();
+          this.replayReveal = { enabled };
+
+          if (enabled && input && typeof input === 'object' && input.startIndex != null) {
+            this.setCurrentIndex(input.startIndex, { follow: true });
+          }
+          this.emit('replayreveal:changed', { ...this.replayReveal });
+          this.scheduleRender();
+          return { ...this.replayReveal };
         }
 
         // ============================================================
@@ -2590,6 +2595,16 @@
 
         setTimeframe(timeframe) {
           this.pause();
+          const previousBars = this.dataManager.getBars(this.currentTimeframe);
+          const previousVisible = previousBars.length
+            ? this.viewportManager.getVisibleWindow({
+                totalBars: previousBars.length,
+                currentIndex: this.currentIndex,
+                timeframe: this.currentTimeframe,
+                chartWidth: this._getChartWidth(),
+              })
+            : null;
+          const previousStartBar = previousVisible ? previousBars[previousVisible.start] : null;
           const result = this.dataManager.switchTimeframe(timeframe, this.currentIndex);
           this.currentTimeframe = result.timeframe;
           let nextIndex = result.index;
@@ -2599,12 +2614,17 @@
             nextIndex = tfCutoff;
           }
           this._updateToolbarState();
-          // Re-center viewport on the time-aligned index so switching tf does
-          // not visually jump to a default window. DataManager already mapped
-          // the index by ts; without scrollTo the viewport would stay at its
-          // previous viewStart and the same wall-clock moment would fall off
-          // screen.
-          this.scrollTo({ timeframe: this.currentTimeframe, barIndex: nextIndex, center: true });
+          const nextBars = this.dataManager.getBars(this.currentTimeframe);
+          const viewInfo = this.viewportManager.getResolvedViewCount(nextBars.length, this.currentTimeframe, this._getChartWidth());
+          const maxStart = Math.max(0, nextBars.length - viewInfo.count);
+          const mappedStart = previousStartBar
+            ? this.dataManager.findNearestIndexByTime(this.currentTimeframe, this.dataManager._timeValue(previousStartBar))
+            : 0;
+          this.currentIndex = clamp(nextIndex, 0, Math.max(0, nextBars.length - 1));
+          this.viewportManager.viewStart = clamp(mappedStart, 0, maxStart);
+          this.viewportManager.setFollowMode(this.viewportManager.viewStart >= maxStart);
+          this.emit('viewport:changed', this._getViewportPayload());
+          this.scheduleRender();
           return result;
         }
 
@@ -2652,14 +2672,13 @@
             ctx.font = '15px "Segoe UI", sans-serif';
             ctx.fillText('Load data to initialize the engine.', 24, 42);
             this.metaEl.textContent = 'No data loaded';
-            this.hudEl.innerHTML = '<strong>No bars</strong>';
             return;
           }
 
           // Clamp visible window against the active timeframe's reveal cutoff.
           // We only shrink `end` (not `count`) so slot widths stay stable — future
           // slots render empty, which matches how playback naturally reveals bars.
-          const cutoff = this._cutoffForCurrent();
+          const cutoff = this._renderCutoffForCurrent();
           if (cutoff != null) {
             if (visible.end > cutoff) visible.end = Math.max(visible.start, cutoff);
             if (visible.start > cutoff) visible.start = Math.max(0, cutoff);
@@ -2674,12 +2693,6 @@
             && this.hover.y <= rc.volumeY + rc.volumeHeight
             ? rc.barIndexForX(this.hover.x)
             : null;
-          // HUD must not leak future data: clamp both currentIndex and hover
-          // against the cutoff when deciding which bar drives the panel.
-          const focusCandidate = hoveredIndex ?? this.currentIndex;
-          const focusIndex = cutoff != null ? Math.min(focusCandidate, cutoff) : focusCandidate;
-          const focusBar = bars[focusIndex] || bars[Math.min(bars.length - 1, cutoff ?? bars.length - 1)];
-
           // Emit hover:bar only on transitions. Clamp against cutoff so external
           // listeners (e.g. MA legend value display) can never read a future bar
           // even if the cursor lingers over a bar that is past the reveal cutoff.
@@ -2701,8 +2714,8 @@
           this.drawAxes(ctx, rc);
           this.drawHighLowLabels(ctx, rc);
           this.drawAnnotationPins(ctx, rc);
-          const crosshairState = this.drawCrosshair(ctx, rc, hoveredIndex);
-          this.updatePanels(rc, focusBar, crosshairState);
+          this.drawCrosshair(ctx, rc, hoveredIndex);
+          this.updatePanels();
           this._updateAnnoHover();
           this._updateHoverCard();
         }

@@ -26,16 +26,25 @@ pre { white-space: pre-wrap; overflow: auto; background: #1e1c18; color: #f8ead1
 .eyebrow { color: var(--accent); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; }
 
 .app-shell { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
+.app-shell.nav-collapsed { grid-template-columns: 76px 1fr; }
 .sidebar { background: rgba(31, 29, 24, .94); color: #fff7e8; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
 .brand { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
 .brand-mark { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; background: var(--accent); font-weight: 700; }
 .brand h1 { font-family: 'Newsreader', serif; margin: 0; }
 .brand p { margin: 4px 0 0; color: #c8bda8; }
+.sidebar-toggle { margin-left: auto; width: 36px; height: 36px; padding: 0; justify-content: center; }
 .sidebar nav { display: grid; gap: 8px; }
 .sidebar button { background: transparent; color: #f8ead1; display: flex; align-items: center; gap: 10px; text-align: left; }
 .sidebar button.active, .sidebar button:hover { background: rgba(255,255,255,.1); }
 .sidebar .secondary { margin-top: auto; background: rgba(166, 83, 42, .9); }
 .sidebar .logout { background: transparent; color: #c8bda8; }
+.nav-collapsed .sidebar { padding: 14px 10px; align-items: center; }
+.nav-collapsed .brand { flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.nav-collapsed .brand-copy,
+.nav-collapsed .nav-label { display: none; }
+.nav-collapsed .brand-mark { width: 44px; height: 44px; border-radius: 12px; }
+.nav-collapsed .sidebar-toggle { margin-left: 0; }
+.nav-collapsed .sidebar button { width: 48px; justify-content: center; padding: 12px; }
 main { padding: 36px; overflow: auto; }
 .page { max-width: 1180px; margin: 0 auto; }
 .page-header { margin-bottom: 28px; }
@@ -56,7 +65,8 @@ main { padding: 36px; overflow: auto; }
 .signal-card { display: flex; justify-content: space-between; gap: 12px; align-items: center; border-bottom: 1px solid var(--line); padding: 12px 0; }
 
 @media (max-width: 820px) {
-  .app-shell { grid-template-columns: 1fr; }
+  .app-shell,
+  .app-shell.nav-collapsed { grid-template-columns: 1fr; }
   .sidebar { position: static; }
   main { padding: 20px; }
   .grid.three { grid-template-columns: 1fr; }
@@ -316,41 +326,6 @@ main { padding: 36px; overflow: auto; }
 
 .dr-error { color: #C94040; }
 
-.dr-review-panel {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 16px;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  pointer-events: none;
-}
-
-.dr-review-panel div {
-  padding: 10px 12px;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 6px;
-  background: rgba(24, 27, 33, .84);
-  backdrop-filter: blur(10px);
-}
-
-.dr-review-panel span {
-  display: block;
-  color: #5A5A56;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-.dr-review-panel strong {
-  display: block;
-  margin-top: 4px;
-  color: #E8E7E3;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-}
-
 .dr-upload-bar {
   grid-area: upload;
   display: flex;
@@ -414,7 +389,6 @@ main { padding: 36px; overflow: auto; }
   .dr-upload-bar { flex-wrap: wrap; min-height: 78px; padding: 10px 12px; }
   .dr-control-group { width: 100%; }
   .dr-control-group select { flex: 1; min-width: 0; }
-  .dr-review-panel { grid-template-columns: 1fr 1fr; }
 }
 
 .dr-action-group {
@@ -492,7 +466,7 @@ main { padding: 36px; overflow: auto; }
 
 .unified-kline-engine {
   width: 100%;
-  height: calc(100% - 88px);
+  height: 100%;
   min-height: 560px;
 }
 
@@ -500,22 +474,11 @@ main { padding: 36px; overflow: auto; }
   height: 100%;
 }
 
-.unified-kline-engine .kline-engine__viewport,
-.unified-kline-engine .kline-engine__canvas-wrap {
-  height: 100%;
+.unified-kline-engine .kline-engine__viewport {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-.unified-kline-engine {
-  width: 100%;
-  height: calc(100% - 88px);
-  min-height: 560px;
-}
-
-.unified-kline-engine .kline-engine {
-  height: 100%;
-}
-
-.unified-kline-engine .kline-engine__viewport,
 .unified-kline-engine .kline-engine__canvas-wrap {
   height: 100%;
 }

@@ -394,6 +394,7 @@ export function generateTrendAnnotations(bars5m = [], strategy = {}) {
         label: `5m trend ${trend}`,
         body: `5m trend changed from ${previous} to ${trend}`,
         t: timeOf(bars5m[index]),
+        ts: bars5m[index]?.ts,
       });
     }
     if (trend) previous = trend;

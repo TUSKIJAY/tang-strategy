@@ -13,9 +13,19 @@ function normalizeAnnotation(annotation, timeframe) {
   };
 }
 
-export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ payload, annotations1m = [], annotations5m = [], onAnnotationClick, onBarClick, onReady }, ref) {
+export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ payload, annotations1m = [], annotations5m = [], onAnnotationClick, onBarClick, onReady, replayOnLoad = false, replayStartTime = null }, ref) {
   const containerRef = useRef(null);
   const engineRef = useRef(null);
+  const onAnnotationClickRef = useRef(onAnnotationClick);
+  const onBarClickRef = useRef(onBarClick);
+  const onReadyRef = useRef(onReady);
+
+  useEffect(() => {
+    onAnnotationClickRef.current = onAnnotationClick;
+    onBarClickRef.current = onBarClick;
+    onReadyRef.current = onReady;
+  }, [onAnnotationClick, onBarClick, onReady]);
+
   const payloadWithAnnotations = useMemo(() => {
     if (!payload) return null;
     return {
@@ -29,24 +39,29 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
     if (!containerRef.current || engineRef.current || !window.KlineEngine) return undefined;
     const engine = new window.KlineEngine({ container: containerRef.current });
     engineRef.current = engine;
-    const offAnno = engine.on?.('annotation:click', (annotation) => onAnnotationClick?.(annotation));
-    const offBar = engine.on?.('bar:click', (event) => onBarClick?.(event));
-    onReady?.(engine);
+    const offAnno = engine.on?.('annotation:click', (annotation) => onAnnotationClickRef.current?.(annotation));
+    const offBar = engine.on?.('bar:click', (event) => onBarClickRef.current?.(event));
+    onReadyRef.current?.(engine);
     return () => {
       offAnno?.();
       offBar?.();
       engine.destroy?.();
       engineRef.current = null;
     };
-  }, [onAnnotationClick, onBarClick, onReady]);
+  }, []);
 
   useEffect(() => {
     const engine = engineRef.current;
     if (!engine || !payloadWithAnnotations) return;
+    engine.replayStartTime = replayStartTime;
     engine.loadData(payloadWithAnnotations);
     const totalBars = payloadWithAnnotations.bars_1m?.length || payloadWithAnnotations.bars_5m?.length || 0;
-    if (totalBars) engine.setCurrentIndex?.(totalBars - 1, { follow: false });
-  }, [payloadWithAnnotations]);
+    if (totalBars && replayOnLoad) {
+      engine.setReplayReveal?.({ enabled: true, startIndex: 0 });
+    } else if (totalBars) {
+      engine.setCurrentIndex?.(totalBars - 1, { follow: false });
+    }
+  }, [payloadWithAnnotations, replayOnLoad, replayStartTime]);
 
   useImperativeHandle(ref, () => ({
     get engine() { return engineRef.current; },
@@ -60,6 +75,7 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
     getCurrentIndex: () => engineRef.current?.getCurrentIndex?.(),
     scrollTo: (target) => engineRef.current?.scrollTo?.(target),
     setRevealCutoff: (input) => engineRef.current?.setRevealCutoff?.(input),
+    setReplayReveal: (input) => engineRef.current?.setReplayReveal?.(input),
     setHighlightRanges: (input) => engineRef.current?.setHighlightRanges?.(input),
     setMAVisibility: (next) => {
       const engine = engineRef.current;
@@ -72,6 +88,7 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
       const engine = engineRef.current;
       if (!engine) return;
       const bars = engine.dataManager?.getBars?.(engine.getTimeframe?.()) || [];
+      engine.setReplayReveal?.(false);
       engine.setRevealCutoff?.(null);
       engine.setHighlightRanges?.(null);
       if (bars.length) engine.setCurrentIndex?.(bars.length - 1, { follow: false });

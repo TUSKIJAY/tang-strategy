@@ -67,6 +67,37 @@ function setupRange(annotation, setup, barsLength) {
   return { start: Math.max(0, start - pad), end: Math.min(Math.max(0, barsLength - 1), end + pad) };
 }
 
+function resolveAnnotationIndex(annotation, bars) {
+  if (!annotation || !bars.length) return 0;
+  const rawIndex = Number(annotation.bar_index);
+  const targetTs = annotation.ts ? String(annotation.ts) : '';
+  const targetTime = String(annotation.t || annotation.time || '').slice(0, 5);
+  if (Number.isInteger(rawIndex) && rawIndex >= 0 && rawIndex < bars.length) {
+    const indexed = bars[rawIndex];
+    if (targetTs && indexed?.ts === targetTs) return rawIndex;
+    if (targetTime && String(indexed?.t || '').slice(0, 5) === targetTime) return rawIndex;
+    if (!targetTs && !targetTime) return rawIndex;
+  }
+
+  if (targetTs || targetTime) {
+    const exactIndex = bars.findIndex((bar) => (
+      (targetTs && bar?.ts === targetTs) ||
+      (targetTime && String(bar?.t || '').slice(0, 5) === targetTime)
+    ));
+    if (exactIndex >= 0) return exactIndex;
+  }
+
+  if (!targetTs && !targetTime) return Math.min(Math.max(rawIndex || 0, 0), bars.length - 1);
+  let nearest = 0;
+  for (let index = 0; index < bars.length; index += 1) {
+    const barTs = String(bars[index]?.ts || '');
+    const barTime = String(bars[index]?.t || bars[index]?.time || '').slice(0, 5);
+    if (targetTs ? barTs <= targetTs : barTime <= targetTime) nearest = index;
+    else break;
+  }
+  return nearest;
+}
+
 function detailItems(annotation) {
   const conditions = annotation._conditions || annotation.checklist || [];
   if (!conditions.length) return [
@@ -94,9 +125,7 @@ export function ReviewPage({ state, setState }) {
   const engineRef = useRef(null);
   const [review, setReview] = useState(null);
   const [activeSignalId, setActiveSignalId] = useState('');
-  const [focusRange, setFocusRange] = useState(null);
   const [runVersion, setRunVersion] = useState(0);
-  const [lastRunLabel, setLastRunLabel] = useState('Auto scan pending');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const selectedDay = state.marketDays.find((day) => day.id === Number(state.selectedDayId)) || state.marketDays[0];
@@ -110,9 +139,7 @@ export function ReviewPage({ state, setState }) {
       .then((payload) => {
         setReview(payload);
         setActiveSignalId('');
-        setFocusRange(null);
         setRunVersion((value) => value + 1);
-        setLastRunLabel('Auto assembled from SQLite');
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -143,25 +170,32 @@ export function ReviewPage({ state, setState }) {
     if (!annotation) return;
     setActiveSignalId(annotation.id);
     const setup = setupForAnnotation(annotation, computed.setups);
-    const timeframe = annotation.timeframe || '1m';
+    const timeframe = annotation.timeframe === '5m' ? '5m' : '1m';
+    const targetBars = timeframe === '5m' ? bars5m : bars1m;
+    if (!targetBars.length) return;
+    const targetIndex = resolveAnnotationIndex(annotation, targetBars);
     if (timeframe === '1m') {
-      const range = setupRange(annotation, setup, bars1m.length);
-      setFocusRange(range);
-      engineRef.current?.setTimeframe('1m');
+      const range = setupRange({ ...annotation, bar_index: targetIndex }, setup, bars1m.length);
       engineRef.current?.setHighlightRanges({ timeframe: '1m', startIndex: range.start, endIndex: range.end, style: setup ? 'olive' : 'blue' });
+    } else {
+      engineRef.current?.setHighlightRanges(null);
     }
-    engineRef.current?.scrollTo({ barIndex: annotation.bar_index, timeframe, highlight: true, center: true });
+    engineRef.current?.scrollTo({
+      barIndex: targetIndex,
+      timeframe,
+      ts: annotation.ts,
+      time: annotation.t,
+      highlight: true,
+      center: false,
+    });
   }
 
   function runBacktest() {
     setRunVersion((value) => value + 1);
-    setLastRunLabel(`Backtest run ${new Date().toLocaleTimeString()}`);
-    setFocusRange(null);
     setActiveSignalId('');
   }
 
   function overview() {
-    setFocusRange(null);
     setActiveSignalId('');
     engineRef.current?.overview();
   }
@@ -271,15 +305,10 @@ export function ReviewPage({ state, setState }) {
               payload={enginePayload}
               annotations1m={computed.annotations1m}
               annotations5m={computed.annotations5m}
+              replayStartTime="09:30"
               onAnnotationClick={(annotation) => selectSignal(allAnnotations.find((item) => item.id === annotation.id) || annotation)}
             />
           )}
-          <div className="dr-review-panel">
-            <div><span>Range</span><strong>{stats.low} / {stats.high}</strong></div>
-            <div><span>1m / 5m Bars</span><strong>{bars1m.length} / {bars5m.length}</strong></div>
-            <div><span>Lifecycle</span><strong>{setupSummary.count} setups · {setupSummary.invalidated} invalidated · {setupSummary.eod} EOD</strong></div>
-            <div><span>Run status</span><strong>{lastRunLabel}</strong></div>
-          </div>
         </main>
 
         <footer className="dr-upload-bar">

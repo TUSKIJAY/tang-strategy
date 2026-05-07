@@ -4,6 +4,37 @@ import { runBacktest } from '../features/backtest/backtest.js';
 import { generateTrendAnnotations } from '../features/review/scanner.js';
 import { UnifiedKlineEngine } from '../kline/UnifiedKlineEngine.jsx';
 
+function resolveAnnotationIndex(annotation, bars) {
+  if (!annotation || !bars.length) return 0;
+  const rawIndex = Number(annotation.bar_index);
+  const targetTs = annotation.ts ? String(annotation.ts) : '';
+  const targetTime = String(annotation.t || annotation.time || '').slice(0, 5);
+  if (Number.isInteger(rawIndex) && rawIndex >= 0 && rawIndex < bars.length) {
+    const indexed = bars[rawIndex];
+    if (targetTs && indexed?.ts === targetTs) return rawIndex;
+    if (targetTime && String(indexed?.t || '').slice(0, 5) === targetTime) return rawIndex;
+    if (!targetTs && !targetTime) return rawIndex;
+  }
+
+  if (targetTs || targetTime) {
+    const exactIndex = bars.findIndex((bar) => (
+      (targetTs && bar?.ts === targetTs) ||
+      (targetTime && String(bar?.t || '').slice(0, 5) === targetTime)
+    ));
+    if (exactIndex >= 0) return exactIndex;
+  }
+
+  if (!targetTs && !targetTime) return Math.min(Math.max(rawIndex || 0, 0), bars.length - 1);
+  let nearest = 0;
+  for (let index = 0; index < bars.length; index += 1) {
+    const barTs = String(bars[index]?.ts || '');
+    const barTime = String(bars[index]?.t || bars[index]?.time || '').slice(0, 5);
+    if (targetTs ? barTs <= targetTs : barTime <= targetTime) nearest = index;
+    else break;
+  }
+  return nearest;
+}
+
 export function BacktestPage({ state }) {
   const engineRef = useRef(null);
   const [results, setResults] = useState([]);
@@ -65,8 +96,18 @@ export function BacktestPage({ state }) {
 
   function selectAnnotation(annotation) {
     const source = annotations1m.find((item) => item.id === annotation.id) || annotation;
-    engineRef.current?.setTimeframe(source.timeframe || '1m');
-    engineRef.current?.scrollTo({ barIndex: source.bar_index, timeframe: source.timeframe || '1m', highlight: true, center: true });
+    const timeframe = source.timeframe === '5m' ? '5m' : '1m';
+    const targetBars = timeframe === '5m' ? bars5m : bars1m;
+    if (!targetBars.length) return;
+    const targetIndex = resolveAnnotationIndex(source, targetBars);
+    engineRef.current?.scrollTo({
+      barIndex: targetIndex,
+      timeframe,
+      ts: source.ts,
+      time: source.t,
+      highlight: true,
+      center: false,
+    });
   }
 
   return (
@@ -97,7 +138,7 @@ export function BacktestPage({ state }) {
         </aside>
         <div className="engine-surface panel">
           {payload ? (
-            <UnifiedKlineEngine ref={engineRef} payload={payload} annotations1m={annotations1m} annotations5m={annotations5m} onAnnotationClick={selectAnnotation} />
+            <UnifiedKlineEngine ref={engineRef} payload={payload} annotations1m={annotations1m} annotations5m={annotations5m} replayOnLoad onAnnotationClick={selectAnnotation} />
           ) : (
             <div className="engine-empty">Run a backtest to load results into the unified K-line engine.</div>
           )}
