@@ -2,19 +2,6 @@ name: Publish static reviews
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - dev
-    paths:
-      - ".github/workflows/publish-static-reviews.yml"
-      - "backend/app/**"
-      - "backend/scripts/**"
-      - "backend/requirements.txt"
-      - "data/seed/market-data/live_extended/**"
-      - "data/sqlite/tang_strategy_live_extended.db"
-      - "frontend/**"
-      - "strategies/json/**"
 
 permissions:
   contents: write

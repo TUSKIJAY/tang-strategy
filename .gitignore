@@ -10,6 +10,7 @@ __pycache__/
 node_modules/
 frontend/dist/
 package-lock.json
+!frontend/package-lock.json
 npm-debug.log*
 
 # Local configuration and secrets
