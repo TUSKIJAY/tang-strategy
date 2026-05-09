@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../features/review/scanner.js';
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
+import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
+import { ReviewSignalList } from '../features/review/ReviewSignalList.jsx';
+import { preferredActivationWickStrategy, rthReviewPayload } from '../features/review/session.js';
 import { UnifiedKlineEngine } from '../kline/UnifiedKlineEngine.jsx';
 
 function assetPath(path) {
@@ -57,8 +60,21 @@ function directionLabel(annotation) {
 
 function setupRange(annotation, setup, barsLength) {
   const center = annotation?.bar_index ?? 0;
-  const start = setup ? Math.min(setup.signal_index, setup.entry_index, setup.exit_index) : center - 24;
-  const end = setup ? Math.max(setup.signal_index, setup.entry_index, setup.exit_index) : center + 24;
+  let start = center - 24;
+  let end = center + 24;
+  if (setup) {
+    start = Math.min(setup.signal_index, setup.entry_index, setup.exit_index);
+    end = Math.max(setup.signal_index, setup.entry_index, setup.exit_index);
+  } else if (Number.isFinite(Number(annotation?._setup_bar_index))) {
+    start = Number(annotation._setup_bar_index);
+    end = Number.isFinite(Number(annotation._activation_bar_index))
+      ? Number(annotation._activation_bar_index)
+      : Number.isFinite(Number(annotation._expire_bar_index))
+        ? Number(annotation._expire_bar_index)
+        : Number.isFinite(Number(annotation._activation_window_end_bar_index))
+          ? Number(annotation._activation_window_end_bar_index)
+          : center;
+  }
   const pad = Math.max(8, Math.round((end - start + 1) * 0.35));
   return { start: Math.max(0, start - pad), end: Math.min(Math.max(0, barsLength - 1), end + pad) };
 }
@@ -114,11 +130,41 @@ function lifecycleText(annotation, setup, bars1m) {
   return `${tag} after ${setup.bars_held} bars -> ${exitBar?.t || '#'} · move ${signed(setup.spy_move)}`;
 }
 
+function chartAnnotation(annotation) {
+  const direction = annotation.direction || '';
+  if (annotation.type === 'setup') {
+    return {
+      ...annotation,
+      title: `${direction} 启动`,
+      body: `进入 ${annotation._activation_window_bars || 8} 根观察窗口，等待进场确认`,
+      style: 'blue',
+    };
+  }
+  if (annotation.type === 'expired') {
+    return {
+      ...annotation,
+      title: `${direction} 过期`,
+      body: `观察窗口过期，未触发进场确认线 ${formatPrice(annotation._activation_level)}`,
+      style: 'purple',
+    };
+  }
+  if (annotation.type === 'signal') {
+    return {
+      ...annotation,
+      title: `${direction} 进场`,
+      body: annotation._activation_time
+        ? `启动 ${annotation._setup_time || '?'} -> 进场 ${annotation._activation_time}`
+        : annotation.body,
+    };
+  }
+  return annotation;
+}
+
 export function StaticReviewsApp() {
   const engineRef = useRef(null);
   const [manifest, setManifest] = useState(null);
   const [selectedDaySlug, setSelectedDaySlug] = useState(() => window.location.hash.replace(/^#\/?/, ''));
-  const [selectedStrategySlug, setSelectedStrategySlug] = useState(() => window.localStorage?.getItem('tangStaticReviews:strategy') || '');
+  const [selectedStrategySlug, setSelectedStrategySlug] = useState('');
   const [review, setReview] = useState(null);
   const [strategyPayload, setStrategyPayload] = useState(null);
   const [activeSignalId, setActiveSignalId] = useState('');
@@ -136,8 +182,8 @@ export function StaticReviewsApp() {
           window.location.hash = data.reviews[0].slug;
           setSelectedDaySlug(data.reviews[0].slug);
         }
-        if (!selectedStrategySlug && data.strategies?.[0]?.slug) {
-          setSelectedStrategySlug(data.strategies[0].slug);
+        if (!selectedStrategySlug && data.strategies?.length) {
+          setSelectedStrategySlug(preferredActivationWickStrategy(data.strategies)?.slug || data.strategies[0].slug);
         }
       })
       .catch((err) => setError(err.message));
@@ -161,7 +207,7 @@ export function StaticReviewsApp() {
         if (!response.ok) throw new Error(`Static review payload not found: ${response.status}`);
         return response.json();
       })
-      .then((payload) => setReview(payload))
+      .then((payload) => setReview(rthReviewPayload(payload)))
       .catch((err) => setError(err.message));
   }, [selectedItem?.file]);
 
@@ -192,6 +238,13 @@ export function StaticReviewsApp() {
   }, [review, bars1m, bars5m, strategy]);
 
   const allAnnotations = [...computed.annotations1m, ...computed.annotations5m];
+  const chartAnnotations1m = useMemo(
+    () => computed.annotations1m
+      .filter((annotation) => ['setup', 'signal', 'expired'].includes(annotation.type))
+      .map(chartAnnotation),
+    [computed.annotations1m],
+  );
+  const chartAnnotations5m = useMemo(() => [], []);
   const summary = summarizeAnnotations(computed.annotations1m);
   const setupSummary = summarizeSetups(computed.setups);
   const stats = sessionStats(bars1m);
@@ -210,23 +263,22 @@ export function StaticReviewsApp() {
   function selectSignal(annotation) {
     if (!annotation) return;
     setActiveSignalId(annotation.id);
-    const setup = setupForAnnotation(annotation, computed.setups);
     const timeframe = annotation.timeframe === '5m' ? '5m' : '1m';
     const targetBars = timeframe === '5m' ? bars5m : bars1m;
     if (!targetBars.length) return;
     const targetIndex = resolveAnnotationIndex(annotation, targetBars);
+    engineRef.current?.setHighlightRanges(null);
     if (timeframe === '1m') {
-      const range = setupRange({ ...annotation, bar_index: targetIndex }, setup, bars1m.length);
-      engineRef.current?.setHighlightRanges({ timeframe: '1m', startIndex: range.start, endIndex: range.end, style: setup ? 'olive' : 'blue' });
-    } else {
-      engineRef.current?.setHighlightRanges(null);
+      const setup = setupForAnnotation(annotation, computed.setups);
+      const range = setupRange({ ...annotation, bar_index: targetIndex }, setup, targetBars.length);
+      engineRef.current?.fitRange({ timeframe, startIndex: range.start, endIndex: range.end });
     }
     engineRef.current?.scrollTo({
       barIndex: targetIndex,
       timeframe,
       ts: annotation.ts,
       time: annotation.t,
-      highlight: true,
+      highlight: false,
       center: false,
     });
   }
@@ -251,8 +303,9 @@ export function StaticReviewsApp() {
     },
     bars_1m: bars1m,
     bars_5m: bars5m,
-    annotations_1m: computed.annotations1m,
-    annotations_5m: computed.annotations5m,
+    annotations_1m: chartAnnotations1m,
+    annotations_5m: chartAnnotations5m,
+    _trades: computed.setups,
   } : null;
 
   return (
@@ -262,15 +315,15 @@ export function StaticReviewsApp() {
           <header className="dr-topbar">
             <div className="dr-title">Static Daily Review</div>
             <div className="dr-divider" />
-            <Stat label="Date" value={meta.date || selectedItem?.trade_date || '--'} />
-            <Stat label="Signals" value={summary.total} />
-            <Stat label="Bear" value={summary.puts} tone="red" />
-            <Stat label="Bull" value={summary.calls} tone="green" />
-            <Stat label="Chg" value={stats.changePct} tone={String(stats.change).startsWith('-') ? 'red' : 'green'} />
-            <Stat label="Setups" value={setupSummary.count} />
-            <Stat label="MFE med" value={setupSummary.medianMfePct == null ? '--' : formatPct(setupSummary.medianMfePct, { ratio: true })} tone="green" />
-            <Stat label="MAE med" value={setupSummary.medianMaePct == null ? '--' : formatPct(setupSummary.medianMaePct, { ratio: true, negativeSign: true })} tone="red" />
-            <div className="dr-strategy-badge">{strategyPayload ? `${strategyPayload.name} v${strategyPayload.version}` : 'Static export'}</div>
+            <Stat label="日期" value={meta.date || selectedItem?.trade_date || '--'} />
+            <Stat label="进场" value={summary.total} />
+            <Stat label="空" value={summary.puts} tone="red" />
+            <Stat label="多" value={summary.calls} tone="green" />
+            <Stat label="涨跌" value={stats.changePct} tone={String(stats.change).startsWith('-') ? 'red' : 'green'} />
+            <Stat label="窗口" value={setupSummary.count} />
+            <Stat label="MFE中位" value={setupSummary.medianMfePct == null ? '--' : formatPct(setupSummary.medianMfePct, { ratio: true })} tone="green" />
+            <Stat label="MAE中位" value={setupSummary.medianMaePct == null ? '--' : formatPct(setupSummary.medianMaePct, { ratio: true, negativeSign: true })} tone="red" />
+            <div className="dr-strategy-badge">{strategyPayload ? `${strategyPayload.name} v${strategyPayload.version}` : '静态导出'}</div>
           </header>
 
           <aside className="dr-sidebar">
@@ -291,57 +344,34 @@ export function StaticReviewsApp() {
               </select>
             </div>
             <div className="dr-sidebar-header">
-              <span>Signals ({allAnnotations.length})</span>
-              <button type="button" onClick={overview}>Overview</button>
+              <span>提示 {summary.setups || summary.expired ? `(${summary.total} 进场 · ${summary.setups} 启动 / ${summary.expired} 过期)` : `(${allAnnotations.length})`}</span>
+              <button type="button" onClick={overview}>总览</button>
             </div>
             <div className="dr-signal-list">
-              {!allAnnotations.length && (
-                <div className="dr-empty">
-                  <div className="dr-empty-icon">K</div>
-                  <div>No signals assembled for this strategy/day.</div>
-                  <small>Static export loaded; scanner found no review signals.</small>
-                </div>
-              )}
-              {allAnnotations.map((annotation) => {
-                const active = annotation.id === activeSignal?.id;
-                const setup = setupForAnnotation(annotation, computed.setups);
-                return (
-                  <article key={annotation.id} className={`dr-signal-card ${active ? 'active expanded' : ''}`} data-style={signalStyle(annotation)} onClick={() => selectSignal(annotation)}>
-                    <div className="dr-signal-time">{annotation.t || annotation.ts || `#${annotation.bar_index}`} · {annotation.timeframe || '1m'}</div>
-                    <div className="dr-signal-title">
-                      <span className={`dr-signal-dir ${annotation.direction === 'PUT' ? 'put' : 'call'}`}>{directionLabel(annotation)}</span>
-                      {annotation.title || annotation.label || 'Strategy signal'}
-                    </div>
-                    <div className="dr-signal-meta">bar #{annotation.bar_index} · {lifecycleText(annotation, setup, bars1m)}</div>
-                    <div className="dr-signal-detail">
-                      <h5>Trigger checklist</h5>
-                      <ul>
-                        {detailItems(annotation).map((item, index) => (
-                          <li key={index}>
-                            <span className={item.ok === false ? 'fail' : 'pass'}>{item.ok === false ? 'x' : 'ok'}</span>
-                            <div>
-                              <strong>{item.label}</strong>
-                              {item.value != null && <small>{String(item.value)}</small>}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </article>
-                );
-              })}
+              <ReviewSignalList
+                annotations1m={computed.annotations1m}
+                annotations5m={computed.annotations5m}
+                setups={computed.setups}
+                activeSignal={activeSignal}
+                onSelect={selectSignal}
+                bars1m={bars1m}
+                bars5m={bars5m}
+                emptyTitle="当前策略/日期没有生成提示。"
+                emptyHint="静态数据已加载，扫描器没有找到进场信号。"
+              />
             </div>
           </aside>
 
           <main className="dr-chart-area">
             {error && <div className="dr-error">{error}</div>}
-            {!error && !enginePayload && <div className="dr-loading">Loading static review...</div>}
+            {!error && !enginePayload && <div className="dr-loading">正在加载静态复盘...</div>}
             {enginePayload && (
               <UnifiedKlineEngine
                 ref={engineRef}
                 payload={enginePayload}
-                annotations1m={computed.annotations1m}
-                annotations5m={computed.annotations5m}
+                annotations1m={chartAnnotations1m}
+                annotations5m={chartAnnotations5m}
+                engineOptions={DAILY_REVIEW_ENGINE_OPTIONS}
                 replayStartTime="09:30"
                 onAnnotationClick={(annotation) => selectSignal(allAnnotations.find((item) => item.id === annotation.id) || annotation)}
               />

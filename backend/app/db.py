@@ -28,7 +28,7 @@ def _migrate_raw_json_columns(conn: sqlite3.Connection) -> None:
     if _table_exists(conn, "bars_1m"):
         _rebuild_bars_table_without_raw_json(conn, "bars_1m")
     if _table_exists(conn, "bars_5m"):
-        conn.execute("DROP TABLE bars_5m")
+        _rebuild_bars_table_without_raw_json(conn, "bars_5m")
 
 
 def _table_exists(conn: sqlite3.Connection, table_name: str) -> bool:
@@ -142,6 +142,34 @@ CREATE TABLE IF NOT EXISTS market_days (
 );
 
 CREATE TABLE IF NOT EXISTS bars_1m (
+    market_day_id INTEGER NOT NULL,
+    idx INTEGER NOT NULL,
+    ts TEXT,
+    time TEXT,
+    open REAL,
+    high REAL,
+    low REAL,
+    close REAL,
+    volume REAL,
+    vwap REAL,
+    ha_open REAL,
+    ha_high REAL,
+    ha_low REAL,
+    ha_close REAL,
+    m5 REAL,
+    m10 REAL,
+    m20 REAL,
+    m30 REAL,
+    m50 REAL,
+    m60 REAL,
+    m120 REAL,
+    m200 REAL,
+    m250 REAL,
+    PRIMARY KEY (market_day_id, idx),
+    FOREIGN KEY (market_day_id) REFERENCES market_days(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS bars_5m (
     market_day_id INTEGER NOT NULL,
     idx INTEGER NOT NULL,
     ts TEXT,

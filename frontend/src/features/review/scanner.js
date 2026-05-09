@@ -52,7 +52,7 @@ function inSession(time, session = {}) {
   const start = session.start || '09:30';
   const end = session.end || '16:00';
   if (!time) return true;
-  return time >= start && time <= end;
+  return time >= start && time < end;
 }
 
 export function detectTrendsRouted(bars5m = [], strategy = {}) {
@@ -347,16 +347,206 @@ function applyActivation({ rawSignals, bars1m, strategy }) {
   return output;
 }
 
+function activationProbe(pending, bars1m, index, strategy) {
+  if (!pending || index <= pending.bar_index) return null;
+  const cfg = strategy.entry_activation || {};
+  const bar = bars1m[index];
+  if (!bar) return null;
+  const isCall = pending.direction === 'CALL';
+  const rangeBars = bars1m.slice(pending.bar_index, index);
+  const highs = rangeBars.map((item) => num(item.H)).filter((value) => value != null);
+  const lows = rangeBars.map((item) => num(item.L)).filter((value) => value != null);
+  if (isCall && !highs.length) return null;
+  if (!isCall && !lows.length) return null;
+
+  const breakoutLevel = isCall ? Math.max(...highs) : Math.min(...lows);
+  const close = num(bar.C);
+  const high = num(bar.H);
+  const low = num(bar.L);
+  if (close == null || high == null || low == null) return null;
+
+  const closeBreak = isCall ? close > breakoutLevel : close < breakoutLevel;
+  const wickBreak = isCall ? high > breakoutLevel : low < breakoutLevel;
+  const closePositionMin = Number(cfg.strong_wick?.close_position_min ?? 0.6);
+  const closePosition = high > low ? (close - low) / (high - low) : null;
+  const strongWick = closePosition != null && (isCall ? closePosition >= closePositionMin : closePosition <= (1 - closePositionMin));
+  const allowStrongWick = ['close_or_strong_wick', 'strong_wick_or_close'].includes(cfg.confirm_price || '');
+  const priceConfirmed = closeBreak || (allowStrongWick && wickBreak && strongWick);
+  const colorOk = cfg.require_same_direction_bar === false ? true : (isCall ? isGreen(bar) : isRed(bar));
+  const slopeOk = cfg.require_ma10_slope_still_aligned === false ? true : maSlopeOk(bars1m, index, pending.direction, strategy.slope_filter?.lookback_bars || 1);
+  const isActivation = priceConfirmed && colorOk && slopeOk;
+  const missBy = isCall ? breakoutLevel - close : close - breakoutLevel;
+  const confirmMethod = closeBreak ? 'close' : (allowStrongWick && wickBreak && strongWick ? 'strong_wick' : null);
+
+  return {
+    breakoutLevel,
+    close,
+    high,
+    low,
+    closeBreak,
+    wickBreak,
+    closePosition,
+    strongWick,
+    colorOk,
+    slopeOk,
+    priceConfirmed,
+    isActivation,
+    missBy,
+    confirmMethod,
+  };
+}
+
+function updatePendingActivationStats(pending, probe, bar, index) {
+  const isCall = pending.direction === 'CALL';
+  pending.lastBreakoutLevel = probe.breakoutLevel;
+  pending.bestClose = pending.bestClose == null
+    ? probe.close
+    : (isCall ? Math.max(pending.bestClose, probe.close) : Math.min(pending.bestClose, probe.close));
+  pending.bestWick = pending.bestWick == null
+    ? (isCall ? probe.high : probe.low)
+    : (isCall ? Math.max(pending.bestWick, probe.high) : Math.min(pending.bestWick, probe.low));
+  pending.missBy = probe.missBy;
+  pending.lastCheckedIndex = index;
+  pending.lastCheckedTime = timeOf(bar);
+  if (probe.wickBreak) pending.wickConfirmedCount = (pending.wickConfirmedCount || 0) + 1;
+  if (probe.priceConfirmed && !probe.colorOk) {
+    pending.expiryGateReason = '价格触发但 HA 颜色未同向';
+  } else if (probe.priceConfirmed && !probe.slopeOk) {
+    pending.expiryGateReason = '价格触发但 MA10 斜率未保持同向';
+  } else if (probe.wickBreak && !probe.strongWick) {
+    const pct = probe.closePosition == null ? '--' : `${Math.round(probe.closePosition * 100)}%`;
+    pending.expiryGateReason = `曾刺破确认线，但收盘位置不够强/弱（${pct}）`;
+  }
+}
+
+function buildSetupAnnotation({ setup, setupId, maxWait }) {
+  return {
+    ...setup,
+    id: `setup-${setupId}-${setup.bar_index}`,
+    type: 'setup',
+    style: 'blue',
+    _setup_id: setupId,
+    _setup_bar_index: setup.bar_index,
+    _setup_time: setup.t,
+    _activation_window_bars: maxWait,
+    _activation_window_start_bar_index: setup.bar_index + 1,
+    _activation_window_end_bar_index: setup.bar_index + maxWait,
+    _raw_signal_id: setup._signal_id,
+    _signal_style: setup.style,
+    body: `${setup.title} candidate; waiting up to ${maxWait} bars for activation`,
+  };
+}
+
+function buildActivatedAnnotation({ pending, probe, bar, index, strategy }) {
+  const delay = index - pending.bar_index;
+  const method = probe.confirmMethod === 'strong_wick' ? 'strong wick' : 'close';
+  return annotationFromSignal({
+    signal: { id: pending._signal_id, name: pending.title, style: pending._signal_style || pending.style },
+    index,
+    bar,
+    direction: pending.direction,
+    checks: [
+      ...(pending.checklist || []),
+      { label: 'Activation within window', ok: true, value: `${delay}/${pending._activation_window_bars}` },
+      { label: 'Breakout confirmation', ok: true, value: method },
+      { label: 'Same direction HA candle', ok: probe.colorOk },
+      { label: 'MA10 slope still aligned', ok: probe.slopeOk },
+    ],
+    strategy,
+    type: 'signal',
+    extra: {
+      _setup_id: pending._setup_id,
+      _setup_bar_index: pending.bar_index,
+      _setup_time: pending.t,
+      _activation_bar_index: index,
+      _activation_time: timeOf(bar),
+      _activation_delay_bars: delay,
+      _activation_confirm_method: probe.confirmMethod,
+      _activation_breakout_price: probe.breakoutLevel,
+      _activation_close_position: probe.closePosition,
+      _activation_window_bars: pending._activation_window_bars,
+      _raw_signal_id: pending._signal_id,
+      body: `Activated ${delay}m later by ${method} breakout ${fmt(probe.breakoutLevel)}`,
+    },
+  });
+}
+
+function buildExpiredAnnotation({ pending, bar, index, maxWait }) {
+  return {
+    ...pending,
+    id: `expired-${pending._setup_id}-${index}`,
+    type: 'expired',
+    style: 'purple',
+    bar_index: index,
+    t: timeOf(bar),
+    ts: bar?.ts,
+    price: bar?.C,
+    _expire_bar_index: index,
+    _expire_time: timeOf(bar),
+    _activation_delay_bars: index - pending.bar_index,
+    _activation_level: pending.lastBreakoutLevel,
+    _best_close_in_window: pending.bestClose,
+    _best_wick_in_window: pending.bestWick,
+    _wick_confirmed_count: pending.wickConfirmedCount || 0,
+    _miss_by: pending.missBy,
+    _last_checked_bar_index: pending.lastCheckedIndex,
+    _last_checked_time: pending.lastCheckedTime,
+    _expiry_gate_reason: pending.expiryGateReason || 'Activation window expired',
+    body: `Expired after ${maxWait} bars; best close ${fmt(pending.bestClose)} missed ${fmt(Math.max(0, pending.missBy || 0))}`,
+  };
+}
+
 export function scanSignals({ bars1m = [], bars5m = [], strategy = {} }) {
   if (!strategy || !Array.isArray(strategy.signals)) return [];
   const session = strategy.filter?.session || {};
   const trends5m = detectTrendsRouted(bars5m, strategy);
-  const rawSignals = [];
+  const useActivation = strategy.entry_activation?.enabled === true;
+  const maxWait = Number(strategy.entry_activation?.max_wait_bars || 8);
+  const usePosition = strategy.position_state?.enabled === true;
+  const useCooldown = strategy.cooldown?.enabled === true;
+  const cooldownBars = Number(strategy.cooldown?.bars || 0);
+  const useMa50Exit = Boolean(strategy.exit?.L2_hard_stops?.ma50_ha_close_break);
+  const annotations = [];
+  let pending = null;
+  let setupId = 0;
+  let activePos = 0;
+  let lastSignalBar = -Infinity;
 
-  bars1m.forEach((bar, index) => {
-    if (index < 1) return;
+  for (let index = 0; index < bars1m.length; index += 1) {
+    const bar = bars1m[index];
+    if (index < 1) continue;
     const time = timeOf(bar);
-    if (!inSession(time, session)) return;
+    if (!inSession(time, session)) continue;
+
+    if (useMa50Exit && activePos !== 0 && num(bar.m50) != null && num(bar.hC) != null) {
+      if ((activePos === 1 && num(bar.hC) < num(bar.m50)) || (activePos === -1 && num(bar.hC) > num(bar.m50))) {
+        activePos = 0;
+        lastSignalBar = -Infinity;
+      }
+    }
+
+    if (useActivation && pending) {
+      if ((index - pending.bar_index) > maxWait) {
+        annotations.push(buildExpiredAnnotation({ pending, bar, index, maxWait }));
+        pending = null;
+      } else {
+        const probe = activationProbe(pending, bars1m, index, strategy);
+        if (probe) updatePendingActivationStats(pending, probe, bar, index);
+        if (probe?.isActivation) {
+          const activated = buildActivatedAnnotation({ pending, probe, bar, index, strategy });
+          annotations.push(activated);
+          if (usePosition) activePos = pending.direction === 'CALL' ? 1 : -1;
+          lastSignalBar = index;
+          pending = null;
+          continue;
+        }
+        continue;
+      }
+    }
+
+    if (usePosition && activePos !== 0) continue;
+    if (useCooldown && lastSignalBar !== -Infinity && (index - lastSignalBar) <= cooldownBars) continue;
+
     const trend = trendAt(bars5m, trends5m, time);
 
     for (const signal of strategy.signals) {
@@ -371,11 +561,21 @@ export function scanSignals({ bars1m = [], bars5m = [], strategy = {} }) {
             ...evaluateGenericConditions(bars1m, index, signal.conditions || {}, direction),
           ];
       if (!checks.every((check) => check.ok)) continue;
-      rawSignals.push(annotationFromSignal({ signal, index, bar, direction, checks, strategy }));
+      const raw = annotationFromSignal({ signal, index, bar, direction, checks, strategy });
+      if (useActivation) {
+        setupId += 1;
+        pending = buildSetupAnnotation({ setup: raw, setupId, maxWait });
+        annotations.push(pending);
+      } else {
+        annotations.push(raw);
+        if (usePosition) activePos = direction === 'CALL' ? 1 : -1;
+        lastSignalBar = index;
+      }
+      break;
     }
-  });
+  }
 
-  return applyActivation({ rawSignals, bars1m, strategy });
+  return useActivation ? annotations : applyActivation({ rawSignals: annotations, bars1m, strategy });
 }
 
 export function generateTrendAnnotations(bars5m = [], strategy = {}) {

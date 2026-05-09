@@ -7,6 +7,25 @@
       const STYLE_ATTR = 'data-kline-engine';
       const DEFAULT_HEIGHT = 560;
       const DEMO_FIXTURES = {};
+      const MA_DEFS = [
+        { key: 'm5', label: 'MA5', color: '#eab308' },
+        { key: 'm10', label: 'MA10', color: '#e6a23c' },
+        { key: 'm20', label: 'MA20', color: '#ec4899' },
+        { key: 'm30', label: 'MA30', color: '#14b8a6' },
+        { key: 'm50', label: 'MA50', color: '#409eff' },
+        { key: 'm60', label: 'MA60', color: '#6366f1' },
+        { key: 'm120', label: 'MA120', color: '#f43f5e' },
+        { key: 'm200', label: 'MA200', color: '#67c23a' },
+        { key: 'm250', label: 'MA250', color: '#22c55e' },
+        { key: 'm500', label: 'MA500', color: '#94a3b8' },
+        { key: 'vw', label: 'VWAP', color: '#a855f7' },
+      ];
+      const DEFAULT_ENGINE_OPTIONS = {
+        maSet: MA_DEFS.map((def) => def.key),
+        allowVerticalDrag: true,
+        storageNamespace: 'klineEngineV2',
+        showClippedMAIndicators: false,
+      };
 
       function clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
@@ -283,6 +302,14 @@
             padding-left: 10px;
           }
 
+          .kline-engine__ma-value {
+            color: var(--kline-muted);
+            font-size: 10px;
+            font-variant-numeric: tabular-nums;
+            min-width: 38px;
+            text-align: right;
+          }
+
           .kline-engine__ma-button .kline-engine__swatch {
             width: 10px;
             height: 10px;
@@ -299,7 +326,7 @@
           .kline-engine__ma-button[data-ma="m50"]  { color: var(--kline-ma50); }
           .kline-engine__ma-button[data-ma="m60"]  { color: var(--kline-ma60); }
           .kline-engine__ma-button[data-ma="m120"] { color: var(--kline-ma120); }
-          
+          .kline-engine__ma-button[data-ma="m200"] { color: var(--kline-ma200); }
           .kline-engine__ma-button[data-ma="m250"] { color: var(--kline-ma250); }
           .kline-engine__ma-button[data-ma="m500"] { color: var(--kline-ma500); }
           .kline-engine__ma-button[data-ma="vw"]   { color: var(--kline-vwap); }
@@ -574,6 +601,7 @@
             bars_5m: [],
             annotations_1m: [],
             annotations_5m: [],
+            _trades: [],
           };
         }
 
@@ -619,6 +647,19 @@
           }));
         }
 
+        _normalizeTrades(rawTrades) {
+          return (rawTrades || []).map((trade) => ({
+            ...trade,
+            signal_index: Number(trade.signal_index),
+            entry_index: Number(trade.entry_index),
+            exit_index: Number(trade.exit_index),
+            entry_price: Number(trade.entry_price),
+            exit_price: Number(trade.exit_price),
+            spy_move: Number(trade.spy_move),
+            bars_held: Number(trade.bars_held),
+          }));
+        }
+
         loadData(payload) {
           const meta = { ...(payload.meta || {}) };
           const normalized = {
@@ -627,6 +668,7 @@
             bars_5m: (payload.bars_5m || []).map((bar) => this._normalizeBar(bar, meta)),
             annotations_1m: this._normalizeAnnotations(payload.annotations_1m, '1m'),
             annotations_5m: this._normalizeAnnotations(payload.annotations_5m, '5m'),
+            _trades: this._normalizeTrades(payload._trades),
           };
 
           this.data = normalized;
@@ -672,6 +714,10 @@
 
         getAnnotations(timeframe = this.timeframe) {
           return timeframe === '5m' ? this.data.annotations_5m : this.data.annotations_1m;
+        }
+
+        getTrades() {
+          return this.data._trades || [];
         }
 
         getLastIndex(timeframe = this.timeframe) {
@@ -818,7 +864,7 @@
       }
 
       class KlineEngine {
-        constructor({ container }) {
+        constructor({ container, options = {} }) {
           if (!container) {
             throw new Error('KlineEngine requires a container element.');
           }
@@ -837,6 +883,7 @@
           this.hover = { x: -1, y: -1, inside: false };
           this.dragState = null;
           this.priceOffsetRatio = 0;
+          this.options = this._normalizeOptions(options);
           this.lastRenderContext = null;
           // Track last emitted hover bar index so `hover:bar` only fires on
           // transitions (null → idx, idx → null, idx_a → idx_b), not every frame.
@@ -848,19 +895,19 @@
           this.theme = 'dark';
           this.candleType = 'ha'; // 'ha' = Heikin-Ashi (Tang 策略默认) | 'normal' = 真实 OHLC
           this.candleFillMode = 'solid'; // 'solid' = filled bodies | 'hollow' = outline bodies
-          this.maVisibility = { m5: true, m10: true, m20: true, m30: true, m50: true, m60: true, m120: true, m200: true, m250: true, m500: true, vw: true };
+          this.maVisibility = Object.fromEntries(MA_DEFS.map((def) => [def.key, this.options.maSet.includes(def.key)]));
           try {
-            const savedTheme = window.localStorage?.getItem('klineEngineV2:theme');
+            const savedTheme = window.localStorage?.getItem(this._storageKey('theme'));
             if (savedTheme === 'light' || savedTheme === 'dark') this.theme = savedTheme;
-            const savedCandle = window.localStorage?.getItem('klineEngineV2:candleType');
+            const savedCandle = window.localStorage?.getItem(this._storageKey('candleType'));
             if (savedCandle === 'ha' || savedCandle === 'normal') this.candleType = savedCandle;
-            const savedCandleFill = window.localStorage?.getItem('klineEngineV2:candleFillMode');
+            const savedCandleFill = window.localStorage?.getItem(this._storageKey('candleFillMode'));
             if (savedCandleFill === 'solid' || savedCandleFill === 'hollow') this.candleFillMode = savedCandleFill;
-            const savedMA = window.localStorage?.getItem('klineEngineV2:maVisibility');
+            const savedMA = window.localStorage?.getItem(this._storageKey('maVisibility'));
             if (savedMA) {
               const parsed = JSON.parse(savedMA);
               if (parsed && typeof parsed === 'object') {
-                Object.keys(this.maVisibility).forEach((k) => {
+                this.options.maSet.forEach((k) => {
                   if (typeof parsed[k] === 'boolean') this.maVisibility[k] = parsed[k];
                 });
               }
@@ -908,6 +955,52 @@
           this.scheduleRender();
         }
 
+        _normalizeOptions(input = {}) {
+          const requested = Array.isArray(input.maSet) && input.maSet.length
+            ? input.maSet
+            : DEFAULT_ENGINE_OPTIONS.maSet;
+          const known = new Set(MA_DEFS.map((def) => def.key));
+          const maSet = requested.filter((key, index) => known.has(key) && requested.indexOf(key) === index);
+          return {
+            ...DEFAULT_ENGINE_OPTIONS,
+            ...input,
+            maSet: maSet.length ? maSet : DEFAULT_ENGINE_OPTIONS.maSet,
+            storageNamespace: input.storageNamespace || DEFAULT_ENGINE_OPTIONS.storageNamespace,
+            allowVerticalDrag: input.allowVerticalDrag !== false,
+            showClippedMAIndicators: Boolean(input.showClippedMAIndicators),
+          };
+        }
+
+        _activeMADefs() {
+          return this.options.maSet
+            .map((key) => MA_DEFS.find((def) => def.key === key))
+            .filter(Boolean);
+        }
+
+        _storageKey(name) {
+          return `${this.options.storageNamespace}:${name}`;
+        }
+
+        setOptions(nextOptions = {}) {
+          const previousMASet = this.options.maSet.join('|');
+          this.options = this._normalizeOptions({ ...this.options, ...nextOptions });
+          const allowed = new Set(this.options.maSet);
+          this.maVisibility = Object.fromEntries(MA_DEFS.map((def) => [
+            def.key,
+            allowed.has(def.key) ? this.maVisibility?.[def.key] !== false : false,
+          ]));
+          if (!this.options.allowVerticalDrag) {
+            this.priceOffsetRatio = 0;
+          }
+          if (this.root && previousMASet !== this.options.maSet.join('|')) {
+            this._buildDOM();
+            this._bindControls();
+            this._bindCanvasHover();
+          }
+          this._updateToolbarState();
+          this.scheduleRender();
+        }
+
         _buildDOM() {
           this.container.innerHTML = '';
 
@@ -917,6 +1010,11 @@
 
           this.toolbar = document.createElement('div');
           this.toolbar.className = 'kline-engine__toolbar';
+          const maButtons = this._activeMADefs().map((def) => `
+              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="${def.key}" title="Toggle ${def.label}">
+                <span class="kline-engine__swatch"></span>${escapeHtml(def.label)}
+                <span class="kline-engine__ma-value" data-ma-value="${def.key}">--</span>
+              </button>`).join('');
           this.toolbar.innerHTML = `
             <div class="kline-engine__toolbar-group">
               <div>
@@ -937,17 +1035,7 @@
               <button class="kline-engine__button" data-action="zoom-out">- Zoom</button>
               <button class="kline-engine__button" data-action="zoom-in">+ Zoom</button>
               <button class="kline-engine__button" data-action="follow">Follow</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m5"   title="Toggle MA5"><span class="kline-engine__swatch"></span>MA5</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m10"  title="Toggle MA10"><span class="kline-engine__swatch"></span>MA10</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m20"  title="Toggle MA20"><span class="kline-engine__swatch"></span>MA20</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m30"  title="Toggle MA30"><span class="kline-engine__swatch"></span>MA30</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m50"  title="Toggle MA50"><span class="kline-engine__swatch"></span>MA50</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m60"  title="Toggle MA60"><span class="kline-engine__swatch"></span>MA60</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m120" title="Toggle MA120"><span class="kline-engine__swatch"></span>MA120</button>
-              
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m250" title="Toggle MA250"><span class="kline-engine__swatch"></span>MA250</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="m500" title="Toggle MA500"><span class="kline-engine__swatch"></span>MA500</button>
-              <button class="kline-engine__button kline-engine__ma-button" data-action="toggle-ma" data-ma="vw"   title="Toggle VWAP"><span class="kline-engine__swatch"></span>VWAP</button>
+              ${maButtons}
               <button class="kline-engine__button" data-action="candle-type" title="Toggle Heikin-Ashi / normal candles">HA</button>
               <button class="kline-engine__button" data-action="candle-fill" title="Toggle filled / hollow candles">Solid</button>
               <button class="kline-engine__button" data-action="theme" title="Toggle black/white theme">&#9788; Light</button>
@@ -1068,7 +1156,7 @@
               const key = button.dataset.ma;
               if (key && key in this.maVisibility) {
                 this.maVisibility[key] = !this.maVisibility[key];
-                try { window.localStorage?.setItem('klineEngineV2:maVisibility', JSON.stringify(this.maVisibility)); } catch (_) {}
+                try { window.localStorage?.setItem(this._storageKey('maVisibility'), JSON.stringify(this.maVisibility)); } catch (_) {}
                 this._updateToolbarState();
                 this.emit('ma:visibility', { ...this.maVisibility });
                 this.scheduleRender();
@@ -1100,7 +1188,7 @@
           if (next === this.theme) return;
           this.theme = next;
           if (this.root) this.root.setAttribute('data-theme', next);
-          try { window.localStorage?.setItem('klineEngineV2:theme', next); } catch (_) {}
+          try { window.localStorage?.setItem(this._storageKey('theme'), next); } catch (_) {}
           this._updateToolbarState();
           this.emit('theme:changed', { theme: next });
           this.scheduleRender();
@@ -1114,7 +1202,7 @@
           const next = type === 'normal' ? 'normal' : 'ha';
           if (next === this.candleType) return;
           this.candleType = next;
-          try { window.localStorage?.setItem('klineEngineV2:candleType', next); } catch (_) {}
+          try { window.localStorage?.setItem(this._storageKey('candleType'), next); } catch (_) {}
           this._updateToolbarState();
           this.emit('candletype:changed', { candleType: next });
           this.scheduleRender();
@@ -1128,7 +1216,7 @@
           const next = mode === 'hollow' ? 'hollow' : 'solid';
           if (next === this.candleFillMode) return;
           this.candleFillMode = next;
-          try { window.localStorage?.setItem('klineEngineV2:candleFillMode', next); } catch (_) {}
+          try { window.localStorage?.setItem(this._storageKey('candleFillMode'), next); } catch (_) {}
           this._updateToolbarState();
           this.emit('candlefill:changed', { candleFillMode: next });
           this.scheduleRender();
@@ -1159,8 +1247,10 @@
             const maxStart = Math.max(0, this.dragState.totalBars - this.dragState.viewCount);
             this.viewportManager.viewStart = clamp(this.dragState.startViewStart + offsetBars, 0, maxStart);
             this.viewportManager.setFollowMode(false);
-            const offsetDelta = dy / Math.max(1, this.dragState.priceHeight);
-            this.priceOffsetRatio = clamp(this.dragState.startPriceOffsetRatio + offsetDelta, -3, 3);
+            if (this.options.allowVerticalDrag) {
+              const offsetDelta = dy / Math.max(1, this.dragState.priceHeight);
+              this.priceOffsetRatio = clamp(this.dragState.startPriceOffsetRatio + offsetDelta, -3, 3);
+            }
             this.emit('viewport:changed', this._getViewportPayload());
             this.scheduleRender();
           });
@@ -1642,17 +1732,67 @@
           ctx.beginPath();
           ctx.rect(rc.area.x, rc.area.y, rc.area.w, rc.priceHeight);
           ctx.clip();
-          if (this.maVisibility.m5)   this.drawSeriesLine(ctx, rc, 'm5',   '#eab308');
-          if (this.maVisibility.m10)  this.drawSeriesLine(ctx, rc, 'm10',  '#e6a23c');
-          if (this.maVisibility.m20)  this.drawSeriesLine(ctx, rc, 'm20',  '#ec4899');
-          if (this.maVisibility.m30)  this.drawSeriesLine(ctx, rc, 'm30',  '#14b8a6');
-          if (this.maVisibility.m50)  this.drawSeriesLine(ctx, rc, 'm50',  '#409eff');
-          if (this.maVisibility.m60)  this.drawSeriesLine(ctx, rc, 'm60',  '#6366f1');
-          if (this.maVisibility.m120) this.drawSeriesLine(ctx, rc, 'm120', '#f43f5e');
-          
-          if (this.maVisibility.m250) this.drawSeriesLine(ctx, rc, 'm250', '#22c55e');
-          if (this.maVisibility.m500) this.drawSeriesLine(ctx, rc, 'm500', '#94a3b8');
-          if (this.maVisibility.vw)   this.drawSeriesLine(ctx, rc, 'vw',   '#a855f7');
+          this._activeMADefs().forEach((def) => {
+            if (this.maVisibility[def.key]) {
+              this.drawSeriesLine(ctx, rc, def.key, def.color);
+            }
+          });
+          ctx.restore();
+        }
+
+        drawClippedMAIndicators(ctx, rc) {
+          const lastBar = rc.visibleBars[rc.visibleBars.length - 1];
+          if (!lastBar) return;
+
+          const below = [];
+          const above = [];
+          this._activeMADefs().forEach((def) => {
+            if (!this.maVisibility[def.key]) return;
+            const value = lastBar[def.key];
+            if (!Number.isFinite(value)) return;
+            if (value < rc.priceMin) below.push({ ...def, value });
+            else if (value > rc.priceMax) above.push({ ...def, value });
+          });
+          if (!below.length && !above.length) return;
+
+          below.sort((a, b) => b.value - a.value);
+          above.sort((a, b) => a.value - b.value);
+
+          const tc = this._themeColors();
+          ctx.save();
+          ctx.font = '11px "Segoe UI", "PingFang SC", sans-serif';
+          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'left';
+          const rowHeight = 16;
+          const padX = 6;
+          const swatchSize = 6;
+          const rowGap = 3;
+          const rightX = rc.chartRight - 6;
+
+          const drawRow = (def, y, arrow) => {
+            const text = `${def.label} ${arrow}${def.value.toFixed(2)}`;
+            const textWidth = ctx.measureText(text).width;
+            const boxWidth = padX + swatchSize + 5 + textWidth + padX;
+            const boxX = rightX - boxWidth;
+            ctx.fillStyle = tc.crosshairLabelBg;
+            ctx.fillRect(boxX, y - rowHeight / 2, boxWidth, rowHeight);
+            ctx.fillStyle = def.color;
+            ctx.fillRect(boxX + padX, y - swatchSize / 2, swatchSize, swatchSize);
+            ctx.fillText(text, boxX + padX + swatchSize + 5, y);
+          };
+
+          let yBelow = rc.area.y + rc.priceHeight - 4 - rowHeight / 2;
+          below.forEach((def) => {
+            drawRow(def, yBelow, '↓ ');
+            yBelow -= rowHeight + rowGap;
+          });
+
+          let yAbove = rc.area.y + 4 + rowHeight / 2;
+          above.forEach((def) => {
+            drawRow(def, yAbove, '↑ ');
+            yAbove += rowHeight + rowGap;
+          });
+
           ctx.restore();
         }
 
@@ -1746,6 +1886,76 @@
           drawLabel(rc.xForIndex(lowIndex), rc.yForPrice(lowValue), lowValue.toFixed(3), 'down');
         }
 
+        drawTradeZones(ctx, rc) {
+          if (this.currentTimeframe !== '1m') return;
+          const trades = this.dataManager.getTrades();
+          if (!trades.length) return;
+
+          const neutralLine = this.theme === 'light' ? 'rgba(26, 26, 25, 0.24)' : 'rgba(255, 255, 255, 0.3)';
+          const neutralText = this.theme === 'light' ? 'rgba(26, 26, 25, 0.62)' : 'rgba(255, 255, 255, 0.6)';
+
+          ctx.save();
+          trades.forEach((trade) => {
+            const entryIdx = trade.entry_index;
+            const exitIdx = trade.exit_index;
+            if (!Number.isFinite(entryIdx) || !Number.isFinite(exitIdx)) return;
+            if (!Number.isFinite(trade.entry_price) || !Number.isFinite(trade.exit_price)) return;
+            if (exitIdx < rc.visible.start || entryIdx > rc.visible.end) return;
+
+            const drawStart = Math.max(entryIdx, rc.visible.start);
+            const drawEnd = Math.min(exitIdx, rc.visible.end);
+            const x1 = rc.xForIndex(drawStart) - rc.slotWidth * 0.5;
+            const x2 = rc.xForIndex(drawEnd) + rc.slotWidth * 0.5;
+            const entryY = rc.yForPrice(trade.entry_price);
+            const exitY = rc.yForPrice(trade.exit_price);
+            const favorableExit = Number.isFinite(trade.spy_move) && trade.spy_move > 0;
+
+            ctx.fillStyle = favorableExit ? 'rgba(76, 175, 80, 0.06)' : 'rgba(201, 64, 64, 0.06)';
+            ctx.fillRect(x1, rc.area.y, x2 - x1, rc.area.h);
+
+            ctx.strokeStyle = neutralLine;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(x1, entryY);
+            ctx.lineTo(x2, entryY);
+            ctx.stroke();
+
+            ctx.strokeStyle = favorableExit ? 'rgba(76, 175, 80, 0.5)' : 'rgba(201, 64, 64, 0.5)';
+            ctx.beginPath();
+            ctx.moveTo(x1, exitY);
+            ctx.lineTo(x2, exitY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = '9px ui-monospace, SFMono-Regular, Menlo, monospace';
+            if (entryIdx >= rc.visible.start && entryIdx <= rc.visible.end) {
+              const entryX = rc.xForIndex(entryIdx);
+              ctx.fillStyle = neutralText;
+              ctx.textAlign = 'left';
+              ctx.fillText(`▸ ${trade.entry_price.toFixed(2)}`, entryX + 4, entryY - 3);
+            }
+
+            if (exitIdx >= rc.visible.start && exitIdx <= rc.visible.end) {
+              const exitX = rc.xForIndex(exitIdx);
+              const move = Number.isFinite(trade.spy_move) ? trade.spy_move : 0;
+              const moveText = move >= 0 ? `+${move.toFixed(2)}` : move.toFixed(2);
+              const exitTag = trade.invalidation_type === 'eod' ? 'EOD' : '失效';
+              ctx.fillStyle = favorableExit ? 'rgba(76, 175, 80, 0.8)' : 'rgba(201, 64, 64, 0.8)';
+              ctx.textAlign = 'right';
+              ctx.fillText(`${moveText} · ${exitTag}`, exitX - 4, exitY - 3);
+              ctx.beginPath();
+              ctx.moveTo(exitX, exitY - 4);
+              ctx.lineTo(exitX + 3, exitY);
+              ctx.lineTo(exitX, exitY + 4);
+              ctx.lineTo(exitX - 3, exitY);
+              ctx.closePath();
+              ctx.fill();
+            }
+          });
+          ctx.restore();
+        }
+
         drawCrosshair(ctx, rc, hoveredIndex) {
           if (!this.hover.inside || hoveredIndex == null) {
             return null;
@@ -1793,9 +2003,19 @@
           return { bar, price };
         }
 
-        updatePanels() {
+        updatePanels(rc, focusBar) {
           const meta = this.dataManager.getMeta();
           this.metaEl.textContent = `${meta.title || 'Untitled'} | ${meta.date || 'n/a'} | tf=${this.currentTimeframe}`;
+          this._updateMAButtonValues(focusBar);
+        }
+
+        _updateMAButtonValues(focusBar) {
+          this._activeMADefs().forEach((def) => {
+            const valueEl = this.root.querySelector(`[data-ma-value="${def.key}"]`);
+            if (!valueEl) return;
+            const value = focusBar?.[def.key];
+            valueEl.textContent = Number.isFinite(value) ? Number(value).toFixed(3) : '--';
+          });
         }
 
         // ============================================================
@@ -2320,6 +2540,47 @@
           this.scheduleRender();
         }
 
+        fitRange(input = {}) {
+          const timeframe = input.timeframe === '5m' ? '5m' : '1m';
+          if (this.currentTimeframe !== timeframe) {
+            this.setTimeframe(timeframe);
+          }
+          const bars = this.dataManager.getBars(this.currentTimeframe);
+          if (!bars.length) return null;
+
+          const rawStart = Math.floor(Number(input.startIndex));
+          const rawEnd = Math.floor(Number(input.endIndex));
+          if (!Number.isFinite(rawStart) || !Number.isFinite(rawEnd)) return null;
+
+          const lo = clamp(Math.min(rawStart, rawEnd), 0, bars.length - 1);
+          const hi = clamp(Math.max(rawStart, rawEnd), 0, bars.length - 1);
+          const rangeSize = Math.max(1, hi - lo + 1);
+          const paddingRatio = Number.isFinite(Number(input.paddingRatio)) ? Number(input.paddingRatio) : 0.35;
+          const minPadding = Number.isFinite(Number(input.minPadding)) ? Number(input.minPadding) : 5;
+          const padding = Math.max(minPadding, Math.round(rangeSize * paddingRatio));
+          const viewStart = Math.max(0, lo - padding);
+          const viewEnd = Math.min(bars.length - 1, hi + padding);
+          const desiredCount = Math.max(1, viewEnd - viewStart + 1);
+          const chartWidth = this._getChartWidth();
+          const view = this.viewportManager.getResolvedViewCount(bars.length, this.currentTimeframe, chartWidth);
+          const clampedCount = clamp(desiredCount, view.minCount, view.maxCount);
+          const maxStart = Math.max(0, bars.length - clampedCount);
+
+          this.viewportManager.zoomScale = clampedCount / Math.max(1, view.base);
+          this.viewportManager.viewStart = clamp(viewStart, 0, maxStart);
+          this.viewportManager.setFollowMode(false);
+          this.currentIndex = bars.length - 1;
+
+          this.emit('viewport:changed', this._getViewportPayload());
+          this.scheduleRender();
+          return {
+            timeframe: this.currentTimeframe,
+            start: this.viewportManager.viewStart,
+            end: Math.min(bars.length - 1, this.viewportManager.viewStart + clampedCount - 1),
+            count: clampedCount,
+          };
+        }
+
         setCurrentIndex(nextIndex, { follow = true } = {}) {
           const bars = this.dataManager.getBars(this.currentTimeframe);
           if (!bars.length) {
@@ -2346,6 +2607,9 @@
           this.revealCutoff = { '1m': null, '5m': null };
           this.replayReveal = { enabled: false };
           this.highlightRanges = [];
+          if (!this.options.allowVerticalDrag) {
+            this.priceOffsetRatio = 0;
+          }
           const summary = this.dataManager.loadData(json);
           this.currentTimeframe = this.dataManager.getTimeframe();
           this.currentIndex = this._resolveInitialIndex(this.currentTimeframe);
@@ -2707,15 +2971,20 @@
           }
 
           this.drawGrid(ctx, rc);
+          this.drawTradeZones(ctx, rc);
           this.drawHighlightRanges(ctx, rc);
           this.drawVolumeBars(ctx, rc);
           this.drawCandles(ctx, rc);
           this.drawMALines(ctx, rc);
+          if (this.options.showClippedMAIndicators) {
+            this.drawClippedMAIndicators(ctx, rc);
+          }
           this.drawAxes(ctx, rc);
           this.drawHighLowLabels(ctx, rc);
           this.drawAnnotationPins(ctx, rc);
-          this.drawCrosshair(ctx, rc, hoveredIndex);
-          this.updatePanels();
+          const crosshairState = this.drawCrosshair(ctx, rc, hoveredIndex);
+          const focusBar = crosshairState?.bar || rc.visibleBars[rc.visibleBars.length - 1] || null;
+          this.updatePanels(rc, focusBar, crosshairState);
           this._updateAnnoHover();
           this._updateHoverCard();
         }

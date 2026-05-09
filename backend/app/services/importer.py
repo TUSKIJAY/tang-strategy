@@ -7,7 +7,7 @@ from typing import Any
 
 from ..db import connect, init_db
 from ..settings import settings
-from .bar_utils import bar_tuple_from_seed
+from .bar_utils import BAR_MA_WINDOWS, bar_tuple_from_seed, recalculate_ma_fields
 
 
 def slugify(value: str) -> str:
@@ -61,10 +61,20 @@ def import_market_json(path: Path) -> int:
             (ticker, trade_date, session_mode),
         ).fetchone()["id"])
         conn.execute("DELETE FROM bars_1m WHERE market_day_id=?", (market_day_id,))
+        conn.execute("DELETE FROM bars_5m WHERE market_day_id=?", (market_day_id,))
+        bars_5m = recalculate_ma_fields(
+            bars_5m,
+            warmup_closes=_fetch_prior_5m_closes(conn, ticker, trade_date, session_mode),
+        )
         conn.executemany(
             BAR_INSERT_SQL.format(table="bars_1m"),
             [bar_tuple_from_seed(market_day_id, i, b) for i, b in enumerate(bars_1m)],
         )
+        if bars_5m:
+            conn.executemany(
+                BAR_INSERT_SQL.format(table="bars_5m"),
+                [bar_tuple_from_seed(market_day_id, i, b) for i, b in enumerate(bars_5m)],
+            )
         return market_day_id
 
 
@@ -142,6 +152,24 @@ def _date_from_name(name: str) -> str:
     if not match:
         raise ValueError(f"Cannot infer trade date from {name}")
     return match.group(1)
+
+
+def _fetch_prior_5m_closes(conn, ticker: str, trade_date: str, session_mode: str) -> list[float | None]:
+    rows = conn.execute(
+        """
+        SELECT bars_5m.close
+        FROM bars_5m
+        JOIN market_days ON market_days.id = bars_5m.market_day_id
+        WHERE market_days.ticker=?
+          AND market_days.session_mode=?
+          AND market_days.trade_date<?
+          AND bars_5m.close IS NOT NULL
+        ORDER BY market_days.trade_date DESC, bars_5m.idx DESC
+        LIMIT ?
+        """,
+        (ticker, session_mode, trade_date, max(BAR_MA_WINDOWS) - 1),
+    ).fetchall()
+    return [row["close"] for row in reversed(rows)]
 
 
 BAR_INSERT_SQL = """

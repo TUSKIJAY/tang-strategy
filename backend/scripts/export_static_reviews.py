@@ -9,14 +9,14 @@ from pathlib import Path
 from typing import Any
 
 from app.db import connect, init_db
-from app.services.bar_utils import bar_row_to_payload, build_5m_bars_from_1m
+from app.services.bar_utils import BAR_MA_WINDOWS, bar_row_to_payload, build_5m_bars_from_1m, recalculate_ma_fields
 from app.settings import settings
 
 
 BAR_SELECT = (
     "SELECT market_day_id, idx, ts, time, open, high, low, close, volume, vwap, "
     "ha_open, ha_high, ha_low, ha_close, m5, m10, m20, m30, m50, m60, m120, m200, m250 "
-    "FROM bars_1m WHERE market_day_id=? ORDER BY idx"
+    "FROM {table} WHERE market_day_id=? ORDER BY idx"
 )
 
 
@@ -72,8 +72,10 @@ def latest_market_days(conn, limit: int, ticker: str | None) -> list[dict[str, A
 
 
 def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
-    rows = conn.execute(BAR_SELECT, (day["id"],)).fetchall()
-    bars_5m = build_5m_bars_from_1m(rows)
+    rows = conn.execute(BAR_SELECT.format(table="bars_1m"), (day["id"],)).fetchall()
+    stored_5m_rows = conn.execute(BAR_SELECT.format(table="bars_5m"), (day["id"],)).fetchall()
+    bars_5m_source = [bar_row_to_payload(row) for row in stored_5m_rows] if stored_5m_rows else build_5m_bars_from_1m(rows)
+    bars_5m = recalculate_ma_fields(bars_5m_source, warmup_closes=fetch_prior_5m_closes(conn, day))
     meta = json.loads(day["meta_json"] or "{}")
     meta.update({
         "ticker": day["ticker"],
@@ -99,6 +101,24 @@ def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
         "annotations_1m": [],
         "annotations_5m": [],
     }
+
+
+def fetch_prior_5m_closes(conn, day: dict[str, Any]) -> list[float | None]:
+    rows = conn.execute(
+        """
+        SELECT bars_5m.close
+        FROM bars_5m
+        JOIN market_days ON market_days.id = bars_5m.market_day_id
+        WHERE market_days.ticker=?
+          AND market_days.session_mode=?
+          AND market_days.trade_date<?
+          AND bars_5m.close IS NOT NULL
+        ORDER BY market_days.trade_date DESC, bars_5m.idx DESC
+        LIMIT ?
+        """,
+        (day["ticker"], day["session_mode"], day["trade_date"], max(BAR_MA_WINDOWS) - 1),
+    ).fetchall()
+    return [row["close"] for row in reversed(rows)]
 
 
 def export_static_reviews(output_dir: Path, limit: int, ticker: str | None, strategy_families: str) -> dict[str, Any]:

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Api, getRole } from '../api/client.js';
+import { preferredActivationWickStrategy } from '../features/review/session.js';
 
 export function DashboardPage({ state, setState }) {
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,16 @@ export function DashboardPage({ state, setState }) {
         Api.marketDays(),
         Api.strategies(),
       ]);
-      setState((prev) => ({ ...prev, tickers, marketDays, strategies }));
+      setState((prev) => {
+        const preferred = preferredActivationWickStrategy(strategies);
+        return {
+          ...prev,
+          tickers,
+          marketDays,
+          strategies,
+          selectedStrategyId: prev.selectedStrategyId || preferred?.id || '',
+        };
+      });
     } catch (err) {
       setError(err.message);
     } finally {

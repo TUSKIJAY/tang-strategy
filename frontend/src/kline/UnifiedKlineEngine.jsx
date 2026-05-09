@@ -13,18 +13,20 @@ function normalizeAnnotation(annotation, timeframe) {
   };
 }
 
-export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ payload, annotations1m = [], annotations5m = [], onAnnotationClick, onBarClick, onReady, replayOnLoad = false, replayStartTime = null }, ref) {
+export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ payload, annotations1m = [], annotations5m = [], onAnnotationClick, onBarClick, onReady, replayOnLoad = false, replayStartTime = null, engineOptions = null }, ref) {
   const containerRef = useRef(null);
   const engineRef = useRef(null);
   const onAnnotationClickRef = useRef(onAnnotationClick);
   const onBarClickRef = useRef(onBarClick);
   const onReadyRef = useRef(onReady);
+  const engineOptionsRef = useRef(engineOptions);
 
   useEffect(() => {
     onAnnotationClickRef.current = onAnnotationClick;
     onBarClickRef.current = onBarClick;
     onReadyRef.current = onReady;
-  }, [onAnnotationClick, onBarClick, onReady]);
+    engineOptionsRef.current = engineOptions;
+  }, [onAnnotationClick, onBarClick, onReady, engineOptions]);
 
   const payloadWithAnnotations = useMemo(() => {
     if (!payload) return null;
@@ -37,7 +39,7 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
 
   useEffect(() => {
     if (!containerRef.current || engineRef.current || !window.KlineEngine) return undefined;
-    const engine = new window.KlineEngine({ container: containerRef.current });
+    const engine = new window.KlineEngine({ container: containerRef.current, options: engineOptionsRef.current || {} });
     engineRef.current = engine;
     const offAnno = engine.on?.('annotation:click', (annotation) => onAnnotationClickRef.current?.(annotation));
     const offBar = engine.on?.('bar:click', (event) => onBarClickRef.current?.(event));
@@ -49,6 +51,11 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
       engineRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!engineRef.current || !engineOptions) return;
+    engineRef.current.setOptions?.(engineOptions);
+  }, [engineOptions]);
 
   useEffect(() => {
     const engine = engineRef.current;
@@ -74,6 +81,7 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
     setCurrentIndex: (index, options) => engineRef.current?.setCurrentIndex?.(index, options),
     getCurrentIndex: () => engineRef.current?.getCurrentIndex?.(),
     scrollTo: (target) => engineRef.current?.scrollTo?.(target),
+    fitRange: (input) => engineRef.current?.fitRange?.(input),
     setRevealCutoff: (input) => engineRef.current?.setRevealCutoff?.(input),
     setReplayReveal: (input) => engineRef.current?.setReplayReveal?.(input),
     setHighlightRanges: (input) => engineRef.current?.setHighlightRanges?.(input),

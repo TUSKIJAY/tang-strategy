@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from .auth import create_token, require_admin, require_readonly, role_from_password
 from .db import connect, init_db, rows_to_dicts
 from .services.importer import import_default_seed, import_market_json, import_strategy_json
-from .services.bar_utils import bar_row_to_payload, build_5m_bars_from_1m
+from .services.bar_utils import BAR_MA_WINDOWS, bar_row_to_payload, build_5m_bars_from_1m, recalculate_ma_fields
 from .settings import settings
 
 app = FastAPI(title="Tang Strategy API")
@@ -21,6 +21,11 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+BAR_SELECT_COLUMNS = (
+    "market_day_id, idx, ts, time, open, high, low, close, volume, vwap, "
+    "ha_open, ha_high, ha_low, ha_close, m5, m10, m20, m30, m50, m60, m120, m200, m250"
 )
 
 
@@ -93,13 +98,11 @@ def bars(market_day_id: int, timeframe: str = "1m", _: str = Depends(require_rea
         day = conn.execute("SELECT * FROM market_days WHERE id=?", (market_day_id,)).fetchone()
         if not day:
             raise HTTPException(status_code=404, detail="Market day not found")
-        rows = conn.execute(
-            "SELECT market_day_id, idx, ts, time, open, high, low, close, volume, vwap, "
-            "ha_open, ha_high, ha_low, ha_close, m5, m10, m20, m30, m50, m60, m120, m200, m250 "
-            "FROM bars_1m WHERE market_day_id=? ORDER BY idx",
-            (market_day_id,),
-        ).fetchall()
-        bars = [bar_row_to_payload(row) for row in rows] if timeframe == "1m" else build_5m_bars_from_1m(rows)
+        bars_1m_rows = _fetch_bar_rows(conn, "bars_1m", market_day_id)
+        if timeframe == "1m":
+            bars_payload = [bar_row_to_payload(row) for row in bars_1m_rows]
+        else:
+            bars_payload = _build_5m_payload(conn, day, bars_1m_rows)
         return {
             "market_day": {
                 "id": day["id"],
@@ -109,7 +112,7 @@ def bars(market_day_id: int, timeframe: str = "1m", _: str = Depends(require_rea
                 "meta": json.loads(day["meta_json"] or "{}"),
             },
             "timeframe": timeframe,
-            "bars": bars,
+            "bars": bars_payload,
         }
 
 
@@ -141,13 +144,8 @@ def assemble_review(market_day_id: int, strategy_id: int, _: str = Depends(requi
         strategy_row = conn.execute("SELECT * FROM strategies WHERE id=? AND active=1", (strategy_id,)).fetchone()
         if not strategy_row:
             raise HTTPException(status_code=404, detail="Strategy not found")
-        bars_1m_rows = conn.execute(
-            "SELECT market_day_id, idx, ts, time, open, high, low, close, volume, vwap, "
-            "ha_open, ha_high, ha_low, ha_close, m5, m10, m20, m30, m50, m60, m120, m200, m250 "
-            "FROM bars_1m WHERE market_day_id=? ORDER BY idx",
-            (market_day_id,),
-        ).fetchall()
-        bars_5m = build_5m_bars_from_1m(bars_1m_rows)
+        bars_1m_rows = _fetch_bar_rows(conn, "bars_1m", market_day_id)
+        bars_5m = _build_5m_payload(conn, day, bars_1m_rows)
         strategy_json = json.loads(strategy_row["json_body"])
         meta = json.loads(day["meta_json"] or "{}")
         meta.update({
@@ -230,3 +228,39 @@ def _safe_repo_path(raw_path: str, allowed_root: Path) -> Path:
     if not resolved.exists() or resolved.suffix != ".json":
         raise HTTPException(status_code=400, detail="JSON file not found")
     return resolved
+
+
+def _fetch_bar_rows(conn, table: str, market_day_id: int) -> list[Any]:
+    return conn.execute(
+        f"SELECT {BAR_SELECT_COLUMNS} FROM {table} WHERE market_day_id=? ORDER BY idx",
+        (market_day_id,),
+    ).fetchall()
+
+
+def _fetch_stored_bar_payload(conn, table: str, market_day_id: int) -> list[dict[str, Any]]:
+    rows = _fetch_bar_rows(conn, table, market_day_id)
+    return [bar_row_to_payload(row) for row in rows]
+
+
+def _build_5m_payload(conn, day: Any, bars_1m_rows: list[Any]) -> list[dict[str, Any]]:
+    stored_bars = _fetch_stored_bar_payload(conn, "bars_5m", day["id"])
+    bars = stored_bars if stored_bars else build_5m_bars_from_1m(bars_1m_rows)
+    return recalculate_ma_fields(bars, warmup_closes=_fetch_prior_5m_closes(conn, day))
+
+
+def _fetch_prior_5m_closes(conn, day: Any) -> list[float | None]:
+    rows = conn.execute(
+        """
+        SELECT bars_5m.close
+        FROM bars_5m
+        JOIN market_days ON market_days.id = bars_5m.market_day_id
+        WHERE market_days.ticker=?
+          AND market_days.session_mode=?
+          AND market_days.trade_date<?
+          AND bars_5m.close IS NOT NULL
+        ORDER BY market_days.trade_date DESC, bars_5m.idx DESC
+        LIMIT ?
+        """,
+        (day["ticker"], day["session_mode"], day["trade_date"], max(BAR_MA_WINDOWS) - 1),
+    ).fetchall()
+    return [row["close"] for row in reversed(rows)]

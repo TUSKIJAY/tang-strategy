@@ -24,6 +24,23 @@ def _as_float(value: Any) -> float | None:
         return None
 
 
+def _finite_values(values: list[float | None]) -> list[float]:
+    return [value for value in values if value is not None]
+
+
+def _typical_price(row: Any) -> float | None:
+    high = _as_float(row["high"])
+    low = _as_float(row["low"])
+    close = _as_float(row["close"])
+    if high is None or low is None or close is None:
+        return None
+    return (high + low + close) / 3.0
+
+
+def _source_vwap_price(row: Any) -> float | None:
+    return _as_float(row["vwap"]) if row["vwap"] is not None else _typical_price(row)
+
+
 def bar_tuple_from_seed(market_day_id: int, idx: int, bar: dict[str, Any]) -> tuple[Any, ...]:
     return (
         market_day_id,
@@ -84,6 +101,33 @@ def bar_row_to_payload(row: Any) -> dict[str, Any]:
     }
 
 
+def recalculate_ma_fields(
+    bars: list[dict[str, Any]],
+    warmup_closes: list[float | None] | None = None,
+    preserve_warmup_values: bool = True,
+) -> list[dict[str, Any]]:
+    closes_for_ma: list[float | None] = list(warmup_closes or [])
+    normalized: list[dict[str, Any]] = []
+
+    for bar in bars:
+        next_bar = dict(bar)
+        close_price = _as_float(pick_value(next_bar, "C", "close"))
+        closes_for_ma.append(close_price)
+
+        for window, key in zip(BAR_MA_WINDOWS, BAR_WINDOW_COLUMNS):
+            if len(closes_for_ma) >= window:
+                window_values = closes_for_ma[-window:]
+                next_bar[key] = sum(v for v in window_values if v is not None) / window if all(
+                    v is not None for v in window_values
+                ) else None
+            elif not preserve_warmup_values:
+                next_bar[key] = None
+
+        normalized.append(next_bar)
+
+    return normalized
+
+
 def _bucket_start(ts: str) -> datetime:
     normalized = ts[:-1] + "+00:00" if ts.endswith("Z") else ts
     dt = datetime.fromisoformat(normalized)
@@ -108,33 +152,50 @@ def build_5m_bars_from_1m(raw_rows: list[Any]) -> list[dict[str, Any]]:
 
     bucket_rows: list[dict[str, Any]] = []
     current_bucket = _bucket_start(rows[0]["ts"])
+    current_session_date = current_bucket.date()
+    cumulative_vw_numerator = 0.0
+    cumulative_vw_denominator = 0.0
 
     def _flush_bucket(bucket_dt: datetime, members: list[dict[str, Any]]) -> None:
         nonlocal prev_ha_open, prev_ha_close, closes_for_ma
+        nonlocal current_session_date, cumulative_vw_numerator, cumulative_vw_denominator
         if not members:
             return
+        if bucket_dt.date() != current_session_date:
+            current_session_date = bucket_dt.date()
+            prev_ha_open = None
+            prev_ha_close = None
+            cumulative_vw_numerator = 0.0
+            cumulative_vw_denominator = 0.0
 
         open_price = _as_float(members[0]["open"])
         closes = [_as_float(row["close"]) for row in members]
         highs = [_as_float(row["high"]) for row in members]
         lows = [_as_float(row["low"]) for row in members]
         volumes = [_as_float(row["volume"]) for row in members]
-        closes_without_none = [x for x in closes if x is not None]
-        high_price = max(highs) if highs else None
-        low_price = min(lows) if lows else None
-        close_price = closes_without_none[-1] if closes else None
+        closes_without_none = _finite_values(closes)
+        highs_without_none = _finite_values(highs)
+        lows_without_none = _finite_values(lows)
+        high_price = max(highs_without_none) if highs_without_none else None
+        low_price = min(lows_without_none) if lows_without_none else None
+        close_price = closes_without_none[-1] if closes_without_none else None
 
-        # Classical VWAP from close-weighted volume.
-        vw_numerator = 0.0
-        vw_denominator = 0.0
-        for close_value, volume_value in zip(closes, volumes):
-            if close_value is None or volume_value is None:
+        # Match upstream Daily Review: use 1m source VWAP when present, otherwise
+        # typical price, then keep a session-cumulative VWAP on the 5m series.
+        bucket_vw_numerator = 0.0
+        bucket_vw_denominator = 0.0
+        for row, volume_value in zip(members, volumes):
+            price_value = _source_vwap_price(row)
+            if price_value is None or volume_value is None:
                 continue
-            vw_numerator += close_value * volume_value
-            vw_denominator += volume_value
+            bucket_vw_numerator += price_value * volume_value
+            bucket_vw_denominator += volume_value
 
         volume_total = sum(v for v in volumes if v is not None)
-        vwap = vw_numerator / vw_denominator if vw_denominator > 0 else None
+        if bucket_vw_denominator > 0:
+            cumulative_vw_numerator += bucket_vw_numerator
+            cumulative_vw_denominator += bucket_vw_denominator
+        vwap = cumulative_vw_numerator / cumulative_vw_denominator if cumulative_vw_denominator > 0 else None
 
         if open_price is None or high_price is None or low_price is None or close_price is None:
             ha_open = None
