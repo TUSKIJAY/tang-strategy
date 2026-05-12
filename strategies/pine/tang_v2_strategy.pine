@@ -1,0 +1,338 @@
+// @version=5
+// Tang Strategy v2 — PineScript Strategy (translated from backtest_v02.py)
+// =========================================================================
+// v1 → v2 changes:
+//   1. Relaxed 5min trend: MA10 vs MA50 + slope (not strict 4-line)
+//   2. Signal strength scoring (0-10) → modulates TP bars
+//   3. Adaptive exit: TP → TimeStop → MA10-stop priority chain
+//   4. Profile parameters (strict / moderate / loose)
+//   5. Signal B detection
+//
+// Usage: Load on SPY 1-min chart in TradingView.
+//        Strategy Tester panel shows backtest results.
+
+strategy("小汤系统 v2 — Strategy", overlay=true,
+     default_qty_type=strategy.percent_of_equity,
+     default_qty_value=100,
+     initial_capital=10000,
+     commission_type=strategy.commission.percent,
+     commission_value=0,
+     slippage=0)
+
+// ══════════════════════════════════════════════════════════════════════
+// 1. User Inputs (corresponds to Python argparse + PROFILES)
+// ══════════════════════════════════════════════════════════════════════
+
+i_profile    = input.string("loose", "Profile", options=["strict", "moderate", "loose"],
+                 tooltip="strict=高过滤 moderate=中 loose=低过滤")
+i_tp_bars    = input.int(2, "TP Bars (0=disabled)", minval=0, maxval=10,
+                 tooltip="连续顺势K止盈根数")
+i_time_stop  = input.int(5, "Time Stop Bars (0=disabled)", minval=0, maxval=20,
+                 tooltip="无新高/低自动出场")
+i_min_score  = input.int(3, "Min Signal Score", minval=0, maxval=10,
+                 tooltip="低于此分数不进场")
+
+// Profile parameter mapping
+f_k_quality = i_profile == "strict" ? 0.50 : i_profile == "moderate" ? 0.30 : 0.15
+f_entangle  = i_profile == "strict" ? 0.30 : i_profile == "moderate" ? 0.20 : 0.12
+f_space     = i_profile == "strict" ? 0.50 : i_profile == "moderate" ? 0.40 : 0.30
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 2. Heikin-Ashi Calculation (forced, chart-type agnostic)
+// ══════════════════════════════════════════════════════════════════════
+
+var float ha_open = na
+ha_close = (open + high + low + close) / 4
+ha_open := na(ha_open[1]) ? (open + close) / 2 : (ha_open[1] + ha_close[1]) / 2
+ha_high  = math.max(high, math.max(ha_open, ha_close))
+ha_low   = math.min(low, math.min(ha_open, ha_close))
+
+is_green = ha_close >= ha_open
+is_red   = ha_close < ha_open
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 3. 1-min Indicators
+// ══════════════════════════════════════════════════════════════════════
+
+ma10_1m  = ta.sma(ha_close, 10)
+ma50_1m  = ta.sma(ha_close, 50)
+ma200_1m = ta.sma(ha_close, 200)
+vwap_1m  = ta.vwap(close)
+
+plot(ma10_1m,  color=color.new(#b86800, 0), title="MA10",  linewidth=2)
+plot(ma50_1m,  color=color.new(#1a5090, 0), title="MA50",  linewidth=2)
+plot(ma200_1m, color=color.new(#187040, 0), title="MA200", linewidth=2)
+plot(vwap_1m,  color=color.new(#6030a0, 0), title="VWAP",  linewidth=2, style=plot.style_cross)
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 4. 5-min Relaxed Trend (v2: MA10 vs MA50 + 3-bar slope)
+// ══════════════════════════════════════════════════════════════════════
+
+ha_ticker = ticker.heikinashi(syminfo.tickerid)
+
+ma10_5m = request.security(ha_ticker, "5", ta.sma(close, 10))
+ma50_5m = request.security(ha_ticker, "5", ta.sma(close, 50))
+
+// 3-bar slope of 5min MA10
+slope_5m = ma10_5m - ma10_5m[3]
+
+bullish_trend_5m = ma10_5m > ma50_5m and slope_5m > 0
+bearish_trend_5m = ma10_5m < ma50_5m and slope_5m < 0
+
+// Background color for trend visualization
+bgcolor(bullish_trend_5m ? color.new(#1d7a4a, 92) :
+        bearish_trend_5m ? color.new(#9e2a1a, 92) : na,
+        title="5min Trend Background")
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 5. Signal Detection — Reject / Support MA10
+// ══════════════════════════════════════════════════════════════════════
+
+// Reject MA10 (bearish signal): green K, wick touches MA10, body stays below
+touch_ma10_up   = ha_high >= ma10_1m
+body_below_ma10 = ha_close <= ma10_1m and ha_open <= ma10_1m
+reject_1m       = is_green and touch_ma10_up and body_below_ma10
+
+// Support MA10 (bullish signal): red K, wick touches MA10, body stays above
+touch_ma10_down = ha_low <= ma10_1m
+body_above_ma10 = ha_close >= ma10_1m and ha_open >= ma10_1m
+support_1m      = is_red and touch_ma10_down and body_above_ma10
+
+// Cross-timeframe confirmation (prev bar signal + current bar confirmation)
+signal_put  = bearish_trend_5m[1] and reject_1m[1]  and is_red
+signal_call = bullish_trend_5m[1] and support_1m[1] and is_green
+
+// Signal B: Reject MA10 + simultaneously broke below MA50 + space below
+signal_b = signal_put
+     and ha_close[1] <= ma50_1m[1] and ha_open[1] > ma50_1m[1]
+     and math.abs(ha_close - ma200_1m) > 2.0
+     and math.abs(ha_close - vwap_1m) > 1.0
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 6. Signal Scoring (0-10) — corresponds to compute_score()
+// ══════════════════════════════════════════════════════════════════════
+
+calc_score(trend_ok, entangle_dist, vwap_ok, space_dist, k_body, k_shadow) =>
+    float s = 0.0
+
+    // Trend clarity (0-2)
+    s += trend_ok ? 2.0 : 0.0
+
+    // Entangle distance (0-2)
+    ent_margin = entangle_dist - f_entangle
+    s += ent_margin > 0.5 ? 2.0 : ent_margin > 0 ? 1.0 : 0.0
+
+    // VWAP alignment (0-1)
+    s += vwap_ok ? 1.0 : 0.0
+
+    // Space to barrier (0-2)
+    s += space_dist > 2.0 ? 2.0 : space_dist > f_space ? 1.0 : 0.0
+
+    // K-line quality: body ratio (0-2)
+    total = k_body + k_shadow
+    ratio = total > 0 ? k_body / total : 0.0
+    s += ratio > 0.7 ? 2.0 : ratio > 0.4 ? 1.0 : 0.0
+
+    math.min(s, 10.0)
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 7. Entry Logic with Scoring + Hard Blocks
+// ══════════════════════════════════════════════════════════════════════
+
+// RTH time filter: 10:00-15:45 ET
+in_session = not na(time(timeframe.period, "1000-1545:1234567", "America/New_York"))
+
+// Compute metrics for scoring
+entangle_dist = math.abs(ma10_1m - ma50_1m)
+
+// Space to nearest barrier in trade direction
+dist_ma50  = math.abs(ha_close - ma50_1m)
+dist_ma200 = math.abs(ha_close - ma200_1m)
+dist_vwap  = math.abs(ha_close - vwap_1m)
+
+// Bearish barriers (below price)
+space_bear_ma50  = ma50_1m  < ha_close ? dist_ma50  : 999.0
+space_bear_ma200 = ma200_1m < ha_close ? dist_ma200 : 999.0
+space_bear_vwap  = vwap_1m  < ha_close ? dist_vwap  : 999.0
+space_bearish    = math.min(space_bear_ma50, math.min(space_bear_ma200, space_bear_vwap))
+
+// Bullish barriers (above price)
+space_bull_ma50  = ma50_1m  > ha_close ? dist_ma50  : 999.0
+space_bull_ma200 = ma200_1m > ha_close ? dist_ma200 : 999.0
+space_bull_vwap  = vwap_1m  > ha_close ? dist_vwap  : 999.0
+space_bullish    = math.min(space_bull_ma50, math.min(space_bull_ma200, space_bull_vwap))
+
+// VWAP alignment
+vwap_ok_bear = ha_close < vwap_1m
+vwap_ok_bull = ha_close > vwap_1m
+
+// K-line quality
+k_body   = math.abs(ha_close - ha_open)
+k_shadow = (ha_high - ha_low) - k_body
+
+// Score for PUT signal
+score_put = calc_score(bearish_trend_5m[1], entangle_dist, vwap_ok_bear,
+                       space_bearish, k_body, k_shadow)
+
+// Score for CALL signal
+score_call = calc_score(bullish_trend_5m[1], entangle_dist, vwap_ok_bull,
+                        space_bullish, k_body, k_shadow)
+
+// Hard blocks (even good score can't override)
+block_entangle   = entangle_dist < f_entangle
+block_space_bear = space_bearish < f_space
+block_space_bull = space_bullish < f_space
+
+// Final entry conditions
+can_enter_put  = signal_put  and in_session and not block_entangle and not block_space_bear and score_put  >= i_min_score
+can_enter_call = signal_call and in_session and not block_entangle and not block_space_bull and score_call >= i_min_score
+
+// TP bars adjustment based on score (corresponds to score_to_tp())
+tp_adj_put  = i_tp_bars == 0 ? 0 : score_put  >= 7 ? i_tp_bars + 2 : score_put  >= 5 ? i_tp_bars : math.max(i_tp_bars - 1, 1)
+tp_adj_call = i_tp_bars == 0 ? 0 : score_call >= 7 ? i_tp_bars + 2 : score_call >= 5 ? i_tp_bars : math.max(i_tp_bars - 1, 1)
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 8. Position State Tracking
+// ══════════════════════════════════════════════════════════════════════
+
+var int   pos             = 0      // -1=short(PUT), 0=flat, 1=long(CALL)
+var int   bars_in_trade   = 0
+var int   favorable_bars  = 0
+var float best_price      = 0.0
+var int   active_tp       = 0
+var float entry_score     = 0.0
+
+// ── Entry ──
+if pos == 0
+    if can_enter_put
+        strategy.entry("PUT", strategy.short)
+        pos            := -1
+        bars_in_trade  := 0
+        favorable_bars := 0
+        best_price     := ha_low
+        active_tp      := tp_adj_put
+        entry_score    := score_put
+
+    else if can_enter_call
+        strategy.entry("CALL", strategy.long)
+        pos            := 1
+        bars_in_trade  := 0
+        favorable_bars := 0
+        best_price     := ha_high
+        active_tp      := tp_adj_call
+        entry_score    := score_call
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 9. Adaptive Exit — TP → TimeStop → MA10 Stop (priority chain)
+// ══════════════════════════════════════════════════════════════════════
+
+// EOD forced close at 15:55 ET
+is_eod = not na(time(timeframe.period, "1555-1600:1234567", "America/New_York"))
+
+if pos != 0
+    bars_in_trade += 1
+
+    // Track best price and favorable bars
+    if pos == 1
+        best_price := math.max(best_price, ha_high)
+        if is_green
+            favorable_bars += 1
+        else
+            favorable_bars := 0
+    else
+        best_price := math.min(best_price, ha_low)
+        if is_red
+            favorable_bars += 1
+        else
+            favorable_bars := 0
+
+    // P1: Take Profit — N consecutive favorable bars
+    exit_tp = active_tp > 0 and favorable_bars >= active_tp
+
+    // P2: Time Stop — no progress after M bars
+    exit_ts = false
+    if i_time_stop > 0 and bars_in_trade >= i_time_stop
+        if pos == 1 and ha_high <= best_price
+            exit_ts := true
+        if pos == -1 and ha_low >= best_price
+            exit_ts := true
+
+    // P3: MA10 Stop — body fully through MA10
+    exit_sl_put  = pos == -1 and is_green and ha_close > ma10_1m and ha_open > ma10_1m
+    exit_sl_call = pos ==  1 and is_red   and ha_close < ma10_1m and ha_open < ma10_1m
+    exit_sl = exit_sl_put or exit_sl_call
+
+    // Priority chain: TP > TimeStop > MA10 Stop > EOD
+    if exit_tp
+        strategy.close_all(comment="TP")
+        pos := 0
+    else if exit_ts
+        strategy.close_all(comment="TimeStop")
+        pos := 0
+    else if exit_sl
+        strategy.close_all(comment="MA10 Stop")
+        pos := 0
+    else if is_eod
+        strategy.close_all(comment="EOD")
+        pos := 0
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 10. Visual Annotations
+// ══════════════════════════════════════════════════════════════════════
+
+// Entry signals
+plotshape(can_enter_put and pos[1] == 0, title="PUT Entry",
+     style=shape.labeldown, location=location.abovebar,
+     color=color.new(#9e2a1a, 0), size=size.small,
+     text="PUT", textcolor=color.white)
+
+plotshape(can_enter_call and pos[1] == 0, title="CALL Entry",
+     style=shape.labelup, location=location.belowbar,
+     color=color.new(#1d7a4a, 0), size=size.small,
+     text="CALL", textcolor=color.white)
+
+// Signal B marker (extra strong)
+plotshape(signal_b and can_enter_put and pos[1] == 0, title="Signal B",
+     style=shape.diamond, location=location.abovebar,
+     color=color.new(#ff6600, 0), size=size.tiny)
+
+// Raw signals (dimmed, for reference)
+plotshape(reject_1m and not (can_enter_put and pos[1] == 0), title="Reject (raw)",
+     style=shape.triangledown, location=location.abovebar,
+     color=color.new(#9e2a1a, 75), size=size.tiny)
+
+plotshape(support_1m and not (can_enter_call and pos[1] == 0), title="Support (raw)",
+     style=shape.triangleup, location=location.belowbar,
+     color=color.new(#1d7a4a, 75), size=size.tiny)
+
+// Score label on entry
+if can_enter_put and pos[1] == 0
+    label.new(bar_index, ha_high + 0.3,
+         str.tostring(score_put, "#.0"),
+         style=label.style_none, textcolor=color.new(#9e2a1a, 30), size=size.small)
+
+if can_enter_call and pos[1] == 0
+    label.new(bar_index, ha_low - 0.3,
+         str.tostring(score_call, "#.0"),
+         style=label.style_none, textcolor=color.new(#1d7a4a, 30), size=size.small)
+
+
+// ══════════════════════════════════════════════════════════════════════
+// 11. Alerts
+// ══════════════════════════════════════════════════════════════════════
+
+alertcondition(can_enter_put  and pos[1] == 0, title="v2 PUT Signal",
+     message="v2: PUT — 5min bearish + Reject MA10 confirmed, score={{close}}")
+alertcondition(can_enter_call and pos[1] == 0, title="v2 CALL Signal",
+     message="v2: CALL — 5min bullish + Support MA10 confirmed, score={{close}}")
+alertcondition(signal_b and can_enter_put and pos[1] == 0, title="v2 Signal B",
+     message="v2: Signal B — Reject MA10 + broke MA50, large space below!")

@@ -1,0 +1,112 @@
+//@version=5
+indicator("小汤系统 V5.0 - 终极狙击版", overlay=true)
+
+// ==========================
+// 0. 参数设置 (自动兼容 SPY/SPX/个股)
+// ==========================
+grp_break = "突破与止盈 (自适应缩放)"
+base_min_space = input.float(2.0, "最小获利空间 (基准点数)", minval=0.1, group=grp_break)
+base_tp_offset = input.float(0.5, "止盈提前量 (基准点数)", minval=0, group=grp_break)
+cd_bars         = input.int(10, "信号冷却期 (Bar数)", minval=1, group=grp_break)
+
+// 自动兼容逻辑
+norm_factor = close / 5000.0
+min_space   = base_min_space * norm_factor
+tp_offset   = base_tp_offset * norm_factor
+
+// ==========================
+// 1. HA 数据内核与均线 (锁定在 HA 价格上)
+// ==========================
+var float xt_ha_open = na
+xt_ha_close = (open + high + low + close) / 4
+xt_ha_open := na(xt_ha_open[1]) ? (open + close) / 2 : (xt_ha_open[1] + xt_ha_close[1]) / 2
+
+ma50  = ta.sma(xt_ha_close, 50)
+ma200 = ta.sma(xt_ha_close, 200)
+is_new_session = ta.change(time("D"))
+custom_vwap = ta.vwap(hlc3, is_new_session)
+
+plot(ma50,  color=color.new(#1a5090, 0),  title="MA50", linewidth=2)
+plot(ma200, color=color.new(#187040, 0),  title="MA200", linewidth=2)
+plot(custom_vwap, color=color.new(#7b1fa2, 0), title="Aligned VWAP", linewidth=3)
+
+// ==========================
+// 2. 5分钟势能监控
+// ==========================
+ma50_5m  = request.security(syminfo.tickerid, "5", ta.sma(close, 50))
+ma200_5m = request.security(syminfo.tickerid, "5", ta.sma(close, 200))
+vwap_5m  = request.security(syminfo.tickerid, "5", ta.vwap(hlc3, is_new_session))
+
+float next_res = na
+if ma50_5m > close
+    next_res := ma50_5m
+if ma200_5m > close
+    next_res := na(next_res) ? ma200_5m : math.min(next_res, ma200_5m)
+if vwap_5m > close
+    next_res := na(next_res) ? vwap_5m : math.min(next_res, vwap_5m)
+
+float next_sup = na
+if ma50_5m < close
+    next_sup := ma50_5m
+if ma200_5m < close
+    next_sup := na(next_sup) ? ma200_5m : math.max(next_sup, ma200_5m)
+if vwap_5m < close
+    next_sup := na(next_sup) ? vwap_5m : math.max(next_sup, vwap_5m)
+
+// ==========================
+// 3. 突破与爆发检测 (一剑封喉)
+// ==========================
+body_size = math.abs(xt_ha_close - xt_ha_open)
+avg_body  = ta.sma(body_size, 20)
+is_burst  = (body_size > avg_body * 1.2) and (volume > ta.sma(volume, 20) * 1.5)
+
+break_up = ta.crossover(close, ma50) or ta.crossover(close, ma200) or ta.crossover(close, custom_vwap)
+break_dn = ta.crossunder(close, ma50) or ta.crossunder(close, ma200) or ta.crossunder(close, custom_vwap)
+
+// ==========================
+// 4. 状态机逻辑
+// ==========================
+var int active_pos = 0
+var int last_sig_bar = 0
+var float current_tp = na
+
+can_trig = (active_pos == 0) and (bar_index - last_sig_bar > cd_bars)
+
+sig_call = can_trig and is_burst and break_up and (not na(next_res) and next_res - close >= min_space)
+sig_put  = can_trig and is_burst and break_dn and (not na(next_sup) and close - next_sup >= min_space)
+
+if sig_call
+    active_pos := 1
+    last_sig_bar := bar_index
+    current_tp := next_res - tp_offset
+if sig_put
+    active_pos := -1
+    last_sig_bar := bar_index
+    current_tp := next_sup + tp_offset
+
+sl_event = (active_pos == 1 and close < ma50) or (active_pos == -1 and close > ma50)
+tp_event = (active_pos == 1 and high >= current_tp) or (active_pos == -1 and low <= current_tp)
+
+// ==========================
+// 5. 视觉展示 (颜色与线条强化)
+// ==========================
+plot(current_tp, "TP Level", color=color.new(#00c853, 0), style=plot.style_linebr, linewidth=2)
+
+// CALL=高亮绿, PUT=深蓝
+plotshape(sig_call, "狙击 CALL", shape.labelup, location.belowbar, #00c853, size=size.normal, text="狙击 CALL", textcolor=color.white)
+plotshape(sig_put,  "狙击 PUT",  shape.labeldown, location.abovebar, #448aff, size=size.normal, text="狙击 PUT", textcolor=color.white)
+
+// 止盈离场：画粗绿线 (width=3)
+if tp_event
+    line.new(bar_index, low, bar_index, high, xloc=xloc.bar_index, extend=extend.both, color=color.new(#00c853, 20), style=line.style_solid, width=3)
+
+// 修正：将“落袋为安”的文字颜色改为亮金色 (#FFD700)
+plotshape(tp_event, "落袋为安", shape.flag, location.top, #00c853, size=size.small, text="落袋为安", textcolor=#00c853)
+
+// 逃生红背警告
+bgcolor(sl_event ? color.new(#ff5252, 90) : na)
+plotshape(sl_event, "逃生", shape.labeldown, location.top, #b71c1c, size=size.small, text="逃生", textcolor=color.white)
+
+if sl_event or tp_event
+    active_pos := 0
+    current_tp := na

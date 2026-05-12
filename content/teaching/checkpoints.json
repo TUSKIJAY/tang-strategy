@@ -1,0 +1,217 @@
+{
+  "schema_version": "0.1",
+  "updated_at": "2026-04-24",
+  "source_note": "Manual patch layer for the first vertical paths (Support MA10, Reject MA10, Signal B). Steps are aligned to derived.checkpoints in teaching_segments.json; the UI currently picks training[0] matching module_id.",
+  "training": [
+    {
+      "case_id": "case_ma10_support_2026_01_07",
+      "module_id": "ma10",
+      "segment_id": "seed_01",
+      "steps": [
+        {
+          "step": "环境判断",
+          "checkpoint_keys": ["trend_ok", "ma_alignment_ok"],
+          "question": "5分钟方向是否清楚？",
+          "options": ["趋势清晰，看多", "趋势清晰，看空", "方向不明确，不做"],
+          "answer": "趋势清晰，看多",
+          "rule_ids": ["background_5m"],
+          "explanation": "5m 趋势为 bullish，均线为多头排列，允许进入 1m 观察。"
+        },
+        {
+          "step": "观察条件",
+          "checkpoint_keys": ["vwap_side", "reward_ok"],
+          "question": "当前是否值得进入 1分钟观察？",
+          "options": ["是，背景与空间允许观察", "否，关卡太近", "否，5分钟背景冲突"],
+          "answer": "是，背景与空间允许观察",
+          "rule_ids": ["support_ma10", "vwap_distance_filter"],
+          "explanation": "价格位于 VWAP 上方，目标空间通过，进入 MA10 回踩观察。MA50 在 11:20-11:24 已被多次 wick 测试并撑住（idx 15-19 五根连续触及），作为已验证的次级防线为本次 MA10 触及提供了支撑结构。"
+        },
+        {
+          "step": "触发判断",
+          "checkpoint_keys": ["touch_ma10", "confirm_bar"],
+          "question": "1分钟是否已经触发 Support MA10？",
+          "options": ["已触发，等待确认K", "未触发，继续等", "触发失败，不做"],
+          "answer": "已触发，等待确认K",
+          "rule_ids": ["support_ma10"],
+          "explanation": "信号 K 触及 MA10，随后确认 K 延续上涨。"
+        },
+        {
+          "step": "过滤检查",
+          "checkpoint_keys": ["body_not_cross", "reward_ok", "forbidden_absent"],
+          "question": "过滤条件是否通过？",
+          "options": ["通过，可以进入执行判断", "空间不足，降级", "禁做条件出现，不做"],
+          "answer": "通过，可以进入执行判断",
+          "rule_ids": ["support_ma10", "vwap_distance_filter"],
+          "explanation": "实体没有有效跌破 MA10，空间足够，且无禁做条件。"
+        },
+        {
+          "step": "执行动作",
+          "checkpoint_keys": ["confirm_bar"],
+          "question": "当前标准动作是什么？",
+          "options": ["做 CALL", "做 PUT", "继续观望"],
+          "answer": "做 CALL",
+          "rule_ids": ["support_ma10"],
+          "explanation": "这是标准 Support MA10 多头延续案例，确认 K 收盘后执行。"
+        },
+        {
+          "step": "出场计划",
+          "checkpoint_keys": ["stop_defined"],
+          "question": "如果执行，止损依据在哪里？",
+          "options": ["信号K低点下方", "MA200下方", "不设止损，等回拉"],
+          "answer": "信号K低点下方",
+          "rule_ids": ["support_ma10", "moving_stop"],
+          "explanation": "切片中 stop_defined 已通过，止损位明确为信号 K 低点下方。"
+        },
+        {
+          "step": "复盘标签",
+          "checkpoint_keys": ["trend_ok", "touch_ma10", "confirm_bar"],
+          "question": "这个案例最适合打什么标签？",
+          "options": ["标准例：Support MA10", "反例：均线缠绕", "边缘例：空间不足"],
+          "answer": "标准例：Support MA10",
+          "rule_ids": ["support_ma10"],
+          "explanation": "趋势、触线、确认和止损都成立，是 MA10 垂直链路第一版标准例。"
+        }
+      ]
+    },
+    {
+      "case_id": "case_ma10_reject_2026_03_09",
+      "module_id": "ma10",
+      "segment_id": "seed_03",
+      "steps": [
+        {
+          "step": "环境判断",
+          "checkpoint_keys": ["trend_ok", "ma_alignment_ok"],
+          "question": "5分钟方向是否清楚？",
+          "options": ["趋势清晰，看多", "趋势清晰，看空", "方向不明确，不做"],
+          "answer": "趋势清晰，看空",
+          "rule_ids": ["background_5m"],
+          "explanation": "5m 趋势为 bearish，均线为空头排列，允许进入 1m 反抽观察。"
+        },
+        {
+          "step": "观察条件",
+          "checkpoint_keys": ["vwap_side", "reward_ok"],
+          "question": "当前是否进入 1分钟反抽观察？",
+          "options": ["是，下方目标空间足够", "否，关卡过近", "否，价格重新站上 VWAP"],
+          "answer": "是，下方目标空间足够",
+          "rule_ids": ["reject_ma10", "vwap_distance_filter"],
+          "explanation": "VWAP 与下方关卡之间仍有约 0.51% 空间，反抽接近 MA10 可以观察。注意：MA50 (668.53) 在前序 25 根中未被价格测试（一直在价格下方 +0.10% 以上），属于未验证的远方关卡，仅作目标参考，不能机械视作强支撑。"
+        },
+        {
+          "step": "触发判断",
+          "checkpoint_keys": ["touch_ma10", "confirm_bar"],
+          "question": "1分钟是否已经触发 Reject MA10？",
+          "options": ["已触发，等待确认K", "未触发，继续等", "触发失败，价格站上 MA10"],
+          "answer": "已触发，等待确认K",
+          "rule_ids": ["reject_ma10"],
+          "explanation": "信号 K 上影线触及 MA10 后实体被压回，下一根确认 K 延续下跌。"
+        },
+        {
+          "step": "过滤检查",
+          "checkpoint_keys": ["body_not_cross", "reward_ok", "forbidden_absent"],
+          "question": "过滤条件是否通过？",
+          "options": ["通过，可以进入执行判断", "空间不足，降级", "均线缠绕，不做"],
+          "answer": "通过，可以进入执行判断",
+          "rule_ids": ["reject_ma10", "vwap_distance_filter"],
+          "explanation": "实体仍压在 MA10 下方，下方空间支持风险回报，均线保持空头排列。"
+        },
+        {
+          "step": "执行动作",
+          "checkpoint_keys": ["confirm_bar"],
+          "question": "当前标准动作是什么？",
+          "options": ["做 CALL", "做 PUT", "继续观望"],
+          "answer": "做 PUT",
+          "rule_ids": ["reject_ma10"],
+          "explanation": "标准 Reject MA10 空头延续案例，确认 K 收盘后执行 PUT。"
+        },
+        {
+          "step": "出场计划",
+          "checkpoint_keys": ["stop_defined"],
+          "question": "如果执行，止损依据在哪里？",
+          "options": ["信号K高点上方", "MA50下方", "不设止损，等回拉"],
+          "answer": "信号K高点上方",
+          "rule_ids": ["reject_ma10", "moving_stop"],
+          "explanation": "切片 stop_defined 已通过，止损放在信号 K 反抽高点上方（约 669.85）。"
+        },
+        {
+          "step": "复盘标签",
+          "checkpoint_keys": ["trend_ok", "touch_ma10", "confirm_bar"],
+          "question": "这个案例最适合打什么标签？",
+          "options": ["标准例：Reject MA10", "反例：背景冲突", "边缘例：关卡过近"],
+          "answer": "标准例：Reject MA10",
+          "rule_ids": ["reject_ma10"],
+          "explanation": "趋势、反抽触线、实体压回和确认 K 都成立，是 Reject MA10 的标准样本。"
+        }
+      ]
+    },
+    {
+      "case_id": "case_signal_b_2026_03_25",
+      "module_id": "signal-b",
+      "segment_id": "seed_06",
+      "steps": [
+        {
+          "step": "环境判断",
+          "checkpoint_keys": ["trend_ok"],
+          "question": "核心入场错过后，5分钟趋势是否还支持延续？",
+          "options": ["是，趋势未反转且正在转弱", "否，趋势已反转", "背景不明，直接不做"],
+          "answer": "是，趋势未反转且正在转弱",
+          "rule_ids": ["signal_b"],
+          "explanation": "5m 收盘已回到 MA10 下方、MA10 开始下弯，趋势处于由多转空的延续段。"
+        },
+        {
+          "step": "观察条件",
+          "checkpoint_keys": ["reward_ok", "vwap_intercept"],
+          "question": "二次确认是否值得观察？",
+          "options": ["是，目标空间足够且 VWAP 未转反向", "否，空间被 VWAP 挡住", "否，已属末端加速"],
+          "answer": "是，目标空间足够且 VWAP 未转反向",
+          "rule_ids": ["signal_b", "vwap_distance_filter"],
+          "explanation": "价格反抽 VWAP 后再次失守（VWAP 已多次被前序测试，构成已验证的关键阻力），下方 MA200 仍留有空间，适合做二次确认。"
+        },
+        {
+          "step": "触发判断",
+          "checkpoint_keys": ["touch_ma10", "confirm_bar"],
+          "question": "1分钟是否出现双线跌破的延续触发？",
+          "options": ["是，双线跌破 + 确认K延续", "只跌破单线，继续等", "触发失败，价格重新上穿"],
+          "answer": "是，双线跌破 + 确认K延续",
+          "rule_ids": ["signal_b"],
+          "explanation": "收盘同时跌破 MA10 (658.72) 与 MA50 (658.46)，下一根确认 K 延续下跌。关键：MA50 在 11:01-11:04 已被价格反复测试为支撑（idx 47-50 连续四根接近，三根 wick 触及），所以这次跌破不是机械碰线，而是\"被市场验证过的支撑被实体跌破\"——这正是信号 B 双线跌破的真正含义。"
+        },
+        {
+          "step": "过滤检查",
+          "checkpoint_keys": ["body_not_cross", "reward_ok", "forbidden_absent"],
+          "question": "延续信号的过滤条件是否通过？",
+          "options": ["通过，可以执行二次确认", "末端加速，不做", "K线质量不合格，降级"],
+          "answer": "通过，可以执行二次确认",
+          "rule_ids": ["signal_b", "vwap_distance_filter"],
+          "explanation": "实体仍压在已验证的 MA50 下方，目标空间通过（下方 MA200 仍有约 0.32% 空间），且无禁做条件。"
+        },
+        {
+          "step": "执行动作",
+          "checkpoint_keys": ["confirm_bar"],
+          "question": "当前标准动作是什么？",
+          "options": ["做 CALL", "做 PUT", "继续观望"],
+          "answer": "做 PUT",
+          "rule_ids": ["signal_b"],
+          "explanation": "信号 B 做的是延续下跌方向，确认 K 收盘后执行 PUT。"
+        },
+        {
+          "step": "出场计划",
+          "checkpoint_keys": ["stop_defined"],
+          "question": "如果执行，止损依据在哪里？",
+          "options": ["信号K高点 / MA50 上方", "MA200下方", "不设止损，靠心态抗"],
+          "answer": "信号K高点 / MA50 上方",
+          "rule_ids": ["signal_b", "moving_stop"],
+          "explanation": "切片 stop_defined 已通过，止损设在信号 K 高点 / MA50 上方（约 658.94）。"
+        },
+        {
+          "step": "复盘标签",
+          "checkpoint_keys": ["trend_ok", "confirm_bar", "vwap_intercept"],
+          "question": "这个案例最适合打什么标签？",
+          "options": ["标准例：信号B 双线跌破延续", "反例：末端追鱼尾", "边缘例：VWAP 挡住目标"],
+          "answer": "标准例：信号B 双线跌破延续",
+          "rule_ids": ["signal_b"],
+          "explanation": "趋势延续、二次确认、已验证 VWAP 失守、已验证 MA50 被实体跌破、确认 K 同步——五个条件共同成立，是信号 B 的标准样本。"
+        }
+      ]
+    }
+  ]
+}

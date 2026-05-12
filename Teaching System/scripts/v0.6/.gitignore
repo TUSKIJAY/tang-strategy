@@ -1,7 +1,0 @@
-# 运行时状态：每次执行都会变，不进版本控制
-state/*.json
-
-# acceptance.md 与 HANDOFF.md 选择保留追踪（便于跨窗口接手与历史复盘）
-# 如不希望追踪，把下面两行取消注释：
-# state/HANDOFF.md
-# state/acceptance.md

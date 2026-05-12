@@ -1,0 +1,341 @@
+{
+  "name": "Tang v4.4 Slope",
+  "version": "4.4",
+  "description": "由 Downloads/message (3).txt 转换：终极实战斜率修正版。HA 用于信号颜色、影线和 MA50 止损判定；均线/VWAP 使用普通 close 对齐券商；5m MA10/20/30 顺势过滤；加入 MA10 斜率过滤、持仓状态机、10 根 K 冷却，以及 MA10 叠加 MA50/MA200/VWAP 的 elite Strong 判定。",
+
+  "source": {
+    "type": "tradingview_pine",
+    "pine_version": 5,
+    "indicator_title": "小汤系统 V4.4 - 终极实战斜率修正版",
+    "source_file": "Downloads/message (3).txt",
+    "overlay": true
+  },
+
+  "candles": {
+    "type": "heikin_ashi_for_signal_and_stop",
+    "price_alignment": "broker_close_for_ma_vwap",
+    "variable_prefix": "xt",
+    "fields": {
+      "hC": "(open + high + low + close) / 4",
+      "hO": "first_bar ? (open + close) / 2 : (prior_hO + prior_hC) / 2",
+      "hH": "max(high, hO, hC)",
+      "hL": "min(low, hO, hC)"
+    },
+    "color_rules": {
+      "green": "hC > hO",
+      "red": "hC < hO"
+    }
+  },
+
+  "indicators": {
+    "moving_averages": {
+      "m10": { "type": "sma", "source": "close", "length": 10, "role": "trigger_line" },
+      "m20": { "type": "sma", "source": "close", "length": 20, "role": "touch_filter_line" },
+      "m30": { "type": "sma", "source": "close", "length": 30, "role": "touch_filter_line" },
+      "m50": { "type": "sma", "source": "close", "length": 50, "role": "bull_bear_boundary_and_stop_line" },
+      "m200": { "type": "sma", "source": "close", "length": 200, "role": "major_barrier" }
+    },
+    "vwap": {
+      "id": "vw",
+      "type": "vwap",
+      "source": "close",
+      "role": "institutional_level"
+    }
+  },
+
+  "display": {
+    "plotted_lines": ["m10", "m50", "m200", "vw"],
+    "hidden_but_used_lines": ["m20", "m30"]
+  },
+
+  "trend": {
+    "method": "regular_close_5m_ma_stack",
+    "timeframe": "5m",
+    "description": "跨周期过滤：使用普通 close 计算 5m MA10/MA20/MA30；10>20>30 才是真多头，10<20<30 才是真空头。",
+    "lines": ["m10", "m20", "m30"],
+    "bullish": {
+      "m10_above_m20": { "field": "m10_5m", "operator": ">", "target": "m20_5m" },
+      "m20_above_m30": { "field": "m20_5m", "operator": ">", "target": "m30_5m" }
+    },
+    "bearish": {
+      "m10_below_m20": { "field": "m10_5m", "operator": "<", "target": "m20_5m" },
+      "m20_below_m30": { "field": "m20_5m", "operator": "<", "target": "m30_5m" }
+    }
+  },
+
+  "multi_timeframe": {
+    "primary_bias_tf": "5m",
+    "execution_tf": "1m",
+    "higher_tf_priority": true,
+    "trend_required_for_signal": true,
+    "description": "CALL 必须 5m 三线多头排列；PUT 必须 5m 三线空头排列。"
+  },
+
+  "slope_filter": {
+    "enabled": true,
+    "line": "m10",
+    "lookback_bars": 1,
+    "bullish": {
+      "ma10_pointing_up": { "field": "m10", "operator": ">", "target": "m10[1]" }
+    },
+    "bearish": {
+      "ma10_pointing_down": { "field": "m10", "operator": "<", "target": "m10[1]" }
+    },
+    "description": "防止 V 型反转时 5m 大势滞后导致误触；做多要求 1m MA10 向上，做空要求 1m MA10 向下。"
+  },
+
+  "touch_logic": {
+    "method": "v3_4_sensitive_overlap",
+    "trend_touch_levels": ["m10", "m20", "m30"],
+    "support_touch": {
+      "id": "t_trend_u",
+      "rule": "prior HA range overlaps any of m10/m20/m30",
+      "conditions": [
+        { "field": "hL[1]", "operator": "<=", "target": "m10[1]" },
+        { "field": "hH[1]", "operator": ">=", "target": "m10[1]" },
+        { "logic": "or_same_overlap_for", "targets": ["m20[1]", "m30[1]"] }
+      ]
+    },
+    "resistance_touch": {
+      "id": "t_trend_d",
+      "rule": "prior HA range overlaps any of m10/m20/m30",
+      "conditions": [
+        { "field": "hH[1]", "operator": ">=", "target": "m10[1]" },
+        { "field": "hL[1]", "operator": "<=", "target": "m10[1]" },
+        { "logic": "or_same_overlap_for", "targets": ["m20[1]", "m30[1]"] }
+      ]
+    },
+    "ma10_close_filter": {
+      "support": { "field": "hC[1]", "operator": ">=", "target": "m10[1]" },
+      "resistance": { "field": "hC[1]", "operator": "<=", "target": "m10[1]" }
+    }
+  },
+
+  "elite_strong": {
+    "enabled": true,
+    "method": "ma10_plus_major_level_overlap",
+    "base_touch": {
+      "t_10": "hL <= m10 and hH >= m10"
+    },
+    "major_touch_any": {
+      "t_50": "hL <= m50 and hH >= m50",
+      "t_200": "hL <= m200 and hH >= m200",
+      "t_vwap": "hL <= vw and hH >= vw"
+    },
+    "rule": "t_10 and (t_50 or t_200 or t_vwap)",
+    "signal_uses_previous_bar": true,
+    "description": "Strong 不再使用多线计分，而是要求上一根 K 同时触碰 MA10，并叠加触碰 MA50、MA200 或 VWAP 之一。"
+  },
+
+  "signals": [
+    {
+      "id": "call_normal",
+      "name": "Normal CALL",
+      "direction": "bullish",
+      "style": "green",
+      "anchor_side": "bottom",
+      "conditions": {
+        "can_trigger": true,
+        "trend_5m": "bullish",
+        "ma10_slope": "up",
+        "space_ok": "call",
+        "not_tangled": true,
+        "previous_range_touch": "t_trend_u",
+        "previous_close_filter": "hC[1] >= m10[1]",
+        "current_bar_color": "green",
+        "previous_elite": false
+      },
+      "label": {
+        "text": "CALL",
+        "size": "small",
+        "color": "#2e7d32",
+        "text_color": "#ffffff"
+      }
+    },
+    {
+      "id": "call_strong",
+      "name": "Strong CALL",
+      "direction": "bullish",
+      "style": "teal",
+      "anchor_side": "bottom",
+      "conditions": {
+        "can_trigger": true,
+        "trend_5m": "bullish",
+        "ma10_slope": "up",
+        "space_ok": "call",
+        "not_tangled": true,
+        "previous_range_touch": "t_trend_u",
+        "previous_close_filter": "hC[1] >= m10[1]",
+        "current_bar_color": "green",
+        "previous_elite": true
+      },
+      "label": {
+        "text": "Strong CALL",
+        "prefix": "flame",
+        "size": "normal",
+        "color": "#00695c",
+        "text_color": "#ffffff"
+      }
+    },
+    {
+      "id": "put_normal",
+      "name": "Normal PUT",
+      "direction": "bearish",
+      "style": "red",
+      "anchor_side": "top",
+      "conditions": {
+        "can_trigger": true,
+        "trend_5m": "bearish",
+        "ma10_slope": "down",
+        "space_ok": "put",
+        "not_tangled": true,
+        "previous_range_touch": "t_trend_d",
+        "previous_close_filter": "hC[1] <= m10[1]",
+        "current_bar_color": "red",
+        "previous_elite": false
+      },
+      "label": {
+        "text": "PUT",
+        "size": "small",
+        "color": "#c62828",
+        "text_color": "#ffffff"
+      }
+    },
+    {
+      "id": "put_strong",
+      "name": "Strong PUT",
+      "direction": "bearish",
+      "style": "orange",
+      "anchor_side": "top",
+      "conditions": {
+        "can_trigger": true,
+        "trend_5m": "bearish",
+        "ma10_slope": "down",
+        "space_ok": "put",
+        "not_tangled": true,
+        "previous_range_touch": "t_trend_d",
+        "previous_close_filter": "hC[1] <= m10[1]",
+        "current_bar_color": "red",
+        "previous_elite": true
+      },
+      "label": {
+        "text": "Strong PUT",
+        "prefix": "flame",
+        "size": "normal",
+        "color": "#d84315",
+        "text_color": "#ffffff"
+      }
+    }
+  ],
+
+  "entry_requirements": {
+    "pattern_required": true,
+    "continuation_confirmation_required": true,
+    "confirmation_bar_source": "current_bar_color_after_prior_touch",
+    "space_check_required": true,
+    "space_threshold_pct": 0.15,
+    "trend_required": true,
+    "slope_required": true,
+    "not_tangled_required": true,
+    "flat_position_required": true,
+    "cooldown_required": true,
+    "description": "无持仓且冷却结束后，上一根 HA 区间触碰 MA10/MA20/MA30 并按 MA10 收盘过滤，当前 K 变色确认；同时要求 5m 顺势、1m MA10 斜率同向、非缠绕、目标方向空间足够。"
+  },
+
+  "space_check": {
+    "enabled": true,
+    "min_distance_pct_of_price": 0.15,
+    "threshold_formula": "close * 0.0015",
+    "call_barriers_above": ["m50", "m200", "vw"],
+    "put_barriers_below": ["m50", "m200", "vw"],
+    "call_rule": "nearest upper m50/m200/vw - close >= close * 0.0015",
+    "put_rule": "close - nearest lower m50/m200/vw >= close * 0.0015",
+    "barrier_source": "regular_close_based_levels"
+  },
+
+  "scoring": {
+    "enabled": false,
+    "replaced_by": "elite_strong",
+    "description": "V4.4 不使用数字打分；Strong 由上一根 elite 条件决定。"
+  },
+
+  "position_state": {
+    "enabled": true,
+    "virtual_position": true,
+    "states": {
+      "flat": 0,
+      "long": 1,
+      "short": -1
+    },
+    "set_long_on": "signal_call",
+    "set_short_on": "signal_put",
+    "reset_on_stop": true
+  },
+
+  "cooldown": {
+    "enabled": true,
+    "bars": 10,
+    "last_signal_bar_initial": 0,
+    "can_trigger_rule": "active_pos == 0 and bar_index - last_signal_bar > 10",
+    "reset_last_signal_bar_on_stop": 0,
+    "description": "普通信号后等待 10 根 K；止损事件会把 last_signal_bar 重置为 0，源码注释为立即解锁。"
+  },
+
+  "exit": {
+    "_comment": "V4.4 的止损使用 HA close 与 MA50，而不是 V3.5.1 的普通 open/close 实体贯穿。",
+    "L1_technical": {
+      "tp_bars": 0,
+      "time_stop_bars": 0,
+      "ma_stop_line": "m50"
+    },
+    "L2_hard_stops": {
+      "ma50_ha_close_break": true,
+      "price_source": "heikin_ashi_close",
+      "long_stop": {
+        "hC_below_m50": { "field": "hC", "operator": "<", "target": "m50" }
+      },
+      "short_stop": {
+        "hC_above_m50": { "field": "hC", "operator": ">", "target": "m50" }
+      }
+    },
+    "L3_trailing": {
+      "enabled": false
+    }
+  },
+
+  "filter": {
+    "min_score": null,
+    "session": {
+      "start": null,
+      "end": null,
+      "timezone": "America/New_York",
+      "source_note": "V4.4 源码没有时间锁。"
+    },
+    "entangle_threshold": 0.03,
+    "entangle_threshold_ratio": 0.0003,
+    "entangle_lines": ["m10", "m20", "m30", "m50"],
+    "entangle_source": "regular_close_based_mas",
+    "space_threshold": 0.15,
+    "space_threshold_ratio": 0.0015
+  },
+
+  "hard_blocks": {
+    "no_trend": true,
+    "entangle": true,
+    "no_space": true,
+    "mtf_conflict": true,
+    "wrong_ma10_slope": true,
+    "active_position": true,
+    "cooldown_active": true
+  },
+
+  "alerts": [],
+
+  "options": {
+    "default_iv": 0.22,
+    "risk_free_rate": 0.045,
+    "dte_mode": "auto",
+    "dte_auto_switch": "14:00",
+    "strike_method": "atm"
+  }
+}

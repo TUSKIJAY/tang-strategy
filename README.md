@@ -1,22 +1,54 @@
 # Tang Strategy
 
-Tang Strategy is a local toolkit for building, reviewing, and practicing the Tang intraday trading workflow.
+Tang Strategy is organized as a frontend/backend workspace for market replay, strategy visualization, browser-side backtesting, and teaching.
 
-This repository is organized as a multi-project workspace. Each project is kept in its own top-level folder so it can evolve independently while sharing the same strategy language and data conventions.
+## Layout
 
-## Projects
+- `backend/` — FastAPI service, SQLite schema, auth, seed import, and provider stubs.
+- `frontend/` — React/Vite app for readonly review, replay backtests, stats, and teaching.
+- `strategies/` — strategy JSON definitions.
+- `content/` — structured teaching/rules/cases assets.
+- `data/seed/` — source JSON seed store.
+- `data/sqlite/` — runtime SQLite DB (`tang_strategy_live_extended.db`).
 
-- `Daily review/`
-  Local SPY intraday review tool. Loads market data, strategy JSON, reviewed annotations, and supports signal review/backtesting workflows.
+## Runtime defaults
 
-- `Fragment Lab/`
-  Strategy fragment screening and review workspace. To be uploaded separately later.
+- Source market files: `data/seed/market-data/live_extended/`
+- Runtime DB: `data/sqlite/tang_strategy_live_extended.db`
 
-- `Teaching System/`
-  Interactive learning and replay system. To be uploaded separately later.
+## Run with Docker
 
-## Current Upload
+```bash
+cp .env.example .env
+docker compose up --build
+```
 
-The first uploaded project is `Daily review/`.
+Open `http://localhost:18080`, authenticate, then use admin import if needed. The backend API is published at `http://localhost:18091`.
 
-See `Daily review/README.md` for usage and `Daily review/INTEGRATION.md` for development handoff notes.
+## Run backend only
+
+```bash
+cd backend
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+PYTHONPATH=. uvicorn app.main:app --reload
+```
+
+Import/rebuild seed data:
+
+```bash
+PYTHONPATH=. python scripts/rebuild_live_extended_db.py
+```
+
+## Run frontend only
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Notes
+
+`legacy/` runtime artifacts are removed; current docs and workflows are maintained in `docs/`.
