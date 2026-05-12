@@ -23,7 +23,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Open `http://localhost:8080`, authenticate, then use admin import if needed.
+Open `http://localhost:18080`, authenticate, then use admin import if needed. The backend API is published at `http://localhost:18091`.
 
 ## Run backend only
 

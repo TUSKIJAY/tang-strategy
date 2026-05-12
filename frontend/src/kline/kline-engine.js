@@ -2188,9 +2188,9 @@
 
         drawAnnotationPins(ctx, rc) {
           const annotations = this.dataManager.getAnnotations(this.currentTimeframe);
+          this._annoHitZones = [];
           if (!annotations.length) return;
 
-          this._annoHitZones = [];
           ctx.save();
 
           annotations.forEach((anno) => {
@@ -2267,31 +2267,33 @@
             });
           });
 
-          // Highlight flash for scrollTo
-          if (this._scrollToHighlight) {
-            const hl = this._scrollToHighlight;
-            if (performance.now() < hl.until) {
-              const idx = hl.index;
-              if (idx >= rc.visible.start && idx <= rc.visible.end) {
-                const x = rc.xForIndex(idx);
-                const bar = rc.bars[idx];
-                if (bar) {
-                  const { high, low } = this._resolveOHLC(bar);
-                  const yTop = rc.yForPrice(high);
-                  const yBot = rc.yForPrice(low);
-                  const elapsed = performance.now() - (hl.until - 1200);
-                  const pulse = 0.25 + 0.2 * Math.sin(elapsed / 120 * Math.PI);
-                  ctx.fillStyle = `rgba(64, 158, 255, ${pulse})`;
-                  ctx.fillRect(x - rc.bodyWidth, yTop - 4, rc.bodyWidth * 2, yBot - yTop + 8);
-                }
-              }
-              this.scheduleRender();
-            } else {
-              this._scrollToHighlight = null;
-            }
-          }
-
           ctx.restore();
+        }
+
+        drawScrollToHighlight(ctx, rc) {
+          if (!this._scrollToHighlight) return;
+          const hl = this._scrollToHighlight;
+          if (performance.now() < hl.until) {
+            const idx = hl.index;
+            if (idx >= rc.visible.start && idx <= rc.visible.end) {
+              const x = rc.xForIndex(idx);
+              const bar = rc.bars[idx];
+              if (bar) {
+                const { high, low } = this._resolveOHLC(bar);
+                const yTop = rc.yForPrice(high);
+                const yBot = rc.yForPrice(low);
+                const elapsed = performance.now() - (hl.until - 1200);
+                const pulse = 0.25 + 0.2 * Math.sin(elapsed / 120 * Math.PI);
+                ctx.save();
+                ctx.fillStyle = `rgba(64, 158, 255, ${pulse})`;
+                ctx.fillRect(x - rc.bodyWidth, yTop - 4, rc.bodyWidth * 2, yBot - yTop + 8);
+                ctx.restore();
+              }
+            }
+            this.scheduleRender();
+          } else {
+            this._scrollToHighlight = null;
+          }
         }
 
         _hitTestAnnotation(mx, my) {
@@ -2981,6 +2983,7 @@
           }
           this.drawAxes(ctx, rc);
           this.drawHighLowLabels(ctx, rc);
+          this.drawScrollToHighlight(ctx, rc);
           this.drawAnnotationPins(ctx, rc);
           const crosshairState = this.drawCrosshair(ctx, rc, hoveredIndex);
           const focusBar = crosshairState?.bar || rc.visibleBars[rc.visibleBars.length - 1] || null;

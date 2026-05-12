@@ -3,8 +3,24 @@ import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
 import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
 import { ReviewSignalList } from '../features/review/ReviewSignalList.jsx';
-import { preferredActivationWickStrategy, rthReviewPayload } from '../features/review/session.js';
+import {
+  buildBarIndexMap,
+  preferredActivationWickStrategy,
+  remapAnnotationIndexes,
+  remapSetupIndexes,
+  reviewPayloadForWindow,
+} from '../features/review/session.js';
 import { UnifiedKlineEngine } from '../kline/UnifiedKlineEngine.jsx';
+
+const EXTENDED_K_STORAGE_KEY = 'tangReview:extendedKBars';
+
+function loadExtendedKBars() {
+  try {
+    return window.localStorage?.getItem(EXTENDED_K_STORAGE_KEY) === 'true';
+  } catch (_) {
+    return false;
+  }
+}
 
 function assetPath(path) {
   const base = import.meta.env.BASE_URL || './';
@@ -169,6 +185,20 @@ export function StaticReviewsApp() {
   const [strategyPayload, setStrategyPayload] = useState(null);
   const [activeSignalId, setActiveSignalId] = useState('');
   const [error, setError] = useState('');
+  const [showExtendedKBars, setShowExtendedKBars] = useState(loadExtendedKBars);
+
+  useEffect(() => {
+    try {
+      window.localStorage?.setItem(EXTENDED_K_STORAGE_KEY, showExtendedKBars ? 'true' : 'false');
+    } catch (_) {
+      // localStorage can be unavailable in restricted browser contexts.
+    }
+  }, [showExtendedKBars]);
+
+  useEffect(() => {
+    setActiveSignalId('');
+    engineRef.current?.overview();
+  }, [showExtendedKBars]);
 
   useEffect(() => {
     fetch(assetPath('reviews/index.json'))
@@ -207,7 +237,7 @@ export function StaticReviewsApp() {
         if (!response.ok) throw new Error(`Static review payload not found: ${response.status}`);
         return response.json();
       })
-      .then((payload) => setReview(rthReviewPayload(payload)))
+      .then((payload) => setReview(payload))
       .catch((err) => setError(err.message));
   }, [selectedItem?.file]);
 
@@ -225,31 +255,46 @@ export function StaticReviewsApp() {
       .catch((err) => setError(err.message));
   }, [selectedStrategy?.file]);
 
-  const bars1m = review?.bars_1m || [];
-  const bars5m = review?.bars_5m || [];
+  const scanReview = useMemo(() => reviewPayloadForWindow(review, 'rth'), [review]);
+  const displayReview = useMemo(
+    () => reviewPayloadForWindow(review, showExtendedKBars ? 'extended_k' : 'rth'),
+    [review, showExtendedKBars],
+  );
+  const scanBars1m = scanReview?.bars_1m || [];
+  const scanBars5m = scanReview?.bars_5m || [];
+  const bars1m = displayReview?.bars_1m || [];
+  const bars5m = displayReview?.bars_5m || [];
   const strategy = strategyPayload?.json || null;
   const computed = useMemo(() => {
-    if (!review || !strategy) return { annotations1m: [], annotations5m: [], setups: [] };
-    const embedded = review.annotations_1m || [];
-    const annotations1m = embedded.length ? embedded : scanSignals({ bars1m, bars5m, strategy });
-    const annotations5m = review.annotations_5m?.length ? review.annotations_5m : generateTrendAnnotations(bars5m, strategy);
-    const setups = traceSetups(bars1m, annotations1m, strategy?.exit || {});
+    if (!scanReview || !strategy) return { annotations1m: [], annotations5m: [], setups: [] };
+    const embedded = scanReview.annotations_1m || [];
+    const annotations1m = embedded.length ? embedded : scanSignals({ bars1m: scanBars1m, bars5m: scanBars5m, strategy });
+    const annotations5m = scanReview.annotations_5m?.length ? scanReview.annotations_5m : generateTrendAnnotations(scanBars5m, strategy);
+    const setups = traceSetups(scanBars1m, annotations1m, strategy?.exit || {});
     return { annotations1m, annotations5m, setups };
-  }, [review, bars1m, bars5m, strategy]);
+  }, [scanReview, scanBars1m, scanBars5m, strategy]);
 
-  const allAnnotations = [...computed.annotations1m, ...computed.annotations5m];
+  const displayIndexMap1m = useMemo(() => buildBarIndexMap(scanBars1m, bars1m), [scanBars1m, bars1m]);
+  const displayIndexMap5m = useMemo(() => buildBarIndexMap(scanBars5m, bars5m), [scanBars5m, bars5m]);
+  const displayComputed = useMemo(() => ({
+    annotations1m: remapAnnotationIndexes(computed.annotations1m, displayIndexMap1m, '1m'),
+    annotations5m: remapAnnotationIndexes(computed.annotations5m, displayIndexMap5m, '5m'),
+    setups: remapSetupIndexes(computed.setups, displayIndexMap1m),
+  }), [computed, displayIndexMap1m, displayIndexMap5m]);
+
+  const allAnnotations = [...displayComputed.annotations1m, ...displayComputed.annotations5m];
   const chartAnnotations1m = useMemo(
-    () => computed.annotations1m
+    () => displayComputed.annotations1m
       .filter((annotation) => ['setup', 'signal', 'expired'].includes(annotation.type))
       .map(chartAnnotation),
-    [computed.annotations1m],
+    [displayComputed.annotations1m],
   );
   const chartAnnotations5m = useMemo(() => [], []);
   const summary = summarizeAnnotations(computed.annotations1m);
   const setupSummary = summarizeSetups(computed.setups);
   const stats = sessionStats(bars1m);
-  const activeSignal = allAnnotations.find((annotation) => annotation.id === activeSignalId) || computed.annotations1m[0] || computed.annotations5m[0];
-  const meta = review?.meta || {};
+  const activeSignal = allAnnotations.find((annotation) => annotation.id === activeSignalId) || displayComputed.annotations1m[0] || displayComputed.annotations5m[0];
+  const meta = displayReview?.meta || {};
 
   function chooseReview(item) {
     window.location.hash = item.slug;
@@ -269,7 +314,7 @@ export function StaticReviewsApp() {
     const targetIndex = resolveAnnotationIndex(annotation, targetBars);
     engineRef.current?.setHighlightRanges(null);
     if (timeframe === '1m') {
-      const setup = setupForAnnotation(annotation, computed.setups);
+      const setup = setupForAnnotation(annotation, displayComputed.setups);
       const range = setupRange({ ...annotation, bar_index: targetIndex }, setup, targetBars.length);
       engineRef.current?.fitRange({ timeframe, startIndex: range.start, endIndex: range.end });
     }
@@ -278,7 +323,7 @@ export function StaticReviewsApp() {
       timeframe,
       ts: annotation.ts,
       time: annotation.t,
-      highlight: false,
+      highlight: true,
       center: false,
     });
   }
@@ -288,9 +333,9 @@ export function StaticReviewsApp() {
     engineRef.current?.overview();
   }
 
-  const enginePayload = review && strategyPayload ? {
+  const enginePayload = displayReview && strategyPayload ? {
     meta: {
-      ...(review.meta || {}),
+      ...(displayReview.meta || {}),
       strategy: {
         id: strategyPayload.id,
         name: strategyPayload.name,
@@ -305,7 +350,7 @@ export function StaticReviewsApp() {
     bars_5m: bars5m,
     annotations_1m: chartAnnotations1m,
     annotations_5m: chartAnnotations5m,
-    _trades: computed.setups,
+    _trades: displayComputed.setups,
   } : null;
 
   return (
@@ -349,9 +394,9 @@ export function StaticReviewsApp() {
             </div>
             <div className="dr-signal-list">
               <ReviewSignalList
-                annotations1m={computed.annotations1m}
-                annotations5m={computed.annotations5m}
-                setups={computed.setups}
+                annotations1m={displayComputed.annotations1m}
+                annotations5m={displayComputed.annotations5m}
+                setups={displayComputed.setups}
                 activeSignal={activeSignal}
                 onSelect={selectSignal}
                 bars1m={bars1m}
@@ -372,7 +417,7 @@ export function StaticReviewsApp() {
                 annotations1m={chartAnnotations1m}
                 annotations5m={chartAnnotations5m}
                 engineOptions={DAILY_REVIEW_ENGINE_OPTIONS}
-                replayStartTime="09:30"
+                replayStartTime={showExtendedKBars ? '09:00' : '09:30'}
                 onAnnotationClick={(annotation) => selectSignal(allAnnotations.find((item) => item.id === annotation.id) || annotation)}
               />
             )}
@@ -380,6 +425,17 @@ export function StaticReviewsApp() {
 
           <footer className="dr-upload-bar">
             <div className="dr-action-group">
+              <button
+                type="button"
+                className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
+                role="switch"
+                aria-checked={showExtendedKBars}
+                onClick={() => setShowExtendedKBars((value) => !value)}
+                disabled={!review}
+                title="Toggle 09:00-16:30 extended K bars"
+              >
+                Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
+              </button>
               <button type="button" onClick={() => engineRef.current?.setTimeframe('1m')} disabled={!review}>1m</button>
               <button type="button" onClick={() => engineRef.current?.setTimeframe('5m')} disabled={!review}>5m</button>
               <button type="button" onClick={() => engineRef.current?.stepBack()} disabled={!review}>Back</button>

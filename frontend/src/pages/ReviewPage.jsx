@@ -4,8 +4,24 @@ import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
 import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
 import { ReviewSignalList } from '../features/review/ReviewSignalList.jsx';
-import { preferredActivationWickStrategy, rthReviewPayload } from '../features/review/session.js';
+import {
+  buildBarIndexMap,
+  preferredActivationWickStrategy,
+  remapAnnotationIndexes,
+  remapSetupIndexes,
+  reviewPayloadForWindow,
+} from '../features/review/session.js';
 import { UnifiedKlineEngine } from '../kline/UnifiedKlineEngine.jsx';
+
+const EXTENDED_K_STORAGE_KEY = 'tangReview:extendedKBars';
+
+function loadExtendedKBars() {
+  try {
+    return window.localStorage?.getItem(EXTENDED_K_STORAGE_KEY) === 'true';
+  } catch (_) {
+    return false;
+  }
+}
 
 function formatPrice(value) {
   return Number.isFinite(Number(value)) ? Number(value).toFixed(2) : '--';
@@ -174,8 +190,22 @@ export function ReviewPage({ state, setState }) {
   const [runVersion, setRunVersion] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showExtendedKBars, setShowExtendedKBars] = useState(loadExtendedKBars);
   const selectedDay = state.marketDays.find((day) => day.id === Number(state.selectedDayId)) || state.marketDays[0];
   const selectedStrategy = state.strategies.find((strategy) => strategy.id === Number(state.selectedStrategyId)) || preferredActivationWickStrategy(state.strategies);
+
+  useEffect(() => {
+    try {
+      window.localStorage?.setItem(EXTENDED_K_STORAGE_KEY, showExtendedKBars ? 'true' : 'false');
+    } catch (_) {
+      // localStorage can be unavailable in restricted browser contexts.
+    }
+  }, [showExtendedKBars]);
+
+  useEffect(() => {
+    setActiveSignalId('');
+    engineRef.current?.overview();
+  }, [showExtendedKBars]);
 
   useEffect(() => {
     if (!selectedDay || !selectedStrategy) return;
@@ -183,7 +213,7 @@ export function ReviewPage({ state, setState }) {
     setError('');
     Api.review(selectedDay.id, selectedStrategy.id)
       .then((payload) => {
-        setReview(rthReviewPayload(payload));
+        setReview(payload);
         setActiveSignalId('');
         setRunVersion((value) => value + 1);
       })
@@ -191,33 +221,46 @@ export function ReviewPage({ state, setState }) {
       .finally(() => setLoading(false));
   }, [selectedDay?.id, selectedStrategy?.id]);
 
-  const bars1m = review?.bars_1m || [];
-  const bars5m = review?.bars_5m || [];
+  const scanReview = useMemo(() => reviewPayloadForWindow(review, 'rth'), [review]);
+  const displayReview = useMemo(
+    () => reviewPayloadForWindow(review, showExtendedKBars ? 'extended_k' : 'rth'),
+    [review, showExtendedKBars],
+  );
+  const scanBars1m = scanReview?.bars_1m || [];
+  const scanBars5m = scanReview?.bars_5m || [];
+  const bars1m = displayReview?.bars_1m || [];
+  const bars5m = displayReview?.bars_5m || [];
   const strategy = review?.strategy?.json || null;
   const computed = useMemo(() => {
-    if (!review) return { annotations1m: [], annotations5m: [], setups: [] };
-    const embedded = review.annotations_1m || [];
-    const annotations1m = embedded.length ? embedded : scanSignals({ bars1m, bars5m, strategy });
-    const annotations5m = review.annotations_5m?.length ? review.annotations_5m : generateTrendAnnotations(bars5m, strategy);
-    const setups = traceSetups(bars1m, annotations1m, strategy?.exit || {});
+    if (!scanReview) return { annotations1m: [], annotations5m: [], setups: [] };
+    const embedded = scanReview.annotations_1m || [];
+    const annotations1m = embedded.length ? embedded : scanSignals({ bars1m: scanBars1m, bars5m: scanBars5m, strategy });
+    const annotations5m = scanReview.annotations_5m?.length ? scanReview.annotations_5m : generateTrendAnnotations(scanBars5m, strategy);
+    const setups = traceSetups(scanBars1m, annotations1m, strategy?.exit || {});
     return { annotations1m, annotations5m, setups };
-  }, [review, bars1m, bars5m, strategy, runVersion]);
+  }, [scanReview, scanBars1m, scanBars5m, strategy, runVersion]);
 
-  const visibleAnnotations = computed.annotations1m;
-  const allAnnotations = [...computed.annotations1m, ...computed.annotations5m];
+  const displayIndexMap1m = useMemo(() => buildBarIndexMap(scanBars1m, bars1m), [scanBars1m, bars1m]);
+  const displayIndexMap5m = useMemo(() => buildBarIndexMap(scanBars5m, bars5m), [scanBars5m, bars5m]);
+  const displayComputed = useMemo(() => ({
+    annotations1m: remapAnnotationIndexes(computed.annotations1m, displayIndexMap1m, '1m'),
+    annotations5m: remapAnnotationIndexes(computed.annotations5m, displayIndexMap5m, '5m'),
+    setups: remapSetupIndexes(computed.setups, displayIndexMap1m),
+  }), [computed, displayIndexMap1m, displayIndexMap5m]);
+
+  const allAnnotations = [...displayComputed.annotations1m, ...displayComputed.annotations5m];
   const chartAnnotations1m = useMemo(
-    () => computed.annotations1m
+    () => displayComputed.annotations1m
       .filter((annotation) => ['setup', 'signal', 'expired'].includes(annotation.type))
       .map(chartAnnotation),
-    [computed.annotations1m],
+    [displayComputed.annotations1m],
   );
   const chartAnnotations5m = useMemo(() => [], []);
   const stats = sessionStats(bars1m);
   const summary = summarizeAnnotations(computed.annotations1m);
   const setupSummary = summarizeSetups(computed.setups);
-  const activeSignal = allAnnotations.find((annotation) => annotation.id === activeSignalId) || computed.annotations1m[0] || computed.annotations5m[0];
-  const activeSetup = setupForAnnotation(activeSignal, computed.setups);
-  const meta = review?.meta || {};
+  const activeSignal = allAnnotations.find((annotation) => annotation.id === activeSignalId) || displayComputed.annotations1m[0] || displayComputed.annotations5m[0];
+  const meta = displayReview?.meta || {};
 
   function selectSignal(annotation) {
     if (!annotation) return;
@@ -228,7 +271,7 @@ export function ReviewPage({ state, setState }) {
     const targetIndex = resolveAnnotationIndex(annotation, targetBars);
     engineRef.current?.setHighlightRanges(null);
     if (timeframe === '1m') {
-      const setup = setupForAnnotation(annotation, computed.setups);
+      const setup = setupForAnnotation(annotation, displayComputed.setups);
       const range = setupRange({ ...annotation, bar_index: targetIndex }, setup, targetBars.length);
       engineRef.current?.fitRange({ timeframe, startIndex: range.start, endIndex: range.end });
     }
@@ -237,7 +280,7 @@ export function ReviewPage({ state, setState }) {
       timeframe,
       ts: annotation.ts,
       time: annotation.t,
-      highlight: false,
+      highlight: true,
       center: false,
     });
   }
@@ -253,10 +296,10 @@ export function ReviewPage({ state, setState }) {
   }
 
   const enginePayload = useMemo(() => {
-    if (!review) return null;
+    if (!displayReview) return null;
     return {
       meta: {
-        ...(review.meta || {}),
+        ...(displayReview.meta || {}),
         initial_timeframe: '1m',
         initial_index_1m: Math.max(0, bars1m.length - 1),
         initial_index_5m: Math.max(0, bars5m.length - 1),
@@ -265,9 +308,9 @@ export function ReviewPage({ state, setState }) {
       bars_5m: bars5m,
       annotations_1m: chartAnnotations1m,
       annotations_5m: chartAnnotations5m,
-      _trades: computed.setups,
+      _trades: displayComputed.setups,
     };
-  }, [review, bars1m, bars5m, chartAnnotations1m, chartAnnotations5m, computed.setups]);
+  }, [displayReview, bars1m, bars5m, chartAnnotations1m, chartAnnotations5m, displayComputed.setups]);
 
   return (
     <section className="dr-shell">
@@ -294,9 +337,9 @@ export function ReviewPage({ state, setState }) {
           </div>
           <div className="dr-signal-list">
             <ReviewSignalList
-              annotations1m={computed.annotations1m}
-              annotations5m={computed.annotations5m}
-              setups={computed.setups}
+              annotations1m={displayComputed.annotations1m}
+              annotations5m={displayComputed.annotations5m}
+              setups={displayComputed.setups}
               activeSignal={activeSignal}
               onSelect={selectSignal}
               bars1m={bars1m}
@@ -317,7 +360,7 @@ export function ReviewPage({ state, setState }) {
               annotations1m={chartAnnotations1m}
               annotations5m={chartAnnotations5m}
               engineOptions={DAILY_REVIEW_ENGINE_OPTIONS}
-              replayStartTime="09:30"
+              replayStartTime={showExtendedKBars ? '09:00' : '09:30'}
               onAnnotationClick={(annotation) => selectSignal(allAnnotations.find((item) => item.id === annotation.id) || annotation)}
             />
           )}
@@ -339,6 +382,17 @@ export function ReviewPage({ state, setState }) {
           </div>
           <div className="dr-upload-divider" />
           <div className="dr-action-group">
+            <button
+              type="button"
+              className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
+              role="switch"
+              aria-checked={showExtendedKBars}
+              onClick={() => setShowExtendedKBars((value) => !value)}
+              disabled={!review || loading}
+              title="Toggle 09:00-16:30 extended K bars"
+            >
+              Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
+            </button>
             <button type="button" onClick={() => engineRef.current?.setTimeframe('1m')}>1m</button>
             <button type="button" onClick={() => engineRef.current?.setTimeframe('5m')}>5m</button>
             <button type="button" onClick={() => engineRef.current?.stepBack()} disabled={!review || loading}>Back</button>

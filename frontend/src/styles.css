@@ -622,6 +622,31 @@ main { padding: 36px; overflow: auto; }
   cursor: not-allowed;
 }
 
+.dr-action-group .dr-toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #8A8A85;
+  min-width: 116px;
+  justify-content: center;
+}
+
+.dr-action-group .dr-toggle-switch span {
+  color: #5A5A56;
+  font-size: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.dr-action-group .dr-toggle-switch.active {
+  color: #E8E7E3;
+  background: rgba(139, 154, 109, 0.18);
+  border-color: #8B9A6D;
+}
+
+.dr-action-group .dr-toggle-switch.active span {
+  color: #C6D6A0;
+}
+
 .dr-trade-result {
   margin-top: 6px;
   padding: 5px 7px;

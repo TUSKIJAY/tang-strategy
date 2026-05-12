@@ -9,7 +9,7 @@ services:
       - ./strategies:/app/strategies:ro
       - ./content:/app/content:ro
     ports:
-      - "8000:8000"
+      - "18091:8000"
   frontend:
     build:
       context: .
@@ -17,4 +17,4 @@ services:
     depends_on:
       - backend
     ports:
-      - "8080:80"
+      - "18080:80"
