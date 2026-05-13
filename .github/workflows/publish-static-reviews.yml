@@ -1,6 +1,9 @@
 name: Publish static reviews
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -23,11 +26,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Use SQLite DB from dev branch
-        run: |
-          git fetch origin dev
-          git checkout origin/dev -- data/sqlite/tang_strategy_live_extended.db
 
       - name: Set up Python
         uses: actions/setup-python@v5
