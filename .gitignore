@@ -42,3 +42,7 @@ Desktop.ini
 data/seed/market-data/
 .codex
 ONLINE_REVIEW_OPTIMIZATION.md
+
+# Local IB publish automation
+backend/scripts/fetch_ib_live_extended.py
+scripts/publish_spy_review.ps1

@@ -1,3 +1,2 @@
 fastapi==0.115.6
-ib-insync==0.9.86
 uvicorn[standard]==0.34.0
