@@ -49,6 +49,31 @@ npm install
 npm run dev
 ```
 
+## Publish one SPY daily review
+
+With IB Gateway running locally on `127.0.0.1:4001`, run:
+
+```powershell
+.\scripts\publish_spy_review.ps1
+```
+
+That command fetches the latest completed SPY extended session from IB, writes the active
+`live_extended` JSON locally, rebuilds `data/sqlite/tang_strategy_live_extended.db`,
+validates a static frontend build, commits the DB update, pushes `main`, and waits for the
+existing GitHub Pages workflow to publish the review page.
+
+For a specific day:
+
+```powershell
+.\scripts\publish_spy_review.ps1 -Date 2026-05-14
+```
+
+The published URL format is:
+
+```text
+https://tuskijay.github.io/tang-strategy/#spy-YYYY-MM-DD-extended
+```
+
 ## Notes
 
 `legacy/` runtime artifacts are removed; current docs and workflows are maintained in `docs/`.
