@@ -22,9 +22,10 @@ function loadExtendedKBars() {
   }
 }
 
-function assetPath(path) {
+function assetPath(path, cacheKey = '') {
   const base = import.meta.env.BASE_URL || './';
-  return `${base.replace(/\/?$/, '/')}${path}`;
+  const suffix = cacheKey ? `${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(cacheKey)}` : '';
+  return `${base.replace(/\/?$/, '/')}${path}${suffix}`;
 }
 
 function formatPrice(value) {
@@ -201,7 +202,7 @@ export function StaticReviewsApp() {
   }, [showExtendedKBars]);
 
   useEffect(() => {
-    fetch(assetPath('reviews/index.json'))
+    fetch(assetPath('reviews/index.json', Date.now()), { cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error(`Static review manifest not found: ${response.status}`);
         return response.json();
@@ -232,7 +233,7 @@ export function StaticReviewsApp() {
     if (!selectedItem) return;
     setError('');
     setActiveSignalId('');
-    fetch(assetPath(`reviews/${selectedItem.file}`))
+    fetch(assetPath(`reviews/${selectedItem.file}`, manifest?.generated_at || Date.now()), { cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error(`Static review payload not found: ${response.status}`);
         return response.json();
@@ -246,7 +247,7 @@ export function StaticReviewsApp() {
     setError('');
     setActiveSignalId('');
     window.localStorage?.setItem('tangStaticReviews:strategy', selectedStrategy.slug);
-    fetch(assetPath(`reviews/${selectedStrategy.file}`))
+    fetch(assetPath(`reviews/${selectedStrategy.file}`, manifest?.generated_at || Date.now()), { cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error(`Static strategy payload not found: ${response.status}`);
         return response.json();
