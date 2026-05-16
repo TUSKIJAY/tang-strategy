@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T01:22:07.331605+00:00",
+  "generated_at": "2026-05-16T04:15:38.058997+00:00",
   "limit": 10,
   "ticker": "SPY",
   "strategy_families": "v3,v4,v5",
@@ -78,6 +78,16 @@
     }
   ],
   "reviews": [
+    {
+      "slug": "spy-2026-05-15-extended",
+      "file": "days/spy-2026-05-15-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-15",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-15 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
     {
       "slug": "spy-2026-05-14-extended",
       "file": "days/spy-2026-05-14-extended.json",

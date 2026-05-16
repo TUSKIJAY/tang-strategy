@@ -244,7 +244,11 @@ def _fetch_stored_bar_payload(conn, table: str, market_day_id: int) -> list[dict
 
 def _build_5m_payload(conn, day: Any, bars_1m_rows: list[Any]) -> list[dict[str, Any]]:
     stored_bars = _fetch_stored_bar_payload(conn, "bars_5m", day["id"])
-    bars = stored_bars if stored_bars else build_5m_bars_from_1m(bars_1m_rows)
+    bars = (
+        stored_bars
+        if stored_bars
+        else build_5m_bars_from_1m(bars_1m_rows, source_vwap_mode="session_cumulative")
+    )
     return recalculate_ma_fields(bars, warmup_closes=_fetch_prior_5m_closes(conn, day))
 
 

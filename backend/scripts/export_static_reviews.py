@@ -74,7 +74,11 @@ def latest_market_days(conn, limit: int, ticker: str | None) -> list[dict[str, A
 def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
     rows = conn.execute(BAR_SELECT.format(table="bars_1m"), (day["id"],)).fetchall()
     stored_5m_rows = conn.execute(BAR_SELECT.format(table="bars_5m"), (day["id"],)).fetchall()
-    bars_5m_source = [bar_row_to_payload(row) for row in stored_5m_rows] if stored_5m_rows else build_5m_bars_from_1m(rows)
+    bars_5m_source = (
+        [bar_row_to_payload(row) for row in stored_5m_rows]
+        if stored_5m_rows
+        else build_5m_bars_from_1m(rows, source_vwap_mode="session_cumulative")
+    )
     bars_5m = recalculate_ma_fields(bars_5m_source, warmup_closes=fetch_prior_5m_closes(conn, day))
     meta = json.loads(day["meta_json"] or "{}")
     meta.update({
