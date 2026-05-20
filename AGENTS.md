@@ -43,3 +43,38 @@ Use concise conventional commits (`feat:`, `fix:`, `docs:`, `chore:`). PRs shoul
 - Keep `.env` values private.
 - Use admin token only for import endpoints.
 - Do not commit provider credentials or generated historical artifacts.
+
+## Daily publish playbook (one-sentence trigger)
+
+If the user says any of:
+
+- "发布 SPY YYYY-MM-DD"
+- "拉一下 YYYY-MM-DD 的 SPY 然后更新页面"
+- "publish SPY review for YYYY-MM-DD"
+- "push 5/20 SPY"
+
+…they mean run the full daily publish flow defined in [`docs/daily-publish-runbook.md`](./docs/daily-publish-runbook.md). Execute the steps below without re-asking — the user has already given consent by using the trigger phrase. If they omit the date, default to the latest completed US trading day (yesterday if after 20:00 ET, else the prior weekday).
+
+```bash
+# 1. Fetch from IB Gateway (live, port 4002). Expect "960 1m bars, gaps=0".
+cd backend && PYTHONPATH=. python scripts/fetch_ib_live_extended_day.py <YYYY-MM-DD>
+
+# 2. Canonicalize the runtime DB.
+PYTHONPATH=. python scripts/rebuild_live_extended_db.py
+
+# 3. (Optional) Local export + static build as sanity check.
+PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit 10 --ticker SPY --strategy-families v3,v4,v5
+cd ../frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews
+rm -rf public/reviews dist && cd ..
+
+# 4. Commit the DB (the only tracked artifact that carries new data) and push.
+git add data/sqlite/tang_strategy_live_extended.db
+git commit -m "feat: publish SPY <YYYY-MM-DD> review"
+git push origin main
+
+# 5. Watch the Pages workflow. URL: https://tuskijay.github.io/tang-strategy/#spy-<YYYY-MM-DD>-extended
+gh run list --repo TUSKIJAY/tang-strategy --workflow "Publish static reviews" --branch main --limit 1
+gh run watch <run-id> --repo TUSKIJAY/tang-strategy --exit-status
+```
+
+Pre-flight assumptions: IB Gateway is logged in to the live account on port 4002, and HMDS farm warm-up logged `Warning 2106 HMDS data farm connection is OK: ushmds` (not `2107 inactive`). If step 1 returns `0 bars` / `reqHistoricalData: Timeout`, restart IB Gateway and retry — see the troubleshooting table in the runbook. Do not skip step 2; the Pages workflow reads from the committed DB, not from the seed JSON (which is gitignored).
