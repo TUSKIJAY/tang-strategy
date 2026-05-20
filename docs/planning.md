@@ -56,7 +56,7 @@ This file is the only active planning document under `docs/`.
 - Minor planning cleanup: keep only one source of truth for each area in root docs.
 - Add compact case-review checklist to `teaching-system.md`.
 - Monitor whether hidden-future cutoff and replay metrics should be normalized across front-end consumers.
-- Add a daily fetch/import runbook once Polygon or IBKR ingestion is finalized.
+- ~~Add a daily fetch/import runbook once Polygon or IBKR ingestion is finalized.~~ Done — see [`daily-publish-runbook.md`](./daily-publish-runbook.md).
 
 ## Documentation Policy
 

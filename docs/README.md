@@ -8,6 +8,7 @@
 4. [`planning.md`](./planning.md) – current planning state and open decisions.
 5. [`teaching-system.md`](./teaching-system.md) – teaching flow, strategy notes, and pattern digest.
 6. [`kline-engine.md`](./kline-engine.md) – shared chart engine contract.
+7. [`daily-publish-runbook.md`](./daily-publish-runbook.md) – SOP for fetch → DB rebuild → push → Pages.
 
 ## Documentation structure
 
@@ -17,6 +18,7 @@
 - `strategy.md` describes strategy versions and default selection.
 - `teaching-system.md` owns teaching content semantics and chart-pattern guidance.
 - `kline-engine.md` owns the shared kline engine API and payload contract.
+- `daily-publish-runbook.md` is the SOP for the daily IBKR fetch → SQLite rebuild → push → GitHub Pages flow.
 
 ## Documentation rule
 
