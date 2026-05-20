@@ -21,7 +21,7 @@ class Settings:
     token_ttl_seconds: int = int(os.environ.get("TANG_TOKEN_TTL_SECONDS", "86400"))
     polygon_api_key: str = os.environ.get("POLYGON_API_KEY", "")
     ibkr_host: str = os.environ.get("IBKR_HOST", "127.0.0.1")
-    ibkr_port: int = int(os.environ.get("IBKR_PORT", "4001"))
+    ibkr_port: int = int(os.environ.get("IBKR_PORT", "4002"))
 
 
 settings = Settings()

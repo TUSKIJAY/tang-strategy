@@ -1,11 +1,19 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
+
+# Python 3.14+ no longer auto-creates an event loop on import; eventkit (pulled in
+# by ib_insync) requires one to exist before its module-level initialisation.
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
 from app.db import connect, init_db
 from app.services.bar_utils import (
@@ -89,7 +97,7 @@ def fetch_ib_1m_bars(
             "useRTH": False,
             "formatDate": 2,
         }
-        ib_end = f"{trade_date:%Y%m%d} 20:00:00 US/Eastern"
+        ib_end = datetime.combine(trade_date, SESSION_END, tzinfo=ET)
         bars = ib.reqHistoricalData(
             contract,
             endDateTime=ib_end,
@@ -99,6 +107,7 @@ def fetch_ib_1m_bars(
             useRTH=request["useRTH"],
             formatDate=request["formatDate"],
             keepUpToDate=False,
+            timeout=60,
         )
     finally:
         ib.disconnect()
