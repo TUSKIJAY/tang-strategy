@@ -1,5 +1,7 @@
 # Python
 .venv/
+venv/
+env/
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -9,6 +11,7 @@ __pycache__/
 # Node
 node_modules/
 frontend/dist/
+frontend/public/reviews/
 package-lock.json
 !frontend/package-lock.json
 npm-debug.log*
@@ -31,7 +34,7 @@ data/exports/
 *.rar
 *.7z
 
-# Editor / OS
+# Editor / OS / agent state
 .vscode/
 .idea/
 .DS_Store
@@ -41,8 +44,9 @@ Desktop.ini
 *.swo
 data/seed/market-data/
 .codex
+.claude/
 ONLINE_REVIEW_OPTIMIZATION.md
 
-# Local IB publish automation
+# Local IB publish automation (personal scaffolding, see docs/daily-publish-runbook.md)
 backend/scripts/fetch_ib_live_extended.py
 scripts/publish_spy_review.ps1
