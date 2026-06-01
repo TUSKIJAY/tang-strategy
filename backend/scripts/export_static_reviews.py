@@ -10,6 +10,7 @@ from typing import Any
 
 from app.db import connect, init_db
 from app.services.bar_utils import BAR_MA_WINDOWS, bar_row_to_payload, build_5m_bars_from_1m, recalculate_ma_fields
+from app.services.tang_trades import load_tang_trades
 from app.settings import settings
 
 
@@ -80,6 +81,7 @@ def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
         else build_5m_bars_from_1m(rows, source_vwap_mode="session_cumulative")
     )
     bars_5m = recalculate_ma_fields(bars_5m_source, warmup_closes=fetch_prior_5m_closes(conn, day))
+    tang_trades = load_tang_trades(day["ticker"], day["trade_date"])
     meta = json.loads(day["meta_json"] or "{}")
     meta.update({
         "ticker": day["ticker"],
@@ -89,6 +91,7 @@ def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
         "counts": {
             "bars_1m": len(rows),
             "bars_5m": len(bars_5m),
+            "tang_trades": len(tang_trades["trades"]),
         },
     })
     return {
@@ -104,6 +107,7 @@ def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
         "bars_5m": bars_5m,
         "annotations_1m": [],
         "annotations_5m": [],
+        "tang_trades": tang_trades,
     }
 
 

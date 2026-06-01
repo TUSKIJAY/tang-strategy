@@ -2166,6 +2166,8 @@
           blue:   { fill: '#409eff', stroke: '#409eff', dim: 'rgba(64,158,255,0.4)' },
           orange: { fill: '#e6a23c', stroke: '#e6a23c', dim: 'rgba(230,162,60,0.4)' },
           purple: { fill: '#a855f7', stroke: '#a855f7', dim: 'rgba(168,85,247,0.4)' },
+          'tang-call': { fill: '#f4c542', stroke: '#f4c542', dim: 'rgba(244,197,66,0.34)' },
+          'tang-put':  { fill: '#b389ff', stroke: '#b389ff', dim: 'rgba(179,137,255,0.34)' },
         };
 
         _annoColor(style) {
@@ -2219,6 +2221,72 @@
             const stemDir = isTop ? -1 : 1;
             const stemStart = anchorY + stemDir * 4;
             const stemEnd = stemStart + stemDir * stemLen;
+
+            if (anno.type === 'tang_trade') {
+              const radius = isHigh ? 10 : 8;
+              const markerY = stemEnd + stemDir * (radius * 0.5);
+              const label = anno.marker_label || anno.title || 'Tang';
+
+              ctx.globalAlpha = 1;
+              ctx.strokeStyle = haloColor;
+              ctx.lineWidth = 4;
+              ctx.beginPath();
+              ctx.moveTo(x, stemStart);
+              ctx.lineTo(x, stemEnd);
+              ctx.stroke();
+
+              ctx.setLineDash([3, 3]);
+              ctx.strokeStyle = colors.stroke;
+              ctx.lineWidth = 1.6;
+              ctx.beginPath();
+              ctx.moveTo(x, stemStart);
+              ctx.lineTo(x, stemEnd);
+              ctx.stroke();
+              ctx.setLineDash([]);
+
+              ctx.beginPath();
+              ctx.moveTo(x, markerY - radius);
+              ctx.lineTo(x + radius, markerY);
+              ctx.lineTo(x, markerY + radius);
+              ctx.lineTo(x - radius, markerY);
+              ctx.closePath();
+              ctx.strokeStyle = haloColor;
+              ctx.lineWidth = 3;
+              ctx.stroke();
+              ctx.fillStyle = colors.fill;
+              ctx.fill();
+
+              ctx.font = '700 11px ui-monospace, SFMono-Regular, Menlo, monospace';
+              const textW = Math.ceil(ctx.measureText(label).width);
+              const labelW = textW + 12;
+              const labelH = 18;
+              const labelX = clamp(x + 10, rc.area.x + 4, rc.chartRight - labelW - 4);
+              const labelY = clamp(markerY - labelH / 2, rc.area.y + 4, rc.volumeY - labelH - 4);
+              ctx.fillStyle = this.theme === 'light' ? 'rgba(255,255,255,0.94)' : 'rgba(20,20,18,0.94)';
+              ctx.strokeStyle = colors.stroke;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.roundRect(labelX, labelY, labelW, labelH, 4);
+              ctx.fill();
+              ctx.stroke();
+              ctx.fillStyle = colors.fill;
+              ctx.fillText(label, labelX + 6, labelY + 12.5);
+
+              const hitX = Math.min(x - radius - 4, labelX);
+              const hitY = Math.min(markerY - radius - 4, labelY);
+              const hitRight = Math.max(x + radius + 4, labelX + labelW);
+              const hitBottom = Math.max(markerY + radius + 4, labelY + labelH);
+              this._annoHitZones.push({
+                x: hitX,
+                y: hitY,
+                w: hitRight - hitX,
+                h: hitBottom - hitY,
+                anno,
+                screenX: x,
+                screenY: markerY,
+              });
+              return;
+            }
 
             ctx.globalAlpha = alpha;
             // Halo behind stem so it doesn't disappear into MA lines.

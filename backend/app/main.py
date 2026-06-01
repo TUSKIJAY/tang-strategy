@@ -12,6 +12,7 @@ from .auth import create_token, require_admin, require_readonly, role_from_passw
 from .db import connect, init_db, rows_to_dicts
 from .services.importer import import_default_seed, import_market_json, import_strategy_json
 from .services.bar_utils import BAR_MA_WINDOWS, bar_row_to_payload, build_5m_bars_from_1m, recalculate_ma_fields
+from .services.tang_trades import load_tang_trades
 from .settings import settings
 
 app = FastAPI(title="Tang Strategy API")
@@ -147,6 +148,7 @@ def assemble_review(market_day_id: int, strategy_id: int, _: str = Depends(requi
         bars_1m_rows = _fetch_bar_rows(conn, "bars_1m", market_day_id)
         bars_5m = _build_5m_payload(conn, day, bars_1m_rows)
         strategy_json = json.loads(strategy_row["json_body"])
+        tang_trades = load_tang_trades(day["ticker"], day["trade_date"])
         meta = json.loads(day["meta_json"] or "{}")
         meta.update({
             "ticker": day["ticker"],
@@ -156,6 +158,7 @@ def assemble_review(market_day_id: int, strategy_id: int, _: str = Depends(requi
             "counts": {
                 "bars_1m": len(bars_1m_rows),
                 "bars_5m": len(bars_5m),
+                "tang_trades": len(tang_trades["trades"]),
             },
             "strategy": {
                 "id": strategy_row["id"],
@@ -185,6 +188,7 @@ def assemble_review(market_day_id: int, strategy_id: int, _: str = Depends(requi
             "bars_5m": bars_5m,
             "annotations_1m": [],
             "annotations_5m": [],
+            "tang_trades": tang_trades,
         }
 
 
