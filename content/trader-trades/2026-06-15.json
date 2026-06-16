@@ -1,0 +1,37 @@
+{
+  "date": "2026-06-15",
+  "ticker": "SPY",
+  "trades": [
+    {
+      "time": "10:46",
+      "side": "CALL",
+      "strike": null,
+      "expiry": "2026-06-15",
+      "action": "buy_open",
+      "source": "manual_note",
+      "reason_type": "explicit_note",
+      "note": "10:46 call。用户提供 Tang 交易点位，未提供具体 option strike。"
+    },
+    {
+      "time": "13:45",
+      "side": "PUT",
+      "strike": null,
+      "expiry": "2026-06-15",
+      "action": "buy_open",
+      "source": "manual_note",
+      "reason_type": "explicit_note",
+      "note": "13:45 put。用户提供 Tang 交易点位，未提供具体 option strike。"
+    },
+    {
+      "time": "14:29",
+      "side": "PUT",
+      "strike": null,
+      "expiry": "2026-06-15",
+      "action": "buy_open",
+      "source": "manual_note",
+      "reason_type": "explicit_note",
+      "note": "14:29 put。用户提供 Tang 交易点位，未提供具体 option strike。"
+    }
+  ],
+  "notes": []
+}
