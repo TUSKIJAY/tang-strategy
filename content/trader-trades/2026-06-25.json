@@ -1,0 +1,17 @@
+{
+  "date": "2026-06-25",
+  "ticker": "SPY",
+  "trades": [
+    {
+      "time": "10:02",
+      "side": "CALL",
+      "strike": null,
+      "expiry": "2026-06-25",
+      "action": "buy_open",
+      "source": "screenshot",
+      "reason_type": "explicit_note",
+      "note": "10:02 call；30% 仓位。5分钟图重点观察10:20 K线：两根实心后第三根较小但收盘撑住，判断为空方尝试夺回控制权未成功后的反转形态；当时价位735出头，目标看5分钟MA20/736.5附近，且15分钟MA10与5分钟MA20重合。用户未提供具体 option strike。"
+    }
+  ],
+  "notes": []
+}
