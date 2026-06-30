@@ -1,0 +1,17 @@
+{
+  "date": "2026-06-29",
+  "ticker": "SPY",
+  "trades": [
+    {
+      "time": "09:40",
+      "side": "CALL",
+      "strike": null,
+      "expiry": "2026-06-29",
+      "action": "buy_open",
+      "source": "screenshot",
+      "reason_type": "explicit_note",
+      "note": "9:40 call；入场依据 7400（SPX）支撑二次回测确认；+30% 止盈出场。用户未提供具体 option strike。"
+    }
+  ],
+  "notes": []
+}
