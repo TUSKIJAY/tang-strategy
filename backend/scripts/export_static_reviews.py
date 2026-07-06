@@ -208,7 +208,7 @@ def export_static_reviews(output_dir: Path, limit: int, ticker: str | None, stra
 def main() -> None:
     parser = argparse.ArgumentParser(description="Export latest market-day reviews for static GitHub Pages hosting.")
     parser.add_argument("--output", type=Path, default=Path("../frontend/public/reviews"))
-    parser.add_argument("--limit", type=int, default=int(os.environ.get("TANG_STATIC_REVIEW_LIMIT", "10")))
+    parser.add_argument("--limit", type=int, default=int(os.environ.get("TANG_STATIC_REVIEW_LIMIT", "250")))
     parser.add_argument("--ticker", default=os.environ.get("TANG_STATIC_REVIEW_TICKER", "SPY"))
     parser.add_argument("--strategy-families", default=os.environ.get("TANG_STATIC_REVIEW_STRATEGY_FAMILIES", "v3,v4,v5"))
     args = parser.parse_args()

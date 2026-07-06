@@ -63,7 +63,7 @@ cd backend && PYTHONPATH=. python scripts/fetch_ib_live_extended_day.py <YYYY-MM
 PYTHONPATH=. python scripts/rebuild_live_extended_db.py
 
 # 3. (Optional) Local export + static build as sanity check.
-PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit 10 --ticker SPY --strategy-families v3,v4,v5
+PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit 250 --ticker SPY --strategy-families v3,v4,v5
 cd ../frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews
 rm -rf public/reviews dist && cd ..
 
