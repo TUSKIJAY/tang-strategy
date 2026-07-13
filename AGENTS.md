@@ -62,17 +62,23 @@ cd backend && PYTHONPATH=. python scripts/fetch_ib_live_extended_day.py <YYYY-MM
 # 2. Canonicalize the runtime DB.
 PYTHONPATH=. python scripts/rebuild_live_extended_db.py
 
-# 3. (Optional) Local export + static build as sanity check.
+# 3. Record Tang SPY 0DTE trades/context when provided.
+# Edit ../content/trader-trades/<YYYY-MM-DD>.json:
+# - actual SPY 0DTE entries go in "trades"
+# - no SPY trade / SPY context only goes in "notes" with "trades": []
+
+# 4. (Optional) Local export + static build as sanity check.
 PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit 250 --ticker SPY --strategy-families v3,v4,v5
 cd ../frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews
 rm -rf public/reviews dist && cd ..
 
-# 4. Commit the DB (the only tracked artifact that carries new data) and push.
+# 5. Commit the DB plus Tang trade JSON if created/changed, then push.
 git add data/sqlite/tang_strategy_live_extended.db
+git add content/trader-trades/<YYYY-MM-DD>.json  # only if created or changed
 git commit -m "feat: publish SPY <YYYY-MM-DD> review"
 git push origin main
 
-# 5. Watch the Pages workflow. URL: https://tuskijay.github.io/tang-strategy/#spy-<YYYY-MM-DD>-extended
+# 6. Watch the Pages workflow. URL: https://tuskijay.github.io/tang-strategy/#spy-<YYYY-MM-DD>-extended
 gh run list --repo TUSKIJAY/tang-strategy --workflow "Publish static reviews" --branch main --limit 1
 gh run watch <run-id> --repo TUSKIJAY/tang-strategy --exit-status
 ```

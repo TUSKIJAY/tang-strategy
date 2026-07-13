@@ -1,6 +1,6 @@
 # Daily Publish Runbook (SPY live extended)
 
-SOP for the end-to-end daily flow: pull bars from IB Gateway → rebuild SQLite → export static review payloads → push `main` → GitHub Pages.
+SOP for the end-to-end daily flow: pull bars from IB Gateway → rebuild SQLite → record Tang SPY 0DTE trades → export static review payloads → push `main` → GitHub Pages.
 
 The published target URL is `https://tuskijay.github.io/tang-strategy/#<ticker>-<date>-extended`.
 
@@ -69,7 +69,73 @@ with connect() as c:
 "
 ```
 
-## 3. Export static review payloads (local sanity build)
+## 3. Record Tang SPY 0DTE trades
+
+Tang's real SPY option entries are stored separately from market data under:
+
+```
+content/trader-trades/<YYYY-MM-DD>.json
+```
+
+This file is optional for market data publishing, but required when Tang provided real SPY 0DTE execution points or a relevant SPY context note. Do **not** put trade notes into `data/seed/market-data/live_extended`; that tree is market bars only.
+
+Use this shape when Tang traded SPY:
+
+```json
+{
+  "date": "2026-05-26",
+  "ticker": "SPY",
+  "trades": [
+    {
+      "time": "09:42",
+      "side": "CALL",
+      "strike": 750,
+      "expiry": "2026-05-26",
+      "action": "buy_open",
+      "source": "screenshot",
+      "reason_type": "explicit_note",
+      "note": "5min MA200 附近支撑，1min MA10 跌破后拉回，目标 5min MA50。"
+    }
+  ],
+  "notes": []
+}
+```
+
+Use this shape when Tang did **not** trade SPY, but SPY was still used as market context:
+
+```json
+{
+  "date": "2026-05-29",
+  "ticker": "SPY",
+  "trades": [],
+  "notes": [
+    "SPY 仅作为大盘方向确认；当天 IV 偏高，Tang 未交易 SPY 0DTE。"
+  ]
+}
+```
+
+Rules:
+
+- Only record actual **SPY 0DTE** entries in `trades`.
+- If Tang traded another symbol (for example NVDA) while using SPY as market context, leave `trades` empty and put the SPY context in `notes`; do not create a fake SPY trade.
+- `note` may be empty when the entry simply follows the existing strategy.
+- `reason_type` should be one of `explicit_note`, `strategy_aligned`, `manual_discretion`, or `unknown`.
+- Times are Eastern market time in `HH:MM`, matching the chart bars.
+
+Quick validation:
+
+```bash
+cd backend
+PYTHONPATH=. python -c "
+from app.services.tang_trades import load_tang_trades
+import json
+print(json.dumps(load_tang_trades('SPY', '<YYYY-MM-DD>'), ensure_ascii=False, indent=2))
+"
+```
+
+The Review page renders these as a separate `Tang Trades` layer. They should appear as Tang-specific gold/purple markers and must not be visually confused with strategy signals.
+
+## 4. Export static review payloads (local sanity build)
 
 ```bash
 cd backend
@@ -93,21 +159,22 @@ After build, clean the temp inputs (they are not committed):
 rm -rf frontend/public/reviews frontend/dist
 ```
 
-## 4. Commit and push
+## 5. Commit and push
 
-Only one tracked artifact carries new data into the workflow: the SQLite DB.
+The SQLite DB carries the market bars into the workflow. Tang trade files carry the manual execution layer when present.
 
 ```bash
 git add data/sqlite/tang_strategy_live_extended.db
+git add content/trader-trades/<YYYY-MM-DD>.json  # only if created or changed
 git commit -m "feat: publish SPY <YYYY-MM-DD> review"
 git push origin main
 ```
 
 If you also changed source code (e.g. fetch script, settings), bundle them into the same commit and reword the message accordingly.
 
-The fetched JSON under `data/seed/market-data/live_extended/<date>/` is gitignored by design — the DB is the source of truth that ships to Pages.
+The fetched JSON under `data/seed/market-data/live_extended/<date>/` is gitignored by design — the DB is the market-data source of truth that ships to Pages.
 
-## 5. Wait for the Pages workflow
+## 6. Wait for the Pages workflow
 
 ```bash
 gh run list --repo TUSKIJAY/tang-strategy --workflow "Publish static reviews" --branch main --limit 1
@@ -124,7 +191,7 @@ CDN/cache typically refreshes in under a minute; hard-reload (`Ctrl+Shift+R`) if
 
 ## One-command helper (local only)
 
-`scripts/publish_spy_review.ps1` chains steps 0–5 above. It is gitignored on purpose — keep it as personal scaffolding, not a shared tool. Defaults: `IbPort=4002`, `Symbol=SPY`, latest completed market date.
+`scripts/publish_spy_review.ps1` chains the market-data steps above. It is gitignored on purpose — keep it as personal scaffolding, not a shared tool. Defaults: `IbPort=4002`, `Symbol=SPY`, latest completed market date. Tang trade JSON still needs to be reviewed/edited manually when Tang provides execution notes.
 
 ```powershell
 pwsh scripts/publish_spy_review.ps1                 # latest market day
