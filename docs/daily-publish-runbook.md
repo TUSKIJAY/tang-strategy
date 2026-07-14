@@ -1,25 +1,116 @@
 # Daily Publish Runbook (SPY live extended)
 
-SOP for the end-to-end daily flow: pull bars from IB Gateway → rebuild SQLite → record Tang SPY 0DTE trades → export static review payloads → push `main` → GitHub Pages.
+SOP for the end-to-end daily flow: fetch SPY from TradingView first → validate the market day → use IB Gateway only when a hard quality gate fails → rebuild SQLite → record Tang SPY 0DTE trades → export static review payloads → push `main` → GitHub Pages.
 
 The published target URL is `https://tuskijay.github.io/tang-strategy/#<ticker>-<date>-extended`.
 
+## Source policy and migration state
+
+The target operating model is **TV-first, IB fallback**:
+
+1. Try `tradingview_fetch` without checking or starting IB Gateway.
+2. Validate the completed US market day before writing/importing the canonical seed.
+3. If every hard gate passes, continue the publish flow with TradingView data. Do not ask the user to start Gateway.
+4. If a hard gate fails after the documented retries, preserve the previous published page, report the exact failed gate, and ask the user to start IB Gateway.
+5. After IB is ready, fetch the whole day from IB and restart validation. Never mix TV and IB bars inside one market day.
+
+Migration phases:
+
+- **Transition:** the TV adapter is developed and exercised against completed days; IB remains the fallback and spot-check reference.
+- **TV default:** promote after at least 10 completed trading days pass the TV hard gates and static build, plus one verified early-close sample. Routine daily publishing no longer requires Gateway.
+- **IB exception only:** use Gateway for TV connection/rate-limit failures, bad or incomplete RTH data, date/timezone corruption, or downstream validation/build failures attributable to the TV payload.
+
+Activation condition: TV-first is executable only when the tracked script
+`backend/scripts/fetch_tv_live_extended_day.py` and its pinned
+`tradingview_fetch` dependency are present on the current branch. Until that
+adapter lands, use the IB section below as the transitional executable path;
+do not pretend that copying an ad-hoc Downloads script constitutes the TV
+pipeline.
+
 ## 0. Pre-flight
+
+- Resolve the requested date using the actual US equity trading calendar. Skip exchange holidays. Do not infer a valid session from weekday alone.
+- Worktree is clean: `git status` shows no unrelated changes.
+- Do not preflight, open, or restart IB Gateway before the TV attempt.
+- Do not commit TradingView credentials. If authenticated access is later used, load it from local environment variables or GitHub Secrets.
+- Keep raw/diagnostic TV output outside the tracked seed tree. Only a payload that passes every hard gate may replace `data/seed/market-data/live_extended/<date>/SPY_<date>.json`.
+
+## 1. Fetch the day from TradingView (preferred path)
+
+Once the tracked adapter is present:
+
+```bash
+cd backend
+PYTHONPATH=. python scripts/fetch_tv_live_extended_day.py <YYYY-MM-DD>
+```
+
+Expected behavior:
+
+- Install/use a pinned `tradingview_fetch` commit or release, not a mutable unpinned branch.
+- Request `AMEX:SPY`, `1m`, `extended_session=True` with retries.
+- Interpret/filter bars in `America/New_York` and retain only the requested market date.
+- Build the same `live_extended` payload contract consumed by the importer, including derived 5m, MA, HA, session VWAP, provider metadata, and quality summary.
+- Validate before writing/importing. A failed candidate must not replace a previously valid seed or runtime DB.
+
+### Hard TV quality gates
+
+All must pass:
+
+| Gate | Normal full day | Scheduled early close |
+|---|---:|---:|
+| Expected RTH window | 09:30–15:59 ET | 09:30–12:59 ET |
+| RTH 1m bars | 390 | 210 |
+| RTH 5m bars after derivation | 78 | 42 |
+| Missing/duplicate RTH minutes | 0 | 0 |
+
+Also require:
+
+- Every timestamp belongs to the requested New York market date, is strictly ordered, and is unique.
+- OHLC values are finite and positive; `high >= open/close/low` and `low <= open/close`; volume is finite and non-negative.
+- The first and last RTH bars match the scheduled session boundaries.
+- Derived RTH 5m bars cover the complete scheduled window without gaps.
+- Session VWAP is available for usable positive-volume RTH bars.
+- Rebuild/import succeeds, `/api/reviews/assemble` returns both 1m and 5m bars, and the static export/build completes.
+
+### TV warnings that do not trigger IB by themselves
+
+- Total extended-session bars are below 960 because TradingView may omit no-trade premarket/after-hours minutes.
+- Premarket or after-hours minutes are sparse while the scheduled RTH window is complete.
+- TradingView absolute volume is lower than IB's consolidated-looking volume.
+- TV-derived VWAP differs from prior IB-derived VWAP, provided the payload and signal-impact checks complete and the difference is recorded.
+
+Do not pad missing TV minutes with synthetic prices merely to reach 960. Record extended-session coverage and source metadata in the payload/report.
+
+### When to fall back to IB
+
+Use the IB path only after one of these remains true after the configured TV retries:
+
+- connection/authentication/rate-limit failure or no usable response;
+- wrong market date/timezone/session boundaries;
+- incomplete or duplicate RTH minutes;
+- invalid OHLCV values;
+- incomplete derived RTH 5m coverage;
+- failed VWAP/payload/import/assemble/static-build validation attributable to TV data.
+
+When fallback is required, stop before commit/push and tell the user exactly which gate failed. Ask them to start IB Gateway; do not attempt to publish a partial TV day.
+
+## 2. Fetch the day from IB Gateway (fallback only)
+
+Only enter this section after a hard TV gate fails, or while the tracked TV adapter has not yet landed.
+
+IB pre-flight:
 
 - IB Gateway is logged in to the **live** account, with the API socket exposed.
 - API socket port matches `IBKR_PORT` in `.env` / `backend/app/settings.py`. Default is **4002**.
-- After any IB Gateway restart, wait ~10 seconds and check the farm warm-up log:
+- After restart, wait ~10 seconds and require HMDS `2106`, not `2107 inactive`:
 
   ```
   Warning 2104  Market data farm connection is OK: usfarm
-  Warning 2106  HMDS data farm connection is OK: ushmds        ← must be 2106, not 2107 inactive
+  Warning 2106  HMDS data farm connection is OK: ushmds
   Warning 2158  Sec-def data farm connection is OK: secdefil
   ```
 
-  If `ushmds` shows `2107 inactive`, fully exit IB Gateway (tray icon → Exit, not just the window) and log back in. Historical requests against an inactive HMDS farm silently time out.
-- Working tree is clean: `git status` shows no uncommitted changes (the `publish_spy_review.ps1` helper enforces this).
-
-## 1. Fetch the day from IB Gateway
+If `ushmds` remains `2107 inactive`, fully exit IB Gateway from the tray and log back in.
 
 ```bash
 cd backend
@@ -46,10 +137,10 @@ Common failures:
 | Symptom | Cause | Fix |
 |---|---|---|
 | `RuntimeError: There is no current event loop in thread 'MainThread'.` | Python 3.14 + `eventkit` import. | The script preinitializes the loop. If you see this on another script, copy the `asyncio.set_event_loop(asyncio.new_event_loop())` pattern at the top. |
-| `reqHistoricalData: Timeout` + `0 bars` | HMDS farm inactive (see §0) or pacing violation. | Restart IB Gateway; if pacing, wait 10 min and retry. |
+| `reqHistoricalData: Timeout` + `0 bars` | HMDS farm inactive (see the IB pre-flight above) or pacing violation. | Restart IB Gateway; if pacing, wait 10 min and retry. |
 | `IBKR could not qualify contract for SPY` | Wrong port (paper vs live) or no contract data subscription. | Confirm IB Gateway is on live, port matches, market-data subscriptions active. |
 
-## 2. Rebuild the runtime DB
+## 3. Rebuild the runtime DB
 
 ```bash
 cd backend
@@ -69,7 +160,7 @@ with connect() as c:
 "
 ```
 
-## 3. Record Tang SPY 0DTE trades
+## 4. Record Tang SPY 0DTE trades
 
 Tang's real SPY option entries are stored separately from market data under:
 
@@ -135,7 +226,7 @@ print(json.dumps(load_tang_trades('SPY', '<YYYY-MM-DD>'), ensure_ascii=False, in
 
 The Review page renders these as a separate `Tang Trades` layer. They should appear as Tang-specific gold/purple markers and must not be visually confused with strategy signals.
 
-## 4. Export static review payloads (local sanity build)
+## 5. Export static review payloads (local sanity build)
 
 ```bash
 cd backend
@@ -159,7 +250,7 @@ After build, clean the temp inputs (they are not committed):
 rm -rf frontend/public/reviews frontend/dist
 ```
 
-## 5. Commit and push
+## 6. Commit and push
 
 The SQLite DB carries the market bars into the workflow. Tang trade files carry the manual execution layer when present.
 
@@ -174,7 +265,7 @@ If you also changed source code (e.g. fetch script, settings), bundle them into 
 
 The fetched JSON under `data/seed/market-data/live_extended/<date>/` is gitignored by design — the DB is the market-data source of truth that ships to Pages.
 
-## 6. Wait for the Pages workflow
+## 7. Wait for the Pages workflow
 
 ```bash
 gh run list --repo TUSKIJAY/tang-strategy --workflow "Publish static reviews" --branch main --limit 1
@@ -191,7 +282,7 @@ CDN/cache typically refreshes in under a minute; hard-reload (`Ctrl+Shift+R`) if
 
 ## One-command helper (local only)
 
-`scripts/publish_spy_review.ps1` chains the market-data steps above. It is gitignored on purpose — keep it as personal scaffolding, not a shared tool. Defaults: `IbPort=4002`, `Symbol=SPY`, latest completed market date. Tang trade JSON still needs to be reviewed/edited manually when Tang provides execution notes.
+`scripts/publish_spy_review.ps1` is an existing gitignored, IB-oriented personal helper. It is **not** the authoritative TV-first automation and must not be described as such until it is replaced by a tracked helper that applies the hard gates above. Tang trade JSON still needs to be reviewed/edited manually when Tang provides execution notes.
 
 ```powershell
 pwsh scripts/publish_spy_review.ps1                 # latest market day
