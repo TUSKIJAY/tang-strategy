@@ -55,22 +55,15 @@ If the user says any of:
 
 …they mean run the full daily publish flow defined in [`docs/daily-publish-runbook.md`](./docs/daily-publish-runbook.md). Execute the steps below without re-asking — the user has already given consent by using the trigger phrase. If they omit the date, resolve the latest completed session from the actual US equity trading calendar and current ET time; do not use weekday-only logic.
 
-Market-source migration rule: use the TV-first flow in the runbook once
-`backend/scripts/fetch_tv_live_extended_day.py` exists on the current branch.
-An unopened Gateway is not a reason to stop or ask the user to launch it. Ask
-for IB Gateway only after the TV fetch or a hard TV quality gate fails. Until
-the tracked TV adapter lands, the existing IB command remains the transitional
-executable path; do not claim that TV was used when the adapter is absent.
+Market-source rule: the tracked TradingView adapter is the default daily source.
+Do not check, open, or require IB Gateway before the TV attempt. A closed Gateway
+is normal and must not block publishing. Ask for IB Gateway only after the TV
+retries or a hard TV quality gate fail, and report the exact failed gate first.
 
 ```bash
-# 1. Fetch market data according to the TV-first policy.
+# 1. Fetch and validate the day from TradingView.
 cd backend
-if [ -f scripts/fetch_tv_live_extended_day.py ]; then
-  PYTHONPATH=. python scripts/fetch_tv_live_extended_day.py <YYYY-MM-DD>
-else
-  # Transitional path only, until the tracked TV adapter lands.
-  PYTHONPATH=. python scripts/fetch_ib_live_extended_day.py <YYYY-MM-DD>
-fi
+PYTHONPATH=. python scripts/fetch_tv_live_extended_day.py <YYYY-MM-DD>
 
 # 2. Canonicalize the runtime DB.
 PYTHONPATH=. python scripts/rebuild_live_extended_db.py
@@ -96,4 +89,4 @@ gh run list --repo TUSKIJAY/tang-strategy --workflow "Publish static reviews" --
 gh run watch <run-id> --repo TUSKIJAY/tang-strategy --exit-status
 ```
 
-Pre-flight assumptions: the tracked TV adapter and its pinned `tradingview_fetch` dependency are preferred when present. Do not require IB Gateway merely because it is closed. If TV fails a hard quality gate, report the failed gate, ask the user to start IB Gateway on live port 4002, wait for HMDS `2106`, and then use the documented IB fallback. Do not skip step 2; the Pages workflow reads from the committed DB, not from the seed JSON (which is gitignored).
+Pre-flight assumptions: install the pinned TV runtime from `backend/requirements-tv.txt` when needed. The script uses the actual NYSE calendar, including scheduled early closes, and writes only after its hard gates pass. If TV fails after retries or a hard quality gate fails, report the failed gate, ask the user to start IB Gateway on live port 4002, wait for HMDS `2106`, and then use the documented IB fallback. Do not skip step 2; the Pages workflow reads from the committed DB, not from the seed JSON (which is gitignored).

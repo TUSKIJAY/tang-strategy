@@ -4,28 +4,26 @@ SOP for the end-to-end daily flow: fetch SPY from TradingView first → validate
 
 The published target URL is `https://tuskijay.github.io/tang-strategy/#<ticker>-<date>-extended`.
 
-## Source policy and migration state
+## Source policy
 
-The target operating model is **TV-first, IB fallback**:
+The active operating model is **TV default, IB exception only**:
 
-1. Try `tradingview_fetch` without checking or starting IB Gateway.
+1. Run the tracked `fetch_tv_live_extended_day.py` adapter without checking or starting IB Gateway.
 2. Validate the completed US market day before writing/importing the canonical seed.
 3. If every hard gate passes, continue the publish flow with TradingView data. Do not ask the user to start Gateway.
 4. If a hard gate fails after the documented retries, preserve the previous published page, report the exact failed gate, and ask the user to start IB Gateway.
 5. After IB is ready, fetch the whole day from IB and restart validation. Never mix TV and IB bars inside one market day.
 
-Migration phases:
+The adapter and its runtime are repository-owned:
 
-- **Transition:** the TV adapter is developed and exercised against completed days; IB remains the fallback and spot-check reference.
-- **TV default:** promote after at least 10 completed trading days pass the TV hard gates and static build, plus one verified early-close sample. Routine daily publishing no longer requires Gateway.
-- **IB exception only:** use Gateway for TV connection/rate-limit failures, bad or incomplete RTH data, date/timezone corruption, or downstream validation/build failures attributable to the TV payload.
+- Entry point: `backend/scripts/fetch_tv_live_extended_day.py`.
+- Reproducible dependencies: `backend/requirements-tv.txt`.
+- Provider client: `tvDatafeed` pinned to commit `e6f6aaa7de439ac6e454d9b26d2760ded8dc4923`.
+- Market calendar: `pandas_market_calendars==5.4.0` with `exchange_calendars==4.13.2`, using the NYSE schedule for holidays and scheduled early closes.
+- Optional credentials: `TRADINGVIEW_USERNAME` and `TRADINGVIEW_PASSWORD`; anonymous access remains the default when both are absent.
 
-Activation condition: TV-first is executable only when the tracked script
-`backend/scripts/fetch_tv_live_extended_day.py` and its pinned
-`tradingview_fetch` dependency are present on the current branch. Until that
-adapter lands, use the IB section below as the transitional executable path;
-do not pretend that copying an ad-hoc Downloads script constitutes the TV
-pipeline.
+Do not substitute an ad-hoc Downloads script or the separate local
+`D:\Code\tradingview_fetch` checkout for the tracked adapter.
 
 ## 0. Pre-flight
 
@@ -35,22 +33,24 @@ pipeline.
 - Do not commit TradingView credentials. If authenticated access is later used, load it from local environment variables or GitHub Secrets.
 - Keep raw/diagnostic TV output outside the tracked seed tree. Only a payload that passes every hard gate may replace `data/seed/market-data/live_extended/<date>/SPY_<date>.json`.
 
-## 1. Fetch the day from TradingView (preferred path)
+## 1. Fetch the day from TradingView (default path)
 
-Once the tracked adapter is present:
+Install the TV runtime once per Python environment, then run the tracked adapter:
 
 ```bash
 cd backend
+python -m pip install -r requirements-tv.txt
 PYTHONPATH=. python scripts/fetch_tv_live_extended_day.py <YYYY-MM-DD>
 ```
 
 Expected behavior:
 
-- Install/use a pinned `tradingview_fetch` commit or release, not a mutable unpinned branch.
+- Use the `tvDatafeed` commit pinned in `requirements-tv.txt`, not a mutable branch.
 - Request `AMEX:SPY`, `1m`, `extended_session=True` with retries.
 - Interpret/filter bars in `America/New_York` and retain only the requested market date.
+- Resolve the real NYSE session from the exchange calendar; reject holidays and automatically use the scheduled early-close boundary.
 - Build the same `live_extended` payload contract consumed by the importer, including derived 5m, MA, HA, session VWAP, provider metadata, and quality summary.
-- Validate before writing/importing. A failed candidate must not replace a previously valid seed or runtime DB.
+- Validate every hard gate before writing/importing. A hard-gate failure must not replace a previously valid seed or runtime DB.
 
 ### Hard TV quality gates
 
@@ -96,7 +96,7 @@ When fallback is required, stop before commit/push and tell the user exactly whi
 
 ## 2. Fetch the day from IB Gateway (fallback only)
 
-Only enter this section after a hard TV gate fails, or while the tracked TV adapter has not yet landed.
+Only enter this section after the tracked TV adapter exhausts its retries or a hard TV gate fails.
 
 IB pre-flight:
 

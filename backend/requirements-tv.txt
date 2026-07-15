@@ -1,0 +1,8 @@
+-r requirements.txt
+
+# Daily SPY TradingView fetch runtime. Keep these pins stable so the same
+# market-day and timestamp behavior is used across machines.
+pandas==2.3.3
+pandas_market_calendars==5.4.0
+exchange_calendars==4.13.2
+tvdatafeed @ git+https://github.com/rongardF/tvdatafeed.git@e6f6aaa7de439ac6e454d9b26d2760ded8dc4923
