@@ -1,0 +1,12 @@
+{
+  "schema_version": "project-harness-config-v1",
+  "profile": "minimal",
+  "project_name": "Tang Strategy",
+  "project_type": "FastAPI backend and React/Vite frontend workspace",
+  "verification_commands": [
+    "python3 scripts/check-project-harness.py --root . --profile auto",
+    "cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'",
+    "cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests",
+    "cd frontend && npm run build"
+  ]
+}

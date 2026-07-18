@@ -1,5 +1,17 @@
 # Repository Guidelines
 
+## Agent Startup Contract
+
+Before substantive work:
+
+1. Confirm the repository root, current branch, and `git status --short --branch`.
+2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and `HANDOFF.md` in that order.
+3. Use `.harness/config.json` and `scripts/check-project-harness.py` for the current verification baseline.
+
+`AGENTS.md` is the authoritative instruction entry. `CLAUDE.md` is a compatibility pointer and must not become a second policy copy. Keep stable project facts in `INSTRUCTIONS.md`, current lifecycle truth in `PROGRESS.md`, and only the latest resume point in `HANDOFF.md`. Update the two state files when the working state or next gate materially changes.
+
+Preserve all unrelated user changes. Do not overwrite, revert, stage, or commit them as part of another task.
+
 ## Project Structure & Module Organization
 
 This repo is a frontend/backend workspace for Tang Strategy.
@@ -30,6 +42,7 @@ This repo is a frontend/backend workspace for Tang Strategy.
 - For logic changes: validate SPY 2026-04-22 market day assembly and a known strategy end-to-end through frontend.
 - Backend validation: `/api/reviews/assemble` should return payload with 1m and 5m bars.
 - Frontend validation: open Review and Backtest pages, run one-day regression manually.
+- Harness validation: `python3 scripts/check-project-harness.py --root . --profile auto`.
 
 ## Commit & PR Guidelines
 
