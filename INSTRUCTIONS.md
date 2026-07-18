@@ -26,6 +26,8 @@ FastAPI backend and React/Vite frontend workspace with a SQLite-backed market-re
 - `data/sqlite/tang_strategy_live_extended.db` — 页面和 Pages workflow 使用的运行时数据源。
 - `docs/` — 架构、策略、roadmap 与日常发布手册；按仓库约定保持扁平。
 - `scripts/` — 项目级 harness 检查工具。
+- `.github/workflows/project-harness.yml` — PR 与手工触发的 harness/backend/frontend 校验。
+- `.github/pull_request_template.md` — GitHub PR 范围、数据影响、验证和安全清单。
 
 ## AI Behavior Rules
 
@@ -57,5 +59,6 @@ TradingView 测试需要当前 Python 环境已安装 `backend/requirements-tv.t
 - 日常发布默认先用仓库内 TradingView adapter。TV 重试耗尽或硬质量门失败前，不检查、不打开、也不要求 IB Gateway。
 - 只有完整通过质量门的数据日才可写入/发布；同一交易日不得混合 TradingView 与 IB bars。
 - `docs/` 保持扁平；本项目使用 `minimal` harness，不凭空增加 plan/review/decision 生命周期。
+- GitHub Actions 只验证提交内容；不会自动修改 `PROGRESS.md` / `HANDOFF.md`，也不授予 merge、Pages 发布或每日数据发布权限。
 - `.env`、provider credentials、admin token、运行时 secrets 和未脱敏生产数据不得提交或写入状态文档。
 - 保留用户已有与无关改动；未经明确请求不自动把 harness 改造扩展为每日发布、数据重建、提交或推送。

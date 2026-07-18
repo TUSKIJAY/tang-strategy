@@ -6,7 +6,7 @@
 - Project: `Tang Strategy`
 - Branch: `codex/project-harness` (created from `main@c262ba0`)
 - Harness profile: `minimal`
-- Status: harness 已生成、按仓库证据定制并完成验证；业务代码和每日市场数据未改动，`main` 引用未移动。
+- Status: 本地 harness 与 GitHub Actions/PR 模板已实现并验证；业务代码和每日市场数据未改动，远端 feature branch 尚未 push，`main` 引用未移动。
 
 ## Resume Checklist
 
@@ -25,16 +25,20 @@
 | Backend compile | `cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests` | pass | 无输出，exit 0 |
 | Frontend build | `cd frontend && npm run build` | pass | Vite build 完成，1746 modules transformed |
 | Diff integrity | `git diff --check` | pass | 无 whitespace errors |
+| GitHub workflow lint | `actionlint` on project-harness + Pages workflows | pass | `actionlint v1.7.12`，零错误 |
+| GitHub-linked backend | workflow-equivalent dependency install + unit tests | pass | 固定 `requirements-tv.txt`，`4/4` |
 
 ## Blockers And Risks
 
 - 当前没有已证实阻塞。
 - `docs/` 必须保持扁平，因此未采用会创建嵌套 lifecycle 目录的 `governed` profile。
 - 新 Python 环境运行 TradingView tests 前需安装 `backend/requirements-tv.txt`；否则会因缺少 `pandas_market_calendars` 失败，这属于环境前置条件。
+- `codex/project-harness` 尚未存在于远端；只有 push 并打开指向 `main` 的 PR 后，GitHub workflow 才会实际执行。
+- `main` 当前未启用 branch protection；现有 checks 是自动验证信号，但尚不是 GitHub 强制 merge 门禁。
 
 ## Next Gate
 
-- 维护者决定是否在 `codex/project-harness` 上 commit；后续如需合入 `main`，应另行明确授权并先复核分支 diff。
+- 维护者决定是否 commit/push/open PR；如需把三项 checks 设为强制门禁，再单独配置 `main` branch protection。合入 `main` 仍需明确授权。
 
 ## Handoff Boundary
 

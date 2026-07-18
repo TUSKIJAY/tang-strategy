@@ -51,6 +51,13 @@ Use concise conventional commits (`feat:`, `fix:`, `docs:`, `chore:`). PRs shoul
 - Data-impacted files or directories.
 - How to verify (`rebuild`, day selection, screenshots or endpoint output).
 
+GitHub integration:
+
+- Pull requests targeting `main` run `.github/workflows/project-harness.yml`: harness structure, backend tests/compile, and frontend build.
+- Use `.github/pull_request_template.md`; keep `PROGRESS.md` and `HANDOFF.md` truthful when the next gate changes.
+- A green GitHub check is verification evidence, not merge or publish authorization. Do not push, open/merge a PR, or change branch protection without an explicit user request.
+- The existing `Publish static reviews` workflow remains the only Pages publisher and runs from `main` under the daily publish contract.
+
 ## Security & Config Notes
 
 - Keep `.env` values private.

@@ -8,5 +8,16 @@
     "cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'",
     "cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests",
     "cd frontend && npm run build"
-  ]
+  ],
+  "github": {
+    "repository": "TUSKIJAY/tang-strategy",
+    "pull_request_base": "main",
+    "workflow": ".github/workflows/project-harness.yml",
+    "pull_request_template": ".github/pull_request_template.md",
+    "checks": [
+      "Harness structure",
+      "Backend checks",
+      "Frontend build"
+    ]
+  }
 }

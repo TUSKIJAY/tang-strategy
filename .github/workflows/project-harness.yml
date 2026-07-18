@@ -1,0 +1,85 @@
+name: Project harness
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: project-harness-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  harness:
+    name: Harness structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate project harness
+        run: python scripts/check-project-harness.py --root . --profile auto
+
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-tv.txt
+
+      - name: Install pinned backend and TradingView dependencies
+        run: python -m pip install -r requirements-tv.txt
+
+      - name: Run backend unit tests
+        env:
+          PYTHONPATH: .
+        run: python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Compile backend Python
+        env:
+          PYTHONPATH: .
+        run: python -m compileall -q app scripts tests
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build

@@ -2,7 +2,7 @@
 
 ## Current Status
 
-2026-07-18：`codex/project-harness` 分支的 `minimal` harness 改造已完成并通过验证。现有 `AGENTS.md`、`CLAUDE.md` 和扁平 `docs/` 结构均保留；本次范围只包含 agent 启动、稳定章程、进度、handoff、机器配置和结构检查，没有修改业务逻辑或每日数据。`main` 仍停留在改造起点 `c262ba0`。
+2026-07-18：`codex/project-harness` 分支的 `minimal` harness 与 GitHub 联动已完成本地实现和验证。PR 指向 `main` 时可运行 harness/backend/frontend checks，并使用统一 PR 模板；不会自动更新状态文档、merge、发布 Pages 或修改每日数据。远端 feature branch 尚未 push，`main` 仍停留在 `c262ba0`。
 
 ## Navigation
 
@@ -15,7 +15,7 @@
 
 ## In Progress
 
-- [ ] 无；改造与验证已完成，等待维护者决定是否 commit/merge。
+- [ ] 无；本地实现与验证已完成，等待维护者决定是否 commit/push/open PR。
 
 ## Blocked
 
@@ -23,7 +23,7 @@
 
 ## To Do
 
-- [ ] 由维护者决定是否提交 `codex/project-harness` 上的改造；不要直接改动 `main`。
+- [ ] 由维护者决定是否 commit/push/open PR；若希望强制绿灯才能合并，需另行授权配置 `main` branch protection。
 
 ## Completed
 
@@ -32,6 +32,9 @@
 - [x] 2026-07-18 — 安装 5 个缺失 harness 文件并手工扩展现有 `AGENTS.md`；未覆盖 `CLAUDE.md`。
 - [x] 2026-07-18 — skill validator `100/100`，本地 harness checker PASS，`git diff --check` PASS。
 - [x] 2026-07-18 — 后端 TradingView quality-gate tests `4/4`、`compileall`、前端 `npm run build` 全部通过。后端测试使用临时隔离环境安装 `requirements-tv.txt` 中固定的 calendar 依赖。
+- [x] 2026-07-18 — 确认远端为 `TUSKIJAY/tang-strategy`、默认分支为 `main`、GitHub CLI 已登录且现有 Pages workflow 保持不变。
+- [x] 2026-07-18 — 新增 PR-only/manual `Project harness` workflow 与 PR 模板；workflow 通过 `actionlint v1.7.12`，原有 Pages workflow 同时复核通过。
+- [x] 2026-07-18 — GitHub 增量复验：harness `100/100`、本地 checker PASS、后端 `4/4`、compileall 与前端 build PASS、`git diff --check` PASS。
 
 ## Historical Redirects
 
