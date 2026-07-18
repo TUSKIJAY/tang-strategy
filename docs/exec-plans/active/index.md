@@ -4,4 +4,4 @@ Only reviewed, user-approved plans belong here. Presence in this directory autho
 
 | Plan | Current phase | Evidence | Next gate |
 | --- | --- | --- | --- |
-| [2026-07-19 Tang Strategy Coding And Data Update Modes](./2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) | phase-6:in-progress | [implementation-review-001](../reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/implementation-review-001.md) | phase-6-re-review |
+| [2026-07-19 Tang Strategy Coding And Data Update Modes](./2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) | phase-6:in-progress | [implementation-review-002](../reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/implementation-review-002.md) | phase-6-remediation-r2 |

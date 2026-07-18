@@ -7,10 +7,10 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-re-review`
+- Next gate: `phase-6-remediation-r2`
 <!-- operating-modes-state:end -->
 
-2026-07-19: `implementation-review-001` 的 bounded remediation 已完成，当前为 `phase-6:in-progress`，next gate 为 `phase-6-re-review`。checker 已 fail-closed 处理 duplicate key、review type/target/path、Proposed gate、review/index evidence；unconstrained runbook/source/workflow 扫描已移除。49 fixtures、focused/composed、startup budget、launcher syntax、19/19 pinned backend + compileall、frontend build、DB integrity/FK、runtime zero-diff 和 frozen hashes 均通过；临时环境、输出和 cache 已清理。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: 第二轮独立实施评审 `implementation-review-002` 针对 `6c108feaa0870c3c363349088b6333a3c8f51f6f` 返回 `revise`、置信度 `high`。它确认首轮全部 finding 已关闭，并新增两个局部问题：pre-review Proposed 与 non-implemented Completed 必须允许 truthful `none` evidence 且拒绝 bogus link；`design-review-*` 应符合 contract 的 prefix grammar。当前为 `phase-6:in-progress`，next gate 为 `phase-6-remediation-r2`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediation is verified and a fresh qualifying implementation review is next.
+- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediate the two implementation-review-002 findings and obtain a fresh qualifying implementation review.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] After the scoped remediation commit, request a fresh independent implementation review against that stable commit; require `accept` before closeout.
+- [ ] Keep remediation-r2 limited to optional lifecycle evidence and Proposed gate-prefix grammar, then rerun bounded verification and request a fresh independent review.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
