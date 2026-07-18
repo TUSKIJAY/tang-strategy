@@ -852,6 +852,14 @@ None.
         path.write_text(coded, encoding="utf-8")
         self.assert_error("must contain exactly one canonical header")
 
+    def test_nested_raw_html_code_table_does_not_count(self) -> None:
+        path = self.root / "docs/exec-plans/active/index.md"
+        original = path.read_text(encoding="utf-8")
+        header = original.index("| Plan |")
+        coded = original[:header] + "<code><code>x</code>\n" + original[header:].rstrip() + "\n</code>\n"
+        path.write_text(coded, encoding="utf-8")
+        self.assert_error("must contain exactly one canonical header")
+
     def test_index_rows_require_terminal_delimiter(self) -> None:
         cases = (
             (
@@ -975,6 +983,15 @@ None.
         self.replace("docs/exec-plans/active/demo-plan.md", "\n## Scope", "\n</code></pre>\n\n## Scope")
         self.assert_error("missing required keys")
 
+    def test_plan_metadata_inside_nested_raw_html_code_does_not_count(self) -> None:
+        self.replace(
+            "docs/exec-plans/active/demo-plan.md",
+            "# Demo Plan\n\n",
+            "# Demo Plan\n\n<code><code>x</code>\n",
+        )
+        self.replace("docs/exec-plans/active/demo-plan.md", "\n## Scope", "\n</code>\n\n## Scope")
+        self.assert_error("missing required keys")
+
     def test_duplicate_review_verdict_key_fails(self) -> None:
         self.replace(
             "docs/exec-plans/reviews/demo-plan/review-001.md",
@@ -1011,6 +1028,19 @@ None.
             "docs/exec-plans/reviews/demo-plan/review-001.md",
             "\n## Findings",
             "\n``\n\n## Findings",
+        )
+        self.assert_error("lacks constrained reviewer fields")
+
+    def test_review_metadata_inside_nested_raw_html_code_does_not_count(self) -> None:
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "# Review 001\n\n",
+            "# Review 001\n\n<code><code>x</code>\n",
+        )
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "\n## Findings",
+            "\n</code>\n\n## Findings",
         )
         self.assert_error("lacks constrained reviewer fields")
 
@@ -1215,6 +1245,23 @@ None.
         )
         self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
 
+    def test_router_nested_raw_html_code_pseudo_link_does_not_count(self) -> None:
+        write(
+            self.root,
+            "AGENTS.md",
+            "# Agents\n\n<code><code>x</code>[dead route](./docs/operating-modes.md)</code>\n",
+        )
+        self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
+
+    def test_custom_code_prefixed_html_tag_does_not_mask_real_route(self) -> None:
+        write(
+            self.root,
+            "AGENTS.md",
+            "# Agents\n\n<code-example>[real route](./docs/operating-modes.md)</code-example>\n",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
     def test_config_requires_fixture_command(self) -> None:
         path = self.root / ".harness/config.json"
         config = json.loads(path.read_text(encoding="utf-8"))
@@ -1252,6 +1299,115 @@ None.
             "  # pull_request:\n  #   branches:\n  #     - main\n",
         )
         self.assert_error("missing required pull_request trigger for main")
+
+    def test_duplicate_top_level_on_mapping_does_not_count(self) -> None:
+        path = self.root / ".github/workflows/project-harness.yml"
+        path.write_text(path.read_text(encoding="utf-8") + "\non:\n  workflow_dispatch:\n", encoding="utf-8")
+        self.assert_error("missing required pull_request trigger for main")
+
+    def test_duplicate_pull_request_event_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "  workflow_dispatch:\n",
+            "  pull_request:\n    branches:\n      - other\n  workflow_dispatch:\n",
+        )
+        self.assert_error("missing required pull_request trigger for main")
+
+    def test_duplicate_branches_field_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "    branches:\n      - main\n",
+            "    branches:\n      - main\n    branches:\n      - other\n",
+        )
+        self.assert_error("missing required pull_request trigger for main")
+
+    def test_pull_request_path_filter_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "    branches:\n      - main\n",
+            "    branches:\n      - main\n    paths:\n      - docs/**\n",
+        )
+        self.assert_error("missing required pull_request trigger for main")
+
+    def test_second_yaml_document_does_not_count(self) -> None:
+        path = self.root / ".github/workflows/project-harness.yml"
+        path.write_text(path.read_text(encoding="utf-8") + "\n---\nname: replacement\n", encoding="utf-8")
+        self.assert_error("missing required pull_request trigger for main")
+
+    def test_duplicate_top_level_jobs_mapping_does_not_count(self) -> None:
+        path = self.root / ".github/workflows/project-harness.yml"
+        path.write_text(
+            path.read_text(encoding="utf-8")
+            + "\njobs:\n  replacement:\n    name: Replacement\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo replacement\n",
+            encoding="utf-8",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_duplicate_job_id_does_not_count(self) -> None:
+        path = self.root / ".github/workflows/project-harness.yml"
+        path.write_text(
+            path.read_text(encoding="utf-8")
+            + "\n  harness:\n    name: Replacement\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo replacement\n",
+            encoding="utf-8",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_duplicate_inline_job_id_does_not_count(self) -> None:
+        path = self.root / ".github/workflows/project-harness.yml"
+        path.write_text(
+            path.read_text(encoding="utf-8") + "\n  harness: {name: replacement}\n",
+            encoding="utf-8",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_nested_pull_request_mapping_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "  pull_request:\n    branches:\n      - main\n",
+            "  x-dead:\n    pull_request:\n      branches:\n        - main\n",
+        )
+        self.assert_error("missing required pull_request trigger for main")
+
+    def test_required_commands_must_share_one_ordered_job(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        path = self.root / ".github/workflows/project-harness.yml"
+        workflow = path.read_text(encoding="utf-8").replace(f"      - run: {command}\n", "")
+        workflow += (
+            "\n  fixtures:\n"
+            "    name: Fixture tests\n"
+            "    runs-on: ubuntu-latest\n"
+            "    steps:\n"
+            f"      - run: {command}\n"
+        )
+        path.write_text(workflow, encoding="utf-8")
+        self.assert_error("must appear in order in the same qualifying job")
+
+    def test_equivalent_pull_request_main_sequence_forms_are_supported(self) -> None:
+        original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
+        variants = (
+            original.replace("      - main", "      - \"main\""),
+            original.replace("    branches:\n      - main", "    branches: [main]"),
+        )
+        for workflow in variants:
+            with self.subTest(workflow=workflow.split("jobs:", 1)[0]):
+                write(self.root, ".github/workflows/project-harness.yml", workflow)
+                completed, payload = self.check()
+                self.assertEqual(completed.returncode, 0, payload["errors"])
+        write(self.root, ".github/workflows/project-harness.yml", original)
+
+    def test_quoted_jobs_and_job_id_are_supported(self) -> None:
+        self.replace(".github/workflows/project-harness.yml", "\njobs:\n  harness:\n", "\n\"jobs\":\n  \"harness\":\n")
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_quoted_trigger_keys_are_supported(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "\non:\n  pull_request:\n    branches:\n",
+            "\n\"on\":\n  \"pull_request\":\n    \"branches\":\n",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
 
     def test_workflow_comment_only_commands_do_not_count(self) -> None:
         for command in (
@@ -1312,6 +1468,16 @@ None.
             "      - run: >\n"
             "          python3 -m unittest\n"
             "          scripts.tests.test_operating_modes",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_workflow_explicit_block_indent_indicator_is_supported(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            f"      - run: >2-\n          {command}",
         )
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])

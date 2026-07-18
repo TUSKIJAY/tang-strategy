@@ -187,6 +187,42 @@ def mask_full_line_code_spans(text: str) -> str:
     return "".join(kept)
 
 
+def mask_raw_html_code(text: str) -> str:
+    """Mask nested raw HTML code/pre elements, failing closed when unclosed."""
+
+    code_ranges = inline_code_span_ranges(text)
+    stack: list[str] = []
+    masked_ranges: list[tuple[int, int]] = []
+    carrier_start: int | None = None
+    tag_pattern = re.compile(r"<\s*(/?)\s*(code|pre)(?=\s|/|>)[^>]*>", re.IGNORECASE)
+    for match in tag_pattern.finditer(text):
+        if any(start <= match.start() and end >= match.end() for start, end in code_ranges):
+            continue
+        closing = bool(match.group(1))
+        tag = match.group(2).lower()
+        if not closing:
+            if not stack:
+                carrier_start = match.start()
+            stack.append(tag)
+            continue
+        if not stack or stack[-1] != tag:
+            continue
+        stack.pop()
+        if not stack and carrier_start is not None:
+            masked_ranges.append((carrier_start, match.end()))
+            carrier_start = None
+    if stack and carrier_start is not None:
+        masked_ranges.append((carrier_start, len(text)))
+    if not masked_ranges:
+        return text
+    characters = list(text)
+    for start, end in masked_ranges:
+        for index in range(start, end):
+            if characters[index] not in {"\r", "\n"}:
+                characters[index] = " "
+    return "".join(characters)
+
+
 def operative_markdown_text(text: str) -> str:
     """Mask comments and code carriers while preserving source line positions."""
 
@@ -194,22 +230,10 @@ def operative_markdown_text(text: str) -> str:
         return "\n" * match.group(0).count("\n")
 
     without_comments = re.sub(r"<!--.*?(?:-->|$)", mask_comment, text, flags=re.DOTALL)
-    without_raw_code = re.sub(
-        r"<(?P<tag>pre|code)\b[^>]*>.*?</(?P=tag)\s*>",
-        mask_comment,
-        without_comments,
-        flags=re.DOTALL | re.IGNORECASE,
-    )
-    without_raw_code = re.sub(
-        r"<(?:pre|code)\b[^>]*>.*$",
-        mask_comment,
-        without_raw_code,
-        flags=re.DOTALL | re.IGNORECASE,
-    )
     kept: list[str] = []
     fence_character: str | None = None
     fence_length = 0
-    for line in without_raw_code.splitlines():
+    for line in without_comments.splitlines():
         if fence_character is not None:
             kept.append("")
             closing = re.fullmatch(
@@ -231,7 +255,9 @@ def operative_markdown_text(text: str) -> str:
             kept.append("")
             continue
         kept.append(line)
-    return mask_full_line_code_spans("\n".join(kept))
+    without_markdown_blocks = "\n".join(kept)
+    without_raw_code = mask_raw_html_code(without_markdown_blocks)
+    return mask_full_line_code_spans(without_raw_code)
 
 
 def has_canonical_markdown_route(path: Path, target: Path, errors: list[str]) -> bool:
@@ -268,6 +294,72 @@ def clean_yaml_scalar(value: str) -> str:
     return cleaned
 
 
+def direct_yaml_key_counts(lines: list[str], indent: int) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for line in lines:
+        stripped = line.lstrip()
+        if not stripped or stripped.startswith("#") or len(line) - len(stripped) != indent:
+            continue
+        key = yaml_mapping_key(stripped)
+        if key is not None:
+            counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
+def direct_yaml_entries_are_mappings(lines: list[str], indent: int) -> bool:
+    return all(
+        yaml_mapping_key(line.lstrip()) is not None
+        for line in lines
+        if line.strip()
+        and not line.lstrip().startswith("#")
+        and len(line) - len(line.lstrip()) == indent
+    )
+
+
+def workflow_job_id_counts(lines: list[str]) -> tuple[dict[str, int], bool]:
+    jobs_index = next(
+        (
+            index
+            for index, line in enumerate(lines)
+            if len(line) == len(line.lstrip())
+            and yaml_mapping_key(line.strip()) == "jobs"
+            and yaml_key_value(line.strip(), "jobs") == ""
+        ),
+        None,
+    )
+    if jobs_index is None:
+        return {}, False
+    jobs_end = len(lines)
+    for index in range(jobs_index + 1, len(lines)):
+        stripped = lines[index].lstrip()
+        if stripped and not stripped.startswith("#") and len(lines[index]) == len(stripped):
+            jobs_end = index
+            break
+    entries = [
+        (len(lines[index]) - len(lines[index].lstrip()), lines[index].lstrip())
+        for index in range(jobs_index + 1, jobs_end)
+        if lines[index].strip() and not lines[index].lstrip().startswith("#")
+    ]
+    if not entries:
+        return {}, False
+    job_indent = min(indent for indent, _ in entries)
+    counts: dict[str, int] = {}
+    valid = True
+    for indent, entry in entries:
+        if indent != job_indent:
+            continue
+        key = yaml_mapping_key(entry)
+        if key is None or yaml_key_value(entry, key) != "":
+            valid = False
+            continue
+        counts[key] = counts.get(key, 0) + 1
+    return counts, valid
+
+
+def block_scalar_style(value: str) -> re.Match[str] | None:
+    return re.fullmatch(r"([|>])(?:(?:([1-9])([+-])?)|(?:([+-])([1-9])?))?", value)
+
+
 def normalize_block_scalar(lines: list[str], index: int, indent: int, style: str) -> tuple[str, int]:
     raw_lines: list[str] = []
     cursor = index + 1
@@ -286,7 +378,13 @@ def normalize_block_scalar(lines: list[str], index: int, indent: int, style: str
     ]
     if not nonempty_indents or any("\t" in line[: len(line) - len(line.lstrip())] for line in raw_lines):
         return "", cursor
-    content_indent = min(nonempty_indents)
+    style_match = block_scalar_style(style)
+    if style_match is None:
+        return "", cursor
+    explicit_indent = style_match.group(2) or style_match.group(5)
+    content_indent = indent + int(explicit_indent) if explicit_indent else min(nonempty_indents)
+    if any(line_indent < content_indent for line_indent in nonempty_indents):
+        return "", cursor
     content = [line[content_indent:] if line.strip() else "" for line in raw_lines]
     while content and content[-1] == "":
         content.pop()
@@ -302,15 +400,15 @@ def normalize_block_scalar(lines: list[str], index: int, indent: int, style: str
 
 
 def normalized_run_command(lines: list[str], index: int, indent: int, value: str) -> tuple[str, int]:
-    if value in {"|", "|-", "|+", ">", ">-", ">+"}:
+    if block_scalar_style(value) is not None:
         return normalize_block_scalar(lines, index, indent, value)
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         value = value[1:-1]
     return (value if value and not value.startswith("#") else ""), index + 1
 
 
-def workflow_step_commands(text: str) -> list[str]:
-    """Extract direct, unconditional run values from top-level jobs.<job>.steps."""
+def workflow_job_command_sequences(text: str) -> list[list[str]]:
+    """Extract direct commands per unique, unconditional top-level workflow job."""
     lines = text.splitlines()
     candidates: list[tuple[int, int, str]] = []
     conditional_jobs: set[int] = set()
@@ -319,11 +417,14 @@ def workflow_step_commands(text: str) -> list[str]:
     modified_steps: set[tuple[int, int]] = set()
     job_key_counts: dict[tuple[int, str], int] = {}
     step_key_counts: dict[tuple[int, int, str], int] = {}
-    workflow_modified = any(
-        len(line) == len(line.lstrip())
-        and yaml_mapping_key(line.strip()) in {"defaults", "env"}
-        for line in lines
-        if line.strip() and not line.lstrip().startswith("#")
+    top_level_counts = direct_yaml_key_counts(lines, 0)
+    job_name_counts, job_ids_valid = workflow_job_id_counts(lines)
+    workflow_modified = (
+        top_level_counts.get("jobs", 0) != 1
+        or any(count != 1 for count in top_level_counts.values())
+        or any(key in top_level_counts for key in {"defaults", "env"})
+        or not direct_yaml_entries_are_mappings(lines, 0)
+        or not job_ids_valid
     )
     runnable_jobs: set[int] = set()
     jobs_active = False
@@ -343,7 +444,7 @@ def workflow_step_commands(text: str) -> list[str]:
         if not stripped or stripped.startswith("#"):
             index += 1
             continue
-        if indent == 0 and re.fullmatch(r"jobs:\s*", stripped):
+        if indent == 0 and yaml_mapping_key(stripped) == "jobs" and yaml_key_value(stripped, "jobs") == "":
             jobs_active = True
             jobs_indent = indent
             job_indent = None
@@ -365,7 +466,8 @@ def workflow_step_commands(text: str) -> list[str]:
             step_field_indent = None
             continue
 
-        job_header = re.fullmatch(r"[A-Za-z0-9_-]+:\s*", stripped)
+        job_name = yaml_mapping_key(stripped)
+        job_header = job_name is not None and yaml_key_value(stripped, job_name) == ""
         if job_header and (job_indent is None or indent <= job_indent):
             job_indent = indent
             job_field_indent = None
@@ -391,6 +493,8 @@ def workflow_step_commands(text: str) -> list[str]:
             if job_key == "if":
                 conditional_jobs.add(job_id)
             if job_key not in {"name", "runs-on", "steps"}:
+                modified_jobs.add(job_id)
+            if job_key == "name" and not clean_yaml_scalar(yaml_key_value(stripped, "name") or ""):
                 modified_jobs.add(job_id)
             if job_key == "runs-on" and clean_yaml_scalar(yaml_key_value(stripped, "runs-on") or "") == "ubuntu-latest":
                 runnable_jobs.add(job_id)
@@ -426,12 +530,16 @@ def workflow_step_commands(text: str) -> list[str]:
                 conditional_steps.add((job_id, step_id))
             if step_key not in {"name", "run"}:
                 modified_steps.add((job_id, step_id))
+            if step_key is None:
+                modified_jobs.add(job_id)
+            if step_key == "name" and not clean_yaml_scalar(yaml_key_value(step_value, "name") or ""):
+                modified_steps.add((job_id, step_id))
             run_value = yaml_key_value(step_value, "run")
             if run_value is not None:
                 command, index = normalized_run_command(
                     lines,
                     index,
-                    indent,
+                    indent + 2,
                     run_value,
                 )
                 if command:
@@ -453,6 +561,8 @@ def workflow_step_commands(text: str) -> list[str]:
                 conditional_steps.add((job_id, step_id))
             if step_key not in {"name", "run"}:
                 modified_steps.add((job_id, step_id))
+            if step_key == "name" and not clean_yaml_scalar(yaml_key_value(stripped, "name") or ""):
+                modified_steps.add((job_id, step_id))
             run_value = yaml_key_value(stripped, "run")
             if run_value is not None:
                 command, index = normalized_run_command(
@@ -465,58 +575,144 @@ def workflow_step_commands(text: str) -> list[str]:
                     candidates.append((job_id, step_id, command))
                 continue
         index += 1
-    return [
-        command
-        for candidate_job, candidate_step, command in candidates
-        if not workflow_modified
-        and candidate_job in runnable_jobs
-        and job_key_counts.get((candidate_job, "runs-on"), 0) == 1
-        and job_key_counts.get((candidate_job, "steps"), 0) == 1
-        and candidate_job not in conditional_jobs
-        and candidate_job not in modified_jobs
-        and (candidate_job, candidate_step) not in conditional_steps
-        and (candidate_job, candidate_step) not in modified_steps
-        and step_key_counts.get((candidate_job, candidate_step, "run"), 0) == 1
-    ]
+    if workflow_modified or any(count != 1 for count in job_name_counts.values()):
+        return []
+    sequences: dict[int, list[str]] = {}
+    for candidate_job, candidate_step, command in candidates:
+        if (
+            candidate_job in runnable_jobs
+            and job_key_counts.get((candidate_job, "name"), 0) == 1
+            and job_key_counts.get((candidate_job, "runs-on"), 0) == 1
+            and job_key_counts.get((candidate_job, "steps"), 0) == 1
+            and candidate_job not in conditional_jobs
+            and candidate_job not in modified_jobs
+            and (candidate_job, candidate_step) not in conditional_steps
+            and (candidate_job, candidate_step) not in modified_steps
+            and step_key_counts.get((candidate_job, candidate_step, "run"), 0) == 1
+        ):
+            sequences.setdefault(candidate_job, []).append(command)
+    return [sequences[job] for job in sorted(sequences)]
+
+
+def flow_sequence_values(value: str) -> list[str] | None:
+    cleaned = value.strip()
+    if not (cleaned.startswith("[") and cleaned.endswith("]")):
+        return None
+    body = cleaned[1:-1].strip()
+    if not body:
+        return []
+    return [clean_yaml_scalar(item) for item in body.split(",")]
 
 
 def workflow_has_pull_request_main(text: str) -> bool:
     lines = text.splitlines()
-    on_indent: int | None = None
-    pull_request_indent: int | None = None
-    branches_indent: int | None = None
-    for line in lines:
-        stripped = line.lstrip()
-        indent = len(line) - len(stripped)
-        if not stripped or stripped.startswith("#"):
-            continue
-        key = yaml_mapping_key(stripped)
-        if on_indent is None:
-            if indent == 0 and key == "on" and yaml_key_value(stripped, "on") == "":
-                on_indent = indent
-            continue
-        if indent <= on_indent:
+    top_level_counts = direct_yaml_key_counts(lines, 0)
+    if (
+        top_level_counts.get("on", 0) != 1
+        or any(count != 1 for count in top_level_counts.values())
+        or not direct_yaml_entries_are_mappings(lines, 0)
+    ):
+        return False
+    on_index = next(
+        (
+            index
+            for index, line in enumerate(lines)
+            if len(line) == len(line.lstrip())
+            and yaml_mapping_key(line.strip()) == "on"
+        ),
+        None,
+    )
+    if on_index is None or yaml_key_value(lines[on_index].strip(), "on") != "":
+        return False
+    on_end = len(lines)
+    for index in range(on_index + 1, len(lines)):
+        stripped = lines[index].lstrip()
+        if stripped and not stripped.startswith("#") and len(lines[index]) == len(stripped):
+            on_end = index
+            break
+    event_entries = [
+        (index, len(lines[index]) - len(lines[index].lstrip()), lines[index].lstrip())
+        for index in range(on_index + 1, on_end)
+        if lines[index].strip() and not lines[index].lstrip().startswith("#")
+    ]
+    if not event_entries:
+        return False
+    event_indent = min(indent for _, indent, _ in event_entries)
+    direct_events = [(index, text) for index, indent, text in event_entries if indent == event_indent]
+    event_counts: dict[str, int] = {}
+    for _, event_text in direct_events:
+        key = yaml_mapping_key(event_text)
+        if key is None or yaml_key_value(event_text, key) != "":
             return False
-        if pull_request_indent is None:
-            if key == "pull_request" and yaml_key_value(stripped, "pull_request") == "":
-                pull_request_indent = indent
-            continue
-        if indent <= pull_request_indent:
-            pull_request_indent = None
-            branches_indent = None
-            if key == "pull_request" and yaml_key_value(stripped, "pull_request") == "":
-                pull_request_indent = indent
-            continue
-        if branches_indent is None:
-            if key == "branches" and yaml_key_value(stripped, "branches") == "":
-                branches_indent = indent
-            continue
-        if indent <= branches_indent:
-            branches_indent = None
-            continue
-        if stripped == "- main":
-            return True
-    return False
+        event_counts[key] = event_counts.get(key, 0) + 1
+    if event_counts.get("pull_request", 0) != 1 or any(count != 1 for count in event_counts.values()):
+        return False
+    pull_request_index, pull_request_text = next(
+        (index, event_text)
+        for index, event_text in direct_events
+        if yaml_mapping_key(event_text) == "pull_request"
+    )
+    if yaml_key_value(pull_request_text, "pull_request") != "":
+        return False
+    pull_request_end = on_end
+    for index in range(pull_request_index + 1, on_end):
+        stripped = lines[index].lstrip()
+        indent = len(lines[index]) - len(stripped)
+        if stripped and not stripped.startswith("#") and indent <= event_indent:
+            pull_request_end = index
+            break
+    field_entries = [
+        (index, len(lines[index]) - len(lines[index].lstrip()), lines[index].lstrip())
+        for index in range(pull_request_index + 1, pull_request_end)
+        if lines[index].strip() and not lines[index].lstrip().startswith("#")
+    ]
+    if not field_entries:
+        return False
+    field_indent = min(indent for _, indent, _ in field_entries)
+    direct_fields = [(index, text) for index, indent, text in field_entries if indent == field_indent]
+    field_counts: dict[str, int] = {}
+    for _, field_text in direct_fields:
+        key = yaml_mapping_key(field_text)
+        if key is None:
+            return False
+        field_counts[key] = field_counts.get(key, 0) + 1
+    if field_counts != {"branches": 1}:
+        return False
+    branches_index, branches_text = next(
+        (index, field_text)
+        for index, field_text in direct_fields
+        if yaml_mapping_key(field_text) == "branches"
+    )
+    branches_value = yaml_key_value(branches_text, "branches")
+    if branches_value is None:
+        return False
+    if branches_value:
+        values = flow_sequence_values(branches_value)
+        return values is not None and "main" in values
+    branch_end = pull_request_end
+    for index in range(branches_index + 1, pull_request_end):
+        stripped = lines[index].lstrip()
+        indent = len(lines[index]) - len(stripped)
+        if stripped and not stripped.startswith("#") and indent <= field_indent:
+            branch_end = index
+            break
+    branch_entries = [
+        (len(lines[index]) - len(lines[index].lstrip()), lines[index].lstrip())
+        for index in range(branches_index + 1, branch_end)
+        if lines[index].strip() and not lines[index].lstrip().startswith("#")
+    ]
+    if not branch_entries:
+        return False
+    branch_indent = min(indent for indent, _ in branch_entries)
+    values: list[str] = []
+    for indent, branch_text in branch_entries:
+        if indent != branch_indent:
+            return False
+        match = re.fullmatch(r"-\s+(.+?)\s*", branch_text)
+        if match is None:
+            return False
+        values.append(clean_yaml_scalar(match.group(1)))
+    return "main" in values
 
 
 def parse_header_bullets(
@@ -1392,13 +1588,23 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
         workflow = read_text(workflow_path, "verification workflow", errors)
         if not workflow_has_pull_request_main(workflow):
             errors.append("verification workflow: missing required pull_request trigger for main")
-        workflow_commands = workflow_step_commands(workflow)
+        workflow_sequences = workflow_job_command_sequences(workflow)
         for command in (canonical_command, fixture_command):
-            if command not in workflow_commands:
+            if not any(command in sequence for sequence in workflow_sequences):
                 errors.append(f"verification workflow: missing required command: {command}")
-        if canonical_command in workflow_commands and fixture_command in workflow_commands:
-            if workflow_commands.index(canonical_command) > workflow_commands.index(fixture_command):
-                errors.append("verification workflow: canonical harness command must precede fixture tests")
+        ordered_sequence = any(
+            canonical_command in sequence
+            and fixture_command in sequence
+            and sequence.index(canonical_command) < sequence.index(fixture_command)
+            for sequence in workflow_sequences
+        )
+        if not ordered_sequence and any(
+            canonical_command in sequence for sequence in workflow_sequences
+        ) and any(fixture_command in sequence for sequence in workflow_sequences):
+            errors.append(
+                "verification workflow: canonical harness command and fixture tests must appear "
+                "in order in the same qualifying job"
+            )
     return files
 
 
