@@ -1387,12 +1387,46 @@ None.
         variants = (
             original.replace("      - main", "      - \"main\""),
             original.replace("    branches:\n      - main", "    branches: [main]"),
+            original.replace("    branches:\n      - main", "    branches: ['main',]"),
         )
         for workflow in variants:
             with self.subTest(workflow=workflow.split("jobs:", 1)[0]):
                 write(self.root, ".github/workflows/project-harness.yml", workflow)
                 completed, payload = self.check()
                 self.assertEqual(completed.returncode, 0, payload["errors"])
+        write(self.root, ".github/workflows/project-harness.yml", original)
+
+    def test_invalid_or_non_scalar_flow_branch_members_do_not_count(self) -> None:
+        original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
+        variants = (
+            "[main,, {bad: value}]",
+            "[main, {bad: value}]",
+            "[main, *other]",
+            "[main, &other branch]",
+            "[main, !tag branch]",
+            "[main, 123]",
+            "[main, true]",
+            "[main, 2026-07-19]",
+            '[main, "unterminated]',
+        )
+        for branches in variants:
+            with self.subTest(branches=branches):
+                workflow = original.replace("    branches:\n      - main", f"    branches: {branches}")
+                write(self.root, ".github/workflows/project-harness.yml", workflow)
+                self.assert_error("missing required pull_request trigger for main")
+        write(self.root, ".github/workflows/project-harness.yml", original)
+
+    def test_block_branch_mapping_member_does_not_count(self) -> None:
+        original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
+        variants = ("{bad: value}", "- nested", "123", "true", "2026-07-19")
+        for member in variants:
+            with self.subTest(member=member):
+                workflow = original.replace(
+                    "    branches:\n      - main",
+                    f"    branches:\n      - main\n      - {member}",
+                )
+                write(self.root, ".github/workflows/project-harness.yml", workflow)
+                self.assert_error("missing required pull_request trigger for main")
         write(self.root, ".github/workflows/project-harness.yml", original)
 
     def test_quoted_jobs_and_job_id_are_supported(self) -> None:
@@ -1490,6 +1524,54 @@ None.
             "      - name: Dead nested value\n"
             "        with:\n"
             f"          run: {command}",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_bare_null_step_item_disqualifies_required_job(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "    steps:\n",
+            "    steps:\n      -\n",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_scalar_step_item_disqualifies_required_job(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "    steps:\n",
+            "    steps:\n      - invalid-scalar\n",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_null_or_whitespace_required_step_name_does_not_count(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        variants = (
+            "# YAML null",
+            "null",
+            "~",
+            "true",
+            "123",
+            '"   "',
+        )
+        for name in variants:
+            with self.subTest(name=name):
+                self.replace(
+                    ".github/workflows/project-harness.yml",
+                    f"      - run: {command}",
+                    f"      - name: {name}\n        run: {command}",
+                )
+                self.assert_error("verification workflow: missing required command")
+                self.replace(
+                    ".github/workflows/project-harness.yml",
+                    f"      - name: {name}\n        run: {command}",
+                    f"      - run: {command}",
+                )
+
+    def test_null_required_job_name_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "    name: Harness structure",
+            "    name: # YAML null",
         )
         self.assert_error("verification workflow: missing required command")
 

@@ -294,6 +294,56 @@ def clean_yaml_scalar(value: str) -> str:
     return cleaned
 
 
+def constrained_yaml_string(value: str) -> str | None:
+    """Parse the declared plain/quoted YAML string subset without coercion."""
+
+    cleaned = value.strip()
+    if not cleaned:
+        return None
+    if cleaned.startswith('"'):
+        try:
+            parsed = json.loads(cleaned)
+        except json.JSONDecodeError:
+            return None
+        return parsed if isinstance(parsed, str) else None
+    if cleaned.startswith("'"):
+        if len(cleaned) < 2 or not cleaned.endswith("'"):
+            return None
+        inner = cleaned[1:-1]
+        parsed: list[str] = []
+        index = 0
+        while index < len(inner):
+            if inner[index] != "'":
+                parsed.append(inner[index])
+                index += 1
+                continue
+            if index + 1 >= len(inner) or inner[index + 1] != "'":
+                return None
+            parsed.append("'")
+            index += 2
+        return "".join(parsed)
+    if cleaned[0] in "&*!#%@`{}[],|>":
+        return None
+    if any(character in cleaned for character in "{}[],"):
+        return None
+    if re.match(r"[-?:](?:\s|$)", cleaned):
+        return None
+    if re.search(r":\s|\s#", cleaned):
+        return None
+    if cleaned.lower() in {
+        "null", "true", "false", "yes", "no", "on", "off", ".nan", ".inf", "+.inf", "-.inf"
+    } or cleaned == "~":
+        return None
+    if re.fullmatch(
+        r"[-+]?(?:0[xX][0-9a-fA-F]+|0[oO][0-7]+|\d+(?:\.\d*)?(?:[eE][-+]?\d+)?|\.\d+(?:[eE][-+]?\d+)?)",
+        cleaned,
+    ):
+        return None
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}(?:[Tt ][0-9:.+-]+[Zz]?)?", cleaned):
+        return None
+    return cleaned
+
+
 def direct_yaml_key_counts(lines: list[str], indent: int) -> dict[str, int]:
     counts: dict[str, int] = {}
     for line in lines:
@@ -494,8 +544,10 @@ def workflow_job_command_sequences(text: str) -> list[list[str]]:
                 conditional_jobs.add(job_id)
             if job_key not in {"name", "runs-on", "steps"}:
                 modified_jobs.add(job_id)
-            if job_key == "name" and not clean_yaml_scalar(yaml_key_value(stripped, "name") or ""):
-                modified_jobs.add(job_id)
+            if job_key == "name":
+                job_name = constrained_yaml_string(yaml_key_value(stripped, "name") or "")
+                if job_name is None or not job_name.strip():
+                    modified_jobs.add(job_id)
             if job_key == "runs-on" and clean_yaml_scalar(yaml_key_value(stripped, "runs-on") or "") == "ubuntu-latest":
                 runnable_jobs.add(job_id)
             if yaml_key_value(stripped, "steps") == "":
@@ -512,11 +564,18 @@ def workflow_job_command_sequences(text: str) -> list[list[str]]:
             index += 1
             continue
 
-        direct_step = stripped.startswith("- ") and (
-            step_indent is None or indent <= step_indent
-        )
-        if direct_step:
+        if step_indent is None:
             step_indent = indent
+        if indent < step_indent:
+            modified_jobs.add(job_id)
+            index += 1
+            continue
+        if indent == step_indent and not stripped.startswith("- "):
+            modified_jobs.add(job_id)
+            index += 1
+            continue
+        direct_step = indent == step_indent and stripped.startswith("- ")
+        if direct_step:
             step_field_indent = None
             step_id += 1
             step_value = stripped[2:].lstrip()
@@ -532,8 +591,10 @@ def workflow_job_command_sequences(text: str) -> list[list[str]]:
                 modified_steps.add((job_id, step_id))
             if step_key is None:
                 modified_jobs.add(job_id)
-            if step_key == "name" and not clean_yaml_scalar(yaml_key_value(step_value, "name") or ""):
-                modified_steps.add((job_id, step_id))
+            if step_key == "name":
+                step_name = constrained_yaml_string(yaml_key_value(step_value, "name") or "")
+                if step_name is None or not step_name.strip():
+                    modified_steps.add((job_id, step_id))
             run_value = yaml_key_value(step_value, "run")
             if run_value is not None:
                 command, index = normalized_run_command(
@@ -561,8 +622,10 @@ def workflow_job_command_sequences(text: str) -> list[list[str]]:
                 conditional_steps.add((job_id, step_id))
             if step_key not in {"name", "run"}:
                 modified_steps.add((job_id, step_id))
-            if step_key == "name" and not clean_yaml_scalar(yaml_key_value(stripped, "name") or ""):
-                modified_steps.add((job_id, step_id))
+            if step_key == "name":
+                step_name = constrained_yaml_string(yaml_key_value(stripped, "name") or "")
+                if step_name is None or not step_name.strip():
+                    modified_steps.add((job_id, step_id))
             run_value = yaml_key_value(stripped, "run")
             if run_value is not None:
                 command, index = normalized_run_command(
@@ -601,7 +664,51 @@ def flow_sequence_values(value: str) -> list[str] | None:
     body = cleaned[1:-1].strip()
     if not body:
         return []
-    return [clean_yaml_scalar(item) for item in body.split(",")]
+    raw_items: list[str] = []
+    current: list[str] = []
+    quote: str | None = None
+    index = 0
+    while index < len(body):
+        character = body[index]
+        if quote is not None:
+            current.append(character)
+            if quote == '"' and character == "\\":
+                if index + 1 >= len(body):
+                    return None
+                index += 1
+                current.append(body[index])
+            elif quote == "'" and character == "'" and index + 1 < len(body) and body[index + 1] == "'":
+                index += 1
+                current.append(body[index])
+            elif character == quote:
+                quote = None
+            index += 1
+            continue
+        if character in {"'", '"'}:
+            quote = character
+            current.append(character)
+        elif character == ",":
+            item = "".join(current).strip()
+            if not item:
+                return None
+            raw_items.append(item)
+            current = []
+        elif character in "[]{}":
+            return None
+        else:
+            current.append(character)
+        index += 1
+    if quote is not None:
+        return None
+    final_item = "".join(current).strip()
+    if final_item:
+        raw_items.append(final_item)
+    elif not raw_items or not body.rstrip().endswith(","):
+        return None
+    parsed = [constrained_yaml_string(item) for item in raw_items]
+    if any(item is None or not item.strip() for item in parsed):
+        return None
+    return [item for item in parsed if item is not None]
 
 
 def workflow_has_pull_request_main(text: str) -> bool:
@@ -711,7 +818,10 @@ def workflow_has_pull_request_main(text: str) -> bool:
         match = re.fullmatch(r"-\s+(.+?)\s*", branch_text)
         if match is None:
             return False
-        values.append(clean_yaml_scalar(match.group(1)))
+        value = constrained_yaml_string(match.group(1))
+        if value is None or not value.strip():
+            return False
+        values.append(value)
     return "main" in values
 
 
