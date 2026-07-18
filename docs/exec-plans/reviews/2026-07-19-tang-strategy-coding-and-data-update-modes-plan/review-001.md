@@ -1,7 +1,12 @@
 # 设计评审意见
 
-- Review target: `docs/exec-plans/proposed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`(proposed 目录内当前修订版)
+- Review target: `docs/exec-plans/proposed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
+- Review target revision: `v1-initial`
 - Review type: design
+- Reviewer ID: `independent-design-reviewer-2026-07-19-r1`
+- Plan author ID: `codex-plan-author-2026-07-19`
+- Independence declaration: `attested`
+- Evidence method: independent repository baseline, plan, checker, runtime-contract, and lifecycle-surface inspection recorded in this review
 - Verdict: revise
 - Confidence: high
 

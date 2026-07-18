@@ -120,7 +120,7 @@ State invariants:
 - Active: latest matching-revision design review is `approve`, independence is `attested`, activation matches `user-instruction:<non-empty-token>`, and phase/phase state/entry gate/next gate are non-`none`.
 - Completed: final disposition is non-none. `Final disposition=Completed` always classifies the plan as implemented and requires an `accept` implementation review even when commit values are `none`; any other disposition with implementation review or implementation commit evidence also requires that `accept`. Commit values may be `none` only when no commit was authorized.
 - Review-field consistency: `Design reviews=none` requires both `Latest design verdict=none` and `Review independence=none`; a new-schema plan with design reviews requires `Review independence=attested`.
-- Historical bare review filenames are accepted only for explicitly migrated `operating-modes-legacy-v1` completed plans. New-schema plans use repository-relative review paths.
+- Historical bare review filenames are accepted only for explicitly migrated `operating-modes-legacy-v1` completed plans. Every review declared by a new-schema plan requires the complete constrained metadata below, including reviews of prior revisions; metadata-only migration may add those fields without rewriting historical findings. New-schema plans use repository-relative review paths.
 
 ### Independent review metadata
 
@@ -142,9 +142,11 @@ The checker validates unique keys, structure, target/revision, vocabulary, and u
 
 ### Fixed index rows
 
-Each fixed index row has exactly four cells, and its Plan cell is exactly one canonical Markdown link with no appended text or second link. Each plan link appears exactly once in its state index. A Proposed plan with design reviews links the latest one and otherwise uses exact `none`; Active evidence always resolves to the latest review artifact; Completed verification resolves to the declared implementation review and otherwise uses exact `none`. Evidence-free rows reject links. The reviews index contains one row per plan, lists the exact direct Markdown artifact set once, derives its latest verdict from the final listed artifact, and uses the matching lifecycle state. When the artifact set is empty, the row links the canonical plan instead of a non-durable empty review directory and uses exact `none` for both Reviews and Latest verdict.
+Each index contains exactly one canonical four-cell header followed immediately by exactly one `| --- | --- | --- | --- |` separator. The headers are `Plan | Status | Review | Next gate`, `Plan | Current phase | Evidence | Next gate`, `Plan | Disposition | Verification | Final commit`, and `Plan | Reviews | Latest verdict | Lifecycle state` for Proposed, Active, Completed, and Reviews respectively. Every header, separator, data row, and sentinel begins and ends with `|`; a missing terminal delimiter fails. Reserved words such as `Plan` or `Decision` cannot introduce another skipped row.
 
-An empty state index uses exactly `| None | — | — | none |`; an empty reviews index uses exactly `| None | — | none | None |`. A None sentinel cannot coexist with a plan row. Other no-link data rows, extra cells (including a trailing empty cell), and multiple sentinels fail.
+Each fixed data row has exactly four cells, and its Plan cell is exactly one canonical Markdown link with no appended text or second link. Each plan link appears exactly once in its state index. A Proposed plan with design reviews links the latest one and otherwise uses exact `none`; Active evidence always resolves to the latest review artifact; Completed verification resolves to the declared implementation review and otherwise uses exact `none`. Evidence-free rows reject links. The reviews index contains one row per plan, lists the exact direct Markdown artifact set once, derives its latest verdict from the final listed artifact, and uses the matching lifecycle state. When the artifact set is empty, the row links the canonical plan instead of a non-durable empty review directory and uses exact `none` for both Reviews and Latest verdict.
+
+An empty state index requires exactly `| None | — | — | none |`; an empty reviews index requires exactly `| None | — | none | None |`. A None sentinel cannot coexist with a plan row. Other no-link data rows, extra cells (including a trailing empty cell), missing sentinels, and multiple sentinels fail.
 
 ```text
 proposed:  | [Title](./plan.md) | Proposed | [review-N](../reviews/.../review-N.md): verdict | <next-gate-token> |
@@ -164,7 +166,7 @@ The checker compares exact plan-link/state sets, not prose summaries.
 
 ### Current-state blocks
 
-`PROGRESS.md` and `HANDOFF.md` each contain exactly one matching block:
+`PROGRESS.md` and `HANDOFF.md` each contain exactly one matching block. The single start marker must precede the single end marker, and only the bounded interval is parsed; missing, reversed, nested, or unclosed forms fail:
 
 ```text
 <!-- operating-modes-state:start -->
@@ -220,7 +222,7 @@ Stop Data Update Mode for missing/unrecoverable history, integrity/foreign-key f
 
 The focused checker is read-only and Python-stdlib-only; it may call installed `git` for dynamic truth. The governed harness composes it for an explicit `--root`; the minimal profile does not.
 
-Machine fixtures cover plan discovery/uniqueness, duplicate constrained keys, metadata/state invariants, Proposed gate categories, exact index/roadmap/review-artifact sets, review target/type/revision matching, current-state blocks, historical Git markers, required constrained paths/routing, read-only behavior, external-root composition, and governed/minimal profile separation. The focused checker does not infer behavior from unconstrained AGENTS prose, runbook text, Python source, or workflow YAML tokens. Unchanged daily trigger/runbook/adapter/rebuild/publisher compatibility for this implementation is carried by baseline-to-HEAD exact diff/hash evidence plus the named behavior tests and human inspection. Existing backend tests remain the carrier for actual calendar, TV quality, rebuild, non-shrink, DB, and assemble behavior. Human evidence remains required for identity, authority, command order, optional checks, bounded-maintenance classification, and anomaly return decisions. Real commit/push/Pages/hosted proof is deferred to a separately authorized daily run.
+Machine fixtures cover plan discovery/uniqueness, duplicate constrained keys, metadata/state invariants, Proposed gate categories, exact index/roadmap/review-artifact sets, review target/type/revision matching, bounded current-state blocks, historical Git markers, required constrained paths/routing, executable verification carriers, read-only behavior, external-root composition, and governed/minimal profile separation. Required repository routes are non-comment, non-fenced canonical Markdown links resolving to this contract. Required project-harness commands are extracted only from actual `steps` list `run` values; supported inline and block forms preserve command order, while YAML comments do not count. The focused checker does not infer business behavior from unconstrained AGENTS prose, runbook text, Python source, or unrelated workflow text. Unchanged daily trigger/runbook/adapter/rebuild/publisher compatibility for this implementation is carried by baseline-to-HEAD exact diff/hash evidence plus the named behavior tests and human inspection. Existing backend tests remain the carrier for actual calendar, TV quality, rebuild, non-shrink, DB, and assemble behavior. Human evidence remains required for identity, authority, command order beyond the constrained workflow carrier, optional checks, bounded-maintenance classification, and anomaly return decisions. Real commit/push/Pages/hosted proof is deferred to a separately authorized daily run.
 
 No fixture or offline inspection may claim a real provider fetch, broker connection, tracked-DB update, push, Pages publication, or hosted verification passed.
 

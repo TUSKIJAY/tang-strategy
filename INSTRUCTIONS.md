@@ -24,7 +24,7 @@ Optimization records, decisions, proposed plans, and reviews do not grant execut
 - `INSTRUCTIONS.md` — stable project facts, boundaries, and verification contract.
 - `PROGRESS.md` — current lifecycle truth.
 - `HANDOFF.md` — latest resume point, evidence, blocker, and next gate.
-- `docs/operating-modes.md` — normative peer-mode routing, lifecycle formats, reviewer evidence, and authority gates.
+- [`docs/operating-modes.md`](./docs/operating-modes.md) — normative peer-mode routing, lifecycle formats, reviewer evidence, and authority gates.
 - `.harness/config.json` — machine-readable governed profile and verification/GitHub contract.
 - `backend/app/` — FastAPI API, SQLite access, import, auth, and review payload assembly.
 - `backend/scripts/`, `backend/tests/` — fetch/rebuild/recovery/export tooling and backend tests.

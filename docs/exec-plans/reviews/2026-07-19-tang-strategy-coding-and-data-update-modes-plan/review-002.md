@@ -2,6 +2,16 @@
 
 **审核对象**: 2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md
 
+- Review target: `docs/exec-plans/proposed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
+- Review target revision: `v1-initial`
+- Review type: design
+- Reviewer ID: `independent-design-reviewer-2026-07-19-r2`
+- Plan author ID: `codex-plan-author-2026-07-19`
+- Independence declaration: `attested`
+- Evidence method: independent second-pass repository and plan inspection plus explicit replay of review-001 findings recorded in this review
+- Verdict: revise
+- Confidence: high
+
 ## 整体判断
 
 **裁决**: revise

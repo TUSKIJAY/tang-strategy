@@ -15,7 +15,7 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-remediation-r5
+- Next gate: phase-6-re-review-r6
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -242,7 +242,7 @@ A qualifying independent review must:
 - Confidence: low|medium|high
 ```
 
-The checker can verify field presence, target revision, accepted verdict vocabulary, and that reviewer/author IDs differ. It cannot prove that the identity or declaration is truthful, nor can it prove that a user actually issued an activation/publish instruction. A human reviewer must validate those attestations and evidence references. Existing `review-001`/`review-002` remain valid `revise` feedback but are `legacy-unattested` and cannot satisfy the future activation gate.
+The checker can verify field presence, target revision, accepted verdict vocabulary, and that reviewer/author IDs differ. It cannot prove that the identity or declaration is truthful, nor can it prove that a user actually issued an activation/publish instruction. A human reviewer must validate those attestations and evidence references. Existing `review-001`/`review-002` remain valid `revise` feedback; remediation-r5 migrated only their constrained metadata to the new schema while preserving their historical findings and verdicts. Neither can satisfy the matching-revision activation gate because both target `v1-initial`.
 
 ## 4. Top-Level Routing And Least-Authority Rules
 
@@ -616,7 +616,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 ## 12. Evidence, Review, And Commit Boundaries
 
 - Review directory: `docs/exec-plans/reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/`
-- Existing verdicts: `review-001: revise@v1-initial`, `review-002: revise@v1-initial` (legacy-unattested); `review-003: approve@v2-review-foldback-2026-07-19` (attested under Section 3.5)
+- Existing verdicts: `review-001: revise@v1-initial`, `review-002: revise@v1-initial` (metadata-only migrated to attested constrained records in remediation-r5); `review-003: approve@v2-review-foldback-2026-07-19` (attested under Section 3.5)
 - Design review gate for v2: closed by `review-003`
 - Activation: recorded from explicit user instruction `user-instruction:2026-07-19-move-proposed-plan-to-active`
 - Required implementation start: separate explicit start/execute instruction after activation recording
@@ -722,3 +722,6 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Re-review-r5 gate: commit this scoped remediation boundary, then request another fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
 - Re-review-r5 boundary: `implementation-review-005.md`, authored by `independent-implementation-reviewer-2026-07-19-r5`, returned `revise` with `high` confidence against stable commit `68f117f84e6cc72fa27bbbe90f8a2f196d404088`. It confirmed all prior findings closed, then found four categories: comment-only workflow/router tokens can satisfy carriers; empty indexes can omit sentinels and reserved headers/missing delimiters bypass grammar; current-state markers can be reversed; and new-schema prior-revision reviews can incorrectly use legacy unstructured evidence.
 - Remediation-r5 gate: record this review separately, enforce executable/non-comment carriers and exact constrained grammar, migrate any affected new-schema review metadata without rewriting review findings, add adversarial fixtures, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
+- Remediation-r5 result: contract routes now require non-comment, non-fenced canonical Markdown links. The project workflow accepts required commands only from actual inline/block `steps[].run` carriers in declared order and rejects comments or nested dead keys. All four indexes require their exact header, immediately adjacent separator, terminal delimiters, fixed rows, and exactly one sentinel when empty. Current-state blocks require start-before-end bounded markers. New-schema plans require full metadata on every declared review revision; `review-001` and `review-002` received metadata-only migration with their findings and verdicts unchanged.
+- Remediation-r5 verification: 79 temporary-Git fixtures pass, including every implementation-review-005 repro plus block-run positive, nested-run negative, header adjacency, four delimiter forms, missing state/reviews sentinels, reserved-word rows, reversed markers, and new-schema prior-revision bare-review failure. Focused/governed/auto checks, startup budget, launcher/checker syntax, frontend production build (1746 modules to deleted temporary output), DB integrity/FK, runtime zero-diff, frozen hashes, and whitespace pass. The earlier pinned 19/19 backend evidence remains applicable because no runtime file changed.
+- Re-review-r6 gate: commit this scoped remediation boundary, then request another fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.

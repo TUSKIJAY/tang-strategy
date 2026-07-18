@@ -7,10 +7,10 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-remediation-r5`
+- Next gate: `phase-6-re-review-r6`
 <!-- operating-modes-state:end -->
 
-2026-07-19: 第五轮独立实施评审 `implementation-review-005` 针对 `68f117f84e6cc72fa27bbbe90f8a2f196d404088` 返回 `revise`、置信度 `high`。它确认此前全部 finding 已关闭，并新增四类问题：comment-only workflow/router carrier、empty index header/sentinel/delimiter grammar、逆序 current-state markers、new-schema 旧 revision review 的 legacy metadata 绕过。当前为 `phase-6:in-progress`，next gate 为 `phase-6-remediation-r5`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: remediation-r5 已关闭 `implementation-review-005` 的四类 finding：workflow/router 只接受有效载体，四个索引使用精确 header/separator/delimiter/sentinel 语法，current-state markers 必须顺序闭合，新 schema 的全部 review revision 必须有完整元数据。79 fixtures、focused/governed/auto、startup budget、syntax、前端 1746-module 临时构建、DB 只读检查、runtime zero-diff 与冻结 hashes 均通过；`review-001/002` 仅迁移元数据，正文与裁决未改。当前为 `phase-6:in-progress`，next gate 为 `phase-6-re-review-r6`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediate the implementation-review-005 carrier/grammar findings and obtain a fresh qualifying implementation review.
+- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediation-r5 is verified and awaits a fresh qualifying implementation review.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] Keep remediation-r5 limited to the four recorded carrier/grammar categories and affected review metadata migration; then rerun bounded verification and request a fresh independent review.
+- [ ] Commit the verified remediation-r5 boundary, then request a fresh independent review against that stable commit.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 

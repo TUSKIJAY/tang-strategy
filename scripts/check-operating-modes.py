@@ -88,6 +88,12 @@ LINK_RE = re.compile(r"\[([^]]+)\]\(([^)]+)\)")
 LEGACY_GIT_KEY_RE = re.compile(
     r"^- (Branch/HEAD|Current HEAD|Git state|Current worktree|Worktree status):"
 )
+INDEX_HEADERS = {
+    "proposed": ["Plan", "Status", "Review", "Next gate"],
+    "active": ["Plan", "Current phase", "Evidence", "Next gate"],
+    "completed": ["Plan", "Disposition", "Verification", "Final commit"],
+    "reviews": ["Plan", "Reviews", "Latest verdict", "Lifecycle state"],
+}
 
 
 @dataclass(frozen=True)
@@ -126,6 +132,104 @@ def read_text(path: Path, label: str, errors: list[str]) -> str:
     except (OSError, UnicodeDecodeError) as exc:
         errors.append(f"{label}: cannot read {path}: {exc}")
         return ""
+
+
+def strip_markdown_comments_and_fences(text: str) -> str:
+    """Remove carriers that cannot be an operative Markdown route."""
+    without_comments = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    kept: list[str] = []
+    fence: str | None = None
+    for line in without_comments.splitlines():
+        marker = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if marker:
+            token = marker.group(1)
+            if fence is None:
+                fence = token[0]
+            elif token[0] == fence:
+                fence = None
+            continue
+        if fence is None:
+            kept.append(line)
+    return "\n".join(kept)
+
+
+def has_canonical_markdown_route(path: Path, target: Path, errors: list[str]) -> bool:
+    text = strip_markdown_comments_and_fences(read_text(path, "contract route", errors))
+    for match in LINK_RE.finditer(text):
+        raw_target = match.group(2).strip().strip("<>")
+        if (path.parent / raw_target).resolve() == target.resolve():
+            return True
+    return False
+
+
+def workflow_step_commands(text: str) -> list[str]:
+    """Extract executable command lines only from run values in YAML steps lists."""
+    lines = text.splitlines()
+    commands: list[str] = []
+    steps_indent: int | None = None
+    step_indent: int | None = None
+    step_field_indent: int | None = None
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        stripped = line.lstrip()
+        indent = len(line) - len(stripped)
+        if not stripped or stripped.startswith("#"):
+            index += 1
+            continue
+        if steps_indent is not None and indent <= steps_indent:
+            steps_indent = None
+            step_indent = None
+            step_field_indent = None
+        if re.fullmatch(r"steps:\s*", stripped):
+            steps_indent = indent
+            step_indent = None
+            step_field_indent = None
+            index += 1
+            continue
+        if steps_indent is None:
+            index += 1
+            continue
+        if indent > steps_indent and stripped.startswith("- "):
+            if step_indent is None or indent <= step_indent:
+                step_indent = indent
+                step_field_indent = None
+        elif step_indent is not None and indent > step_indent and step_field_indent is None:
+            step_field_indent = indent
+        run_match = re.fullmatch(r"(-\s+)?run:\s*(.*?)\s*", stripped)
+        if run_match and step_indent is not None:
+            is_inline_step = run_match.group(1) is not None and indent == step_indent
+            is_step_field = (
+                run_match.group(1) is None
+                and step_field_indent is not None
+                and indent == step_field_indent
+            )
+            if is_inline_step or is_step_field:
+                value = run_match.group(2)
+                if value in {"|", "|-", "|+", ">", ">-", ">+"}:
+                    block_indent = indent
+                    block_lines: list[str] = []
+                    cursor = index + 1
+                    while cursor < len(lines):
+                        block_line = lines[cursor]
+                        block_stripped = block_line.lstrip()
+                        block_line_indent = len(block_line) - len(block_stripped)
+                        if block_stripped and block_line_indent <= block_indent:
+                            break
+                        if block_stripped and not block_stripped.startswith("#"):
+                            block_lines.append(block_stripped)
+                        cursor += 1
+                    commands.extend(block_lines)
+                    if value.startswith(">") and block_lines:
+                        commands.append(" ".join(block_lines))
+                    index = cursor
+                    continue
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+                    value = value[1:-1]
+                if value and not value.startswith("#"):
+                    commands.append(value)
+        index += 1
+    return commands
 
 
 def parse_header_bullets(
@@ -286,7 +390,10 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
                 target_revision,
                 errors,
                 expected_type="design",
-                allow_legacy=(plan.schema == "operating-modes-legacy-v1" or target_revision != plan.revision),
+                allow_legacy=(
+                    plan.schema == "operating-modes-legacy-v1"
+                    and plan.directory_state == "completed"
+                ),
             )
         review_results.append((verdict, target_revision, raw_path, review_path, structured))
 
@@ -466,15 +573,38 @@ def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[li
     sentinel_count = 0
     state_sentinel = ["None", "—", "—", "none"]
     reviews_sentinel = ["None", "—", "none", "None"]
-    expected_sentinel = reviews_sentinel if path.parent.name == "reviews" else state_sentinel
-    for line in text.splitlines():
+    index_kind = path.parent.name
+    expected_header = INDEX_HEADERS.get(index_kind)
+    expected_separator = ["---", "---", "---", "---"]
+    expected_sentinel = reviews_sentinel if index_kind == "reviews" else state_sentinel
+    header_count = 0
+    separator_count = 0
+    table_roles: list[str] = []
+    header_lines: list[int] = []
+    separator_lines: list[int] = []
+    for line_number, line in enumerate(text.splitlines(), 1):
         raw = line.strip()
-        if not raw.startswith("|") or re.fullmatch(r"\|[\s|:-]+\|?", raw):
+        if not raw.startswith("|"):
             continue
-        body = raw[1:-1] if raw.endswith("|") else raw[1:]
+        if not raw.endswith("|"):
+            errors.append(
+                f"index: {path.relative_to(root)} table row requires a terminal delimiter: {line}"
+            )
+            table_roles.append("invalid")
+            continue
+        body = raw[1:-1]
         cells = [cell.strip() for cell in body.split("|")]
-        if not cells or cells[0] in {"Plan", "Decision"}:
+        if cells == expected_header:
+            header_count += 1
+            header_lines.append(line_number)
+            table_roles.append("header")
             continue
+        if cells == expected_separator:
+            separator_count += 1
+            separator_lines.append(line_number)
+            table_roles.append("separator")
+            continue
+        table_roles.append("data")
         links = list(LINK_RE.finditer(cells[0]))
         if links:
             if len(cells) != 4:
@@ -494,10 +624,36 @@ def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[li
                 f"index: {path.relative_to(root)} data row must use a canonical Plan link or "
                 f"exact None sentinel: {line}"
             )
+    if expected_header is None:
+        errors.append(f"index: {path.relative_to(root)} has no defined fixed-table schema")
+    if header_count != 1:
+        errors.append(
+            f"index: {path.relative_to(root)} must contain exactly one canonical header; "
+            f"found {header_count}"
+        )
+    if separator_count != 1:
+        errors.append(
+            f"index: {path.relative_to(root)} must contain exactly one canonical separator; "
+            f"found {separator_count}"
+        )
+    if (
+        len(table_roles) < 2
+        or table_roles[:2] != ["header", "separator"]
+        or len(header_lines) != 1
+        or len(separator_lines) != 1
+        or separator_lines[0] != header_lines[0] + 1
+    ):
+        errors.append(
+            f"index: {path.relative_to(root)} canonical header must be followed immediately by separator"
+        )
     if sentinel_count > 1:
         errors.append(f"index: {path.relative_to(root)} contains duplicate None sentinel rows")
     if sentinel_count and rows:
         errors.append(f"index: {path.relative_to(root)} cannot mix a None sentinel with plan rows")
+    if not rows and sentinel_count != 1:
+        errors.append(
+            f"index: {path.relative_to(root)} empty plan set requires exactly one canonical None sentinel"
+        )
     return rows
 
 
@@ -802,7 +958,12 @@ def extract_state_block(path: Path, root: Path, errors: list[str]) -> dict[str, 
     if text.count(start) != 1 or text.count(end) != 1:
         errors.append(f"state block: {path.relative_to(root)} must contain exactly one start/end marker pair")
         return {}
-    body = text.split(start, 1)[1].split(end, 1)[0]
+    start_position = text.find(start)
+    end_position = text.find(end)
+    if start_position >= end_position:
+        errors.append(f"state block: {path.relative_to(root)} start marker must precede end marker")
+        return {}
+    body = text[start_position + len(start):end_position]
     values = {
         key: clean_value(value)
         for key, value in parse_header_bullets(
@@ -883,16 +1044,25 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
         files.append({"path": relative, "present": present})
         if not present:
             errors.append(f"contract path: missing required file: {relative}")
-    routes = {
-        "AGENTS.md": "docs/operating-modes.md",
-        "INSTRUCTIONS.md": "docs/operating-modes.md",
-        "docs/README.md": "operating-modes.md",
-        "docs/operating-modes.md": "operating-modes-v1",
-    }
-    for relative, token in routes.items():
+    route_paths = ("AGENTS.md", "INSTRUCTIONS.md", "docs/README.md")
+    route_target = root / "docs" / "operating-modes.md"
+    for relative in route_paths:
         path = root / relative
-        if path.is_file() and token not in read_text(path, "contract route", errors):
-            errors.append(f"contract route: {relative} does not route/declare {token}")
+        if path.is_file() and not has_canonical_markdown_route(path, route_target, errors):
+            errors.append(
+                f"contract route: {relative} does not contain a non-comment canonical Markdown "
+                "link to docs/operating-modes.md"
+            )
+    contract_path = root / "docs" / "operating-modes.md"
+    if contract_path.is_file():
+        contract_text = strip_markdown_comments_and_fences(
+            read_text(contract_path, "contract route", errors)
+        )
+        if "operating-modes-v1" not in contract_text:
+            errors.append(
+                "contract route: docs/operating-modes.md does not declare operating-modes-v1 "
+                "outside comments or fenced examples"
+            )
     plan_template = root / "docs" / "exec-plans" / "plan-template.md"
     if plan_template.is_file():
         metadata = parse_header_bullets(
@@ -935,13 +1105,12 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
     workflow_path = root / ".github" / "workflows" / "project-harness.yml"
     if workflow_path.is_file():
         workflow = read_text(workflow_path, "verification workflow", errors)
-        workflow_canonical = f"run: {canonical_command}"
-        workflow_fixture = f"run: {fixture_command}"
-        for command in (workflow_canonical, workflow_fixture):
-            if command not in workflow:
-                errors.append(f"verification workflow: missing required command: {command.removeprefix('run: ')}")
-        if workflow_canonical in workflow and workflow_fixture in workflow:
-            if workflow.index(workflow_canonical) > workflow.index(workflow_fixture):
+        workflow_commands = workflow_step_commands(workflow)
+        for command in (canonical_command, fixture_command):
+            if command not in workflow_commands:
+                errors.append(f"verification workflow: missing required command: {command}")
+        if canonical_command in workflow_commands and fixture_command in workflow_commands:
+            if workflow_commands.index(canonical_command) > workflow_commands.index(fixture_command):
                 errors.append("verification workflow: canonical harness command must precede fixture tests")
     return files
 

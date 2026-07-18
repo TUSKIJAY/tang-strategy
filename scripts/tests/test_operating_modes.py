@@ -118,9 +118,13 @@ def build_governed_fixture(root: Path) -> None:
     write(
         root,
         "AGENTS.md",
-        "# Agents\n\nUse docs/operating-modes.md.\n\n发布 SPY YYYY-MM-DD\n拉一下 YYYY-MM-DD 的 SPY 然后更新页面\npublish SPY review for YYYY-MM-DD\npush 5/20 SPY\n",
+        "# Agents\n\nUse [the operating modes contract](./docs/operating-modes.md).\n\n发布 SPY YYYY-MM-DD\n拉一下 YYYY-MM-DD 的 SPY 然后更新页面\npublish SPY review for YYYY-MM-DD\npush 5/20 SPY\n",
     )
-    write(root, "INSTRUCTIONS.md", "# Instructions\n\nUse docs/operating-modes.md.\n")
+    write(
+        root,
+        "INSTRUCTIONS.md",
+        "# Instructions\n\nUse [the operating modes contract](./docs/operating-modes.md).\n",
+    )
     block = state_block("Active", "phase-1", "complete", "phase-2-start")
     write(root, "PROGRESS.md", f"# Progress\n\n{block}")
     write(root, "HANDOFF.md", f"# Handoff\n\n{block}")
@@ -730,6 +734,92 @@ None.
         )
         self.assert_error("cannot mix a None sentinel with plan rows")
 
+    def test_empty_state_indexes_require_canonical_sentinel(self) -> None:
+        cases = (
+            "docs/exec-plans/proposed/index.md",
+            "docs/exec-plans/completed/index.md",
+        )
+        for relative in cases:
+            with self.subTest(index=relative):
+                self.replace(relative, "| None | — | — | none |\n", "")
+                self.assert_error("empty plan set requires exactly one canonical None sentinel")
+                self.replace(relative, "| --- | --- | --- | --- |\n", "| --- | --- | --- | --- |\n| None | — | — | none |\n")
+
+    def test_empty_reviews_index_requires_canonical_sentinel(self) -> None:
+        (self.root / "docs/exec-plans/active/demo-plan.md").unlink()
+        shutil.rmtree(self.root / "docs/exec-plans/reviews/demo-plan")
+        write(
+            self.root,
+            "docs/exec-plans/active/index.md",
+            "# Active\n\n| Plan | Current phase | Evidence | Next gate |\n"
+            "| --- | --- | --- | --- |\n| None | — | — | none |\n",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/reviews/index.md",
+            "# Reviews\n\n| Plan | Reviews | Latest verdict | Lifecycle state |\n"
+            "| --- | --- | --- | --- |\n",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/roadmap.md",
+            "# Roadmap\n\n## Active Plans\n\nNone.\n\n## Proposed Plans\n\nNone.\n\n"
+            "## Completed Plans\n\nNone.\n",
+        )
+        none_block = (
+            "<!-- operating-modes-state:start -->\n"
+            "- Current plan: `none`\n"
+            "- Lifecycle status: `None`\n"
+            "- Current phase: `none`\n"
+            "- Phase state: `none`\n"
+            "- Next gate: `none`\n"
+            "<!-- operating-modes-state:end -->\n"
+        )
+        write(self.root, "PROGRESS.md", f"# Progress\n\n{none_block}")
+        write(self.root, "HANDOFF.md", f"# Handoff\n\n{none_block}")
+        self.assert_error("empty plan set requires exactly one canonical None sentinel")
+
+    def test_reserved_header_words_cannot_masquerade_as_data_rows(self) -> None:
+        path = self.root / "docs/exec-plans/active/index.md"
+        for first_cell in ("Plan", "Decision"):
+            with self.subTest(first_cell=first_cell):
+                forged = f"| {first_cell} | forged | x | y |\n"
+                path.write_text(path.read_text(encoding="utf-8") + forged, encoding="utf-8")
+                self.assert_error("data row must use a canonical Plan link or exact None sentinel")
+                self.replace("docs/exec-plans/active/index.md", forged, "")
+
+    def test_index_header_rejects_extra_cell(self) -> None:
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "| Plan | Current phase | Evidence | Next gate |",
+            "| Plan | Current phase | Evidence | Next gate | forged |",
+        )
+        self.assert_error("must contain exactly one canonical header")
+
+    def test_index_header_and_separator_must_be_adjacent(self) -> None:
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "| Plan | Current phase | Evidence | Next gate |\n| --- | --- | --- | --- |",
+            "| Plan | Current phase | Evidence | Next gate |\nintervening prose\n| --- | --- | --- | --- |",
+        )
+        self.assert_error("canonical header must be followed immediately by separator")
+
+    def test_index_rows_require_terminal_delimiter(self) -> None:
+        cases = (
+            (
+                "docs/exec-plans/active/index.md",
+                "| [Demo](./demo-plan.md) | phase-1:complete | [review-001](../reviews/demo-plan/review-001.md) | phase-2-start |",
+            ),
+            ("docs/exec-plans/proposed/index.md", "| None | — | — | none |"),
+            ("docs/exec-plans/completed/index.md", "| Plan | Disposition | Verification | Final commit |"),
+            ("docs/exec-plans/reviews/index.md", "| --- | --- | --- | --- |"),
+        )
+        for relative, row in cases:
+            with self.subTest(index=relative):
+                self.replace(relative, row, row[:-1])
+                self.assert_error("table row requires a terminal delimiter")
+                self.replace(relative, row[:-1], row)
+
     def test_migrated_legacy_completed_plan_passes_without_rewriting_reviews(self) -> None:
         self.make_completed()
         self.replace(
@@ -767,6 +857,25 @@ None.
     def test_state_blocks_must_match(self) -> None:
         self.replace("HANDOFF.md", "- Next gate: `phase-2-start`", "- Next gate: `wrong-gate`")
         self.assert_error("PROGRESS.md and HANDOFF.md do not match")
+
+    def test_state_block_rejects_reversed_markers(self) -> None:
+        for relative in ("PROGRESS.md", "HANDOFF.md"):
+            self.replace(
+                relative,
+                "<!-- operating-modes-state:start -->",
+                "<!-- operating-modes-state:temporary -->",
+            )
+            self.replace(
+                relative,
+                "<!-- operating-modes-state:end -->",
+                "<!-- operating-modes-state:start -->",
+            )
+            self.replace(
+                relative,
+                "<!-- operating-modes-state:temporary -->",
+                "<!-- operating-modes-state:end -->",
+            )
+        self.assert_error("start marker must precede end marker")
 
     def test_forbidden_live_git_key_fails(self) -> None:
         path = self.root / "PROGRESS.md"
@@ -927,9 +1036,50 @@ None.
         )
         self.assert_error("missing required keys: Evidence method")
 
+    def test_new_schema_prior_revision_review_requires_structured_metadata(self) -> None:
+        self.replace("docs/exec-plans/active/demo-plan.md", "- Revision: `r1`", "- Revision: `r2`")
+        self.replace(
+            "docs/exec-plans/active/demo-plan.md",
+            "- Design reviews: ../reviews/demo-plan/review-001.md@approve@r1",
+            "- Design reviews: ../reviews/demo-plan/review-001.md@approve@r1, "
+            "../reviews/demo-plan/review-002.md@approve@r2",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "# Historical Review\n\n**裁决**: approve\n\nUnstructured historical prose.\n",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/reviews/demo-plan/review-002.md",
+            design_review()
+            .replace("# Review 001", "# Review 002")
+            .replace("- Review target revision: `r1`", "- Review target revision: `r2`")
+            .replace("- Reviewer ID: `reviewer-1`", "- Reviewer ID: `reviewer-2`"),
+        )
+        self.replace(
+            "docs/exec-plans/reviews/index.md",
+            "[review-001](./demo-plan/review-001.md) | approve",
+            "[review-001](./demo-plan/review-001.md), [review-002](./demo-plan/review-002.md) | approve",
+        )
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "[review-001](../reviews/demo-plan/review-001.md)",
+            "[review-002](../reviews/demo-plan/review-002.md)",
+        )
+        self.assert_error("review-001.md lacks constrained reviewer fields")
+
     def test_router_must_link_normative_contract(self) -> None:
         self.replace("AGENTS.md", "docs/operating-modes.md", "docs/missing-modes.md")
-        self.assert_error("AGENTS.md does not route/declare docs/operating-modes.md")
+        self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
+
+    def test_router_comment_only_token_does_not_count(self) -> None:
+        write(
+            self.root,
+            "AGENTS.md",
+            "# Agents\n\n<!-- [dead route](./docs/operating-modes.md) -->\n",
+        )
+        self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
 
     def test_config_requires_fixture_command(self) -> None:
         path = self.root / ".harness/config.json"
@@ -950,6 +1100,42 @@ None.
             ".github/workflows/project-harness.yml",
             "run: python3 -m unittest scripts.tests.test_operating_modes",
             "run: echo missing-fixture-command",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_workflow_comment_only_commands_do_not_count(self) -> None:
+        for command in (
+            "python3 scripts/check-project-harness.py --root . --profile governed",
+            "python3 -m unittest scripts.tests.test_operating_modes",
+        ):
+            self.replace(
+                ".github/workflows/project-harness.yml",
+                f"      - run: {command}",
+                f"      # - run: {command}",
+            )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_workflow_block_run_values_are_supported(self) -> None:
+        for command in (
+            "python3 scripts/check-project-harness.py --root . --profile governed",
+            "python3 -m unittest scripts.tests.test_operating_modes",
+        ):
+            self.replace(
+                ".github/workflows/project-harness.yml",
+                f"      - run: {command}",
+                f"      - run: |\n          {command}",
+            )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_nested_workflow_run_key_is_not_a_step_command(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            "      - name: Dead nested value\n"
+            "        with:\n"
+            f"          run: {command}",
         )
         self.assert_error("verification workflow: missing required command")
 
