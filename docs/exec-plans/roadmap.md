@@ -31,12 +31,12 @@
 
 ## Active Plans
 
-当前无 active 计划。以 [`active/index.md`](./active/index.md) 为当前索引。
+- [`2026-07-19 Tang Strategy Coding And Data Update Modes`](./active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Active；`phase-0:not-started`；canonical details: [`active` index](./active/index.md)
 
 ## Proposed Plans
 
-当前无 proposed 计划。以 `proposed/index.md` 为当前索引。
+当前无 proposed 计划。以 [`proposed/index.md`](./proposed/index.md) 为当前索引。
 
 ## Completed Plans
 
-- [`2026-07-18 Tang Strategy governed harness and data safety recovery`](./completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md) — completed locally after independent `accept`; no commit or remote action.
+- [`2026-07-18 Tang Strategy governed harness and data safety recovery`](./completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md) — completed locally after independent `accept`; verified implementation commit `a70be643a968cc24215fe508e69b3e0496d3c34a`, acceptance/lifecycle reconciliation commit `2454ccb7fc1c927f2a52a3bd2db7debe41998594`; no remote action was authorized by that plan.

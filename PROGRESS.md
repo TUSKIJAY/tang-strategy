@@ -2,7 +2,7 @@
 
 ## Current Status
 
-2026-07-19: 本地验收报告返工已完成。启动器允许 TIME_WAIT 后立即重用端口，同时仍拒绝真实监听者；cleanup 会在关闭自身进程组和删除临时目录期间忽略后续信号。相同端口连续启动、连续 Ctrl-C、HTTP 200、46 天临时 DB、`integrity_check=ok` 及 tracked DB SHA-256 不变均已实测。completed/reviews 索引已回写 `a70be643...`，CI harness job 已接入 `bash -n`。本地 diff 未 stage/未 commit；未 fetch、rebuild、push、publish、创建 PR 或修改远端设置。
+2026-07-19: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` 已在 `review-003: approve` 后依据用户明确指令完成 lifecycle activation recording。plan 已从 `proposed/` 移入 `active/`，当前为 `phase-0:not-started`，activation evidence 已记录；本次 activation 不构成 implementation start。next gate 为单独明确的 start/execute instruction 才可进入 Phase 0。用户另行授予本 plan 的 standing local commit authority：每个 lifecycle transition 或 Phase exit 在验证与状态同步通过后，自动形成一个仅含该边界 scoped files 的本地 conventional commit；这不是逐次小改动 commit，也不授予 push/PR/merge/publish 等远端权限。未实施 mode/checker/CI/runtime/data 变更，未 fetch、rebuild、push、publish、创建 PR 或修改远端设置；实时 Git 状态必须由启动命令获取。
 
 ## Navigation
 
@@ -11,12 +11,13 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
+| Active operating-modes plan | `docs/exec-plans/active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
 | Completed execution plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
 | Verification and reviews | `docs/exec-plans/reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/` |
 
 ## In Progress
 
-- [ ] None.
+- [ ] Active operating-modes plan is at `phase-0:not-started`; awaiting a separate explicit start/execute instruction; no implementation has started.
 
 ## Blocked
 
@@ -24,8 +25,8 @@
 
 ## To Do
 
-- [ ] Maintainer reviews the complete local unstaged/untracked diff.
-- [ ] Any future stage, commit, push, PR, Pages publish, merge, branch protection, environment approval, or remote configuration requires separate authority.
+- [ ] Do not start Phase 0 without a separate explicit start/execute instruction for this active plan.
+- [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
