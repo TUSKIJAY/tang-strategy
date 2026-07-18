@@ -18,7 +18,7 @@
 - Completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
 - Design reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
-- Implementation boundary: implementation-review-013 accepted stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`; the lifecycle transition commit will be recorded by the final metadata-only reconciliation after that commit exists
+- Implementation boundary: implementation-review-013 accepted stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`; lifecycle reconciliation is recorded at `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`
 - Local Git boundary: after a lifecycle transition or Phase exit passes verification and state reconciliation, create one conventional commit containing only that boundary's plan-scoped paths
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, or other remote change is authorized
 
@@ -28,7 +28,7 @@
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve any unrelated changes and read `docs/operating-modes.md` plus the completed plan execution record.
 4. Phase 5 is complete and committed at `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`; do not recreate that boundary commit.
-5. Lifecycle migration is complete in this state. After committing it, record that commit hash in the completed plan metadata, rerun final verification, and create only the metadata-only reconciliation commit. No further implementation is authorized.
+5. This plan is fully closed with accepted implementation and durable lifecycle reconciliation evidence. Do not perform further implementation under this plan.
 6. At each verified lifecycle/Phase boundary, inspect the diff and use the plan's standing authority to stage only scoped paths and create one local conventional commit. Do not push, open a PR, publish, merge, or change remote settings without separate authority.
 
 ## Verification Evidence
@@ -92,7 +92,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-After the lifecycle transition commit exists, record its hash in the completed plan metadata and rerun final verification. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized.
+None for this completed plan. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized unless separately requested.
 
 ## Handoff Boundary
 

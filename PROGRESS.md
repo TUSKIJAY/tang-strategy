@@ -10,7 +10,7 @@
 - Next gate: `none`
 <!-- operating-modes-state:end -->
 
-2026-07-19: `Tang Strategy Coding And Data Update Modes` 已完成全部 Phase、12 轮 bounded remediation 与第十三轮独立 `accept`，并迁移到 `completed/`。Verified implementation commit 为 `994f9176eb74778f346710e62ec6dabde55bae9a`；lifecycle transition commit 形成后将由 metadata-only follow-up 写回 plan。146/146 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: `Tang Strategy Coding And Data Update Modes` 已完成全部 Phase、12 轮 bounded remediation 与第十三轮独立 `accept`，并迁移到 `completed/`。Verified implementation commit 为 `994f9176eb74778f346710e62ec6dabde55bae9a`，lifecycle reconciliation commit 为 `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`。146/146 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -33,13 +33,12 @@
 
 ## To Do
 
-- [ ] After the lifecycle transition commit exists, record its hash in the completed plan and rerun final verification.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
-- [x] 2026-07-19 - Completed the Coding/Data Update operating-modes plan with 146 fixtures, accepted independent implementation review, frozen runtime/data/provider/publisher boundaries, and lifecycle migration to `completed/`.
+- [x] 2026-07-19 - Completed the Coding/Data Update operating-modes plan with 146 fixtures, accepted independent implementation review, frozen runtime/data/provider/publisher boundaries, and lifecycle reconciliation commit `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`.
 - [x] 2026-07-19 - Completed Phase 5 with 35 fixtures, contract-text enforcement, 19/19 pinned backend tests, compileall, frontend build, DB integrity, and explicit deferred real-run evidence.
 - [x] 2026-07-19 - Completed Phase 4 config/CI integration, exact command ordering enforcement, 29 fixtures, unchanged job names, and zero Pages workflow diff.
 - [x] 2026-07-19 - Completed Phase 3 Data Update carrier map, existing-test/runbook/publisher compatibility inspection, and explicit future-run evidence boundaries.
