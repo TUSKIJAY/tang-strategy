@@ -66,9 +66,7 @@ REQUIRED_PATHS = (
     "HANDOFF.md",
     ".harness/config.json",
     ".github/workflows/project-harness.yml",
-    ".github/workflows/publish-static-reviews.yml",
     "docs/README.md",
-    "docs/daily-publish-runbook.md",
     "docs/operating-modes.md",
     "docs/decisions/2026-07-19-operating-modes-and-lifecycle-source.md",
     "docs/exec-plans/plan-template.md",
@@ -80,9 +78,6 @@ REQUIRED_PATHS = (
     "docs/exec-plans/roadmap.md",
     "scripts/check-project-harness.py",
     "scripts/check-operating-modes.py",
-    "backend/scripts/fetch_tv_live_extended_day.py",
-    "backend/scripts/fetch_ib_live_extended_day.py",
-    "backend/scripts/rebuild_live_extended_db.py",
 )
 
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -132,15 +127,33 @@ def read_text(path: Path, label: str, errors: list[str]) -> str:
         return ""
 
 
-def parse_header_bullets(text: str) -> dict[str, str]:
+def parse_header_bullets(
+    text: str,
+    *,
+    duplicate_errors: list[str] | None = None,
+    label: str = "metadata",
+) -> dict[str, str]:
     metadata: dict[str, str] = {}
     for line in text.splitlines():
         if line.startswith("## "):
             break
         match = re.fullmatch(r"- ([A-Za-z][A-Za-z0-9 /-]*):\s*(.*?)\s*", line)
         if match:
-            metadata[match.group(1)] = match.group(2)
+            key = match.group(1)
+            if key in metadata and duplicate_errors is not None:
+                duplicate_errors.append(f"{label} duplicate constrained key: {key}")
+            metadata[key] = match.group(2)
     return metadata
+
+
+def is_proposed_next_gate(value: str) -> bool:
+    return bool(
+        re.fullmatch(
+            r"(?:design-review|review(?:[._:@/-].*)?|revision(?:[._:@/-].*)?|"
+            r"plan-revision(?:[._:@/-].*)?|activation-recording(?:[._:@/-].*)?)",
+            value,
+        )
+    )
 
 
 def resolve_inside(root: Path, base: Path, raw: str, label: str, errors: list[str]) -> Path | None:
@@ -164,7 +177,11 @@ def discover_plans(root: Path, errors: list[str]) -> list[Plan]:
             if path.name == "index.md":
                 continue
             text = read_text(path, "plans", errors)
-            metadata = parse_header_bullets(text)
+            metadata = parse_header_bullets(
+                text,
+                duplicate_errors=errors,
+                label=f"plan metadata: {path.relative_to(root)}",
+            )
             plan = Plan(path=path, directory_state=directory, metadata=metadata)
             plans.append(plan)
             missing = [key for key in PLAN_KEYS if key not in metadata]
@@ -256,6 +273,7 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
                 verdict,
                 target_revision,
                 errors,
+                expected_type="design",
                 allow_legacy=(plan.schema == "operating-modes-legacy-v1" or target_revision != plan.revision),
             )
         review_results.append((verdict, target_revision, raw_path, review_path, structured))
@@ -267,6 +285,12 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
             errors.append(f"plan state: {relative} Proposed plan must not have activation or current phase state")
         if disposition != "none" or implementation != "none":
             errors.append(f"plan state: {relative} Proposed plan must not have disposition or implementation review")
+        next_gate = meta.get("Next gate", "")
+        if not is_proposed_next_gate(next_gate):
+            errors.append(
+                f"plan state: {relative} Proposed Next gate={next_gate!r} must be a review, revision, "
+                "or activation-recording gate"
+            )
     elif plan.directory_state == "active":
         matching_approve = [item for item in review_results if item[0] == "approve" and item[1] == plan.revision]
         if not matching_approve:
@@ -314,11 +338,25 @@ def validate_review(
     target_revision: str,
     errors: list[str],
     *,
+    expected_type: str,
     allow_legacy: bool,
 ) -> bool:
     text = read_text(path, "review", errors)
-    metadata = {key: clean_value(value) for key, value in parse_header_bullets(text).items()}
     relative = path.relative_to(root)
+    metadata = {
+        key: clean_value(value)
+        for key, value in parse_header_bullets(
+            text,
+            duplicate_errors=errors,
+            label=f"review metadata: {relative}",
+        ).items()
+    }
+    expected_directory = (root / "docs" / "exec-plans" / "reviews" / plan.slug).resolve()
+    if path.parent.resolve() != expected_directory or path.suffix != ".md":
+        errors.append(
+            f"review path: {relative} must be a direct Markdown artifact under "
+            f"docs/exec-plans/reviews/{plan.slug}/"
+        )
     present = [key for key in REVIEW_KEYS if key in metadata]
     if not present:
         if not allow_legacy:
@@ -334,15 +372,24 @@ def validate_review(
             f"review revision: {relative} target={metadata['Review target revision']!r} "
             f"declared={target_revision!r}"
         )
-    target_name = Path(metadata["Review target"]).name
-    if target_name != plan.path.name:
-        errors.append(f"review target: {relative} targets {target_name!r}, expected {plan.path.name!r}")
+    target = metadata["Review target"]
+    expected_target = re.compile(
+        rf"docs/exec-plans/(?:proposed|active|completed)/{re.escape(plan.path.name)}"
+    )
+    if not expected_target.fullmatch(target):
+        errors.append(
+            f"review target: {relative} targets {target!r}; expected an exact canonical lifecycle path "
+            f"for {plan.path.name!r}"
+        )
     if metadata["Verdict"] != declared_verdict:
         errors.append(
             f"review verdict: {relative} Verdict={metadata['Verdict']!r} declared={declared_verdict!r}"
         )
-    if metadata["Review type"] not in {"design", "implementation", "closeout"}:
-        errors.append(f"review metadata: {relative} invalid Review type={metadata['Review type']!r}")
+    if metadata["Review type"] != expected_type:
+        errors.append(
+            f"review metadata: {relative} Review type={metadata['Review type']!r}; "
+            f"expected {expected_type!r} for this evidence"
+        )
     if metadata["Verdict"] not in {"approve", "revise", "reject", "accept"}:
         errors.append(f"review metadata: {relative} invalid Verdict={metadata['Verdict']!r}")
     if metadata["Confidence"] not in {"low", "medium", "high"}:
@@ -378,7 +425,16 @@ def validate_implementation_review(root: Path, plan: Plan, value: str, errors: l
         if not re.search(r"(?:Verdict|\*\*裁决\*\*)\s*:\s*accept\b", text, flags=re.IGNORECASE):
             errors.append(f"implementation review: {review_path.relative_to(root)} lacks accept evidence")
         return
-    validate_review(root, plan, review_path, "accept", plan.revision, errors, allow_legacy=False)
+    validate_review(
+        root,
+        plan,
+        review_path,
+        "accept",
+        plan.revision,
+        errors,
+        expected_type="implementation",
+        allow_legacy=False,
+    )
 
 
 def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[list[str], str, str]]:
@@ -396,51 +452,39 @@ def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[li
     return rows
 
 
-def check_indexes(root: Path, plans: list[Plan], errors: list[str]) -> None:
-    by_path = {plan.path.resolve(): plan for plan in plans}
-    for directory, expected_status in STATE_DIRECTORIES.items():
-        index = root / "docs" / "exec-plans" / directory / "index.md"
-        rows = parse_table_rows(index, root, errors)
-        actual_paths: list[Path] = []
-        for cells, target, _line in rows:
-            resolved = resolve_inside(root, index.parent, target, "state index", errors)
-            if resolved is None:
-                continue
-            actual_paths.append(resolved)
-            plan = by_path.get(resolved)
-            if plan is None:
-                errors.append(f"state index: {index.relative_to(root)} has ghost plan link: {target}")
-                continue
-            if directory == "proposed" and (len(cells) < 2 or clean_value(cells[1]) != "Proposed"):
-                errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} must use Proposed")
-            if directory == "active":
-                expected = f"{clean_value(plan.metadata.get('Current phase', ''))}:{clean_value(plan.metadata.get('Phase state', ''))}"
-                if len(cells) < 4 or clean_value(cells[1]) != expected:
-                    errors.append(
-                        f"state index: {index.relative_to(root)} row for {plan.slug} phase={clean_value(cells[1]) if len(cells) > 1 else ''!r}; "
-                        f"expected {expected!r}"
-                    )
-                if len(cells) >= 4 and clean_value(cells[3]) != clean_value(plan.metadata.get("Next gate", "")):
-                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} next gate mismatch")
-            if directory == "completed":
-                disposition = clean_value(plan.metadata.get("Final disposition", ""))
-                commit = clean_value(plan.metadata.get("Verified implementation commit", ""))
-                if len(cells) < 4 or clean_value(cells[1]) != disposition or clean_value(cells[3]) != commit:
-                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} disposition/commit mismatch")
-        expected_paths = {plan.path.resolve() for plan in plans if plan.directory_state == directory}
-        actual_set = set(actual_paths)
-        if len(actual_paths) != len(actual_set):
-            errors.append(f"state index: {index.relative_to(root)} contains duplicate plan rows")
-        missing = sorted(str(path.relative_to(root)) for path in expected_paths - actual_set)
-        ghost = sorted(str(path.relative_to(root)) for path in actual_set - expected_paths if path in by_path)
-        if missing:
-            errors.append(f"state index: {index.relative_to(root)} missing plan rows: {', '.join(missing)}")
-        if ghost:
-            errors.append(f"state index: {index.relative_to(root)} has wrong-state plan rows: {', '.join(ghost)}")
+def review_artifact_verdict(path: Path, root: Path, errors: list[str]) -> str:
+    relative = path.relative_to(root)
+    text = read_text(path, "reviews index", errors)
+    metadata = {
+        key: clean_value(value)
+        for key, value in parse_header_bullets(
+            text,
+            duplicate_errors=errors,
+            label=f"review metadata: {relative}",
+        ).items()
+    }
+    verdict = metadata.get("Verdict", "")
+    if not verdict:
+        match = re.search(
+            r"(?:Verdict|\*\*裁决\*\*)\s*:\s*(approve|revise|reject|accept)\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+        verdict = match.group(1).lower() if match else ""
+    if verdict not in {"approve", "revise", "reject", "accept"}:
+        errors.append(f"reviews index: {relative} lacks a valid verdict")
+    return verdict
 
+
+def check_reviews_index(
+    root: Path,
+    plans: list[Plan],
+    errors: list[str],
+) -> dict[str, tuple[Path, str]]:
     review_index = root / "docs" / "exec-plans" / "reviews" / "index.md"
     review_rows = parse_table_rows(review_index, root, errors)
     row_slugs: list[str] = []
+    latest_by_slug: dict[str, tuple[Path, str]] = {}
     plans_by_slug = {plan.slug: plan for plan in plans if plan.slug}
     for cells, target, _line in review_rows:
         resolved = resolve_inside(root, review_index.parent, target, "reviews index", errors)
@@ -452,13 +496,66 @@ def check_indexes(root: Path, plans: list[Plan], errors: list[str]) -> None:
         if plan is None:
             errors.append(f"reviews index: ghost review directory row: {target}")
             continue
+        expected_review_directory = (root / "docs" / "exec-plans" / "reviews" / slug).resolve()
+        if resolved != expected_review_directory:
+            errors.append(
+                f"reviews index: {slug} row must target its canonical review directory: "
+                f"docs/exec-plans/reviews/{slug}/"
+            )
         if not resolved.is_dir():
             errors.append(f"reviews index: review directory does not exist: {target}")
+            continue
         if len(cells) < 4 or clean_value(cells[3]) != plan.status:
             errors.append(
                 f"reviews index: {slug} lifecycle state={clean_value(cells[3]) if len(cells) > 3 else ''!r}; "
                 f"expected {plan.status!r}"
             )
+
+        listed: list[Path] = []
+        if len(cells) >= 2:
+            for match in LINK_RE.finditer(cells[1]):
+                artifact = resolve_inside(
+                    root,
+                    review_index.parent,
+                    match.group(2).strip().strip("<>"),
+                    "reviews index artifact",
+                    errors,
+                )
+                if artifact is not None:
+                    listed.append(artifact)
+        expected_directory = (root / "docs" / "exec-plans" / "reviews" / slug).resolve()
+        for artifact in listed:
+            if artifact.parent.resolve() != expected_directory or artifact.suffix != ".md":
+                errors.append(
+                    f"reviews index: {slug} artifact must be a direct Markdown file in its review directory: "
+                    f"{artifact.relative_to(root) if artifact.is_relative_to(root) else artifact}"
+                )
+            elif not artifact.is_file():
+                errors.append(f"reviews index: {slug} listed artifact does not exist: {artifact.relative_to(root)}")
+        if len(listed) != len(set(listed)):
+            errors.append(f"reviews index: {slug} contains duplicate review artifacts")
+        expected_artifacts = {path.resolve() for path in resolved.glob("*.md") if path.name != "index.md"}
+        listed_set = set(listed)
+        missing = sorted(str(path.relative_to(root)) for path in expected_artifacts - listed_set)
+        extra = sorted(
+            str(path.relative_to(root)) if path.is_relative_to(root) else str(path)
+            for path in listed_set - expected_artifacts
+        )
+        if missing or extra:
+            errors.append(
+                f"reviews index: {slug} artifact set mismatch; missing={missing} extra={extra}"
+            )
+        if listed:
+            latest_path = listed[-1]
+            latest_verdict = review_artifact_verdict(latest_path, root, errors) if latest_path.is_file() else ""
+            declared_latest = clean_value(cells[2]) if len(cells) > 2 else ""
+            if declared_latest != latest_verdict:
+                errors.append(
+                    f"reviews index: {slug} latest verdict={declared_latest!r}; "
+                    f"expected {latest_verdict!r} from {latest_path.name}"
+                )
+            latest_by_slug[slug] = (latest_path, latest_verdict)
+
     expected_review_slugs = {
         plan.slug
         for plan in plans
@@ -472,6 +569,108 @@ def check_indexes(root: Path, plans: list[Plan], errors: list[str]) -> None:
         errors.append(f"reviews index: missing plan rows: {', '.join(missing_reviews)}")
     if ghost_reviews:
         errors.append(f"reviews index: ghost plan rows: {', '.join(ghost_reviews)}")
+    return latest_by_slug
+
+
+def state_index_evidence(
+    root: Path,
+    index: Path,
+    cell: str,
+    label: str,
+    errors: list[str],
+) -> Path | None:
+    links = list(LINK_RE.finditer(cell))
+    if len(links) != 1:
+        errors.append(f"state index: {label} must contain exactly one evidence link")
+        return None
+    return resolve_inside(
+        root,
+        index.parent,
+        links[0].group(2).strip().strip("<>"),
+        "state index evidence",
+        errors,
+    )
+
+
+def check_indexes(root: Path, plans: list[Plan], errors: list[str]) -> None:
+    by_path = {plan.path.resolve(): plan for plan in plans}
+    latest_reviews = check_reviews_index(root, plans, errors)
+    for directory, expected_status in STATE_DIRECTORIES.items():
+        index = root / "docs" / "exec-plans" / directory / "index.md"
+        rows = parse_table_rows(index, root, errors)
+        actual_paths: list[Path] = []
+        for cells, target, _line in rows:
+            resolved = resolve_inside(root, index.parent, target, "state index", errors)
+            if resolved is None:
+                continue
+            actual_paths.append(resolved)
+            plan = by_path.get(resolved)
+            if plan is None:
+                errors.append(f"state index: {index.relative_to(root)} has ghost plan link: {target}")
+                continue
+            evidence = (
+                state_index_evidence(root, index, cells[2], plan.slug, errors)
+                if len(cells) >= 3
+                else None
+            )
+            if directory == "proposed":
+                if len(cells) < 4 or clean_value(cells[1]) != "Proposed":
+                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} must use Proposed")
+                if len(cells) >= 4 and clean_value(cells[3]) != clean_value(plan.metadata.get("Next gate", "")):
+                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} next gate mismatch")
+                reviews = parse_design_reviews(plan.metadata.get("Design reviews", ""), plan.path.relative_to(root), errors)
+                expected_evidence = (
+                    resolve_inside(root, plan.path.parent, reviews[-1][0], "state index evidence", errors)
+                    if reviews
+                    else None
+                )
+                if expected_evidence is not None and evidence != expected_evidence:
+                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} review evidence mismatch")
+                if reviews and not cells[2].strip().endswith(f": {reviews[-1][1]}"):
+                    errors.append(
+                        f"state index: {index.relative_to(root)} row for {plan.slug} review verdict mismatch"
+                    )
+            if directory == "active":
+                expected = f"{clean_value(plan.metadata.get('Current phase', ''))}:{clean_value(plan.metadata.get('Phase state', ''))}"
+                if len(cells) < 4 or clean_value(cells[1]) != expected:
+                    errors.append(
+                        f"state index: {index.relative_to(root)} row for {plan.slug} phase={clean_value(cells[1]) if len(cells) > 1 else ''!r}; "
+                        f"expected {expected!r}"
+                    )
+                if len(cells) >= 4 and clean_value(cells[3]) != clean_value(plan.metadata.get("Next gate", "")):
+                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} next gate mismatch")
+                latest = latest_reviews.get(plan.slug)
+                if latest is not None and evidence != latest[0]:
+                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} latest evidence mismatch")
+            if directory == "completed":
+                disposition = clean_value(plan.metadata.get("Final disposition", ""))
+                commit = clean_value(plan.metadata.get("Verified implementation commit", ""))
+                if len(cells) < 4 or clean_value(cells[1]) != disposition or clean_value(cells[3]) != commit:
+                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} disposition/commit mismatch")
+                implementation = clean_value(plan.metadata.get("Implementation review", ""))
+                expected_evidence = None
+                if implementation.endswith("@accept"):
+                    expected_evidence = resolve_inside(
+                        root,
+                        plan.path.parent,
+                        implementation[:-7],
+                        "state index evidence",
+                        errors,
+                    )
+                if expected_evidence is not None and evidence != expected_evidence:
+                    errors.append(
+                        f"state index: {index.relative_to(root)} row for {plan.slug} implementation evidence mismatch"
+                    )
+        expected_paths = {plan.path.resolve() for plan in plans if plan.directory_state == directory}
+        actual_set = set(actual_paths)
+        if len(actual_paths) != len(actual_set):
+            errors.append(f"state index: {index.relative_to(root)} contains duplicate plan rows")
+        missing = sorted(str(path.relative_to(root)) for path in expected_paths - actual_set)
+        ghost = sorted(str(path.relative_to(root)) for path in actual_set - expected_paths if path in by_path)
+        if missing:
+            errors.append(f"state index: {index.relative_to(root)} missing plan rows: {', '.join(missing)}")
+        if ghost:
+            errors.append(f"state index: {index.relative_to(root)} has wrong-state plan rows: {', '.join(ghost)}")
 
 
 def check_roadmap(root: Path, plans: list[Plan], errors: list[str]) -> None:
@@ -520,7 +719,14 @@ def extract_state_block(path: Path, root: Path, errors: list[str]) -> dict[str, 
         errors.append(f"state block: {path.relative_to(root)} must contain exactly one start/end marker pair")
         return {}
     body = text.split(start, 1)[1].split(end, 1)[0]
-    values = {key: clean_value(value) for key, value in parse_header_bullets(body).items()}
+    values = {
+        key: clean_value(value)
+        for key, value in parse_header_bullets(
+            body,
+            duplicate_errors=errors,
+            label=f"state block: {path.relative_to(root)}",
+        ).items()
+    }
     missing = [key for key in STATE_BLOCK_KEYS if key not in values]
     extra = sorted(set(values) - set(STATE_BLOCK_KEYS))
     if missing or extra:
@@ -605,13 +811,21 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
             errors.append(f"contract route: {relative} does not route/declare {token}")
     plan_template = root / "docs" / "exec-plans" / "plan-template.md"
     if plan_template.is_file():
-        metadata = parse_header_bullets(read_text(plan_template, "plan template", errors))
+        metadata = parse_header_bullets(
+            read_text(plan_template, "plan template", errors),
+            duplicate_errors=errors,
+            label="plan template",
+        )
         missing = [key for key in PLAN_KEYS if key not in metadata]
         if missing:
             errors.append(f"plan template: missing constrained keys: {', '.join(missing)}")
     review_template = root / "docs" / "exec-plans" / "reviews" / "review-template.md"
     if review_template.is_file():
-        metadata = parse_header_bullets(read_text(review_template, "review template", errors))
+        metadata = parse_header_bullets(
+            read_text(review_template, "review template", errors),
+            duplicate_errors=errors,
+            label="review template",
+        )
         missing = [key for key in REVIEW_KEYS if key not in metadata]
         if missing:
             errors.append(f"review template: missing constrained keys: {', '.join(missing)}")
@@ -645,91 +859,7 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
         if workflow_canonical in workflow and workflow_fixture in workflow:
             if workflow.index(workflow_canonical) > workflow.index(workflow_fixture):
                 errors.append("verification workflow: canonical harness command must precede fixture tests")
-    check_data_update_contract(root, errors)
     return files
-
-
-def require_text_tokens(
-    root: Path,
-    relative: str,
-    tokens: tuple[str, ...],
-    label: str,
-    errors: list[str],
-) -> None:
-    path = root / relative
-    if not path.is_file():
-        return
-    text = read_text(path, label, errors)
-    for token in tokens:
-        if token not in text:
-            errors.append(f"{label}: {relative} missing required contract text: {token}")
-
-
-def check_data_update_contract(root: Path, errors: list[str]) -> None:
-    require_text_tokens(
-        root,
-        "AGENTS.md",
-        (
-            "发布 SPY YYYY-MM-DD",
-            "拉一下 YYYY-MM-DD 的 SPY 然后更新页面",
-            "publish SPY review for YYYY-MM-DD",
-            "push 5/20 SPY",
-        ),
-        "data trigger",
-        errors,
-    )
-    require_text_tokens(
-        root,
-        "docs/operating-modes.md",
-        (
-            "requested -> date_resolved -> fetched -> quality_passed -> candidate_verified -> local_accepted -> publish_authorized -> committed -> published -> hosted_verified",
-            "### Local Update Gate",
-            "### Publish Gate",
-        ),
-        "data contract",
-        errors,
-    )
-    require_text_tokens(
-        root,
-        "docs/daily-publish-runbook.md",
-        (
-            "TV default, IB exception only",
-            "Do not preflight, open, or restart IB Gateway before the TV attempt.",
-            "Never mix TV and IB bars inside one market day.",
-            "PYTHONPATH=. python scripts/rebuild_live_extended_db.py",
-            "normal automation must never use it",
-        ),
-        "daily runbook",
-        errors,
-    )
-    import_line = "market_day_id = None if args.skip_import else import_market_json(output_path)"
-    for relative in (
-        "backend/scripts/fetch_tv_live_extended_day.py",
-        "backend/scripts/fetch_ib_live_extended_day.py",
-    ):
-        require_text_tokens(root, relative, (import_line,), "data adapter", errors)
-    require_text_tokens(
-        root,
-        "backend/scripts/rebuild_live_extended_db.py",
-        (
-            "Rebuild live_extended into a verified candidate and atomically promote it.",
-            '"--allow-date-loss"',
-        ),
-        "data rebuild",
-        errors,
-    )
-    require_text_tokens(
-        root,
-        ".github/workflows/publish-static-reviews.yml",
-        (
-            "branches:\n      - main",
-            "PYTHONPATH=. python scripts/export_static_reviews.py",
-            "npm run build:static-reviews",
-            "git push --force origin gh-pages",
-        ),
-        "pages publisher",
-        errors,
-    )
 
 
 def read_git_status(root: Path, errors: list[str]) -> list[str]:

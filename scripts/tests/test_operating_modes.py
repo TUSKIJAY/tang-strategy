@@ -577,9 +577,107 @@ None.
         self.replace("docs/exec-plans/reviews/demo-plan/review-001.md", "- Reviewer ID: `reviewer-1`", "- Reviewer ID: `author-1`")
         self.assert_error("Reviewer ID must differ")
 
+    def test_duplicate_plan_metadata_key_fails(self) -> None:
+        self.replace(
+            "docs/exec-plans/active/demo-plan.md",
+            "- Status: Active",
+            "- Status: Proposed\n- Status: Active",
+        )
+        self.assert_error("duplicate constrained key: Status")
+
+    def test_duplicate_review_verdict_key_fails(self) -> None:
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "- Verdict: approve",
+            "- Verdict: reject\n- Verdict: approve",
+        )
+        self.assert_error("duplicate constrained key: Verdict")
+
+    def test_duplicate_current_state_key_fails(self) -> None:
+        self.replace(
+            "PROGRESS.md",
+            "- Phase state: `complete`",
+            "- Phase state: `blocked`\n- Phase state: `complete`",
+        )
+        self.assert_error("duplicate constrained key: Phase state")
+
+    def test_duplicate_template_key_fails(self) -> None:
+        self.replace(
+            "docs/exec-plans/plan-template.md",
+            "- Status: none",
+            "- Status: Proposed\n- Status: none",
+        )
+        self.assert_error("plan template duplicate constrained key: Status")
+
+    def test_design_review_type_must_be_design(self) -> None:
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "- Review type: design",
+            "- Review type: implementation",
+        )
+        self.assert_error("expected 'design' for this evidence")
+
+    def test_implementation_review_type_must_be_implementation(self) -> None:
+        self.make_completed()
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/implementation-review-001.md",
+            "- Review type: implementation",
+            "- Review type: design",
+        )
+        self.assert_error("expected 'implementation' for this evidence")
+
+    def test_review_target_requires_exact_canonical_plan_path(self) -> None:
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "docs/exec-plans/proposed/demo-plan.md",
+            "unrelated/location/demo-plan.md",
+        )
+        self.assert_error("expected an exact canonical lifecycle path")
+
     def test_review_revision_must_match_declared_revision(self) -> None:
         self.replace("docs/exec-plans/reviews/demo-plan/review-001.md", "- Review target revision: `r1`", "- Review target revision: `r2`")
         self.assert_error("target='r2' declared='r1'")
+
+    def test_reviews_index_latest_verdict_must_match_last_artifact(self) -> None:
+        self.replace("docs/exec-plans/reviews/index.md", "| approve | Active |", "| reject | Active |")
+        self.assert_error("latest verdict='reject'; expected 'approve'")
+
+    def test_reviews_index_must_list_every_review_artifact(self) -> None:
+        write(self.root, "docs/exec-plans/reviews/demo-plan/review-002.md", "# Review 002\n\n**裁决**: revise\n")
+        self.assert_error("artifact set mismatch")
+
+    def test_active_index_evidence_must_match_latest_review_artifact(self) -> None:
+        write(
+            self.root,
+            "docs/exec-plans/reviews/demo-plan/review-002.md",
+            "# Review 002\n\n**裁决**: revise\n",
+        )
+        self.replace(
+            "docs/exec-plans/reviews/index.md",
+            "[review-001](./demo-plan/review-001.md) | approve",
+            "[review-001](./demo-plan/review-001.md), [review-002](./demo-plan/review-002.md) | revise",
+        )
+        self.assert_error("latest evidence mismatch")
+
+    def test_completed_index_evidence_must_match_implementation_review(self) -> None:
+        self.make_completed()
+        self.replace(
+            "docs/exec-plans/completed/index.md",
+            "../reviews/demo-plan/implementation-review-001.md",
+            "../reviews/demo-plan/review-001.md",
+        )
+        self.assert_error("implementation evidence mismatch")
+
+    def test_proposed_next_gate_rejects_publish_authority(self) -> None:
+        self.make_proposed()
+        for relative in (
+            "docs/exec-plans/proposed/demo-plan.md",
+            "docs/exec-plans/proposed/index.md",
+            "PROGRESS.md",
+            "HANDOFF.md",
+        ):
+            self.replace(relative, "activation-recording", "publish-now")
+        self.assert_error("must be a review, revision, or activation-recording gate")
 
     def test_matching_review_requires_all_reviewer_fields(self) -> None:
         self.replace(
@@ -615,33 +713,58 @@ None.
         )
         self.assert_error("verification workflow: missing required command")
 
-    def test_daily_trigger_contract_is_enforced(self) -> None:
+    def test_daily_trigger_prose_is_outside_lifecycle_checker(self) -> None:
         self.replace("AGENTS.md", "push 5/20 SPY", "removed trigger")
-        self.assert_error("data trigger: AGENTS.md missing required contract text: push 5/20 SPY")
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
 
-    def test_tv_first_runbook_contract_is_enforced(self) -> None:
+    def test_runbook_prose_is_outside_lifecycle_checker(self) -> None:
         self.replace(
             "docs/daily-publish-runbook.md",
             "Do not preflight, open, or restart IB Gateway before the TV attempt.",
             "Gateway first",
         )
-        self.assert_error("daily runbook: docs/daily-publish-runbook.md missing required contract text")
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
 
-    def test_pages_publisher_contract_is_enforced(self) -> None:
+    def test_pages_workflow_source_is_outside_lifecycle_checker(self) -> None:
         self.replace(
             ".github/workflows/publish-static-reviews.yml",
             "git push --force origin gh-pages",
             "echo no publish",
         )
-        self.assert_error("pages publisher: .github/workflows/publish-static-reviews.yml missing required contract text")
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
 
-    def test_default_fetch_import_contract_is_enforced(self) -> None:
+    def test_commented_adapter_token_does_not_create_lifecycle_evidence(self) -> None:
         self.replace(
             "backend/scripts/fetch_tv_live_extended_day.py",
             "market_day_id = None if args.skip_import else import_market_json(output_path)",
-            "market_day_id = None",
+            "# market_day_id = None if args.skip_import else import_market_json(output_path)\nmarket_day_id = None",
         )
-        self.assert_error("data adapter: backend/scripts/fetch_tv_live_extended_day.py missing required contract text")
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_equivalent_adapter_refactor_does_not_fail_lifecycle_checker(self) -> None:
+        self.replace(
+            "backend/scripts/fetch_tv_live_extended_day.py",
+            "market_day_id = None if args.skip_import else import_market_json(output_path)",
+            "if args.skip_import:\n    market_day_id = None\nelse:\n    market_day_id = import_market_json(output_path)",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_runtime_compatibility_files_are_not_required_lifecycle_formats(self) -> None:
+        for relative in (
+            ".github/workflows/publish-static-reviews.yml",
+            "docs/daily-publish-runbook.md",
+            "backend/scripts/fetch_tv_live_extended_day.py",
+            "backend/scripts/fetch_ib_live_extended_day.py",
+            "backend/scripts/rebuild_live_extended_db.py",
+        ):
+            (self.root / relative).unlink()
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
 
     def test_checker_is_read_only(self) -> None:
         before = {

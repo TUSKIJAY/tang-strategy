@@ -264,6 +264,8 @@ def check_operating_modes_contract(root: Path, errors: list[str]) -> dict[str, A
     nested_errors = payload.get("errors")
     if isinstance(nested_errors, list):
         errors.extend(f"operating modes: {item}" for item in nested_errors if isinstance(item, str))
+        if completed.returncode != 0 and not any(isinstance(item, str) for item in nested_errors):
+            errors.append(f"operating modes: checker failed with code {completed.returncode} without errors")
     elif completed.returncode != 0:
         errors.append(f"operating modes: checker failed with code {completed.returncode}")
     return payload

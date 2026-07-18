@@ -7,18 +7,18 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-remediation`
+- Next gate: `phase-6-re-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Startup Git evidence: this proposal began from `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` with a clean worktree/index; rerun the startup commands for live branch/HEAD/status truth
-- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-6:in-progress`; implementation review `implementation-review-001` returned `revise` with `high` confidence
+- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-6:in-progress`; `implementation-review-001` remediation is verified and renewed independent review is next
 - Active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
 - Design reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
-- Implementation boundary: Phase 5 is committed at `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`; remediation is limited to the recorded lifecycle-checker, review/index, and handoff findings before renewed independent review
+- Implementation boundary: Phase 5 is committed at `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`; bounded remediation passes 49 fixtures and full native/read-only verification; use live Git log to identify the latest scoped remediation boundary for renewed independent review
 - Local Git boundary: after a lifecycle transition or Phase exit passes verification and state reconciliation, create one conventional commit containing only that boundary's plan-scoped paths
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, or other remote change is authorized
 
@@ -28,7 +28,7 @@
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve any unrelated changes and read `docs/operating-modes.md` plus the active plan execution record.
 4. Phase 5 is complete and committed at `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`; do not recreate that boundary commit.
-5. Remediate `implementation-review-001`, rerun the full bounded verification set, and request a fresh independent review. Phase 6 requires a qualifying `accept` before completed disposition and lifecycle reconciliation.
+5. Identify the latest scoped remediation boundary from live Git, then request a fresh independent review against that stable commit. Phase 6 requires a qualifying `accept` before completed disposition and lifecycle reconciliation.
 6. At each verified lifecycle/Phase boundary, inspect the diff and use the plan's standing authority to stage only scoped paths and create one local conventional commit. Do not push, open a PR, publish, merge, or change remote settings without separate authority.
 
 ## Verification Evidence
@@ -50,6 +50,7 @@
 | Phase 4 harness/CI integration | pass: config/workflow canonical ordering, 29 fixtures, external roots/profiles, unchanged three job names, and unchanged Pages workflow |
 | Phase 5 compatibility closeout | pass: 35 fixtures; 19/19 pinned backend tests; compileall; frontend build; DB integrity/FK; exact trigger/runbook/adapter/rebuild/publisher text |
 | Current operating-modes implementation review | `revise`, confidence `high`; remediation required before re-review |
+| Phase 6 remediation | pass: 49 fixtures; constrained lifecycle false-pass closed; raw source/prose scanning removed; focused/composed/native/hash verification green |
 | 2026-07-18 recovery-plan implementation review | `accept`, confidence `high` |
 | Local page acceptance | pass: root command, `/tmp` SQLite backup, 46 days, integrity `ok`, frontend/OpenAPI HTTP 200, immediate same-port restart, occupied-port refusal, and repeated Ctrl-C cleanup |
 | Tracked DB protection | SHA-256 before/after `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8` |
@@ -68,7 +69,7 @@ Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-gov
 
 ## Next Gate
 
-Remediate only the `implementation-review-001` findings, rerun focused/composed/native verification, and request a fresh qualifying independent implementation review. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized.
+Use live Git to identify the verified scoped remediation boundary, then request a fresh qualifying independent implementation review against it. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized.
 
 ## Handoff Boundary
 

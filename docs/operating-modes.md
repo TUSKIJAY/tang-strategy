@@ -112,11 +112,11 @@ Every governed plan begins with one Markdown bullet per key using exact `- Key: 
 - Lifecycle reconciliation commit: none|`<40-hex-commit>`
 ```
 
-Additional human fields are allowed. Gate tokens must be non-empty and use only letters, digits, periods, underscores, colons, `@`, `/`, or hyphens.
+Additional human fields are allowed. Each constrained key appears exactly once; duplicates fail instead of using first- or last-write wins. Gate tokens must be non-empty and use only letters, digits, periods, underscores, colons, `@`, `/`, or hyphens.
 
 State invariants:
 
-- Proposed: `Status=Proposed`, no activation/current phase, and a review/revision/activation-recording next gate.
+- Proposed: `Status=Proposed`, no activation/current phase, and a next gate beginning with `design-review`, `review`, `revision`, `plan-revision`, or `activation-recording`.
 - Active: latest matching-revision design review is `approve`, independence is `attested`, activation is non-none, and phase/phase state/entry gate/next gate are non-none.
 - Completed: final disposition is non-none; an implemented plan references an `accept` implementation review. Commit values may be `none` only when no commit was authorized.
 - Historical bare review filenames are accepted only for explicitly migrated `operating-modes-legacy-v1` completed plans. New-schema plans use repository-relative review paths.
@@ -137,11 +137,11 @@ A qualifying review must be authored from a context that did not draft the revie
 - Confidence: low|medium|high
 ```
 
-The checker validates structure, target/revision, vocabulary, and unequal author/reviewer IDs. Human review validates identity, independence truth, evidence quality, user instructions, and publication authority.
+The checker validates unique keys, structure, target/revision, vocabulary, and unequal author/reviewer IDs. A review target is an exact repository-relative `docs/exec-plans/<proposed|active|completed>/<plan filename>` path, and the artifact is a direct Markdown file under `docs/exec-plans/reviews/<plan-slug>/`. A `Design reviews` entry requires `Review type: design`; `Implementation review` requires `Review type: implementation`. Human review validates identity, independence truth, evidence quality, user instructions, and publication authority.
 
 ### Fixed index rows
 
-Each plan link appears exactly once in its state index. The reviews index contains one row per plan with review artifacts and uses the matching lifecycle state.
+Each plan link appears exactly once in its state index. Proposed/Active evidence links resolve to the applicable latest review artifact; Completed verification resolves to the declared implementation review. The reviews index contains one row per plan, lists the exact direct Markdown artifact set once, derives its latest verdict from the final listed artifact, and uses the matching lifecycle state.
 
 ```text
 proposed:  | [Title](./plan.md) | Proposed | [review-N](../reviews/.../review-N.md): verdict | <next-gate-token> |
@@ -216,7 +216,7 @@ Stop Data Update Mode for missing/unrecoverable history, integrity/foreign-key f
 
 The focused checker is read-only and Python-stdlib-only; it may call installed `git` for dynamic truth. The governed harness composes it for an explicit `--root`; the minimal profile does not.
 
-Machine fixtures cover plan discovery/uniqueness, metadata/state invariants, exact index/roadmap sets, review structure and revision matching, current-state blocks, historical Git markers, required paths/routing, read-only behavior, external-root composition, and governed/minimal profile separation. Contract inspection covers routing, Data Update ordering, unchanged daily trigger/runbook/publisher boundaries, and migration text. Existing backend tests remain the carrier for actual calendar, TV quality, rebuild, non-shrink, DB, and assemble behavior. Human evidence remains required for identity, authority, command order, optional checks, bounded-maintenance classification, and anomaly return decisions. Real commit/push/Pages/hosted proof is deferred to a separately authorized daily run.
+Machine fixtures cover plan discovery/uniqueness, duplicate constrained keys, metadata/state invariants, Proposed gate categories, exact index/roadmap/review-artifact sets, review target/type/revision matching, current-state blocks, historical Git markers, required constrained paths/routing, read-only behavior, external-root composition, and governed/minimal profile separation. The focused checker does not infer behavior from unconstrained AGENTS prose, runbook text, Python source, or workflow YAML tokens. Unchanged daily trigger/runbook/adapter/rebuild/publisher compatibility for this implementation is carried by baseline-to-HEAD exact diff/hash evidence plus the named behavior tests and human inspection. Existing backend tests remain the carrier for actual calendar, TV quality, rebuild, non-shrink, DB, and assemble behavior. Human evidence remains required for identity, authority, command order, optional checks, bounded-maintenance classification, and anomaly return decisions. Real commit/push/Pages/hosted proof is deferred to a separately authorized daily run.
 
 No fixture or offline inspection may claim a real provider fetch, broker connection, tracked-DB update, push, Pages publication, or hosted verification passed.
 
@@ -243,7 +243,7 @@ This map binds the Data Update cases to current repository evidence without turn
 | Anomaly requires a system change | Coding Mode hard-routing contract plus human diagnosis evidence | Stop Data Update Mode and route the change; the data request grants no code authority. |
 | Routine update edits code, weakens a gate, uses date-loss override, or fabricates data | contract inspection plus human diff/command evidence | Stop; none is allowed as a completion shortcut. |
 | Routine existing-system update has no Exec Plan | peer-mode/routing contract inspection | Allowed when all existing gates work and no system change is needed. |
-| Daily triggers, runbook sequence, and Pages publisher remain compatible | exact text/path inspection of `AGENTS.md`, `docs/daily-publish-runbook.md`, and `.github/workflows/publish-static-reviews.yml` | Compatibility evidence only; it is not a hosted publish test. |
+| Daily triggers, runbook sequence, adapters/rebuild, and Pages publisher remain compatible | baseline-to-HEAD exact diff/hash inspection of `AGENTS.md`, `docs/daily-publish-runbook.md`, both fetch adapters, `rebuild_live_extended_db.py`, and `.github/workflows/publish-static-reviews.yml`; named behavior tests where available | Compatibility evidence only; the focused lifecycle checker does not parse these unconstrained sources and this is not a hosted publish test. |
 | Commit/push/Pages/hosted sequence succeeds | future authorized run | No offline fixture, implementation phase, or green local check can satisfy this row. |
 
 Current runtime gaps are explicit: the default adapters can mutate the tracked DB before rebuild acceptance; IB quality acceptance depends on runbook/human evidence; and a newly requested day's assemble receipt is collected during the real update rather than by this contract-only implementation. Any proposal to change those facts is separate Coding Mode work.
