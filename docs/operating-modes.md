@@ -90,7 +90,7 @@ The checker may interpret only the formats in this section. It must not infer li
 
 ### Plan metadata
 
-Every governed plan begins with one Markdown bullet per key using exact `- Key: value` syntax:
+Every governed plan begins with one operative Markdown bullet per key using exact `- Key: value` syntax. Bullets inside HTML comments, fenced code, or indented code do not count:
 
 ```text
 - Lifecycle schema: `operating-modes-v1`
@@ -124,7 +124,7 @@ State invariants:
 
 ### Independent review metadata
 
-A qualifying review must be authored from a context that did not draft the reviewed revision, independently inspect repository evidence, and contain:
+A qualifying review must be authored from a context that did not draft the reviewed revision, independently inspect repository evidence, and contain the following operative Markdown bullets outside comments or code carriers:
 
 ```text
 - Review target: `<plan-path>`
@@ -142,7 +142,7 @@ The checker validates unique keys, structure, target/revision, vocabulary, and u
 
 ### Fixed index rows
 
-Each index contains exactly one canonical four-cell header followed immediately by exactly one `| --- | --- | --- | --- |` separator. The headers are `Plan | Status | Review | Next gate`, `Plan | Current phase | Evidence | Next gate`, `Plan | Disposition | Verification | Final commit`, and `Plan | Reviews | Latest verdict | Lifecycle state` for Proposed, Active, Completed, and Reviews respectively. Every header, separator, data row, and sentinel begins and ends with `|`; a missing terminal delimiter fails. Reserved words such as `Plan` or `Decision` cannot introduce another skipped row.
+Each index contains exactly one operative canonical four-cell header followed immediately by exactly one `| --- | --- | --- | --- |` separator. Tables inside HTML comments, fenced code, or indented code do not count. The headers are `Plan | Status | Review | Next gate`, `Plan | Current phase | Evidence | Next gate`, `Plan | Disposition | Verification | Final commit`, and `Plan | Reviews | Latest verdict | Lifecycle state` for Proposed, Active, Completed, and Reviews respectively. Every header, separator, data row, and sentinel begins and ends with `|`; a missing terminal delimiter fails. Reserved words such as `Plan` or `Decision` cannot introduce another skipped row.
 
 Each fixed data row has exactly four cells, and its Plan cell is exactly one canonical Markdown link with no appended text or second link. Each plan link appears exactly once in its state index. A Proposed plan with design reviews links the latest one and otherwise uses exact `none`; Active evidence always resolves to the latest review artifact; Completed verification resolves to the declared implementation review and otherwise uses exact `none`. Evidence-free rows reject links. The reviews index contains one row per plan, lists the exact direct Markdown artifact set once, derives its latest verdict from the final listed artifact, and uses the matching lifecycle state. When the artifact set is empty, the row links the canonical plan instead of a non-durable empty review directory and uses exact `none` for both Reviews and Latest verdict.
 
@@ -222,7 +222,11 @@ Stop Data Update Mode for missing/unrecoverable history, integrity/foreign-key f
 
 The focused checker is read-only and Python-stdlib-only; it may call installed `git` for dynamic truth. The governed harness composes it for an explicit `--root`; the minimal profile does not.
 
-Machine fixtures cover plan discovery/uniqueness, duplicate constrained keys, metadata/state invariants, Proposed gate categories, exact index/roadmap/review-artifact sets, review target/type/revision matching, bounded current-state blocks, historical Git markers, required constrained paths/routing, executable verification carriers, read-only behavior, external-root composition, and governed/minimal profile separation. Required repository routes are non-comment, non-fenced canonical Markdown links resolving to this contract. Required project-harness commands are extracted only from actual `steps` list `run` values; supported inline and block forms preserve command order, while YAML comments do not count. The focused checker does not infer business behavior from unconstrained AGENTS prose, runbook text, Python source, or unrelated workflow text. Unchanged daily trigger/runbook/adapter/rebuild/publisher compatibility for this implementation is carried by baseline-to-HEAD exact diff/hash evidence plus the named behavior tests and human inspection. Existing backend tests remain the carrier for actual calendar, TV quality, rebuild, non-shrink, DB, and assemble behavior. Human evidence remains required for identity, authority, command order beyond the constrained workflow carrier, optional checks, bounded-maintenance classification, and anomaly return decisions. Real commit/push/Pages/hosted proof is deferred to a separately authorized daily run.
+Machine fixtures cover plan discovery/uniqueness, duplicate constrained keys, metadata/state invariants, Proposed gate categories, exact index/roadmap/review-artifact sets, review target/type/revision matching, bounded current-state blocks, historical Git markers, required constrained paths/routing, executable verification carriers, read-only behavior, external-root composition, and governed/minimal profile separation. Constrained plan/review/template bullets and index tables are parsed only from operative Markdown outside HTML comments, fenced code, and indented code. Current-state and historical-evidence comment markers use their dedicated bounded parsers.
+
+Required repository routes are canonical Markdown links resolving to this contract outside HTML comments, fenced or indented code, and any inline-code span that contains the complete pseudo-link. Inline code inside a real link label remains legal. Required project-harness commands are accepted only as direct `run` values under top-level `jobs.<job>.steps[]`; a job or required step with any `if` condition is not an unconditional carrier. An inline/quoted scalar must equal the required command. A literal or folded block counts only when its normalized non-comment content is exactly one direct command. Non-job `steps`, multi-line shell flow, dead branches, heredoc bodies, early exits, YAML comments, and nested keys do not count. The two required commands retain declared order.
+
+The focused checker does not infer business behavior from unconstrained AGENTS prose, runbook text, Python source, or unrelated workflow text. Unchanged daily trigger/runbook/adapter/rebuild/publisher compatibility for this implementation is carried by baseline-to-HEAD exact diff/hash evidence plus the named behavior tests and human inspection. Existing backend tests remain the carrier for actual calendar, TV quality, rebuild, non-shrink, DB, and assemble behavior. Human evidence remains required for identity, authority, command order beyond the constrained workflow carrier, optional checks, bounded-maintenance classification, and anomaly return decisions. Real commit/push/Pages/hosted proof is deferred to a separately authorized daily run.
 
 No fixture or offline inspection may claim a real provider fetch, broker connection, tracked-DB update, push, Pages publication, or hosted verification passed.
 

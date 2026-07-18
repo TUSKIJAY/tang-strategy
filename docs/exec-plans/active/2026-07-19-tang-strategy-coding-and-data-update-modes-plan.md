@@ -15,7 +15,7 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-remediation-r6
+- Next gate: phase-6-re-review-r7
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -727,3 +727,6 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Re-review-r6 gate: commit this scoped remediation boundary, then request another fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
 - Re-review-r6 boundary: `implementation-review-006.md`, authored by `independent-implementation-reviewer-2026-07-19-r6`, returned `revise` with `high` confidence against stable commit `cc00bc40075b560a091b5ce30f2c60ba426b3a7e`. It confirmed all implementation-review-005 findings and prior key regressions closed, then found three categories: commands in non-job, `if:false`, dead-shell, and heredoc contexts can satisfy workflow carriers; lifecycle tables and constrained metadata inside HTML comments/fenced code can pass; and router pseudo-links inside inline/indented code can pass.
 - Remediation-r6 gate: record this review separately, constrain workflow carriers to direct runnable job steps, exclude non-operative Markdown contexts from lifecycle/router evidence, add the recorded negative fixtures, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
+- Remediation-r6 result: workflow enforcement is limited to direct, unconditional `jobs.<job>.steps[].run` values. Inline/quoted scalars must exactly equal the command; literal/folded blocks must normalize to exactly one non-comment command, so non-job steps, any job/step `if`, dead branches, heredocs, early exits, nested keys, and multi-line shell flow do not count. A shared Markdown preprocessor removes closed/unclosed HTML comments, fenced code, and indented code before constrained plan/review/template bullets and index tables are parsed. Router matching additionally rejects pseudo-links wholly contained in inline code while preserving real links with code-formatted labels.
+- Remediation-r6 verification: 96 temporary-Git fixtures pass, including all implementation-review-006 reproductions, four comment-wrapped indexes, fenced/indented tables, commented plan/review/template metadata, unclosed comments, inline/indented router code, non-job and conditioned workflow carriers, dead-shell/heredoc/early-exit blocks, plus quoted-inline and single-command literal/folded positives. Focused/governed/auto checks, startup budget, launcher/checker syntax, frontend production build (1746 modules to deleted temporary output), DB integrity/FK, runtime zero-diff, frozen hashes, and whitespace pass. The earlier pinned 19/19 backend evidence remains applicable because no runtime file changed.
+- Re-review-r7 gate: commit this scoped remediation boundary, then request another fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.

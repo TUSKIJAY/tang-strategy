@@ -134,41 +134,111 @@ def read_text(path: Path, label: str, errors: list[str]) -> str:
         return ""
 
 
-def strip_markdown_comments_and_fences(text: str) -> str:
-    """Remove carriers that cannot be an operative Markdown route."""
-    without_comments = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+def inline_code_span_ranges(text: str) -> list[tuple[int, int]]:
+    ranges: list[tuple[int, int]] = []
+    offset = 0
+    for line in text.splitlines(keepends=True):
+        cursor = 0
+        while cursor < len(line):
+            if line[cursor] != "`":
+                cursor += 1
+                continue
+            end_of_opener = cursor
+            while end_of_opener < len(line) and line[end_of_opener] == "`":
+                end_of_opener += 1
+            delimiter = line[cursor:end_of_opener]
+            closing = line.find(delimiter, end_of_opener)
+            if closing == -1:
+                cursor = end_of_opener
+                continue
+            ranges.append((offset + cursor, offset + closing + len(delimiter)))
+            cursor = closing + len(delimiter)
+        offset += len(line)
+    return ranges
+
+
+def operative_markdown_text(text: str) -> str:
+    """Mask comments and code carriers while preserving source line positions."""
+
+    def mask_comment(match: re.Match[str]) -> str:
+        return "\n" * match.group(0).count("\n")
+
+    without_comments = re.sub(r"<!--.*?(?:-->|$)", mask_comment, text, flags=re.DOTALL)
     kept: list[str] = []
-    fence: str | None = None
+    fence_character: str | None = None
+    fence_length = 0
     for line in without_comments.splitlines():
-        marker = re.match(r"^\s*(`{3,}|~{3,})", line)
-        if marker:
-            token = marker.group(1)
-            if fence is None:
-                fence = token[0]
-            elif token[0] == fence:
-                fence = None
+        if fence_character is not None:
+            kept.append("")
+            closing = re.fullmatch(
+                rf" {{0,3}}{re.escape(fence_character)}{{{fence_length},}}\s*",
+                line,
+            )
+            if closing:
+                fence_character = None
+                fence_length = 0
             continue
-        if fence is None:
-            kept.append(line)
+        opening = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        if opening:
+            marker = opening.group(1)
+            fence_character = marker[0]
+            fence_length = len(marker)
+            kept.append("")
+            continue
+        if line.startswith("    ") or line.startswith("\t"):
+            kept.append("")
+            continue
+        kept.append(line)
     return "\n".join(kept)
 
 
 def has_canonical_markdown_route(path: Path, target: Path, errors: list[str]) -> bool:
-    text = strip_markdown_comments_and_fences(read_text(path, "contract route", errors))
+    text = operative_markdown_text(read_text(path, "contract route", errors))
+    code_ranges = inline_code_span_ranges(text)
     for match in LINK_RE.finditer(text):
+        if any(start <= match.start() and end >= match.end() for start, end in code_ranges):
+            continue
         raw_target = match.group(2).strip().strip("<>")
         if (path.parent / raw_target).resolve() == target.resolve():
             return True
     return False
 
 
+def normalized_run_command(lines: list[str], index: int, indent: int, value: str) -> tuple[str, int]:
+    if value in {"|", "|-", "|+", ">", ">-", ">+"}:
+        executable_lines: list[str] = []
+        cursor = index + 1
+        while cursor < len(lines):
+            block_line = lines[cursor]
+            block_stripped = block_line.lstrip()
+            block_indent = len(block_line) - len(block_stripped)
+            if block_stripped and block_indent <= indent:
+                break
+            if block_stripped and not block_stripped.startswith("#"):
+                executable_lines.append(block_stripped)
+            cursor += 1
+        command = executable_lines[0] if len(executable_lines) == 1 else ""
+        return command, cursor
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        value = value[1:-1]
+    return (value if value and not value.startswith("#") else ""), index + 1
+
+
 def workflow_step_commands(text: str) -> list[str]:
-    """Extract executable command lines only from run values in YAML steps lists."""
+    """Extract direct, unconditional run values from top-level jobs.<job>.steps."""
     lines = text.splitlines()
-    commands: list[str] = []
+    candidates: list[tuple[int, int, str]] = []
+    conditional_jobs: set[int] = set()
+    conditional_steps: set[tuple[int, int]] = set()
+    jobs_active = False
+    jobs_indent = 0
+    job_indent: int | None = None
+    job_field_indent: int | None = None
+    job_id = 0
     steps_indent: int | None = None
     step_indent: int | None = None
     step_field_indent: int | None = None
+    step_id = 0
     index = 0
     while index < len(lines):
         line = lines[index]
@@ -177,59 +247,108 @@ def workflow_step_commands(text: str) -> list[str]:
         if not stripped or stripped.startswith("#"):
             index += 1
             continue
-        if steps_indent is not None and indent <= steps_indent:
+        if indent == 0 and re.fullmatch(r"jobs:\s*", stripped):
+            jobs_active = True
+            jobs_indent = indent
+            job_indent = None
+            job_field_indent = None
             steps_indent = None
             step_indent = None
             step_field_indent = None
-        if re.fullmatch(r"steps:\s*", stripped):
-            steps_indent = indent
+            index += 1
+            continue
+        if not jobs_active:
+            index += 1
+            continue
+        if indent <= jobs_indent:
+            jobs_active = False
+            job_indent = None
+            job_field_indent = None
+            steps_indent = None
             step_indent = None
             step_field_indent = None
+            continue
+
+        job_header = re.fullmatch(r"[A-Za-z0-9_-]+:\s*", stripped)
+        if job_header and (job_indent is None or indent <= job_indent):
+            job_indent = indent
+            job_field_indent = None
+            job_id += 1
+            steps_indent = None
+            step_indent = None
+            step_field_indent = None
+            step_id = 0
             index += 1
             continue
-        if steps_indent is None:
+        if job_indent is None or indent <= job_indent:
             index += 1
             continue
-        if indent > steps_indent and stripped.startswith("- "):
-            if step_indent is None or indent <= step_indent:
-                step_indent = indent
+        if job_field_indent is None:
+            job_field_indent = indent
+        if indent == job_field_indent:
+            if re.fullmatch(r"if:\s*.+", stripped):
+                conditional_jobs.add(job_id)
+            if re.fullmatch(r"steps:\s*", stripped):
+                steps_indent = indent
+                step_indent = None
                 step_field_indent = None
-        elif step_indent is not None and indent > step_indent and step_field_indent is None:
+                index += 1
+                continue
+            if steps_indent is not None:
+                steps_indent = None
+                step_indent = None
+                step_field_indent = None
+        if steps_indent is None or indent <= steps_indent:
+            index += 1
+            continue
+
+        direct_step = stripped.startswith("- ") and (
+            step_indent is None or indent <= step_indent
+        )
+        if direct_step:
+            step_indent = indent
+            step_field_indent = None
+            step_id += 1
+            step_value = stripped[2:].lstrip()
+            if re.fullmatch(r"if:\s*.+", step_value):
+                conditional_steps.add((job_id, step_id))
+            run_match = re.fullmatch(r"run:\s*(.*?)\s*", step_value)
+            if run_match:
+                command, index = normalized_run_command(
+                    lines,
+                    index,
+                    indent,
+                    run_match.group(1),
+                )
+                if command:
+                    candidates.append((job_id, step_id, command))
+                continue
+            index += 1
+            continue
+
+        if step_indent is not None and indent > step_indent and step_field_indent is None:
             step_field_indent = indent
-        run_match = re.fullmatch(r"(-\s+)?run:\s*(.*?)\s*", stripped)
-        if run_match and step_indent is not None:
-            is_inline_step = run_match.group(1) is not None and indent == step_indent
-            is_step_field = (
-                run_match.group(1) is None
-                and step_field_indent is not None
-                and indent == step_field_indent
-            )
-            if is_inline_step or is_step_field:
-                value = run_match.group(2)
-                if value in {"|", "|-", "|+", ">", ">-", ">+"}:
-                    block_indent = indent
-                    block_lines: list[str] = []
-                    cursor = index + 1
-                    while cursor < len(lines):
-                        block_line = lines[cursor]
-                        block_stripped = block_line.lstrip()
-                        block_line_indent = len(block_line) - len(block_stripped)
-                        if block_stripped and block_line_indent <= block_indent:
-                            break
-                        if block_stripped and not block_stripped.startswith("#"):
-                            block_lines.append(block_stripped)
-                        cursor += 1
-                    commands.extend(block_lines)
-                    if value.startswith(">") and block_lines:
-                        commands.append(" ".join(block_lines))
-                    index = cursor
-                    continue
-                if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
-                    value = value[1:-1]
-                if value and not value.startswith("#"):
-                    commands.append(value)
+        if step_indent is not None and indent == step_field_indent:
+            if re.fullmatch(r"if:\s*.+", stripped):
+                conditional_steps.add((job_id, step_id))
+            run_match = re.fullmatch(r"run:\s*(.*?)\s*", stripped)
+            if run_match:
+                command, index = normalized_run_command(
+                    lines,
+                    index,
+                    indent,
+                    run_match.group(1),
+                )
+                if command:
+                    candidates.append((job_id, step_id, command))
+                continue
         index += 1
-    return commands
+    return [
+        command
+        for candidate_job, candidate_step, command in candidates
+        if candidate_job not in conditional_jobs
+        and (candidate_job, candidate_step) not in conditional_steps
+    ]
 
 
 def parse_header_bullets(
@@ -239,7 +358,7 @@ def parse_header_bullets(
     label: str = "metadata",
 ) -> dict[str, str]:
     metadata: dict[str, str] = {}
-    for line in text.splitlines():
+    for line in operative_markdown_text(text).splitlines():
         if line.startswith("## "):
             break
         match = re.fullmatch(r"- ([A-Za-z][A-Za-z0-9 /-]*):\s*(.*?)\s*", line)
@@ -568,7 +687,7 @@ def validate_implementation_review(root: Path, plan: Plan, value: str, errors: l
 
 
 def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[list[str], str, str]]:
-    text = read_text(path, "index", errors)
+    text = operative_markdown_text(read_text(path, "index", errors))
     rows: list[tuple[list[str], str, str]] = []
     sentinel_count = 0
     state_sentinel = ["None", "—", "—", "none"]
@@ -583,15 +702,15 @@ def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[li
     header_lines: list[int] = []
     separator_lines: list[int] = []
     for line_number, line in enumerate(text.splitlines(), 1):
-        raw = line.strip()
-        if not raw.startswith("|"):
+        if not line.startswith("|"):
             continue
-        if not raw.endswith("|"):
+        if not line.endswith("|"):
             errors.append(
                 f"index: {path.relative_to(root)} table row requires a terminal delimiter: {line}"
             )
             table_roles.append("invalid")
             continue
+        raw = line
         body = raw[1:-1]
         cells = [cell.strip() for cell in body.split("|")]
         if cells == expected_header:
@@ -1055,9 +1174,7 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
             )
     contract_path = root / "docs" / "operating-modes.md"
     if contract_path.is_file():
-        contract_text = strip_markdown_comments_and_fences(
-            read_text(contract_path, "contract route", errors)
-        )
+        contract_text = operative_markdown_text(read_text(contract_path, "contract route", errors))
         if "operating-modes-v1" not in contract_text:
             errors.append(
                 "contract route: docs/operating-modes.md does not declare operating-modes-v1 "

@@ -804,6 +804,38 @@ None.
         )
         self.assert_error("canonical header must be followed immediately by separator")
 
+    def test_index_tables_inside_html_comments_do_not_count(self) -> None:
+        for relative in (
+            "docs/exec-plans/proposed/index.md",
+            "docs/exec-plans/active/index.md",
+            "docs/exec-plans/completed/index.md",
+            "docs/exec-plans/reviews/index.md",
+        ):
+            with self.subTest(index=relative):
+                path = self.root / relative
+                original = path.read_text(encoding="utf-8")
+                header = original.index("| Plan |")
+                commented = original[:header] + "<!--\n" + original[header:].rstrip() + "\n-->\n"
+                path.write_text(commented, encoding="utf-8")
+                self.assert_error("must contain exactly one canonical header")
+                path.write_text(original, encoding="utf-8")
+
+    def test_index_table_inside_fenced_code_does_not_count(self) -> None:
+        path = self.root / "docs/exec-plans/active/index.md"
+        original = path.read_text(encoding="utf-8")
+        header = original.index("| Plan |")
+        fenced = original[:header] + "```text\n" + original[header:].rstrip() + "\n```\n"
+        path.write_text(fenced, encoding="utf-8")
+        self.assert_error("must contain exactly one canonical header")
+
+    def test_indented_code_table_does_not_count(self) -> None:
+        path = self.root / "docs/exec-plans/active/index.md"
+        original = path.read_text(encoding="utf-8")
+        lines = original.splitlines()
+        coded = "\n".join(f"    {line}" if line.startswith("|") else line for line in lines) + "\n"
+        path.write_text(coded, encoding="utf-8")
+        self.assert_error("must contain exactly one canonical header")
+
     def test_index_rows_require_terminal_delimiter(self) -> None:
         cases = (
             (
@@ -912,6 +944,11 @@ None.
         )
         self.assert_error("duplicate constrained key: Status")
 
+    def test_plan_metadata_inside_html_comment_does_not_count(self) -> None:
+        self.replace("docs/exec-plans/active/demo-plan.md", "# Demo Plan\n\n", "# Demo Plan\n\n<!--\n")
+        self.replace("docs/exec-plans/active/demo-plan.md", "\n## Scope", "\n-->\n\n## Scope")
+        self.assert_error("missing required keys")
+
     def test_duplicate_review_verdict_key_fails(self) -> None:
         self.replace(
             "docs/exec-plans/reviews/demo-plan/review-001.md",
@@ -919,6 +956,24 @@ None.
             "- Verdict: reject\n- Verdict: approve",
         )
         self.assert_error("duplicate constrained key: Verdict")
+
+    def test_review_metadata_inside_html_comment_does_not_count(self) -> None:
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "# Review 001\n\n",
+            "# Review 001\n\n<!--\n",
+        )
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "\n## Findings",
+            "\n-->\n\n## Findings",
+        )
+        self.assert_error("lacks constrained reviewer fields")
+
+    def test_template_metadata_inside_html_comment_does_not_count(self) -> None:
+        self.replace("docs/exec-plans/plan-template.md", "# Plan\n\n", "# Plan\n\n<!--\n")
+        self.replace("docs/exec-plans/plan-template.md", "\n\n## Body", "\n-->\n\n## Body")
+        self.assert_error("plan template: missing constrained keys")
 
     def test_duplicate_current_state_key_fails(self) -> None:
         self.replace(
@@ -1081,6 +1136,30 @@ None.
         )
         self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
 
+    def test_router_unclosed_comment_token_does_not_count(self) -> None:
+        write(
+            self.root,
+            "AGENTS.md",
+            "# Agents\n\n<!-- [dead route](./docs/operating-modes.md)\n",
+        )
+        self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
+
+    def test_router_inline_code_pseudo_link_does_not_count(self) -> None:
+        write(
+            self.root,
+            "AGENTS.md",
+            "# Agents\n\n`[dead route](./docs/operating-modes.md)`\n",
+        )
+        self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
+
+    def test_router_indented_code_pseudo_link_does_not_count(self) -> None:
+        write(
+            self.root,
+            "AGENTS.md",
+            "# Agents\n\n    [dead route](./docs/operating-modes.md)\n",
+        )
+        self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
+
     def test_config_requires_fixture_command(self) -> None:
         path = self.root / ".harness/config.json"
         config = json.loads(path.read_text(encoding="utf-8"))
@@ -1128,6 +1207,32 @@ None.
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])
 
+    def test_workflow_quoted_inline_run_values_are_supported(self) -> None:
+        for command in (
+            "python3 scripts/check-project-harness.py --root . --profile governed",
+            "python3 -m unittest scripts.tests.test_operating_modes",
+        ):
+            self.replace(
+                ".github/workflows/project-harness.yml",
+                f"      - run: {command}",
+                f"      - run: '{command}'",
+            )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_workflow_folded_single_command_run_values_are_supported(self) -> None:
+        for command in (
+            "python3 scripts/check-project-harness.py --root . --profile governed",
+            "python3 -m unittest scripts.tests.test_operating_modes",
+        ):
+            self.replace(
+                ".github/workflows/project-harness.yml",
+                f"      - run: {command}",
+                f"      - run: >\n          {command}",
+            )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
     def test_nested_workflow_run_key_is_not_a_step_command(self) -> None:
         command = "python3 -m unittest scripts.tests.test_operating_modes"
         self.replace(
@@ -1136,6 +1241,64 @@ None.
             "      - name: Dead nested value\n"
             "        with:\n"
             f"          run: {command}",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_non_job_steps_do_not_count_as_workflow_commands(self) -> None:
+        workflow = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
+        workflow = workflow.replace("jobs:", "x-dead:", 1)
+        write(self.root, ".github/workflows/project-harness.yml", workflow)
+        self.assert_error("verification workflow: missing required command")
+
+    def test_conditional_workflow_step_does_not_count(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            f"      - if: false\n        run: {command}",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_conditional_workflow_job_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "  harness:\n    name:",
+            "  harness:\n    if: true\n    name:",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_dead_shell_branch_does_not_count_as_workflow_command(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            "      - run: |\n"
+            "          if false; then\n"
+            f"            {command}\n"
+            "          fi",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_heredoc_body_does_not_count_as_workflow_command(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            "      - run: |\n"
+            "          cat <<'EOF'\n"
+            f"          {command}\n"
+            "          EOF",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_command_after_early_exit_does_not_count(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            "      - run: |\n"
+            "          exit 0\n"
+            f"          {command}",
         )
         self.assert_error("verification workflow: missing required command")
 
