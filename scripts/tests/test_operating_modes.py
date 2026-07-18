@@ -1413,6 +1413,28 @@ None.
         )
         self.assert_error("missing required pull_request trigger for main")
 
+    def test_raw_yaml_forbidden_double_quoted_characters_do_not_count(self) -> None:
+        original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
+        for codepoint in (0x7F, 0x80, 0x84, 0x85, 0x86, 0x9F):
+            with self.subTest(codepoint=f"U+{codepoint:04X}"):
+                member = f'x{chr(codepoint)}y'
+                workflow = original.replace(
+                    "    branches:\n      - main",
+                    f'    branches: [main, "{member}"]',
+                )
+                write(self.root, ".github/workflows/project-harness.yml", workflow)
+                self.assert_error("missing required pull_request trigger for main")
+        write(self.root, ".github/workflows/project-harness.yml", original)
+
+    def test_escaped_del_double_quoted_branch_string_is_supported(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "    branches:\n      - main",
+            '    branches: [main, "x\\x7Fy"]',
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
     def test_quoted_terminal_colon_branch_strings_are_supported(self) -> None:
         original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
         variants = (

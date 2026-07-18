@@ -294,6 +294,17 @@ def clean_yaml_scalar(value: str) -> str:
     return cleaned
 
 
+def yaml_single_line_source_character_allowed(character: str) -> bool:
+    codepoint = ord(character)
+    return (
+        character == "\t"
+        or 0x20 <= codepoint <= 0x7E
+        or 0xA0 <= codepoint <= 0xD7FF
+        or 0xE000 <= codepoint <= 0xFFFD
+        or 0x10000 <= codepoint <= 0x10FFFF
+    )
+
+
 def decode_yaml_double_quoted(value: str) -> str | None:
     """Decode the declared single-line YAML double-quoted scalar subset."""
 
@@ -323,7 +334,7 @@ def decode_yaml_double_quoted(value: str) -> str | None:
     end = len(value) - 1
     while index < end:
         character = value[index]
-        if character == '"' or (ord(character) < 0x20 and character != "\t"):
+        if character == '"' or not yaml_single_line_source_character_allowed(character):
             return None
         if character != "\\":
             decoded.append(character)
