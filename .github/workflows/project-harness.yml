@@ -29,6 +29,9 @@ jobs:
       - name: Validate project harness
         run: python scripts/check-project-harness.py --root . --profile governed
 
+      - name: Check local acceptance launcher syntax
+        run: bash -n scripts/start-local-acceptance.sh
+
       - name: Enforce startup document budgets
         run: python scripts/check-startup-doc-budget.py
 

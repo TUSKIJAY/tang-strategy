@@ -2,7 +2,7 @@
 
 ## Current Status
 
-2026-07-18: governed harness、三日数据恢复、rebuild fail-closed、文档真理化、授权旧输出清理、全量验证与独立实施验收均已在本地完成。最终独立 verdict 为 `accept` (`high` confidence)。tracked DB 为 46 天, 原 43 天与 strategies/teaching hashes 不变。plan 已移动到 completed。工作树保持未 stage/未 commit; 未 push、publish、merge、创建 PR 或修改任何远端设置。
+2026-07-19: 本地验收报告返工已完成。启动器允许 TIME_WAIT 后立即重用端口，同时仍拒绝真实监听者；cleanup 会在关闭自身进程组和删除临时目录期间忽略后续信号。相同端口连续启动、连续 Ctrl-C、HTTP 200、46 天临时 DB、`integrity_check=ok` 及 tracked DB SHA-256 不变均已实测。completed/reviews 索引已回写 `a70be643...`，CI harness job 已接入 `bash -n`。本地 diff 未 stage/未 commit；未 fetch、rebuild、push、publish、创建 PR 或修改远端设置。
 
 ## Navigation
 
@@ -40,6 +40,9 @@
 - [x] 2026-07-18 - Passed frontend production build and real-browser Review/Backtest regression for SPY 2026-07-17 using a temporary SQLite backup of the 46-day DB.
 - [x] 2026-07-18 - Passed governed checker, structural validator (`100/100`), startup-document budget, lifecycle links, database integrity/foreign keys, and whitespace checks.
 - [x] 2026-07-18 - Independent implementation review returned `accept` with `high` confidence; plan moved to completed with no commit or remote action.
+- [x] 2026-07-18 - Standardized local page acceptance from the repository root with a consistent `/tmp` DB snapshot, fail-closed port checks, owned process-group cleanup, configurable Vite API proxy, HTTP 200 checks, and tracked-DB hash preservation. Existing 8000/5173 services were closed only after explicit follow-up authorization.
+- [x] 2026-07-18 - Independent launcher diff review returned `accept` with `high` confidence; its sole cache-cleanliness observation was resolved before final status capture.
+- [x] 2026-07-19 - Closed the acceptance-report rework items: TIME_WAIT-safe port probing, signal-safe cleanup, committed-plan lifecycle indexes, and CI-enforced launcher syntax checking.
 
 ## Historical Redirects
 

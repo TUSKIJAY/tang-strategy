@@ -6,6 +6,7 @@
   "verification_commands": [
     "python3 scripts/check-project-harness.py --root . --profile governed",
     "python3 scripts/check-startup-doc-budget.py",
+    "bash -n scripts/start-local-acceptance.sh",
     "cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'",
     "cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests",
     "cd frontend && npm run build"

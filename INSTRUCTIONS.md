@@ -65,6 +65,18 @@ Generated review JSON belongs in `frontend/public/reviews`, the Vite build belon
 
 ## Verification Commands
 
+### Local Page Acceptance
+
+Run the canonical protected page-acceptance service from the repository root:
+
+```bash
+./scripts/start-local-acceptance.sh
+```
+
+The script resolves the repository root independently of the caller's current directory, creates a consistent SQLite backup under `/tmp`, and starts the backend with `PYTHONPATH=backend`, `TANG_DB_PATH=<temporary-db>`, and `backend/.venv/bin/uvicorn`. It starts the frontend through `npm --prefix frontend run dev -- --host 127.0.0.1`. Defaults are backend port `8000` and frontend port `5173`; set `TANG_ACCEPTANCE_BACKEND_PORT` and `TANG_ACCEPTANCE_FRONTEND_PORT` to use other free ports. Occupied ports cause a fail-closed exit and no existing process is stopped. Ctrl-C stops only the process groups created by the script, verifies the tracked DB hash, and removes the temporary directory.
+
+### Repository Checks
+
 - `python3 scripts/check-project-harness.py --root . --profile governed`
 - `python3 scripts/check-startup-doc-budget.py`
 - `cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'`

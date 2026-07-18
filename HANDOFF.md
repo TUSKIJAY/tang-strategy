@@ -2,13 +2,13 @@
 
 ## Current Snapshot
 
-- Last updated: 2026-07-18
+- Last updated: 2026-07-19
 - Project: `Tang Strategy`
-- Branch/HEAD: `codex/project-harness@8c6851d8f469e7a84471cd2900b00b3d9dcbdf07`
+- Branch/HEAD: `codex/project-harness@a70be643a968cc24215fe508e69b3e0496d3c34a`
 - Harness profile: `governed`
-- Lifecycle: local plan completed after independent `accept` (`high` confidence)
+- Lifecycle: governed recovery plan completed; root-anchored local acceptance launcher implemented, report findings remediated, and verified
 - Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
-- Git state: complete local diff is unstaged/uncommitted; `main` and `origin/main` remain at `c262ba0`
+- Git state: local acceptance and report-remediation changes are unstaged/uncommitted; `main` and `origin/main` remain at `c262ba0`
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, or other remote change
 
 ## Resume Checklist
@@ -31,6 +31,9 @@
 | Browser | pass: 46-day dashboard; 2026-07-17 Review assembled at 868/192; 10-day Backtest returned 43 signals and opened 2026-07-17; 1m/5m and Step worked |
 | Governed harness | pass: local checker, lifecycle links, startup budget, and structural validator `100/100` |
 | Independent review | `accept`, confidence `high` |
+| Local page acceptance | pass: root command, `/tmp` SQLite backup, 46 days, integrity `ok`, frontend/OpenAPI HTTP 200, immediate same-port restart, occupied-port refusal, and repeated Ctrl-C cleanup |
+| Tracked DB protection | SHA-256 before/after `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8` |
+| Launcher diff review | `accept`, confidence `high`; final cache-cleanliness observation resolved |
 | Git boundary | no staged files, commit, push, PR, publish, merge, or remote settings change |
 
 Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/`.
@@ -45,7 +48,7 @@ Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-gov
 
 ## Next Gate
 
-Maintainer review of the local unstaged diff. Any Git closeout or remote action requires a new explicit request.
+Maintainer review of the local acceptance and report-remediation diff. Any Git closeout or remote action requires a new explicit request.
 
 ## Handoff Boundary
 
