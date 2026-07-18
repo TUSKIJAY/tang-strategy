@@ -1,31 +1,37 @@
 # Tang Strategy
 
-Tang Strategy is organized as a frontend/backend workspace for market replay, strategy visualization, browser-side backtesting, and teaching.
+Tang Strategy is a FastAPI and React/Vite workspace for authenticated market-day review, browser-side strategy backtesting, teaching replay, and static GitHub Pages reviews.
+
+## Runtime Model
+
+- Interactive mode: React calls the FastAPI bearer-auth API and reads the tracked SQLite DB.
+- Static Pages mode: CI exports review JSON from the same tracked DB, builds `StaticReviewsApp`, and publishes `frontend/dist` to `gh-pages`.
+- Daily source mode: the repository TradingView adapter is attempted first; IB Gateway is fallback-only after TV retries or a hard quality-gate failure.
+- Database rebuild: seed data imports into a fresh candidate, validates semantic/integrity/superset gates, and is atomically promoted only when safe.
+
+The runtime and Pages data source is `data/sqlite/tang_strategy_live_extended.db`. Gitignored files under `data/seed/market-data/live_extended/` are local fetch/import inputs, not the committed publication input.
 
 ## Layout
 
-- `backend/` — FastAPI service, SQLite schema, auth, seed import, and provider stubs.
-- `frontend/` — React/Vite app for readonly review, replay backtests, stats, and teaching.
-- `strategies/` — strategy JSON definitions.
-- `content/` — structured teaching/rules/cases assets.
-- `data/seed/` — source JSON seed store.
-- `data/sqlite/` — runtime SQLite DB (`tang_strategy_live_extended.db`).
+- `backend/app/` — API, auth, DB schema/access, imports, and review assembly.
+- `backend/scripts/` — TV/IB fetchers, safe rebuild, recovery, and static export.
+- `backend/tests/` — data-quality and DB-safety tests.
+- `frontend/src/` — Data, Review, Backtest, Teaching, scanner, and shared kline UI.
+- `strategies/` — strategy JSON plus the canonical [`STRATEGY.md`](./strategies/STRATEGY.md).
+- `content/` — teaching/rule/case assets and Tang trade overlays.
+- `data/` — local seed contract and tracked SQLite runtime.
+- `docs/` — product/architecture docs plus controlled governed lifecycle records; generated site output does not live here.
 
-## Runtime defaults
-
-- Source market files: `data/seed/market-data/live_extended/`
-- Runtime DB: `data/sqlite/tang_strategy_live_extended.db`
-
-## Run with Docker
+## Run The Stack
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-Open `http://localhost:18080`, authenticate, then use admin import if needed. The backend API is published at `http://localhost:18091`.
+Open `http://localhost:18080`; the backend is published at `http://localhost:18091` by the Docker workspace.
 
-## Run backend only
+Backend only:
 
 ```bash
 cd backend
@@ -35,13 +41,7 @@ pip install -r requirements.txt
 PYTHONPATH=. uvicorn app.main:app --reload
 ```
 
-Import/rebuild seed data:
-
-```bash
-PYTHONPATH=. python scripts/rebuild_live_extended_db.py
-```
-
-## Run frontend only
+Frontend only:
 
 ```bash
 cd frontend
@@ -49,6 +49,15 @@ npm install
 npm run dev
 ```
 
-## Notes
+## Safe Rebuild
 
-`legacy/` runtime artifacts are removed; current docs and workflows are maintained in `docs/`.
+```bash
+cd backend
+PYTHONPATH=. python scripts/rebuild_live_extended_db.py
+```
+
+The default command rejects empty/invalid candidates, date loss, non-market key shrink, integrity failures, and concurrent source drift. Do not use `--allow-date-loss` in daily publication or normal automation.
+
+## Verification And Documentation
+
+Use [`AGENTS.md`](./AGENTS.md) for repository rules, [`INSTRUCTIONS.md`](./INSTRUCTIONS.md) for stable contracts, [`docs/README.md`](./docs/README.md) for the documentation authority map, and [`docs/daily-publish-runbook.md`](./docs/daily-publish-runbook.md) for separately authorized daily publication.

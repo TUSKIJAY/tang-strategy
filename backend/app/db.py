@@ -1,23 +1,29 @@
 from __future__ import annotations
 
+import contextlib
 import sqlite3
+from pathlib import Path
 from typing import Iterable
 
 from .settings import settings
+from .services.db_safety import db_write_lock
 
 
-def connect() -> sqlite3.Connection:
-    settings.db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(settings.db_path)
+def connect(db_path: Path | None = None) -> sqlite3.Connection:
+    target = (db_path or settings.db_path).expanduser().resolve()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(target)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
-def init_db() -> None:
-    with connect() as conn:
-        conn.executescript(SCHEMA)
-        _migrate_raw_json_columns(conn)
+def init_db(db_path: Path | None = None) -> None:
+    target = (db_path or settings.db_path).expanduser().resolve()
+    with db_write_lock(target):
+        with contextlib.closing(connect(target)) as conn, conn:
+            conn.executescript(SCHEMA)
+            _migrate_raw_json_columns(conn)
 
 
 def rows_to_dicts(rows: Iterable[sqlite3.Row]) -> list[dict]:

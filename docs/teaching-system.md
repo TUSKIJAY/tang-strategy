@@ -4,7 +4,7 @@ The Teaching page explains Tang Strategy behavior using the same DB payload and 
 
 ## Runtime Entry
 
-- Route: `/teaching`.
+- Navigation entry: `Teaching` in the interactive React app (the app uses internal view state rather than a `/teaching` browser route).
 - Data source: backend assembled review payload.
 - Content source: `content/teaching/checkpoints.json`, `content/cases/index.json`, and `content/rules/compiled/index.json`.
 - Strategy source: `strategies/json/*.json`.

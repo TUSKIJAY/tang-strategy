@@ -1,70 +1,59 @@
 # Tang Strategy Architecture
 
-## Current baseline
+## Runtime Modes
 
-The project runs as a frontend/backend split:
+Tang Strategy has one data source of truth and two delivery modes:
 
-- Backend (`backend/`): FastAPI + SQLite API, auth, seed import, and data adapters.
-- Frontend (`frontend/`): Vite React UI for Review, Teaching, Backtest, replay, and statistics.
-- Shared data layer: `data/sqlite/tang_strategy_live_extended.db`.
-- Rebuild source: `data/seed/market-data/live_extended/`.
+- interactive: FastAPI reads the tracked SQLite DB; authenticated React pages call the API;
+- static Pages: CI reads the same DB, exports JSON, builds `StaticReviewsApp`, and publishes the Vite output to `gh-pages`.
 
-## Data flow
+The shared runtime input is `data/sqlite/tang_strategy_live_extended.db`. The accepted local seed shape is `data/seed/market-data/live_extended/<date>/<ticker>_<date>.json`.
 
-1. External fetchers (Polygon/IBKR planned) produce JSON files in `data/seed/market-data/live_extended/<YYYY-MM-DD>/`.
-2. Backend importer reads `live_extended` and writes:
-   - `market_days`
-   - `bars_1m`
-   - `bars_5m`
-   - strategy metadata and annotation payloads
-3. Frontend requests assembled payloads from `GET /api/reviews/assemble?day_id=...`.
-4. Review, Teaching, and Backtest render from the same payload shape.
-5. UI charts use the shared kline engine; no per-day static HTML is required.
+## Daily Data And DB Flow
 
-## Runtime Modules
+1. `fetch_tv_live_extended_day.py` requests TradingView first and writes/imports only after NYSE/session/OHLCV/RTH/5m/VWAP gates pass.
+2. If TV retries or a hard gate fail, the operator may separately start IB Gateway and run `fetch_ib_live_extended_day.py`; one day never mixes providers.
+3. `rebuild_live_extended_db.py` validates all discovered inputs, imports into a fresh candidate, verifies bar/count/integrity/date/non-market gates, checks live DB drift, and atomically promotes.
+4. The tracked DB carries market days, 1m/5m bars, strategies, and teaching assets into runtime and Pages export.
+5. `content/trader-trades/<date>.json` stays outside SQLite and is overlaid at assemble/export time.
 
-### Daily Review
+Rebuild never deletes the current DB before candidate validation. Default replacement requires the candidate market-day set to be a superset of the current set; the daily workflow never uses the intentional date-loss override.
 
-- Lists market days from SQLite.
-- Assembles one canonical day payload.
-- Drives replay, annotation review, and session-level statistics.
+## Interactive API Flow
 
-### Backtest
+- login: `POST /api/auth/login`;
+- discovery: `GET /api/tickers`, `/api/market-days`, `/api/strategies`;
+- bars: `GET /api/market-days/{market_day_id}/bars?timeframe=1m|5m`;
+- assembled review: `GET /api/reviews/assemble?market_day_id=<id>&strategy_id=<id>`;
+- teaching assets: `GET /api/teaching/{asset_type}`;
+- controlled writes: three admin import endpoints only.
 
-- Uses the assembled review payload.
-- Runs browser-side signal lifecycle and timing-window evaluation.
-- Shares chart state and indicator behavior with Review.
+Readonly/admin endpoints use bearer auth. There is no rebuild/content-write API endpoint.
 
-### Teaching System
+## Static Pages Flow
 
-- Reads cases, checkpoints, and rules from `content/`.
-- Uses the same chart engine and replay controls.
-- Explains strategy semantics without duplicating runtime strategy logic in UI code.
+`.github/workflows/publish-static-reviews.yml` runs only for its configured `main` push/manual trigger:
 
-## Engine boundary
+1. checkout the tracked DB;
+2. run `export_static_reviews.py` into `frontend/public/reviews`;
+3. build with `VITE_STATIC_REVIEWS=true` into `frontend/dist`;
+4. replace the remote `gh-pages` branch with that build.
 
-`frontend/src/kline/` contains the unified chart engine used by teaching, review, and backtest flows.
+The current static format is a Vite SPA plus generated review/strategy JSON. It is not the retired collection of standalone per-day HTML under `docs/`.
 
-Core engine responsibilities:
+## Frontend Modules
 
-- normalize 1m/5m bars
-- render Heikin-Ashi or normal OHLC candles
-- render MA and VWAP overlays
-- support single-bar stepping and playback
-- enforce hidden-future reveal cutoff for teaching/replay
+- Data/Dashboard loads tickers, days, strategies, and admin import controls.
+- Review requests one assembled payload and runs browser scanner/lifecycle rendering.
+- Backtest loads bars for recent days, runs the browser-side backtest, and renders results through the shared engine.
+- Teaching loads structured content and uses the same chart/replay surface.
+- `frontend/src/kline/` owns the shared chart engine; new consumers must not create a page-specific replacement.
 
-## Compatibility scope
+## Ownership Boundaries
 
-This branch uses a clean single-format DB contract:
-
-- Market source format: `live_extended` JSON only.
-- DB name: `tang_strategy_live_extended.db`.
-- Existing legacy DB/schema files are not used by runtime.
-
-## Repository conventions
-
-- Keep DB rebuild and import paths in `backend/scripts`.
-- Keep strategy JSON in `strategies/json`.
-- Keep teaching/lesson runtime assets in `content/`.
-- Keep historical static artifacts outside active documentation and active runtime docs.
-- Keep `docs/` flat; do not create nested documentation folders.
+- strategy JSON: `strategies/json`; canonical intent guide: `strategies/STRATEGY.md`;
+- teaching/rules/cases/trades: `content/`;
+- product direction: `docs/roadmap.md`;
+- governed execution: `docs/exec-plans/`;
+- generated JSON/build: `frontend/public/reviews` and `frontend/dist`;
+- publication: `gh-pages`, never `docs/`.

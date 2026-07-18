@@ -20,13 +20,14 @@ This repo is a frontend/backend workspace for Tang Strategy.
 - `frontend/` renders Review, Backtest, and Teaching pages.
 - `backend/app`, `frontend/src`, `strategies/`, `content/`, and `data/` are the active code/data boundaries.
 - `data/seed/market-data/live_extended` is the only seed source format accepted by current pipeline.
-- `legacy/` is not part of active code paths.
+- `docs/roadmap.md` owns product direction; governed lifecycle artifacts live under `docs/exec-plans`, `docs/decisions`, `docs/optimization`, and `docs/progress-archive`.
+- Generated static review JSON belongs in `frontend/public/reviews`, Vite output belongs in `frontend/dist`, and publication output belongs on `gh-pages`; generated output must not be written back under `docs/`.
 
 ## Build, Test, and Development Commands
 
 - `docker compose up --build` — run full stack.
 - `cd backend && PYTHONPATH=. uvicorn app.main:app --reload` — run backend.
-- `cd backend && PYTHONPATH=. python scripts/rebuild_live_extended_db.py` — rebuild DB from live_extended seed.
+- `cd backend && PYTHONPATH=. python scripts/rebuild_live_extended_db.py` — build and validate a candidate DB, reject date/non-market shrink by default, then atomically promote.
 - `cd frontend && npm run dev` — run frontend.
 - `cd frontend && npm run build` — production build.
 
@@ -39,7 +40,7 @@ This repo is a frontend/backend workspace for Tang Strategy.
 
 ## Testing Guidelines
 
-- For logic changes: validate SPY 2026-04-22 market day assembly and a known strategy end-to-end through frontend.
+- For logic changes: validate SPY 2026-07-17 market day assembly with `tang-v4-4-slope-4-4` and a known strategy end-to-end through frontend.
 - Backend validation: `/api/reviews/assemble` should return payload with 1m and 5m bars.
 - Frontend validation: open Review and Backtest pages, run one-day regression manually.
 - Harness validation: `python3 scripts/check-project-harness.py --root . --profile auto`.
@@ -63,6 +64,7 @@ GitHub integration:
 - Keep `.env` values private.
 - Use admin token only for import endpoints.
 - Do not commit provider credentials or generated historical artifacts.
+- The tracked SQLite DB is the runtime and Pages input. Rebuild must remain candidate-first and fail closed; the daily/default path must never use `--allow-date-loss`.
 
 ## Daily publish playbook (one-sentence trigger)
 

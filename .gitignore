@@ -26,6 +26,7 @@ npm-debug.log*
 # Runtime data
 *.db-shm
 *.db-wal
+*.db.write.lock
 data/exports/
 
 # Raw / bulky provider files
@@ -43,7 +44,6 @@ Desktop.ini
 *.swp
 *.swo
 data/seed/market-data/
-.codex
 .claude/
 ONLINE_REVIEW_OPTIMIZATION.md
 

@@ -147,7 +147,17 @@ cd backend
 PYTHONPATH=. python scripts/rebuild_live_extended_db.py
 ```
 
-This deletes and re-imports `data/sqlite/tang_strategy_live_extended.db` from every `SPY_*.json` / `SPX_*.json` under `live_extended/`. Idempotent — required because the published page reads from the committed DB.
+This is a fail-closed candidate rebuild. It never deletes the current DB before import:
+
+1. Discover and validate every `SPY_*.json` / `SPX_*.json` under `live_extended/`.
+2. Import market days, strategies, and teaching assets into a fresh adjacent candidate DB.
+3. Require non-empty 1m/5m bars, seed/declared/actual count agreement, SQLite integrity and foreign keys, and no strategy/teaching key shrink.
+4. By default, require the candidate market-day key set to be a superset of the current DB. If dates would be lost, the command exits nonzero and lists every missing date.
+5. Re-check that the current DB did not drift while the candidate was built, then atomically promote the verified candidate.
+
+On any empty seed, parse/import error, semantic mismatch, integrity failure, date loss, or concurrent drift, the current DB bytes remain unchanged. The explicit `--allow-date-loss` flag exists only for an intentional, supervised shrink. The daily publish flow and normal automation must never use it.
+
+This step remains required because the published page reads from the committed DB, not the gitignored seed JSON.
 
 Verify the new day landed:
 
@@ -156,7 +166,7 @@ PYTHONPATH=. python -c "
 from app.db import connect
 with connect() as c:
     print(c.execute('SELECT id, ticker, trade_date FROM market_days ORDER BY trade_date').fetchall())
-    print('5/19 1m count:', c.execute(\"SELECT COUNT(*) FROM bars_1m b JOIN market_days m ON m.id=b.market_day_id WHERE m.trade_date='<date>'\").fetchone()[0])
+    print('<date> 1m count:', c.execute(\"SELECT COUNT(*) FROM bars_1m b JOIN market_days m ON m.id=b.market_day_id WHERE m.trade_date='<date>'\").fetchone()[0])
 "
 ```
 

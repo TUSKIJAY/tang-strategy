@@ -6,7 +6,7 @@ This document is the single strategy canon for all review, backtest, and teachin
 
 - Primary barframes: 1m execution, 5m context.
 - Candle base: Heikin-Ashi OHLC (`hO/hH/hL/hC`) for trend and signal logic.
-- MA set: SMA5/10/20/30/50/60/120/200 and VWAP.
+- Strategy/runtime MA set: SMA5/10/20/30/50/60/120/200/250 and VWAP. The chart engine can also render optional `m500` values when a payload supplies them.
 - No per-day HTML strategy files: strategy behavior is loaded from `strategies/json/*.json` and consumed through API-assembled payloads.
 - Output shape for signals is expected to remain stable by `id`, `timeframe`, `bar_index`, and `direction` for UI compatibility.
 
@@ -61,6 +61,11 @@ This document is the single strategy canon for all review, backtest, and teachin
 ### Tang v4.5 (if enabled in repo)
 - Transitional variant after v4.4 with incremental parameter tuning and cleaner annotations.
 - Recommended for comparative benchmarks only unless intentionally migrating from v4.4.
+
+### Tang v4.8.4 Hybrid VWAP
+- Hybrid v4-family definition exported by the current Pages strategy-family filter.
+- Keeps the versioned JSON contract and adds VWAP-oriented hybrid context for comparative review.
+- Treat as an explicit comparison target; do not silently replace the v4.4 Slope baseline.
 
 ### Tang v5.0
 - Current forward-compatibility branch.

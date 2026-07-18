@@ -1,28 +1,35 @@
-# Tang Strategy Documentation Hub
+# Tang Strategy Documentation Authority Map
 
-## What to read first
+## Startup And Current State
 
-1. [`architecture.md`](./architecture.md) – runtime design and source-of-truth flow.
-2. [`strategy.md`](./strategy.md) – strategy versions and default runtime strategy choice.
-3. [`roadmap.md`](./roadmap.md) – milestones and module-level plan.
-4. [`planning.md`](./planning.md) – current planning state and open decisions.
-5. [`teaching-system.md`](./teaching-system.md) – teaching flow, strategy notes, and pattern digest.
-6. [`kline-engine.md`](./kline-engine.md) – shared chart engine contract.
-7. [`daily-publish-runbook.md`](./daily-publish-runbook.md) – SOP for fetch → DB rebuild → push → Pages.
+- [`../AGENTS.md`](../AGENTS.md) — single authoritative agent entry and hard operational rules.
+- [`../INSTRUCTIONS.md`](../INSTRUCTIONS.md) — stable project/runtime/governance contracts.
+- [`../PROGRESS.md`](../PROGRESS.md) — current lifecycle truth.
+- [`../HANDOFF.md`](../HANDOFF.md) — latest resume point and next gate.
 
-## Documentation structure
+## Product And Architecture Docs
 
-- `architecture.md` defines the runtime design, data flow, API boundaries, and module ownership.
-- `roadmap.md` tracks product direction for review, backtest, teaching, and engine work.
-- `planning.md` summarizes historical plans and active decisions without nested folders.
-- `strategy.md` describes strategy versions and default selection.
-- `teaching-system.md` owns teaching content semantics and chart-pattern guidance.
-- `kline-engine.md` owns the shared kline engine API and payload contract.
-- `daily-publish-runbook.md` is the SOP for the daily IBKR fetch → SQLite rebuild → push → GitHub Pages flow.
+- [`architecture.md`](./architecture.md) — runtime modes, source/data flow, API boundaries, and ownership.
+- [`roadmap.md`](./roadmap.md) — product/module direction for Review, Backtest, Teaching, data, and kline work.
+- [`planning.md`](./planning.md) — historical planning summary and compatibility pointer; not active plan/decision authority.
+- [`strategy.md`](./strategy.md) — docs entry pointing to canonical strategy intent in `strategies/STRATEGY.md`.
+- [`teaching-system.md`](./teaching-system.md) — teaching content semantics and case-review guidance.
+- [`kline-engine.md`](./kline-engine.md) — shared frontend chart engine and payload contract.
+- [`daily-publish-runbook.md`](./daily-publish-runbook.md) — TV-first daily fetch, safe DB rebuild, and Pages publication SOP.
 
-## Documentation rule
+## Governed Lifecycle Docs
 
-- Keep `docs/` aligned with live-extended DB-first runtime.
-- Keep all files directly under `docs/`; do not add subdirectories.
-- Put Daily Review and Backtest details in `roadmap.md` and `architecture.md`.
-- Put planning history and open decisions in `planning.md`.
+- [`exec-plans/roadmap.md`](./exec-plans/roadmap.md) — execution-plan lifecycle and proposed/active/completed/review indexes.
+- [`decisions/index.md`](./decisions/index.md) — persistent decisions; accepted decisions do not automatically execute work.
+- [`optimization/index.md`](./optimization/index.md) — record-only improvement intake; records do not authorize implementation.
+- [`progress-archive/index.md`](./progress-archive/index.md) — indexed historical lifecycle/evidence redirected out of startup files.
+
+Product roadmap and execution-plan roadmap have different owners and must not duplicate each other. Current state belongs in `PROGRESS.md`/`HANDOFF.md`, not in a roadmap or historical summary.
+
+## Generated Output Boundary
+
+- static review JSON: `frontend/public/reviews`;
+- Vite build: `frontend/dist`;
+- published site: `gh-pages` branch root.
+
+Generated Pages/export/build output must not be written under `docs/`. The tracked SQLite DB remains the source used by both interactive runtime and the Pages export workflow.

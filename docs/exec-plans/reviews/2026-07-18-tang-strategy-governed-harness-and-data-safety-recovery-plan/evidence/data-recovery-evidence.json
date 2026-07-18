@@ -1,0 +1,391 @@
+{
+  "baseline_backup_sha256": "bcf153e7e43d1e6e018f39d79324fc6ac8c55a46a67d57c6c180a1ef342530a6",
+  "baseline_token": {
+    "byte_sha256": "67e4fba9bcbd104c8e2aea6d6138a10f9c7d4c38198ad0384d5edf6e6de65924",
+    "device": 16777233,
+    "inode": 58545754,
+    "logical_sha256": "8311bcdc76f6819d8fb37b703ddaddcd2498b18267b2a1e395ba706f14baad68",
+    "mtime_ns": 1784364331395310811,
+    "size": 11448320
+  },
+  "candidate_sha256_before_promotion": "76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8",
+  "pages_publish_occurred": false,
+  "post_promotion": {
+    "db_sha256": "76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8",
+    "foreign_key_check_rows": 0,
+    "integrity_check": "ok",
+    "market_days": 46
+  },
+  "promoted": true,
+  "recovered": [
+    {
+      "bars_1m": 960,
+      "bars_5m": 192,
+      "candidate_market_day_id": 44,
+      "candidate_ticker_id": 1,
+      "key": "SPY|2026-05-15|extended",
+      "normalized_hashes": {
+        "bars_1m": "028c601bd48e23417f627cdda74b323c8207418e5e9d1c567265441f2a6fb941",
+        "bars_5m": "b0699d8e3fac0983bb8a93b31e6b24b0bd4dfff10386c2211deecd44165076ab",
+        "market_day": "2366460d1410ac140f0e097b890895938c8071733151527fd7a5f271e9e8292e"
+      },
+      "source_db": "/private/tmp/tang-recovery-test.8KhOrZ/34caa03.db",
+      "source_market_day_id": 4,
+      "source_ticker_id": 1,
+      "summary": {
+        "bars_1m": {
+          "count": 960,
+          "first": {
+            "idx": 0,
+            "open": 744.24,
+            "time": "04:00",
+            "ts": "2026-05-15T04:00:00-04:00",
+            "vwap": 743.23
+          },
+          "high_max": 746.36,
+          "last": {
+            "close": 737.34,
+            "idx": 959,
+            "time": "19:59",
+            "ts": "2026-05-15T19:59:00-04:00",
+            "vwap": 740.4399074603583
+          },
+          "low_min": 736.88,
+          "volume_sum": 39274120.0,
+          "vwap_max": 744.1950597639893,
+          "vwap_min": 739.9787863133761
+        },
+        "bars_5m": {
+          "count": 192,
+          "first": {
+            "idx": 0,
+            "open": 744.24,
+            "time": "04:00",
+            "ts": "2026-05-15T04:00:00-04:00",
+            "vwap": 743.7508757052897
+          },
+          "high_max": 746.36,
+          "last": {
+            "close": 737.34,
+            "idx": 191,
+            "time": "19:55",
+            "ts": "2026-05-15T19:55:00-04:00",
+            "vwap": 740.4399074603579
+          },
+          "low_min": 736.88,
+          "volume_sum": 39274120.0,
+          "vwap_max": 743.7508757052897,
+          "vwap_min": 739.9790018630465
+        },
+        "declared_bars_1m": 960,
+        "declared_bars_5m": 192,
+        "imported_at": "2026-05-16 04:15:27",
+        "market_day_id": 4,
+        "metadata": {
+          "counts": {
+            "afterhours_1m": 240,
+            "bars_1m": 960,
+            "bars_5m": 192,
+            "premarket_1m": 330,
+            "rth_1m": 390
+          },
+          "date": "2026-05-15",
+          "gap_count": 0,
+          "generated_at": "2026-05-16T12:15:27.073802",
+          "ib_contract": {
+            "conId": 756733,
+            "currency": "USD",
+            "exchange": "SMART",
+            "primaryExchange": "ARCA",
+            "secType": "STK",
+            "symbol": "SPY"
+          },
+          "ib_request": {
+            "barSizeSetting": "1 min",
+            "durationStr": "1 D",
+            "endDateTime": "2026-05-15T20:00:00-04:00",
+            "formatDate": 2,
+            "useRTH": false,
+            "whatToShow": "TRADES"
+          },
+          "missing_minutes": [],
+          "provider": "ibkr",
+          "session_mode": "extended",
+          "session_type": "full_session",
+          "session_window": "04:00-20:00 ET",
+          "source": "Interactive Brokers Gateway historicalData 127.0.0.1:4001",
+          "ticker": "SPY",
+          "vwap_mode": "session_cumulative",
+          "vwap_session_anchor": "04:00 ET extended session",
+          "vwap_source": "IB historicalData average weighted by volume; typical price fallback",
+          "warmup_complete": {
+            "1m": true,
+            "5m": false
+          }
+        },
+        "source": "Interactive Brokers Gateway historicalData 127.0.0.1:4001",
+        "title": "SPY 2026-05-15 Full Day"
+      }
+    },
+    {
+      "bars_1m": 960,
+      "bars_5m": 192,
+      "candidate_market_day_id": 45,
+      "candidate_ticker_id": 1,
+      "key": "SPY|2026-06-30|extended",
+      "normalized_hashes": {
+        "bars_1m": "6fddb3acc8cd7b18822d441daaecb5cf50b2b024ec83b712b364e0004a756a62",
+        "bars_5m": "5067437246e54691da078aada495a4271ceb467551957253083f88313bf6fe30",
+        "market_day": "aa9524c7024f1c57d9a3a3882ccf9b746db39f95db721f2b02493ac592908d75"
+      },
+      "source_db": "/private/tmp/tang-recovery-test.8KhOrZ/1f15443.db",
+      "source_market_day_id": 33,
+      "source_ticker_id": 1,
+      "summary": {
+        "bars_1m": {
+          "count": 960,
+          "first": {
+            "idx": 0,
+            "open": 742.0,
+            "time": "04:00",
+            "ts": "2026-06-30T04:00:00-04:00",
+            "vwap": 741.529
+          },
+          "high_max": 748.02,
+          "last": {
+            "close": 746.3,
+            "idx": 959,
+            "time": "19:59",
+            "ts": "2026-06-30T19:59:00-04:00",
+            "vwap": 745.830133582797
+          },
+          "low_min": 740.49,
+          "volume_sum": 36706156.0,
+          "vwap_max": 745.830133582797,
+          "vwap_min": 741.4510628836758
+        },
+        "bars_5m": {
+          "count": 192,
+          "first": {
+            "idx": 0,
+            "open": 742.0,
+            "time": "04:00",
+            "ts": "2026-06-30T04:00:00-04:00",
+            "vwap": 741.8819693079802
+          },
+          "high_max": 748.02,
+          "last": {
+            "close": 746.3,
+            "idx": 191,
+            "time": "19:55",
+            "ts": "2026-06-30T19:55:00-04:00",
+            "vwap": 745.8301335827972
+          },
+          "low_min": 740.49,
+          "volume_sum": 36706156.0,
+          "vwap_max": 745.8301335827972,
+          "vwap_min": 741.4510628836761
+        },
+        "declared_bars_1m": 960,
+        "declared_bars_5m": 192,
+        "imported_at": "2026-07-02 01:56:59",
+        "market_day_id": 33,
+        "metadata": {
+          "counts": {
+            "afterhours_1m": 240,
+            "bars_1m": 960,
+            "bars_5m": 192,
+            "premarket_1m": 330,
+            "rth_1m": 390
+          },
+          "date": "2026-06-30",
+          "gap_count": 0,
+          "generated_at": "2026-07-02T09:51:52.605705",
+          "ib_contract": {
+            "conId": 756733,
+            "currency": "USD",
+            "exchange": "SMART",
+            "primaryExchange": "ARCA",
+            "secType": "STK",
+            "symbol": "SPY"
+          },
+          "ib_request": {
+            "barSizeSetting": "1 min",
+            "durationStr": "1 D",
+            "endDateTime": "2026-06-30T20:00:00-04:00",
+            "formatDate": 2,
+            "useRTH": false,
+            "whatToShow": "TRADES"
+          },
+          "missing_minutes": [],
+          "provider": "ibkr",
+          "session_mode": "extended",
+          "session_type": "full_session",
+          "session_window": "04:00-20:00 ET",
+          "source": "Interactive Brokers Gateway historicalData 127.0.0.1:4002",
+          "ticker": "SPY",
+          "vwap_mode": "session_cumulative",
+          "vwap_session_anchor": "04:00 ET extended session",
+          "vwap_source": "IB historicalData average weighted by volume; typical price fallback",
+          "warmup_complete": {
+            "1m": true,
+            "5m": false
+          }
+        },
+        "source": "Interactive Brokers Gateway historicalData 127.0.0.1:4002",
+        "title": "SPY 2026-06-30 Full Day"
+      }
+    },
+    {
+      "bars_1m": 960,
+      "bars_5m": 192,
+      "candidate_market_day_id": 46,
+      "candidate_ticker_id": 1,
+      "key": "SPY|2026-07-01|extended",
+      "normalized_hashes": {
+        "bars_1m": "d18c99a4574b1e046979fd3452868db75ec0fb9583382c2ef6c7b40135cd0285",
+        "bars_5m": "790357a86428e8f2fa33249a8b4c645f9a0ab321b555c9b53a098e39ded3fbbb",
+        "market_day": "120b180cd856b41d830651b3017d1321543267b58d6a127d227516b9efa32819"
+      },
+      "source_db": "/private/tmp/tang-recovery-test.8KhOrZ/1f15443.db",
+      "source_market_day_id": 34,
+      "source_ticker_id": 1,
+      "summary": {
+        "bars_1m": {
+          "count": 960,
+          "first": {
+            "idx": 0,
+            "open": 744.53,
+            "time": "04:00",
+            "ts": "2026-07-01T04:00:00-04:00",
+            "vwap": 743.992
+          },
+          "high_max": 749.44,
+          "last": {
+            "close": 744.91,
+            "idx": 959,
+            "time": "19:59",
+            "ts": "2026-07-01T19:59:00-04:00",
+            "vwap": 746.4276324130794
+          },
+          "low_min": 742.37,
+          "volume_sum": 34024562.0,
+          "vwap_max": 746.6616569024426,
+          "vwap_min": 743.7758131566014
+        },
+        "bars_5m": {
+          "count": 192,
+          "first": {
+            "idx": 0,
+            "open": 744.53,
+            "time": "04:00",
+            "ts": "2026-07-01T04:00:00-04:00",
+            "vwap": 744.1366918020268
+          },
+          "high_max": 749.44,
+          "last": {
+            "close": 744.91,
+            "idx": 191,
+            "time": "19:55",
+            "ts": "2026-07-01T19:55:00-04:00",
+            "vwap": 746.427632413078
+          },
+          "low_min": 742.37,
+          "volume_sum": 34024562.0,
+          "vwap_max": 746.6611897576353,
+          "vwap_min": 743.77872681527
+        },
+        "declared_bars_1m": 960,
+        "declared_bars_5m": 192,
+        "imported_at": "2026-07-02 01:56:59",
+        "market_day_id": 34,
+        "metadata": {
+          "counts": {
+            "afterhours_1m": 240,
+            "bars_1m": 960,
+            "bars_5m": 192,
+            "premarket_1m": 330,
+            "rth_1m": 390
+          },
+          "date": "2026-07-01",
+          "gap_count": 0,
+          "generated_at": "2026-07-02T09:51:52.534508",
+          "ib_contract": {
+            "conId": 756733,
+            "currency": "USD",
+            "exchange": "SMART",
+            "primaryExchange": "ARCA",
+            "secType": "STK",
+            "symbol": "SPY"
+          },
+          "ib_request": {
+            "barSizeSetting": "1 min",
+            "durationStr": "1 D",
+            "endDateTime": "2026-07-01T20:00:00-04:00",
+            "formatDate": 2,
+            "useRTH": false,
+            "whatToShow": "TRADES"
+          },
+          "missing_minutes": [],
+          "provider": "ibkr",
+          "session_mode": "extended",
+          "session_type": "full_session",
+          "session_window": "04:00-20:00 ET",
+          "source": "Interactive Brokers Gateway historicalData 127.0.0.1:4002",
+          "ticker": "SPY",
+          "vwap_mode": "session_cumulative",
+          "vwap_session_anchor": "04:00 ET extended session",
+          "vwap_source": "IB historicalData average weighted by volume; typical price fallback",
+          "warmup_complete": {
+            "1m": true,
+            "5m": false
+          }
+        },
+        "source": "Interactive Brokers Gateway historicalData 127.0.0.1:4002",
+        "title": "SPY 2026-07-01 Full Day"
+      }
+    }
+  ],
+  "schema_version": "tang-market-day-recovery-evidence-v1",
+  "target_db": "/Users/neowang/Code/tang-strategy-github/data/sqlite/tang_strategy_live_extended.db",
+  "validation": {
+    "added_days": [
+      "SPY|2026-05-15|extended",
+      "SPY|2026-06-30|extended",
+      "SPY|2026-07-01|extended"
+    ],
+    "foreign_key_check_rows": 0,
+    "integrity_check": "ok",
+    "market_days_after": 46,
+    "market_days_before": 43,
+    "original_day_hash_map_sha256_before": "4da75bbf46093df46a6f9daba5f3b54a5b840d46e6c08ff8e0bd83da38cac4a3",
+    "original_day_hash_map_sha256_candidate": "4da75bbf46093df46a6f9daba5f3b54a5b840d46e6c08ff8e0bd83da38cac4a3",
+    "original_day_hash_mismatches": {},
+    "runtime": {
+      "assemble_2026-07-17": {
+        "bars_1m": 868,
+        "bars_5m": 192,
+        "day_id": 43,
+        "strategy_id": 8,
+        "strategy_slug": "tang-v4-4-slope-4-4"
+      },
+      "export_stdout": "Exported 46 static days and 9 strategies to /var/folders/6z/x3fsjtfn6g3bkqk46tgs_6mh0000gn/T/tang-recovery-runtime-cd48z5_s/reviews",
+      "tang_overlays": {
+        "2026-06-30": {
+          "notes": 0,
+          "payload": "days/spy-2026-06-30-extended.json",
+          "trades": 1
+        },
+        "2026-07-01": {
+          "notes": 0,
+          "payload": "days/spy-2026-07-01-extended.json",
+          "trades": 1
+        }
+      }
+    },
+    "strategies_sha256_before": "7c03ad9aa6b48161ab96d02b1c354fbe9f6393d26f0fe452b2b0d33534cb689a",
+    "strategies_sha256_candidate": "7c03ad9aa6b48161ab96d02b1c354fbe9f6393d26f0fe452b2b0d33534cb689a",
+    "teaching_sha256_before": "9ab2647fc700050a0676f416feb12554c3d6c426545fecf1990fb1ce1921fadb",
+    "teaching_sha256_candidate": "9ab2647fc700050a0676f416feb12554c3d6c426545fecf1990fb1ce1921fadb"
+  }
+}

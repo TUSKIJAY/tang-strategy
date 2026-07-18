@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import re
+import sqlite3
 from pathlib import Path
 from typing import Any
 
 from ..db import connect, init_db
 from ..settings import settings
 from .bar_utils import BAR_MA_WINDOWS, bar_tuple_from_seed, recalculate_ma_fields
+from .db_safety import db_write_lock
 
 
 def slugify(value: str) -> str:
@@ -26,56 +29,70 @@ def import_market_json(path: Path) -> int:
     bars_1m = data.get("bars_1m") or []
     bars_5m = data.get("bars_5m") or []
 
-    with connect() as conn:
-        conn.execute(
-            "INSERT OR IGNORE INTO tickers(symbol, name) VALUES (?, ?)",
-            (ticker, ticker),
+    with db_write_lock(settings.db_path):
+        with contextlib.closing(connect()) as conn, conn:
+            return _import_market_data(conn, ticker, trade_date, session_mode, meta, bars_1m, bars_5m, path)
+
+
+def _import_market_data(
+    conn: sqlite3.Connection,
+    ticker: str,
+    trade_date: str,
+    session_mode: str,
+    meta: dict[str, Any],
+    bars_1m: list[dict[str, Any]],
+    bars_5m: list[dict[str, Any]],
+    path: Path,
+) -> int:
+    conn.execute(
+        "INSERT OR IGNORE INTO tickers(symbol, name) VALUES (?, ?)",
+        (ticker, ticker),
+    )
+    conn.execute(
+        """
+        INSERT INTO market_days(
+            ticker, trade_date, session_mode, source, title, bar_count_1m, bar_count_5m, meta_json
         )
-        conn.execute(
-            """
-            INSERT INTO market_days(
-                ticker, trade_date, session_mode, source, title, bar_count_1m, bar_count_5m, meta_json
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(ticker, trade_date, session_mode) DO UPDATE SET
-                source=excluded.source,
-                title=excluded.title,
-                bar_count_1m=excluded.bar_count_1m,
-                bar_count_5m=excluded.bar_count_5m,
-                imported_at=CURRENT_TIMESTAMP,
-                meta_json=excluded.meta_json
-            """,
-            (
-                ticker,
-                trade_date,
-                session_mode,
-                str(meta.get("source") or path.name),
-                str(meta.get("title") or f"{ticker} {trade_date}"),
-                len(bars_1m),
-                len(bars_5m),
-                json.dumps(meta, ensure_ascii=False, separators=(",", ":")),
-            ),
-        )
-        market_day_id = int(conn.execute(
-            "SELECT id FROM market_days WHERE ticker=? AND trade_date=? AND session_mode=?",
-            (ticker, trade_date, session_mode),
-        ).fetchone()["id"])
-        conn.execute("DELETE FROM bars_1m WHERE market_day_id=?", (market_day_id,))
-        conn.execute("DELETE FROM bars_5m WHERE market_day_id=?", (market_day_id,))
-        bars_5m = recalculate_ma_fields(
-            bars_5m,
-            warmup_closes=_fetch_prior_5m_closes(conn, ticker, trade_date, session_mode),
-        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(ticker, trade_date, session_mode) DO UPDATE SET
+            source=excluded.source,
+            title=excluded.title,
+            bar_count_1m=excluded.bar_count_1m,
+            bar_count_5m=excluded.bar_count_5m,
+            imported_at=CURRENT_TIMESTAMP,
+            meta_json=excluded.meta_json
+        """,
+        (
+            ticker,
+            trade_date,
+            session_mode,
+            str(meta.get("source") or path.name),
+            str(meta.get("title") or f"{ticker} {trade_date}"),
+            len(bars_1m),
+            len(bars_5m),
+            json.dumps(meta, ensure_ascii=False, separators=(",", ":")),
+        ),
+    )
+    market_day_id = int(conn.execute(
+        "SELECT id FROM market_days WHERE ticker=? AND trade_date=? AND session_mode=?",
+        (ticker, trade_date, session_mode),
+    ).fetchone()["id"])
+    conn.execute("DELETE FROM bars_1m WHERE market_day_id=?", (market_day_id,))
+    conn.execute("DELETE FROM bars_5m WHERE market_day_id=?", (market_day_id,))
+    bars_5m = recalculate_ma_fields(
+        bars_5m,
+        warmup_closes=_fetch_prior_5m_closes(conn, ticker, trade_date, session_mode),
+    )
+    conn.executemany(
+        BAR_INSERT_SQL.format(table="bars_1m"),
+        [bar_tuple_from_seed(market_day_id, i, b) for i, b in enumerate(bars_1m)],
+    )
+    if bars_5m:
         conn.executemany(
-            BAR_INSERT_SQL.format(table="bars_1m"),
-            [bar_tuple_from_seed(market_day_id, i, b) for i, b in enumerate(bars_1m)],
+            BAR_INSERT_SQL.format(table="bars_5m"),
+            [bar_tuple_from_seed(market_day_id, i, b) for i, b in enumerate(bars_5m)],
         )
-        if bars_5m:
-            conn.executemany(
-                BAR_INSERT_SQL.format(table="bars_5m"),
-                [bar_tuple_from_seed(market_day_id, i, b) for i, b in enumerate(bars_5m)],
-            )
-        return market_day_id
+    return market_day_id
 
 
 def import_strategy_json(path: Path) -> int:
@@ -85,42 +102,65 @@ def import_strategy_json(path: Path) -> int:
     version = str(strategy.get("version") or "unknown")
     slug = slugify(f"{path.stem}-{version}")
     body = json.dumps(strategy, ensure_ascii=False, separators=(",", ":"))
-    with connect() as conn:
-        conn.execute(
-            """
-            INSERT INTO strategies(name, version, slug, description, json_body)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(slug) DO UPDATE SET
-                name=excluded.name,
-                version=excluded.version,
-                description=excluded.description,
-                json_body=excluded.json_body,
-                active=1,
-                updated_at=CURRENT_TIMESTAMP
-            """,
-            (name, version, slug, strategy.get("description", ""), body),
-        )
-        return int(conn.execute("SELECT id FROM strategies WHERE slug=?", (slug,)).fetchone()["id"])
+    with db_write_lock(settings.db_path):
+        with contextlib.closing(connect()) as conn, conn:
+            return _import_strategy_data(conn, strategy, name, version, slug, body)
+
+
+def _import_strategy_data(
+    conn: sqlite3.Connection,
+    strategy: dict[str, Any],
+    name: str,
+    version: str,
+    slug: str,
+    body: str,
+) -> int:
+    conn.execute(
+        """
+        INSERT INTO strategies(name, version, slug, description, json_body)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(slug) DO UPDATE SET
+            name=excluded.name,
+            version=excluded.version,
+            description=excluded.description,
+            json_body=excluded.json_body,
+            active=1,
+            updated_at=CURRENT_TIMESTAMP
+        """,
+        (name, version, slug, strategy.get("description", ""), body),
+    )
+    return int(conn.execute("SELECT id FROM strategies WHERE slug=?", (slug,)).fetchone()["id"])
 
 
 def import_teaching_asset(path: Path, asset_type: str, slug: str, version: str = "default") -> int:
     init_db()
     body = path.read_text(encoding="utf-8")
-    with connect() as conn:
-        conn.execute(
-            """
-            INSERT INTO teaching_assets(asset_type, version, slug, json_body)
-            VALUES (?, ?, ?, ?)
-            ON CONFLICT(asset_type, version, slug) DO UPDATE SET
-                json_body=excluded.json_body,
-                updated_at=CURRENT_TIMESTAMP
-            """,
-            (asset_type, version, slug, body),
-        )
-        return int(conn.execute(
-            "SELECT id FROM teaching_assets WHERE asset_type=? AND version=? AND slug=?",
-            (asset_type, version, slug),
-        ).fetchone()["id"])
+    with db_write_lock(settings.db_path):
+        with contextlib.closing(connect()) as conn, conn:
+            return _import_teaching_data(conn, body, asset_type, slug, version)
+
+
+def _import_teaching_data(
+    conn: sqlite3.Connection,
+    body: str,
+    asset_type: str,
+    slug: str,
+    version: str,
+) -> int:
+    conn.execute(
+        """
+        INSERT INTO teaching_assets(asset_type, version, slug, json_body)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(asset_type, version, slug) DO UPDATE SET
+            json_body=excluded.json_body,
+            updated_at=CURRENT_TIMESTAMP
+        """,
+        (asset_type, version, slug, body),
+    )
+    return int(conn.execute(
+        "SELECT id FROM teaching_assets WHERE asset_type=? AND version=? AND slug=?",
+        (asset_type, version, slug),
+    ).fetchone()["id"])
 
 
 def import_default_seed() -> dict[str, int]:

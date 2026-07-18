@@ -4,42 +4,49 @@
 
 - Last updated: 2026-07-18
 - Project: `Tang Strategy`
-- Branch: `codex/project-harness` (created from `main@c262ba0`)
-- Harness profile: `minimal`
-- Status: 本地 harness 与 GitHub Actions/PR 模板已实现并验证；业务代码和每日市场数据未改动，远端 feature branch 尚未 push，`main` 引用未移动。
+- Branch/HEAD: `codex/project-harness@8c6851d8f469e7a84471cd2900b00b3d9dcbdf07`
+- Harness profile: `governed`
+- Lifecycle: local plan completed after independent `accept` (`high` confidence)
+- Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
+- Git state: complete local diff is unstaged/uncommitted; `main` and `origin/main` remain at `c262ba0`
+- Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, or other remote change
 
 ## Resume Checklist
 
-1. 读取 `AGENTS.md`、`INSTRUCTIONS.md`、`PROGRESS.md` 与本文件。
-2. 若为 Git 仓库，运行 `git status --short --branch`，保留所有用户已有改动。
-3. 运行 `.harness/config.json` 中的验证命令。
-4. 若修改逻辑或数据管线，再执行 `AGENTS.md` 要求的已知交易日与页面回归。
+1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
+2. Run `git status --short --branch` and preserve the complete local diff.
+3. Read the completed plan, evidence reports, and `implementation-review-001.md`.
+4. Review the diff. Do not stage, commit, push, or open a PR without a new explicit request.
+5. If future work starts, route it through the governed lifecycle and keep record-only optimization items non-authorizing.
 
 ## Verification Evidence
 
-| Check | Command | Result | Notes |
-| --- | --- | --- | --- |
-| Harness structure | `python3 scripts/check-project-harness.py --root . --profile auto` | pass | 所有 minimal 文件存在，config 匹配 |
-| Skill structural validator | `validate_harness.py --target . --profile auto --min-score 90` | pass | `100/100`，0 critical failures |
-| Backend unit tests | `cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'` | pass | `4/4`; 临时隔离环境安装固定 calendar 依赖后运行 |
-| Backend compile | `cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests` | pass | 无输出，exit 0 |
-| Frontend build | `cd frontend && npm run build` | pass | Vite build 完成，1746 modules transformed |
-| Diff integrity | `git diff --check` | pass | 无 whitespace errors |
-| GitHub workflow lint | `actionlint` on project-harness + Pages workflows | pass | `actionlint v1.7.12`，零错误 |
-| GitHub-linked backend | workflow-equivalent dependency install + unit tests | pass | 固定 `requirements-tv.txt`，`4/4` |
+| Check | Result |
+| --- | --- |
+| DB recovery | pass: 43 -> 46, exactly three additions, original 43-day map and non-market table hashes unchanged |
+| DB integrity | pass: `integrity_check=ok`, foreign-key rows `0`, post-promotion SHA-256 `76a885c2...28f8` |
+| Rebuild safety | pass: 11 rebuild tests, 4 shared safety tests, actual six-day seed refused against a 46-day temp copy with identical before/after bytes |
+| Backend | pass: 19 tests and compileall |
+| Frontend | pass: Vite production build, 1746 modules transformed |
+| Browser | pass: 46-day dashboard; 2026-07-17 Review assembled at 868/192; 10-day Backtest returned 43 signals and opened 2026-07-17; 1m/5m and Step worked |
+| Governed harness | pass: local checker, lifecycle links, startup budget, and structural validator `100/100` |
+| Independent review | `accept`, confidence `high` |
+| Git boundary | no staged files, commit, push, PR, publish, merge, or remote settings change |
 
-## Blockers And Risks
+Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/`.
 
-- 当前没有已证实阻塞。
-- `docs/` 必须保持扁平，因此未采用会创建嵌套 lifecycle 目录的 `governed` profile。
-- 新 Python 环境运行 TradingView tests 前需安装 `backend/requirements-tv.txt`；否则会因缺少 `pandas_market_calendars` 失败，这属于环境前置条件。
-- `codex/project-harness` 尚未存在于远端；只有 push 并打开指向 `main` 的 PR 后，GitHub workflow 才会实际执行。
-- `main` 当前未启用 branch protection；现有 checks 是自动验证信号，但尚不是 GitHub 强制 merge 门禁。
+## Known Non-Blocking Observations
+
+- Future recovery evidence should retain manual value-level secret review; the current evidence was independently checked and is safe.
+- A dedicated dual-writer contention/timeout test remains a useful test enhancement; current lock coverage and drift tests passed.
+- Browser console recorded only the existing missing `favicon.ico` request (`404`); product APIs and flows returned successfully.
+- The isolated backend environment emitted third-party calendar-library deprecation warnings; the 19 tests still passed.
+- `actionlint` is not installed in the current shell. The dependency-free checker validated workflow paths, configured checks, exact job names, and ordering. No hosted run was authorized.
 
 ## Next Gate
 
-- 维护者决定是否 commit/push/open PR；如需把三项 checks 设为强制门禁，再单独配置 `main` branch protection。合入 `main` 仍需明确授权。
+Maintainer review of the local unstaged diff. Any Git closeout or remote action requires a new explicit request.
 
 ## Handoff Boundary
 
-本文件是当前接手索引，不是历史日志。详细历史进入 `PROGRESS.md` 或其归档，机器运行时状态进入专门状态文件。
+This file is the current resume index, not project history or an archive. Detailed commands, hashes, test matrices, and review findings remain in the completed plan evidence/review directory.
