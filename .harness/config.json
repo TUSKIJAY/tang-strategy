@@ -5,6 +5,7 @@
   "project_type": "FastAPI backend and React/Vite frontend workspace",
   "verification_commands": [
     "python3 scripts/check-project-harness.py --root . --profile governed",
+    "python3 -m unittest scripts.tests.test_operating_modes",
     "python3 scripts/check-startup-doc-budget.py",
     "bash -n scripts/start-local-acceptance.sh",
     "cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'",

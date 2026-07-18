@@ -27,7 +27,10 @@ jobs:
           python-version: "3.11"
 
       - name: Validate project harness
-        run: python scripts/check-project-harness.py --root . --profile governed
+        run: python3 scripts/check-project-harness.py --root . --profile governed
+
+      - name: Test operating modes fixtures
+        run: python3 -m unittest scripts.tests.test_operating_modes
 
       - name: Check local acceptance launcher syntax
         run: bash -n scripts/start-local-acceptance.sh

@@ -12,16 +12,16 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
-- Current phase: phase-3
+- Current phase: phase-4
 - Phase state: complete
-- Phase entry gate: `phase-2-complete@10e19e71012c2573334e743395507349125f34c2`
-- Next gate: phase-4-start
+- Phase entry gate: `phase-3-complete@549ec914d8fed9c47e96995e552c2d909a599f51`
+- Next gate: phase-5-start
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-3 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
-- Scope authority: Phase 3 Data Update contract/evidence-mapping slice only; Phase 4 is the next unopened implementation gate
+- Implementation authority: Phases 0-4 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
+- Scope authority: Phase 4 harness/config/CI integration slice only; Phase 5 is the next unopened implementation gate
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-3:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 3 finalized the Data Update carrier map against current runbook, publisher, adapter, and backend-test evidence without executing provider/DB/publication behavior. The only next gate is `phase-4-start`. No broker, provider, tracked-DB, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-4:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 4 integrated the canonical governed checker and fixture suite into repository config and the existing Harness structure job while preserving job names and the Pages workflow. The only next gate is `phase-5-start`. No broker, provider, tracked-DB, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -675,3 +675,12 @@ This plan is **Active** at `phase-3:complete`. Revision `v2-review-foldback-2026
 - Runtime-only evidence: a new requested day's real provider provenance, default-import before/after DB evidence, IB whole-day/gap/session proof, assemble 1m/5m receipt, optional page smoke status, user-supplied Tang JSON, command order, Git publication boundary, Pages run, and hosted URL remain future authorized-run or human evidence.
 - Compatibility inspection: daily trigger phrases, TV-first runbook ordering, `--allow-date-loss` prohibition, default TV/IB `import_market_json` calls, tracked-DB publisher input, and the sole `gh-pages` workflow remain unchanged. Frozen hashes still match Phase 0.
 - Exit result: local success cannot be interpreted as publish authority, no offline evidence claims a real publish, and no separately proposed runtime change is required for this plan. Phase 4 may start after the scoped Phase 3 commit succeeds.
+
+### Phase 4 — complete
+
+- Entry evidence: Phase 3 exit commit `549ec914d8fed9c47e96995e552c2d909a599f51` and clean scoped baseline.
+- Config: `.harness/config.json` retains the canonical governed entry and adds `python3 -m unittest scripts.tests.test_operating_modes` immediately after it.
+- CI: the existing `Harness structure` job runs the same canonical command then the fixture suite. Job display names remain exactly `Harness structure`, `Backend checks`, and `Frontend build`; backend/frontend jobs are otherwise unchanged.
+- Enforcement: the focused checker now rejects missing/misordered canonical or fixture commands in config/workflow. Three new negative fixtures cover config omission, config ordering, and workflow omission; the suite now passes 29 tests.
+- Compatibility: governed and minimal profile behavior, external fixture roots, state-block reconciliation, startup-document budget, Markdown links, workflow job names/order, and no Pages workflow diff all pass. `.github/workflows/publish-static-reviews.yml` retains its Phase 0 hash.
+- Exit result: local and PR harness paths enforce the same operating-modes contract without network, provider, broker, tracked DB, or publication access. Phase 5 may start after the scoped Phase 4 commit succeeds.

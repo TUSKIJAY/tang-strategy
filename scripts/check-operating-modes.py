@@ -610,6 +610,36 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
         missing = [key for key in REVIEW_KEYS if key not in metadata]
         if missing:
             errors.append(f"review template: missing constrained keys: {', '.join(missing)}")
+    canonical_command = "python3 scripts/check-project-harness.py --root . --profile governed"
+    fixture_command = "python3 -m unittest scripts.tests.test_operating_modes"
+    config_path = root / ".harness" / "config.json"
+    if config_path.is_file():
+        try:
+            config = json.loads(read_text(config_path, "verification config", errors))
+        except json.JSONDecodeError as exc:
+            errors.append(f"verification config: invalid JSON: {exc}")
+        else:
+            commands = config.get("verification_commands") if isinstance(config, dict) else None
+            if not isinstance(commands, list):
+                errors.append("verification config: verification_commands must be a list")
+            else:
+                for command in (canonical_command, fixture_command):
+                    if command not in commands:
+                        errors.append(f"verification config: missing required command: {command}")
+                if canonical_command in commands and fixture_command in commands:
+                    if commands.index(canonical_command) > commands.index(fixture_command):
+                        errors.append("verification config: canonical harness command must precede fixture tests")
+    workflow_path = root / ".github" / "workflows" / "project-harness.yml"
+    if workflow_path.is_file():
+        workflow = read_text(workflow_path, "verification workflow", errors)
+        workflow_canonical = f"run: {canonical_command}"
+        workflow_fixture = f"run: {fixture_command}"
+        for command in (workflow_canonical, workflow_fixture):
+            if command not in workflow:
+                errors.append(f"verification workflow: missing required command: {command.removeprefix('run: ')}")
+        if workflow_canonical in workflow and workflow_fixture in workflow:
+            if workflow.index(workflow_canonical) > workflow.index(workflow_fixture):
+                errors.append("verification workflow: canonical harness command must precede fixture tests")
     return files
 
 

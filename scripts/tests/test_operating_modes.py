@@ -123,7 +123,10 @@ def build_governed_fixture(root: Path) -> None:
     config = {
         "schema_version": "project-harness-config-v1",
         "profile": "governed",
-        "verification_commands": ["python3 scripts/check-project-harness.py --root . --profile governed"],
+        "verification_commands": [
+            "python3 scripts/check-project-harness.py --root . --profile governed",
+            "python3 -m unittest scripts.tests.test_operating_modes",
+        ],
         "github": {
             "workflow": ".github/workflows/project-harness.yml",
             "pull_request_template": ".github/pull_request_template.md",
@@ -134,7 +137,7 @@ def build_governed_fixture(root: Path) -> None:
     write(
         root,
         ".github/workflows/project-harness.yml",
-        "name: Test\n\non: workflow_dispatch\n\njobs:\n  harness:\n    name: Harness structure\n    runs-on: ubuntu-latest\n",
+        "name: Test\n\non: workflow_dispatch\n\njobs:\n  harness:\n    name: Harness structure\n    runs-on: ubuntu-latest\n    steps:\n      - run: python3 scripts/check-project-harness.py --root . --profile governed\n      - run: python3 -m unittest scripts.tests.test_operating_modes\n",
     )
     write(root, ".github/pull_request_template.md", "# PR\n")
     write(root, "scripts/check-project-harness.py", "# fixture path\n")
@@ -540,6 +543,28 @@ None.
     def test_router_must_link_normative_contract(self) -> None:
         self.replace("AGENTS.md", "docs/operating-modes.md", "docs/missing-modes.md")
         self.assert_error("AGENTS.md does not route/declare docs/operating-modes.md")
+
+    def test_config_requires_fixture_command(self) -> None:
+        path = self.root / ".harness/config.json"
+        config = json.loads(path.read_text(encoding="utf-8"))
+        config["verification_commands"].remove("python3 -m unittest scripts.tests.test_operating_modes")
+        path.write_text(json.dumps(config), encoding="utf-8")
+        self.assert_error("verification config: missing required command")
+
+    def test_config_requires_canonical_command_before_fixtures(self) -> None:
+        path = self.root / ".harness/config.json"
+        config = json.loads(path.read_text(encoding="utf-8"))
+        config["verification_commands"].reverse()
+        path.write_text(json.dumps(config), encoding="utf-8")
+        self.assert_error("canonical harness command must precede fixture tests")
+
+    def test_workflow_requires_fixture_command(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "run: python3 -m unittest scripts.tests.test_operating_modes",
+            "run: echo missing-fixture-command",
+        )
+        self.assert_error("verification workflow: missing required command")
 
     def test_checker_is_read_only(self) -> None:
         before = {
