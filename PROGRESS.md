@@ -7,10 +7,10 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-re-review-r10`
+- Next gate: `phase-6-remediation-r10`
 <!-- operating-modes-state:end -->
 
-2026-07-19: remediation-r9 已关闭 `implementation-review-009` 的 branch flow 空项/非标量与 bare null step/comment-null name false-pass。139/139 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。当前为 `phase-6:in-progress`，next gate 为 `phase-6-re-review-r10`；完成态仍需 fresh independent `accept`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: 第十轮独立实施评审 `implementation-review-010` 针对 remediation-r9 commit `b5f754b9feed272ea57dad58dfa56c5c553c613b` 返回 `revise`、置信度 `high`。它确认全部第九轮 finding 与既有关键回归关闭，并新增 YAML binary/underscore numeric string coercion、terminal-colon mapping indicator false-pass 与 YAML `\xNN` quoted-string false-reject。当前为 `phase-6:in-progress`，next gate 为 `phase-6-remediation-r10`；真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediation-r9 is verified and awaits fresh qualifying implementation re-review-r10.
+- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediate only implementation-review-010 scalar-classification and YAML quoted-escape findings, then obtain a fresh qualifying implementation review.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] Commit the verified remediation-r9 boundary, request fresh independent re-review-r10, and close out only after a qualifying `accept`.
+- [ ] Record review-010 separately, complete bounded remediation-r10 and verification, then request fresh independent review; close out only after a qualifying `accept`.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 

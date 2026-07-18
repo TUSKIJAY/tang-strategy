@@ -7,18 +7,18 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-re-review-r10`
+- Next gate: `phase-6-remediation-r10`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Startup Git evidence: this proposal began from `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` with a clean worktree/index; rerun the startup commands for live branch/HEAD/status truth
-- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-6:in-progress`; remediation-r9 is fully verified and fresh independent re-review-r10 is next
+- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-6:in-progress`; `implementation-review-010` returned `revise` with `high` confidence and bounded remediation-r10 is next
 - Active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
 - Design reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
-- Implementation boundary: remediation-r9 closes implementation-review-009 with fully consumed branch string scalars and fail-closed YAML-null direct step/name handling; its stable boundary commit must precede re-review-r10
+- Implementation boundary: remediation-r9 commit `b5f754b9feed272ea57dad58dfa56c5c553c613b` closed implementation-review-009; remediation-r10 is limited to YAML numeric/plain mapping-indicator classification and declared double-quoted escape handling
 - Local Git boundary: after a lifecycle transition or Phase exit passes verification and state reconciliation, create one conventional commit containing only that boundary's plan-scoped paths
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, or other remote change is authorized
 
@@ -28,7 +28,7 @@
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve any unrelated changes and read `docs/operating-modes.md` plus the active plan execution record.
 4. Phase 5 is complete and committed at `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`; do not recreate that boundary commit.
-5. Remediation-r9 and its bounded verification are complete; commit that scoped boundary and request fresh independent re-review-r10. Phase 6 requires a qualifying `accept` before completed disposition and lifecycle reconciliation.
+5. Record `implementation-review-010`, remediate only its bounded scalar-classification and quoted-escape findings, rerun the bounded verification set, commit that scoped boundary, and request a fresh independent review. Phase 6 requires a qualifying `accept` before completed disposition and lifecycle reconciliation.
 6. At each verified lifecycle/Phase boundary, inspect the diff and use the plan's standing authority to stage only scoped paths and create one local conventional commit. Do not push, open a PR, publish, merge, or change remote settings without separate authority.
 
 ## Verification Evidence
@@ -67,6 +67,7 @@
 | Phase 6 remediation-r8 | pass: 133 fixtures; unique direct workflow mappings and same-job order enforced; equivalent YAML forms normalized; nested raw-code carriers fail closed |
 | Current operating-modes re-review-r9 | `implementation-review-009`: `revise`, confidence `high`; branch scalar and YAML-null direct step/name remediation required |
 | Phase 6 remediation-r9 | pass: 139 fixtures; branch sequences fully tokenize to strings; empty/non-scalar members and null/scalar step/name forms fail closed |
+| Current operating-modes re-review-r10 | `implementation-review-010`: `revise`, confidence `high`; YAML numeric/plain mapping-indicator classification and quoted escape remediation required |
 | 2026-07-18 recovery-plan implementation review | `accept`, confidence `high` |
 | Local page acceptance | pass: root command, `/tmp` SQLite backup, 46 days, integrity `ok`, frontend/OpenAPI HTTP 200, immediate same-port restart, occupied-port refusal, and repeated Ctrl-C cleanup |
 | Tracked DB protection | SHA-256 before/after `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8` |
@@ -85,7 +86,7 @@ Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-gov
 
 ## Next Gate
 
-Commit the verified remediation-r9 boundary and request fresh qualifying independent implementation re-review-r10. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized.
+Record review-010 separately, complete bounded remediation-r10, and request fresh qualifying independent implementation review after its verified commit. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized.
 
 ## Handoff Boundary
 
