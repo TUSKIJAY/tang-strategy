@@ -15,13 +15,13 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-re-review-r8
+- Next gate: phase-6-remediation-r8
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and remediations r1-r7 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 now requires renewed independent implementation review and a qualifying `accept` before closeout
-- Scope authority: re-review-r8 is read-only except for its review artifact; no further implementation mutation is authorized until a review finding requires bounded remediation, and runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-5 and remediations r1-r7 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r8 is authorized by implementation-review-008 and remains bounded by renewed independent review and closeout gates
+- Scope authority: remediation-r8 may correct only unique/direct workflow YAML hierarchy and ordering, supported equivalent YAML source forms, nested raw HTML code masking, and their fixtures/contract wording; runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-007` returned `revise` with `high` confidence against remediation-r6 commit `7c750c24d8b53b41260d926e7a57ae896707c322`; remediation-r7 has now closed its recorded YAML execution/scalar and Markdown code-carrier findings with 114 passing fixtures and the full bounded verification set. The only next gate is fresh independent implementation re-review-r8 against the stable remediation commit. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-008` returned `revise` with `high` confidence against remediation-r7 commit `9dad5a9396ecc0efd0e776707aa6f0a5a27dedaf`. It confirmed every implementation-review-007 finding closed, then found duplicate or structurally unrelated workflow mappings, cross-job command flattening, and nested same-tag raw HTML code can still false-pass; supported equivalent YAML spellings can false-reject. The only next gate is bounded remediation-r8 followed by fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -735,3 +735,5 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Remediation-r7 result: required workflow evidence now requires an operative `pull_request` trigger for `main`, an `ubuntu-latest` job with only the declared direct job keys, and a required step with only optional `name` plus exactly one `run`. Bare or quoted conditions, execution modifiers, workflow/job defaults or environment, unsupported runners, duplicate keys, and other direct carrier modifiers fail closed. Literal/folded blocks preserve source comments and normalize by declared style before exact command comparison, including valid folded commands split across physical source lines. Operative Markdown parsing now excludes multiline CommonMark code spans and closed/unclosed raw HTML `code`/`pre` contexts while preserving real links with code-formatted labels.
 - Remediation-r7 verification: 114 temporary-Git fixtures pass, including every implementation-review-007 reproduction and added pull-request-trigger, duplicate-key, runner/default/environment, quoted-condition, modifier, folded-comment, folded-split-command, multiline-code-span, and raw-HTML-code cases. Focused/governed/auto checks, startup budget, launcher/checker syntax, `git diff --check`, baseline runtime/data zero-diff, exact frozen hashes, read-only DB integrity/foreign keys/46-day count, and a Vite production build of 1746 modules to an external temporary directory all pass. The earlier pinned 19/19 backend evidence remains applicable because no runtime file changed.
 - Re-review-r8 gate: commit this scoped remediation boundary, then request a fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
+- Re-review-r8 boundary: `implementation-review-008.md`, authored by `independent-implementation-reviewer-2026-07-19-r8`, returned `revise` with `high` confidence against stable commit `9dad5a9396ecc0efd0e776707aa6f0a5a27dedaf`. It confirmed all implementation-review-007 reproductions and prior key regressions closed, then found two serious false-pass groups: duplicate/unrelated workflow mappings and cross-job flattening can claim a trigger or ordered commands that are not operative, while nested same-tag raw HTML can expose hidden routes or lifecycle metadata. It also found valid quoted/flow YAML spellings and an explicit block-indent form false-rejected outside a declared source restriction.
+- Remediation-r8 gate: record this review separately, enforce unique direct YAML hierarchy and same-job command order, mask nested raw HTML code carriers, normalize or explicitly constrain supported equivalent YAML forms, add every recorded positive/negative fixture, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
