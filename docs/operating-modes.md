@@ -141,13 +141,14 @@ The checker validates unique keys, structure, target/revision, vocabulary, and u
 
 ### Fixed index rows
 
-Each plan link appears exactly once in its state index. Proposed/Active evidence links resolve to the applicable latest review artifact; Completed verification resolves to the declared implementation review. The reviews index contains one row per plan, lists the exact direct Markdown artifact set once, derives its latest verdict from the final listed artifact, and uses the matching lifecycle state.
+Each plan link appears exactly once in its state index. A Proposed plan with design reviews links the latest one and otherwise uses exact `none`; Active evidence always resolves to the latest review artifact; Completed verification resolves to the declared implementation review and otherwise uses exact `none`. Evidence-free rows reject links. The reviews index contains one row per plan, lists the exact direct Markdown artifact set once, derives its latest verdict from the final listed artifact, and uses the matching lifecycle state. When the artifact set is empty, the row links the canonical plan instead of a non-durable empty review directory and uses exact `none` for both Reviews and Latest verdict.
 
 ```text
 proposed:  | [Title](./plan.md) | Proposed | [review-N](../reviews/.../review-N.md): verdict | <next-gate-token> |
 active:    | [Title](./plan.md) | phase-N:<phase-state> | [evidence](...) | <next-gate-token> |
 completed: | [Title](./plan.md) | <Final disposition> | [implementation review](...) | <40-hex-or-none> |
 reviews:   | [Title](./review-dir/) | [review-N](...)[, ...] | <latest-verdict> | <Proposed|Active|Completed> |
+no review: | [Title](../<state>/<plan>.md) | none | none | <Proposed|Completed> |
 ```
 
 Roadmap lifecycle sections contain only rows shaped as:

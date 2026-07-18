@@ -7,10 +7,10 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-remediation-r2`
+- Next gate: `phase-6-re-review-r3`
 <!-- operating-modes-state:end -->
 
-2026-07-19: 第二轮独立实施评审 `implementation-review-002` 针对 `6c108feaa0870c3c363349088b6333a3c8f51f6f` 返回 `revise`、置信度 `high`。它确认首轮全部 finding 已关闭，并新增两个局部问题：pre-review Proposed 与 non-implemented Completed 必须允许 truthful `none` evidence 且拒绝 bogus link；`design-review-*` 应符合 contract 的 prefix grammar。当前为 `phase-6:in-progress`，next gate 为 `phase-6-remediation-r2`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: `implementation-review-002` 的 bounded remediation 已完成，当前为 `phase-6:in-progress`，next gate 为 `phase-6-re-review-r3`。每个 plan 都必须有 reviews-index row；无 artifact/review 时使用 canonical plan link 与 unlinked `none` sentinel，bogus link fail；`design-review-*` grammar 已与 contract 对齐。55 fixtures、focused/governed/auto、startup budget、launcher syntax、DB integrity/FK、runtime zero-diff、frozen hashes 与 whitespace 均通过；此前同一 Phase 6 的 pinned 19/19 backend/compileall 与 frontend build 仍适用。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediate the two implementation-review-002 findings and obtain a fresh qualifying implementation review.
+- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediation-r2 is verified and another fresh qualifying implementation review is next.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] Keep remediation-r2 limited to optional lifecycle evidence and Proposed gate-prefix grammar, then rerun bounded verification and request a fresh independent review.
+- [ ] After the scoped remediation-r2 commit, request another fresh independent implementation review against that stable boundary; require `accept` before closeout.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 

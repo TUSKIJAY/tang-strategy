@@ -429,6 +429,69 @@ None.
         write(self.root, "PROGRESS.md", f"# Progress\n\n{block}")
         write(self.root, "HANDOFF.md", f"# Handoff\n\n{block}")
 
+    def make_pre_review_proposed(self) -> None:
+        self.make_proposed()
+        self.replace(
+            "docs/exec-plans/proposed/demo-plan.md",
+            "- Design reviews: ../reviews/demo-plan/review-001.md@approve@r1",
+            "- Design reviews: none",
+        )
+        self.replace(
+            "docs/exec-plans/proposed/demo-plan.md",
+            "- Latest design verdict: approve",
+            "- Latest design verdict: none",
+        )
+        self.replace(
+            "docs/exec-plans/proposed/demo-plan.md",
+            "- Review independence: attested",
+            "- Review independence: none",
+        )
+        review = self.root / "docs/exec-plans/reviews/demo-plan/review-001.md"
+        review.unlink()
+        review.parent.rmdir()
+        write(
+            self.root,
+            "docs/exec-plans/proposed/index.md",
+            "# Proposed\n\n| Plan | Status | Review | Next gate |\n| --- | --- | --- | --- |\n"
+            "| [Demo](./demo-plan.md) | Proposed | none | activation-recording |\n",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/reviews/index.md",
+            "# Reviews\n\n| Plan | Reviews | Latest verdict | Lifecycle state |\n| --- | --- | --- | --- |\n"
+            "| [Demo](../proposed/demo-plan.md) | none | none | Proposed |\n",
+        )
+
+    def make_nonimplemented_completed(self) -> None:
+        self.make_completed()
+        replacements = {
+            "- Design reviews: ../reviews/demo-plan/review-001.md@approve@r1": "- Design reviews: none",
+            "- Latest design verdict: approve": "- Latest design verdict: none",
+            "- Review independence: attested": "- Review independence: none",
+            "- Implementation review: ../reviews/demo-plan/implementation-review-001.md@accept": "- Implementation review: none",
+            "- Final disposition: Completed": "- Final disposition: Rejected",
+            "- Verified implementation commit: `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`": "- Verified implementation commit: none",
+            "- Lifecycle reconciliation commit: `bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb`": "- Lifecycle reconciliation commit: none",
+        }
+        for old, new in replacements.items():
+            self.replace("docs/exec-plans/completed/demo-plan.md", old, new)
+        review_dir = self.root / "docs/exec-plans/reviews/demo-plan"
+        (review_dir / "review-001.md").unlink()
+        (review_dir / "implementation-review-001.md").unlink()
+        review_dir.rmdir()
+        write(
+            self.root,
+            "docs/exec-plans/completed/index.md",
+            "# Completed\n\n| Plan | Disposition | Verification | Final commit |\n| --- | --- | --- | --- |\n"
+            "| [Demo](./demo-plan.md) | Rejected | none | none |\n",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/reviews/index.md",
+            "# Reviews\n\n| Plan | Reviews | Latest verdict | Lifecycle state |\n| --- | --- | --- | --- |\n"
+            "| [Demo](../completed/demo-plan.md) | none | none | Completed |\n",
+        )
+
     def test_valid_active_fixture_passes(self) -> None:
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])
@@ -503,6 +566,30 @@ None.
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])
 
+    def test_pre_review_proposed_with_none_evidence_passes(self) -> None:
+        self.make_pre_review_proposed()
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_pre_review_proposed_bogus_evidence_link_fails(self) -> None:
+        self.make_pre_review_proposed()
+        self.replace(
+            "docs/exec-plans/proposed/index.md",
+            "| Proposed | none | activation-recording |",
+            "| Proposed | [none](../plan-template.md) | activation-recording |",
+        )
+        self.assert_error("without design reviews must use evidence none")
+
+    def test_every_plan_requires_a_reviews_index_row(self) -> None:
+        self.make_pre_review_proposed()
+        write(
+            self.root,
+            "docs/exec-plans/reviews/index.md",
+            "# Reviews\n\n| Plan | Reviews | Latest verdict | Lifecycle state |\n| --- | --- | --- | --- |\n"
+            "| None | none | none | None |\n",
+        )
+        self.assert_error("reviews index: missing plan rows: demo-plan")
+
     def test_active_without_phase_fails(self) -> None:
         self.replace("docs/exec-plans/active/demo-plan.md", "- Current phase: phase-1", "- Current phase: none")
         self.assert_error("lacks phase, phase state, or phase entry gate")
@@ -511,6 +598,20 @@ None.
         self.make_completed()
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_nonimplemented_completed_with_none_verification_passes(self) -> None:
+        self.make_nonimplemented_completed()
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_nonimplemented_completed_bogus_verification_link_fails(self) -> None:
+        self.make_nonimplemented_completed()
+        self.replace(
+            "docs/exec-plans/completed/index.md",
+            "| Rejected | none | none |",
+            "| Rejected | [none](../plan-template.md) | none |",
+        )
+        self.assert_error("without an implementation review must use verification none")
 
     def test_migrated_legacy_completed_plan_passes_without_rewriting_reviews(self) -> None:
         self.make_completed()
@@ -678,6 +779,28 @@ None.
         ):
             self.replace(relative, "activation-recording", "publish-now")
         self.assert_error("must be a review, revision, or activation-recording gate")
+
+    def test_all_proposed_gate_prefixes_allow_delimited_suffixes(self) -> None:
+        self.make_proposed()
+        previous = "activation-recording"
+        for gate in (
+            "design-review-r2",
+            "review-round-2",
+            "revision-v2",
+            "plan-revision-v2",
+            "activation-recording-user",
+        ):
+            with self.subTest(gate=gate):
+                for relative in (
+                    "docs/exec-plans/proposed/demo-plan.md",
+                    "docs/exec-plans/proposed/index.md",
+                    "PROGRESS.md",
+                    "HANDOFF.md",
+                ):
+                    self.replace(relative, previous, gate)
+                completed, payload = self.check()
+                self.assertEqual(completed.returncode, 0, payload["errors"])
+                previous = gate
 
     def test_matching_review_requires_all_reviewer_fields(self) -> None:
         self.replace(

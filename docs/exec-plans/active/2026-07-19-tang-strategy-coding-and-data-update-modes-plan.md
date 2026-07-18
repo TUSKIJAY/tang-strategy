@@ -15,13 +15,13 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-remediation-r2
+- Next gate: phase-6-re-review-r3
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and the first remediation are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r2 is authorized by implementation-review-002 and remains bounded by renewed independent review and closeout gates
-- Scope authority: remediation-r2 may correct only optional Proposed/non-implemented-Completed evidence shapes, empty reviews-index rows, design-review prefix grammar, and their fixtures; runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-5 and both reviewed remediations are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remains bounded by renewed independent review and closeout gates
+- Scope authority: remediation-r2 is complete; only renewed review evidence and lifecycle closeout may proceed, while runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-002` returned `revise` with `high` confidence against remediation commit `6c108feaa0870c3c363349088b6333a3c8f51f6f`. The only next gate is bounded remediation of its optional-evidence and gate-prefix findings, followed by another fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:in-progress`. The bounded remediation for `implementation-review-002` is complete and verified; the only next gate is another fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -707,3 +707,6 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Review gate: commit the scoped remediation boundary, then request a fresh independent review against that stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
 - Re-review boundary: `implementation-review-002.md`, authored by `independent-implementation-reviewer-2026-07-19-r2`, returned `revise` with `high` confidence against stable commit `6c108feaa0870c3c363349088b6333a3c8f51f6f`. It confirmed every implementation-review-001 finding closed and found two local follow-ups: optional evidence must use truthful `none` sentinels for pre-review Proposed and non-implemented Completed states while rejecting bogus links, and `design-review` must allow the same delimiter/suffix grammar as the other Proposed gate categories.
 - Remediation-r2 gate: record this review separately, add positive and adversarial fixtures for both optional-evidence lifecycle states plus all allowed gate prefixes, rerun the bounded verification set, and obtain a fresh independent `accept` before closeout.
+- Remediation-r2 result: the reviews index now requires one row for every plan. Rows with no review artifacts link the canonical plan and use exact `none`/`none`, avoiding non-durable empty directories; Proposed and non-implemented Completed state rows likewise require an unlinked `none` sentinel and reject bogus links. Artifact-bearing rows retain exact review-directory/set/latest-verdict enforcement. `design-review` now supports the same delimited suffix grammar as the other four Proposed categories.
+- Remediation-r2 verification: 55 temporary-Git fixtures pass, including truthful-pass and bogus-link-fail cases for pre-review Proposed and non-implemented Completed states, a missing reviews-index row failure, and suffixed positive cases for all five allowed Proposed gate prefixes. Focused/governed/auto checks, startup budget, launcher syntax, DB integrity/FK, runtime zero-diff, frozen hashes, and whitespace pass. The earlier pinned 19/19 backend/compileall and temporary frontend build evidence remains applicable because remediation-r2 changes only the contract, focused checker, and its fixtures.
+- Re-review-r3 gate: commit this scoped remediation boundary, then request another fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.

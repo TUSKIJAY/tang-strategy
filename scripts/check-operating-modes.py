@@ -149,7 +149,7 @@ def parse_header_bullets(
 def is_proposed_next_gate(value: str) -> bool:
     return bool(
         re.fullmatch(
-            r"(?:design-review|review(?:[._:@/-].*)?|revision(?:[._:@/-].*)?|"
+            r"(?:design-review(?:[._:@/-].*)?|review(?:[._:@/-].*)?|revision(?:[._:@/-].*)?|"
             r"plan-revision(?:[._:@/-].*)?|activation-recording(?:[._:@/-].*)?)",
             value,
         )
@@ -486,24 +486,17 @@ def check_reviews_index(
     row_slugs: list[str] = []
     latest_by_slug: dict[str, tuple[Path, str]] = {}
     plans_by_slug = {plan.slug: plan for plan in plans if plan.slug}
+    plans_by_path = {plan.path.resolve(): plan for plan in plans}
     for cells, target, _line in review_rows:
         resolved = resolve_inside(root, review_index.parent, target, "reviews index", errors)
         if resolved is None:
             continue
-        slug = resolved.name
+        plan = plans_by_path.get(resolved)
+        slug = plan.slug if plan is not None else (resolved.stem if resolved.suffix == ".md" else resolved.name)
         row_slugs.append(slug)
-        plan = plans_by_slug.get(slug)
+        plan = plan or plans_by_slug.get(slug)
         if plan is None:
-            errors.append(f"reviews index: ghost review directory row: {target}")
-            continue
-        expected_review_directory = (root / "docs" / "exec-plans" / "reviews" / slug).resolve()
-        if resolved != expected_review_directory:
-            errors.append(
-                f"reviews index: {slug} row must target its canonical review directory: "
-                f"docs/exec-plans/reviews/{slug}/"
-            )
-        if not resolved.is_dir():
-            errors.append(f"reviews index: review directory does not exist: {target}")
+            errors.append(f"reviews index: ghost plan/review row: {target}")
             continue
         if len(cells) < 4 or clean_value(cells[3]) != plan.status:
             errors.append(
@@ -534,7 +527,11 @@ def check_reviews_index(
                 errors.append(f"reviews index: {slug} listed artifact does not exist: {artifact.relative_to(root)}")
         if len(listed) != len(set(listed)):
             errors.append(f"reviews index: {slug} contains duplicate review artifacts")
-        expected_artifacts = {path.resolve() for path in resolved.glob("*.md") if path.name != "index.md"}
+        expected_artifacts = (
+            {path.resolve() for path in expected_directory.glob("*.md") if path.name != "index.md"}
+            if expected_directory.is_dir()
+            else set()
+        )
         listed_set = set(listed)
         missing = sorted(str(path.relative_to(root)) for path in expected_artifacts - listed_set)
         extra = sorted(
@@ -546,6 +543,11 @@ def check_reviews_index(
                 f"reviews index: {slug} artifact set mismatch; missing={missing} extra={extra}"
             )
         if listed:
+            if resolved != expected_directory or not resolved.is_dir():
+                errors.append(
+                    f"reviews index: {slug} row with artifacts must target its canonical review directory: "
+                    f"docs/exec-plans/reviews/{slug}/"
+                )
             latest_path = listed[-1]
             latest_verdict = review_artifact_verdict(latest_path, root, errors) if latest_path.is_file() else ""
             declared_latest = clean_value(cells[2]) if len(cells) > 2 else ""
@@ -555,12 +557,19 @@ def check_reviews_index(
                     f"expected {latest_verdict!r} from {latest_path.name}"
                 )
             latest_by_slug[slug] = (latest_path, latest_verdict)
+        else:
+            if resolved != plan.path.resolve():
+                errors.append(
+                    f"reviews index: {slug} row without artifacts must target the canonical plan path"
+                )
+            declared_artifacts = clean_value(cells[1]) if len(cells) > 1 else ""
+            declared_latest = clean_value(cells[2]) if len(cells) > 2 else ""
+            if declared_artifacts != "none" or declared_latest != "none":
+                errors.append(
+                    f"reviews index: {slug} empty artifact set requires Reviews=none and Latest verdict=none"
+                )
 
-    expected_review_slugs = {
-        plan.slug
-        for plan in plans
-        if plan.slug and (root / "docs" / "exec-plans" / "reviews" / plan.slug).is_dir()
-    }
+    expected_review_slugs = {plan.slug for plan in plans if plan.slug}
     if len(row_slugs) != len(set(row_slugs)):
         errors.append("reviews index: duplicate plan rows")
     missing_reviews = sorted(expected_review_slugs - set(row_slugs))
@@ -608,27 +617,35 @@ def check_indexes(root: Path, plans: list[Plan], errors: list[str]) -> None:
             if plan is None:
                 errors.append(f"state index: {index.relative_to(root)} has ghost plan link: {target}")
                 continue
-            evidence = (
-                state_index_evidence(root, index, cells[2], plan.slug, errors)
-                if len(cells) >= 3
-                else None
-            )
             if directory == "proposed":
                 if len(cells) < 4 or clean_value(cells[1]) != "Proposed":
                     errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} must use Proposed")
                 if len(cells) >= 4 and clean_value(cells[3]) != clean_value(plan.metadata.get("Next gate", "")):
                     errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} next gate mismatch")
                 reviews = parse_design_reviews(plan.metadata.get("Design reviews", ""), plan.path.relative_to(root), errors)
-                expected_evidence = (
-                    resolve_inside(root, plan.path.parent, reviews[-1][0], "state index evidence", errors)
-                    if reviews
-                    else None
-                )
-                if expected_evidence is not None and evidence != expected_evidence:
-                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} review evidence mismatch")
-                if reviews and not cells[2].strip().endswith(f": {reviews[-1][1]}"):
+                if reviews:
+                    evidence = (
+                        state_index_evidence(root, index, cells[2], plan.slug, errors)
+                        if len(cells) >= 3
+                        else None
+                    )
+                    expected_evidence = resolve_inside(
+                        root,
+                        plan.path.parent,
+                        reviews[-1][0],
+                        "state index evidence",
+                        errors,
+                    )
+                    if expected_evidence is not None and evidence != expected_evidence:
+                        errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} review evidence mismatch")
+                    if not cells[2].strip().endswith(f": {reviews[-1][1]}"):
+                        errors.append(
+                            f"state index: {index.relative_to(root)} row for {plan.slug} review verdict mismatch"
+                        )
+                elif len(cells) < 3 or clean_value(cells[2]) != "none" or LINK_RE.search(cells[2]):
                     errors.append(
-                        f"state index: {index.relative_to(root)} row for {plan.slug} review verdict mismatch"
+                        f"state index: {index.relative_to(root)} row for {plan.slug} without design reviews "
+                        "must use evidence none"
                     )
             if directory == "active":
                 expected = f"{clean_value(plan.metadata.get('Current phase', ''))}:{clean_value(plan.metadata.get('Phase state', ''))}"
@@ -640,7 +657,14 @@ def check_indexes(root: Path, plans: list[Plan], errors: list[str]) -> None:
                 if len(cells) >= 4 and clean_value(cells[3]) != clean_value(plan.metadata.get("Next gate", "")):
                     errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} next gate mismatch")
                 latest = latest_reviews.get(plan.slug)
-                if latest is not None and evidence != latest[0]:
+                evidence = (
+                    state_index_evidence(root, index, cells[2], plan.slug, errors)
+                    if len(cells) >= 3
+                    else None
+                )
+                if latest is None:
+                    errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} lacks latest review evidence")
+                elif evidence != latest[0]:
                     errors.append(f"state index: {index.relative_to(root)} row for {plan.slug} latest evidence mismatch")
             if directory == "completed":
                 disposition = clean_value(plan.metadata.get("Final disposition", ""))
@@ -657,9 +681,20 @@ def check_indexes(root: Path, plans: list[Plan], errors: list[str]) -> None:
                         "state index evidence",
                         errors,
                     )
-                if expected_evidence is not None and evidence != expected_evidence:
+                if expected_evidence is not None:
+                    evidence = (
+                        state_index_evidence(root, index, cells[2], plan.slug, errors)
+                        if len(cells) >= 3
+                        else None
+                    )
+                    if evidence != expected_evidence:
+                        errors.append(
+                            f"state index: {index.relative_to(root)} row for {plan.slug} implementation evidence mismatch"
+                        )
+                elif len(cells) < 3 or clean_value(cells[2]) != "none" or LINK_RE.search(cells[2]):
                     errors.append(
-                        f"state index: {index.relative_to(root)} row for {plan.slug} implementation evidence mismatch"
+                        f"state index: {index.relative_to(root)} row for {plan.slug} without an implementation "
+                        "review must use verification none"
                     )
         expected_paths = {plan.path.resolve() for plan in plans if plan.directory_state == directory}
         actual_set = set(actual_paths)
