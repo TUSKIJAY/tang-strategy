@@ -15,13 +15,13 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-re-review-r6
+- Next gate: phase-6-remediation-r6
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and all four prior remediations are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r5 is authorized by implementation-review-005 and remains bounded by renewed independent review and closeout gates
-- Scope authority: remediation-r5 may correct only executable workflow/non-comment router carriers, exact index header/sentinel/delimiter grammar, bounded current-state markers, new-schema structured review history, and their fixtures/evidence migration; runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-5 and all five prior remediations are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r6 is authorized by implementation-review-006 and remains bounded by renewed independent review and closeout gates
+- Scope authority: remediation-r6 may correct only executable `jobs.<job>.steps[].run` carriers, non-operative Markdown comment/code contexts for constrained lifecycle records, operative router links, and their fixtures/contract wording; runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -725,3 +725,5 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Remediation-r5 result: contract routes now require non-comment, non-fenced canonical Markdown links. The project workflow accepts required commands only from actual inline/block `steps[].run` carriers in declared order and rejects comments or nested dead keys. All four indexes require their exact header, immediately adjacent separator, terminal delimiters, fixed rows, and exactly one sentinel when empty. Current-state blocks require start-before-end bounded markers. New-schema plans require full metadata on every declared review revision; `review-001` and `review-002` received metadata-only migration with their findings and verdicts unchanged.
 - Remediation-r5 verification: 79 temporary-Git fixtures pass, including every implementation-review-005 repro plus block-run positive, nested-run negative, header adjacency, four delimiter forms, missing state/reviews sentinels, reserved-word rows, reversed markers, and new-schema prior-revision bare-review failure. Focused/governed/auto checks, startup budget, launcher/checker syntax, frontend production build (1746 modules to deleted temporary output), DB integrity/FK, runtime zero-diff, frozen hashes, and whitespace pass. The earlier pinned 19/19 backend evidence remains applicable because no runtime file changed.
 - Re-review-r6 gate: commit this scoped remediation boundary, then request another fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
+- Re-review-r6 boundary: `implementation-review-006.md`, authored by `independent-implementation-reviewer-2026-07-19-r6`, returned `revise` with `high` confidence against stable commit `cc00bc40075b560a091b5ce30f2c60ba426b3a7e`. It confirmed all implementation-review-005 findings and prior key regressions closed, then found three categories: commands in non-job, `if:false`, dead-shell, and heredoc contexts can satisfy workflow carriers; lifecycle tables and constrained metadata inside HTML comments/fenced code can pass; and router pseudo-links inside inline/indented code can pass.
+- Remediation-r6 gate: record this review separately, constrain workflow carriers to direct runnable job steps, exclude non-operative Markdown contexts from lifecycle/router evidence, add the recorded negative fixtures, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
