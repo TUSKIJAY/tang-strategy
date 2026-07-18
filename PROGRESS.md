@@ -5,12 +5,12 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-5`
-- Phase state: `complete`
-- Next gate: `phase-6-implementation-review`
+- Current phase: `phase-6`
+- Phase state: `in-progress`
+- Next gate: `phase-6-remediation`
 <!-- operating-modes-state:end -->
 
-2026-07-19: Phase 5 已完成 full negative matrix 与 Data Update contract-text compatibility closeout，当前为 `phase-5:complete`，next gate 为 `phase-6-implementation-review`。35 个 temporary-Git fixtures、focused/composed checker、startup budget、launcher syntax、pinned temporary environment 下 19/19 backend tests 与 compileall、frontend production build、tracked DB integrity/foreign keys 均通过；临时 venv、cache 和 `dist` 已清理。真实 provider/IB/DB update/Tang input/commit/push/Pages/hosted evidence 未授权、未执行、未冒充 pass。
+2026-07-19: Phase 5 boundary commit `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e` 后的独立实施评审 `implementation-review-001` 返回 `revise`、置信度 `high`。当前为 `phase-6:in-progress`，next gate 为 `phase-6-remediation`：修复 constrained lifecycle false-pass、review/index 对账和 focused checker 越界扫描问题，再进行全套复验与新一轮独立评审。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-5:complete`; Phase 6 independent implementation review and closeout are next.
+- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediate `implementation-review-001` findings and obtain a fresh qualifying implementation review.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] Start Phase 6 review only after the verified Phase 5 scoped local commit succeeds.
+- [ ] Keep remediation limited to the recorded implementation-review findings, then rerun focused/composed/native verification and request a fresh independent review.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 

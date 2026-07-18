@@ -12,16 +12,16 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
-- Current phase: phase-5
-- Phase state: complete
-- Phase entry gate: `phase-4-complete@f8e84d657a6de7bac5a825f620cd6641d4a67c92`
-- Next gate: phase-6-implementation-review
+- Current phase: phase-6
+- Phase state: in-progress
+- Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
+- Next gate: phase-6-remediation
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 completed under `user-goal-execute-plan-2026-07-19`; Phase 6 remains bounded by independent implementation review and closeout gates
-- Scope authority: Phase 5 negative-matrix/compatibility hardening only; Phase 6 independent implementation review is the next unopened gate
+- Implementation authority: Phases 0-5 completed under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation is authorized by implementation-review-001 and remains bounded by renewed independent review and closeout gates
+- Scope authority: Phase 6 remediation may correct only the implementation-review-001 findings and their verification carriers; runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-5:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 5 completed the negative matrix, contract compatibility checks, and bounded native verification. The only next gate is `phase-6-implementation-review`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:in-progress`. Independent implementation review `implementation-review-001` returned `revise` with `high` confidence against Phase 5 commit `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`. The only next gate is bounded remediation of those findings, followed by a fresh qualifying implementation review; completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -694,3 +694,10 @@ This plan is **Active** at `phase-5:complete`. Revision `v2-review-foldback-2026
 - Compatibility verification: frontend production build passed with 1746 transformed modules and generated `frontend/dist` was removed; tracked DB read-only `integrity_check=ok` and foreign-key output was empty; focused/composed checkers, startup budget, launcher syntax, Markdown links, job names, whitespace, intended paths, and read-only hashes passed.
 - Deferred evidence: no real provider fetch, IB fallback, tracked-DB update, Tang trade input, local page smoke, data commit/push, Pages run, or hosted URL verification was authorized or executed. Those items are not called passes and remain future Data Update evidence.
 - Exit result: every implementation-scope automated/inspection row passes, all runtime-only rows are truthfully deferred, and Phase 6 independent implementation review may start after the scoped Phase 5 commit succeeds.
+
+### Phase 6 — in progress
+
+- Entry evidence: Phase 5 exit commit `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e` and independent implementation review `implementation-review-001.md`.
+- Review boundary: reviewer `independent-implementation-reviewer-2026-07-19-r1` returned `revise` with `high` confidence after inspecting the baseline-to-Phase-5 diff, phase commits, checker/fixtures, lifecycle evidence, read-only DB state, frontend build, and frozen hashes.
+- Required remediation: reject duplicate constrained keys; bind design and implementation review types to their use; constrain review targets/artifact paths; constrain Proposed next gates; reconcile review-index artifacts/latest verdict and lifecycle-index evidence; remove unconstrained source/prose semantic scanning from the focused lifecycle checker; correct the stale handoff wording.
+- Closeout gate: record this review boundary separately, implement only the reviewed remediation scope, pass focused/composed/native verification, and obtain a fresh independent `accept` before completed disposition.
