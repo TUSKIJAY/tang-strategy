@@ -1,6 +1,22 @@
 # <Plan Title>
 
+- Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
+- Plan slug: `<unique-slug>`
+- Revision: `<stable-revision-id>`
+- Plan author ID: `<non-empty-id>`
+- Design reviews: none
+- Latest design verdict: none
+- Review independence: none
+- Activation evidence: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: `design-review`
+- Implementation review: none
+- Final disposition: none
+- Verified implementation commit: none
+- Lifecycle reconciliation commit: none
 - Owner: <owner>
 - Created: YYYY-MM-DD
 - Scope authority: review-only; this template and proposed plan do not authorize implementation
@@ -60,3 +76,6 @@
 - Required verdict:
 - Required user approval:
 - Activation is a separate lifecycle change before implementation.
+- Implementation start requires a later explicit start/execute instruction after activation recording.
+
+The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../operating-modes.md) for state invariants, review paths, gate-token syntax, manual transitions, and closeout fields.

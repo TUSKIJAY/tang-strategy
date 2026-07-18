@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-- [`2026-07-19 Tang Strategy Coding And Data Update Modes`](./active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Active；`phase-0:complete`；canonical details: [`active` index](./active/index.md)
+- [2026-07-19 Tang Strategy Coding And Data Update Modes](./active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Active; canonical details: [active index](./active/index.md)
 
 ## Proposed Plans
 
@@ -39,4 +39,4 @@
 
 ## Completed Plans
 
-- [`2026-07-18 Tang Strategy governed harness and data safety recovery`](./completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md) — completed locally after independent `accept`; verified implementation commit `a70be643a968cc24215fe508e69b3e0496d3c34a`, acceptance/lifecycle reconciliation commit `2454ccb7fc1c927f2a52a3bd2db7debe41998594`; no remote action was authorized by that plan.
+- [2026-07-18 Tang Strategy governed harness and data safety recovery](./completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md) — Completed; canonical details: [completed index](./completed/index.md)

@@ -2,15 +2,23 @@
 
 ## Current Snapshot
 
+<!-- operating-modes-state:start -->
+- Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
+- Lifecycle status: `Active`
+- Current phase: `phase-1`
+- Phase state: `complete`
+- Next gate: `phase-2-start`
+<!-- operating-modes-state:end -->
+
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Startup Git evidence: this proposal began from `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` with a clean worktree/index; rerun the startup commands for live branch/HEAD/status truth
-- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-0:complete`; the explicit execute instruction and Phase 0 exit evidence are recorded
+- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-1:complete`; authority/format package and carrier attestation are recorded
 - Active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
 - Design reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
-- Implementation boundary: Phase 0 baseline/manifest/authority evidence only; no mode/checker/CI/runtime/data change; Phase 1 is the next unopened slice
+- Implementation boundary: Phase 1 contract/decision/templates/index/state blocks only; no checker/CI/runtime/data change; Phase 2 is next
 - Local Git boundary: after a lifecycle transition or Phase exit passes verification and state reconciliation, create one conventional commit containing only that boundary's plan-scoped paths
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, or other remote change is authorized
 
@@ -18,9 +26,9 @@
 
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
-3. Preserve any unrelated changes and read the active operating-modes plan plus its Phase 0 execution record.
-4. Phase 0 is complete. Verify and create its exact scoped local commit before entering Phase 1.
-5. Phase 1 is limited to the authority contract, decision, constrained formats, templates, indexes, roadmap, and current-state blocks.
+3. Preserve any unrelated changes and read `docs/operating-modes.md` plus the active plan execution record.
+4. Phase 1 is complete. Verify and create its exact scoped local commit before entering Phase 2.
+5. Phase 2 is limited to legacy metadata reconciliation, compact routers, focused checker, and Coding/lifecycle fixtures; no transition helper.
 6. At each verified lifecycle/Phase boundary, inspect the diff and use the plan's standing authority to stage only scoped paths and create one local conventional commit. Do not push, open a PR, publish, merge, or change remote settings without separate authority.
 
 ## Verification Evidence
@@ -36,6 +44,7 @@
 | Governed harness | pass: local checker, lifecycle links, startup budget, and structural validator `100/100` |
 | Operating-modes proposal baseline | pass: governed audit found 21/21 harness artifacts; current checker passed despite revalidated stale lifecycle truth, demonstrating the execution-layer gap |
 | Phase 0 manifest and authority freeze | pass: four planned additions absent as expected, all existing targets present, read-only hashes captured, no extra path or authority required |
+| Phase 1 constrained formats | pass: one normative contract, accepted decision, exact metadata/review/index/roadmap/state-block formats, and carrier inventory |
 | Independent review | `accept`, confidence `high` |
 | Local page acceptance | pass: root command, `/tmp` SQLite backup, 46 days, integrity `ok`, frontend/OpenAPI HTTP 200, immediate same-port restart, occupied-port refusal, and repeated Ctrl-C cleanup |
 | Tracked DB protection | SHA-256 before/after `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8` |
@@ -54,7 +63,7 @@ Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-gov
 
 ## Next Gate
 
-Create the verified scoped local Phase 0 commit, then enter `phase-1-start` for the authority contract and Constrained Format Package. Verified lifecycle/Phase closeouts use the standing scoped-local-commit authority; remote actions require separate authority.
+Create the verified scoped local Phase 1 commit, then enter `phase-2-start` for legacy metadata migration, compact routing, the focused checker, and Coding/lifecycle fixtures. Remote actions remain unauthorized.
 
 ## Handoff Boundary
 

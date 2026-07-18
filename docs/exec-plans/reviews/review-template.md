@@ -1,9 +1,14 @@
 # Review <NNN> — <Plan Title>
 
-- Review target: `<exact plan path and revision>`
-- Review type: design / implementation / closeout
-- Verdict: approve / revise / reject / accept
-- Confidence: low / medium / high
+- Review target: `<exact repository-relative plan path>`
+- Review target revision: `<exact revision-id>`
+- Review type: design|implementation|closeout
+- Reviewer ID: `<non-empty-id>`
+- Plan author ID: `<non-empty-id>`
+- Independence declaration: `attested`
+- Evidence method: `<independent repository inspection summary>`
+- Verdict: approve|revise|reject|accept
+- Confidence: low|medium|high
 
 ## Scope Checked
 
@@ -21,4 +26,4 @@
 
 ## Verdict Rationale
 
-State what was independently verified and what remains unverified. This review does not activate or execute the plan.
+State what was independently verified and what remains unverified. The reviewer ID must differ from the plan author ID, and the review context must not have drafted the reviewed revision. This review does not activate or execute the plan.

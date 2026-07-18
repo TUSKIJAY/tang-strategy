@@ -2,7 +2,15 @@
 
 ## Current Status
 
-2026-07-19: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` 已在用户明确的 execute instruction 下完成 Phase 0 baseline/manifest/authority freeze，当前为 `phase-0:complete`，next gate 为 `phase-1-start`。现有 governed checker 与 startup budget 通过；Section 2.2 manifest 无 mismatch；TV/IB default-import、candidate-first rebuild、TV-first runbook 与 Pages publisher 边界已取证。用户既有 standing local commit authority 仅允许每个已验证 Phase/lifecycle 边界的 scoped 本地 conventional commit；未 fetch、rebuild、修改 DB/runtime/provider/publisher，也未获得 push/PR/merge/publish 或远端权限。
+<!-- operating-modes-state:start -->
+- Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
+- Lifecycle status: `Active`
+- Current phase: `phase-1`
+- Phase state: `complete`
+- Next gate: `phase-2-start`
+<!-- operating-modes-state:end -->
+
+2026-07-19: Phase 1 已完成 `operating-modes-v1` authority contract、Accepted decision、plan/review metadata schema、fixed index/roadmap rows 与匹配的 current-state blocks，当前为 `phase-1:complete`，next gate 为 `phase-2-start`。Section 9 每个 matrix row 都有可实施 carrier；machine fixture、contract inspection、existing backend test、human evidence 与 future authorized run 边界已明确。本阶段未实施 checker/CI/runtime/data/provider/publisher 变更，远端权限仍未授予。
 
 ## Navigation
 
@@ -17,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-0:complete`; Phase 1 authority/format package is the next implementation slice.
+- [ ] Active operating-modes plan is at `phase-1:complete`; Phase 2 legacy migration/router/checker/Coding fixtures are next.
 
 ## Blocked
 
@@ -25,12 +33,13 @@
 
 ## To Do
 
-- [ ] Start Phase 1 only after the verified Phase 0 scoped local commit succeeds.
+- [ ] Start Phase 2 only after the verified Phase 1 scoped local commit succeeds.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-19 - Completed Phase 1 single authority contract, accepted decision, constrained plan/review/index/roadmap/state-block formats, and fixture-carrier attestation.
 - [x] 2026-07-19 - Completed Phase 0 baseline, exact manifest revalidation, authority freeze, read-only contract/hash capture, governed checker, startup budget, and no-runtime/data/provider/publisher mutation proof.
 
 - [x] 2026-07-18 - Confirmed the clean startup baseline at `codex/project-harness@8c6851d8f469e7a84471cd2900b00b3d9dcbdf07`; `main` and `origin/main` remained at `c262ba0`.

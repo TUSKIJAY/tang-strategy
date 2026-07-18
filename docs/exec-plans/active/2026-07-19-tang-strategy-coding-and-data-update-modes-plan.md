@@ -12,16 +12,16 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
-- Current phase: phase-0
+- Current phase: phase-1
 - Phase state: complete
-- Phase entry gate: `user-goal-execute-plan-2026-07-19`
-- Next gate: phase-1-start
+- Phase entry gate: `phase-0-complete@6b1707cd75a2396dc39b6611ff6028fdacf851d2`
+- Next gate: phase-2-start
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phase 0 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
-- Scope authority: Phase 0 baseline/lifecycle evidence only; Phase 1 is the next unopened implementation gate
+- Implementation authority: Phases 0-1 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
+- Scope authority: Phase 1 authority/format/template/index/current-state slice only; Phase 2 is the next unopened implementation gate
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-0:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit user activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 0 passed its baseline, manifest, authority, startup-budget, status, and no-runtime-mutation checks. The only next gate is `phase-1-start`. No publication, broker, provider, remote, PR, merge, or push authority was created; local commits remain limited to the standing boundary authority recorded in Section 12.
+This plan is **Active** at `phase-1:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 1 delivered the authority contract and complete Constrained Format Package without checker, runtime, data, provider, or publisher changes. The only next gate is `phase-2-start`. No publication, broker, provider, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -645,3 +645,13 @@ This plan is **Active** at `phase-0:complete`. Revision `v2-review-foldback-2026
 - Frozen read-only hashes: `docs/daily-publish-runbook.md` = `bc7f2fe36b9f5be06ff1fcd43b2f81ea053b64784a2532cfe0a4bf6806ee3aac`; `.github/workflows/publish-static-reviews.yml` = `752459988433320587963c33f18cff6c572bcb2598be94cc610b64d61599277d`; tracked DB = `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8`.
 - Authority freeze: local plan-scoped implementation and verified phase-boundary commits are authorized; fetch, rebuild, DB mutation, broker/provider connection, push, PR, merge, Pages publish, remote administration, and scope expansion are not authorized.
 - Exit result: no unresolved manifest/baseline mismatch; Phase 1 may start after the scoped Phase 0 lifecycle/evidence commit succeeds.
+
+### Phase 1 — complete
+
+- Entry evidence: Phase 0 exit commit `6b1707cd75a2396dc39b6611ff6028fdacf851d2` and clean scoped baseline.
+- Contract: added `docs/operating-modes.md` as the single normative source for peer modes, authority dimensions, Coding lanes, lifecycle stages, `operating-modes-v1` formats, reviewer evidence, Data Update gates, escalation, and checker/human boundaries.
+- Decision and routing: added the Accepted operating-modes/source decision and routed both contract and decision from the documentation authority map and decision index. Decision acceptance is explicitly non-executing.
+- Constrained formats: plan and review templates now own every required field; four index tables and roadmap lifecycle rows use fixed link/state shapes; `PROGRESS.md` and `HANDOFF.md` contain one matching current-state block. Gate tokens use a minimal character constraint rather than a closed vocabulary.
+- Migration treatment: existing completed-plan prose remains untouched until metadata-only migration in Phase 2; fixed current index rows already use the future deterministic shapes.
+- Fixture-carrier attestation: every Section 9.1 and 9.2 row has an implementable carrier. Lifecycle/state/review/read-only/profile cases map to temporary-repository fixtures; routing and unchanged text map to contract inspection; actual calendar/TV/rebuild/DB/assemble behavior maps to named existing backend tests in Phase 3; identity/authority/order/optional checks map to human evidence; real publish proof remains a future authorized run.
+- Exit result: no checker requirement depends on ambiguous prose, and no offline carrier claims a provider, broker, DB update, push, Pages run, or hosted verification passed. Phase 2 may start after the scoped Phase 1 commit succeeds.
