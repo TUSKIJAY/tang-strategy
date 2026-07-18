@@ -13,15 +13,15 @@
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
 - Current phase: phase-6
-- Phase state: in-progress
+- Phase state: complete
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-re-review-r13
+- Next gate: phase-6-closeout
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and remediations r1-r12 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 now requires renewed independent implementation review and a qualifying `accept` before closeout
-- Scope authority: re-review-r13 is read-only except for its review artifact; no further implementation mutation is authorized until a review finding requires bounded remediation, and runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-6 and remediations r1-r12 are complete under `user-goal-execute-plan-2026-07-19`; implementation-review-013 provides the qualifying independent `accept`, so only lifecycle closeout remains authorized
+- Scope authority: closeout may reconcile this plan, lifecycle indexes/roadmap, review index, PROGRESS, and HANDOFF; no further implementation, runtime, data, provider, publisher, or remote mutation is authorized
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-012` returned `revise` with `high` confidence against remediation-r11 commit `e4a3faa45d358890515a28a812eb4a15143a3425`; remediation-r12 has now reconciled the normative Unicode range policy with 146 passing fixtures and the full bounded verification set. The only next gate is fresh independent implementation re-review-r13 against the stable remediation commit. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:complete`. Independent re-review `implementation-review-013` returned `accept` with `high` confidence against remediation-r12 commit `994f9176eb74778f346710e62ec6dabde55bae9a`, with no serious, medium, or minor findings. All implementation phases and acceptance gates are complete; the only next gate is lifecycle closeout to `completed/` with durable implementation and reconciliation evidence. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -760,3 +760,5 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Remediation-r12 result: the contract now makes its explicit YAML printable ranges authoritative, retains BMP U+FFFE/U+FFFF outside those ranges, and removes the contradictory blanket noncharacter exclusion. No predicate change was required because the checker already implemented the YAML-compatible source policy verified by the independent parser.
 - Remediation-r12 verification: 146 temporary-Git fixtures pass, including raw U+FDD0, U+FDEF, U+1FFFE, U+1FFFF, U+10FFFE, and U+10FFFF positives plus raw U+FFFE/U+FFFF negatives. Focused/governed/auto checks, startup budget, launcher/checker syntax, `git diff --check`, baseline runtime/data zero-diff, exact frozen hashes, read-only DB integrity/foreign keys/46-day count, and a Vite production build of 1746 modules to a deleted external temporary directory all pass. The earlier pinned 19/19 backend evidence remains applicable because no runtime file changed.
 - Re-review-r13 gate: commit this scoped remediation boundary, then request a fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
+- Re-review-r13 boundary: `implementation-review-013.md`, authored by `independent-implementation-reviewer-2026-07-19-r13`, returned `accept` with `high` confidence against stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`. It independently confirmed remediation-r12 closed the sole review-012 finding, all 146 fixtures and bounded verification passed, frozen runtime/data/provider/publisher boundaries held, and no implementation findings remained.
+- Phase 6 completion: the qualifying independent `accept` closes the implementation gate. Phase state is `complete`; lifecycle closeout may move the plan to `completed/`, declare the accepted review and verified implementation commit, reconcile all derived state surfaces, and form the separately referenceable lifecycle commit without granting any remote or publication authority.

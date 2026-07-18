@@ -6,11 +6,11 @@
 - Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
-- Phase state: `in-progress`
-- Next gate: `phase-6-re-review-r13`
+- Phase state: `complete`
+- Next gate: `phase-6-closeout`
 <!-- operating-modes-state:end -->
 
-2026-07-19: remediation-r12 已将 Unicode raw-source policy 收敛到 YAML-compatible listed ranges，并以 allowed supplementary plane-end values 与 rejected BMP U+FFFE/U+FFFF 边界 fixtures 固定。146/146 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。当前为 `phase-6:in-progress`，next gate 为 `phase-6-re-review-r13`；完成态仍需 fresh independent `accept`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: 第十三轮独立实施评审 `implementation-review-013` 针对 remediation-r12 commit `994f9176eb74778f346710e62ec6dabde55bae9a` 返回 `accept`、置信度 `high`，无 serious/medium/minor finding。146/146 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。当前为 `phase-6:complete`，next gate 为 `phase-6-closeout`；真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediation-r12 is verified and awaits fresh qualifying implementation re-review-r13.
+- [ ] Active operating-modes plan is at `phase-6:complete`; implementation-review-013 accepted the stable implementation and only lifecycle closeout remains.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] Commit the verified remediation-r12 boundary, request fresh independent re-review-r13, and close out only after a qualifying `accept`.
+- [ ] Record implementation-review-013 and the Phase 6 completion boundary, then move the plan to completed and reconcile durable commit evidence.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
