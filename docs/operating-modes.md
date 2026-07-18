@@ -118,7 +118,8 @@ State invariants:
 
 - Proposed: `Status=Proposed`, no activation/current phase, and a next gate beginning with `design-review`, `review`, `revision`, `plan-revision`, or `activation-recording`.
 - Active: latest matching-revision design review is `approve`, independence is `attested`, activation is non-none, and phase/phase state/entry gate/next gate are non-none.
-- Completed: final disposition is non-none; an implemented plan references an `accept` implementation review. Commit values may be `none` only when no commit was authorized.
+- Completed: final disposition is non-none. `Final disposition=Completed` always classifies the plan as implemented and requires an `accept` implementation review even when commit values are `none`; any other disposition with implementation review or implementation commit evidence also requires that `accept`. Commit values may be `none` only when no commit was authorized.
+- Review-field consistency: `Design reviews=none` requires both `Latest design verdict=none` and `Review independence=none`; a new-schema plan with design reviews requires `Review independence=attested`.
 - Historical bare review filenames are accepted only for explicitly migrated `operating-modes-legacy-v1` completed plans. New-schema plans use repository-relative review paths.
 
 ### Independent review metadata
@@ -141,7 +142,7 @@ The checker validates unique keys, structure, target/revision, vocabulary, and u
 
 ### Fixed index rows
 
-Each plan link appears exactly once in its state index. A Proposed plan with design reviews links the latest one and otherwise uses exact `none`; Active evidence always resolves to the latest review artifact; Completed verification resolves to the declared implementation review and otherwise uses exact `none`. Evidence-free rows reject links. The reviews index contains one row per plan, lists the exact direct Markdown artifact set once, derives its latest verdict from the final listed artifact, and uses the matching lifecycle state. When the artifact set is empty, the row links the canonical plan instead of a non-durable empty review directory and uses exact `none` for both Reviews and Latest verdict.
+Each fixed index row has exactly four cells, and its Plan cell is exactly one canonical Markdown link with no appended text or second link. Each plan link appears exactly once in its state index. A Proposed plan with design reviews links the latest one and otherwise uses exact `none`; Active evidence always resolves to the latest review artifact; Completed verification resolves to the declared implementation review and otherwise uses exact `none`. Evidence-free rows reject links. The reviews index contains one row per plan, lists the exact direct Markdown artifact set once, derives its latest verdict from the final listed artifact, and uses the matching lifecycle state. When the artifact set is empty, the row links the canonical plan instead of a non-durable empty review directory and uses exact `none` for both Reviews and Latest verdict.
 
 ```text
 proposed:  | [Title](./plan.md) | Proposed | [review-N](../reviews/.../review-N.md): verdict | <next-gate-token> |

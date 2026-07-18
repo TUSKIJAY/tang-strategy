@@ -258,6 +258,17 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
         )
     if not reviews and meta.get("Design reviews") != "none":
         errors.append(f"plan reviews: {relative} Design reviews must be none or constrained review entries")
+    if not reviews and meta.get("Design reviews") == "none":
+        if latest != "none" or independence != "none":
+            errors.append(
+                f"plan reviews: {relative} Design reviews=none requires Latest design verdict=none "
+                "and Review independence=none"
+            )
+    elif plan.schema == "operating-modes-v1" and independence != "attested":
+        errors.append(
+            f"plan reviews: {relative} new-schema plans with design reviews require "
+            "Review independence=attested"
+        )
 
     review_results: list[tuple[str, str, str, Path | None, bool]] = []
     for raw_path, verdict, target_revision in reviews:
@@ -310,7 +321,11 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
     elif plan.directory_state == "completed":
         if disposition == "none":
             errors.append(f"plan state: {relative} Completed plan lacks final disposition")
-        implemented = meta.get("Verified implementation commit") != "none" or implementation != "none"
+        implemented = (
+            disposition == "Completed"
+            or meta.get("Verified implementation commit") != "none"
+            or implementation != "none"
+        )
         if implemented:
             validate_implementation_review(root, plan, implementation, errors)
 
@@ -446,8 +461,17 @@ def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[li
         cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
         if not cells or cells[0] in {"Plan", "Decision"}:
             continue
-        match = LINK_RE.search(cells[0])
-        if match:
+        links = list(LINK_RE.finditer(cells[0]))
+        if links:
+            if len(cells) != 4:
+                errors.append(
+                    f"index: {path.relative_to(root)} fixed row must contain exactly four cells: {line}"
+                )
+            if len(links) != 1 or links[0].span() != (0, len(cells[0])):
+                errors.append(
+                    f"index: {path.relative_to(root)} Plan cell must be exactly one standalone link: {cells[0]}"
+                )
+            match = links[0]
             rows.append((cells, match.group(2).strip().strip("<>"), line))
     return rows
 

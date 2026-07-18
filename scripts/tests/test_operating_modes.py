@@ -580,6 +580,33 @@ None.
         )
         self.assert_error("without design reviews must use evidence none")
 
+    def test_no_design_reviews_rejects_declared_approve(self) -> None:
+        self.make_pre_review_proposed()
+        self.replace(
+            "docs/exec-plans/proposed/demo-plan.md",
+            "- Latest design verdict: none",
+            "- Latest design verdict: approve",
+        )
+        self.assert_error("Design reviews=none requires Latest design verdict=none")
+
+    def test_no_design_reviews_rejects_independence_attestation(self) -> None:
+        self.make_pre_review_proposed()
+        self.replace(
+            "docs/exec-plans/proposed/demo-plan.md",
+            "- Review independence: none",
+            "- Review independence: attested",
+        )
+        self.assert_error("Design reviews=none requires Latest design verdict=none")
+
+    def test_new_schema_design_reviews_require_independence_attestation(self) -> None:
+        self.make_proposed()
+        self.replace(
+            "docs/exec-plans/proposed/demo-plan.md",
+            "- Review independence: attested",
+            "- Review independence: none",
+        )
+        self.assert_error("new-schema plans with design reviews require Review independence=attested")
+
     def test_every_plan_requires_a_reviews_index_row(self) -> None:
         self.make_pre_review_proposed()
         write(
@@ -612,6 +639,44 @@ None.
             "| Rejected | [none](../plan-template.md) | none |",
         )
         self.assert_error("without an implementation review must use verification none")
+
+    def test_completed_disposition_requires_accept_even_without_commits(self) -> None:
+        self.make_nonimplemented_completed()
+        self.replace(
+            "docs/exec-plans/completed/demo-plan.md",
+            "- Final disposition: Rejected",
+            "- Final disposition: Completed",
+        )
+        self.replace(
+            "docs/exec-plans/completed/index.md",
+            "| Rejected | none | none |",
+            "| Completed | none | none |",
+        )
+        self.assert_error("implemented Completed plan requires <path>@accept")
+
+    def test_state_index_plan_cell_rejects_second_link(self) -> None:
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "[Demo](./demo-plan.md)",
+            "[Demo](./demo-plan.md) [bogus](../plan-template.md)",
+        )
+        self.assert_error("Plan cell must be exactly one standalone link")
+
+    def test_reviews_index_plan_cell_rejects_second_link(self) -> None:
+        self.replace(
+            "docs/exec-plans/reviews/index.md",
+            "[Demo](./demo-plan/)",
+            "[Demo](./demo-plan/) [bogus](../plan-template.md)",
+        )
+        self.assert_error("Plan cell must be exactly one standalone link")
+
+    def test_fixed_index_row_rejects_extra_cell(self) -> None:
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "| phase-2-start |",
+            "| phase-2-start | extra |",
+        )
+        self.assert_error("fixed row must contain exactly four cells")
 
     def test_migrated_legacy_completed_plan_passes_without_rewriting_reviews(self) -> None:
         self.make_completed()
