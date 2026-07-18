@@ -7,10 +7,10 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-re-review-r12`
+- Next gate: `phase-6-remediation-r12`
 <!-- operating-modes-state:end -->
 
-2026-07-19: remediation-r11 已关闭 `implementation-review-011` 的 raw YAML-forbidden DEL/C1 character false-pass。145/145 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。当前为 `phase-6:in-progress`，next gate 为 `phase-6-re-review-r12`；完成态仍需 fresh independent `accept`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: 第十二轮独立实施评审 `implementation-review-012` 针对 remediation-r11 commit `e4a3faa45d358890515a28a812eb4a15143a3425` 返回 `revise`、置信度 `high`。它确认全部第十一轮 finding 与既有关键回归关闭，并识别出 listed YAML printable ranges 与 generic noncharacter exclusion 的合同矛盾；独立 YAML parser 接受这些 listed values。当前为 `phase-6:in-progress`，next gate 为 `phase-6-remediation-r12`；真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediation-r11 is verified and awaits fresh qualifying implementation re-review-r12.
+- [ ] Active operating-modes plan is at `phase-6:in-progress`; reconcile only implementation-review-012 Unicode range policy wording and boundary fixtures, then obtain a fresh qualifying implementation review.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] Commit the verified remediation-r11 boundary, request fresh independent re-review-r12, and close out only after a qualifying `accept`.
+- [ ] Record review-012 separately, complete bounded remediation-r12 and verification, then request fresh independent review; close out only after a qualifying `accept`.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 

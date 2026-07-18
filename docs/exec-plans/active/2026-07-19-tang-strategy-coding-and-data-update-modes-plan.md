@@ -15,13 +15,13 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-re-review-r12
+- Next gate: phase-6-remediation-r12
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and remediations r1-r11 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 now requires renewed independent implementation review and a qualifying `accept` before closeout
-- Scope authority: re-review-r12 is read-only except for its review artifact; no further implementation mutation is authorized until a review finding requires bounded remediation, and runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-5 and remediations r1-r11 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r12 is authorized by implementation-review-012 and remains bounded by renewed independent review and closeout gates
+- Scope authority: remediation-r12 may only reconcile the raw Unicode range policy wording with the existing YAML-compatible predicate and add its boundary fixtures; runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-011` returned `revise` with `high` confidence against remediation-r10 commit `ff00efdeb1c1f17d5ed6dbd89c6acf491a320bca`; remediation-r11 has now closed the recorded raw YAML printable-source finding with 145 passing fixtures and the full bounded verification set. The only next gate is fresh independent implementation re-review-r12 against the stable remediation commit. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-012` returned `revise` with `high` confidence against remediation-r11 commit `e4a3faa45d358890515a28a812eb4a15143a3425`. It confirmed every implementation-review-011 finding closed, then found the normative printable ranges allow YAML-accepted Unicode noncharacters while the same sentence says all noncharacters fail. The only next gate is bounded remediation-r12 followed by fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -755,3 +755,5 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Remediation-r11 result: the single-line YAML double-quoted decoder now permits only raw tab, U+0020-U+007E, U+00A0-U+D7FF, U+E000-U+FFFD, and valid supplementary scalar values. Raw C0/DEL/C1 controls, line breaks, surrogates, and noncharacters fail closed, while valid escapes can still decode to values such as U+007F without putting forbidden raw source into the workflow.
 - Remediation-r11 verification: 145 temporary-Git fixtures pass, including raw U+007F, U+0080, U+0084, U+0085, U+0086, and U+009F negatives plus an escaped `\x7F` retained positive. Focused/governed/auto checks, startup budget, launcher/checker syntax, `git diff --check`, baseline runtime/data zero-diff, exact frozen hashes, read-only DB integrity/foreign keys/46-day count, and a Vite production build of 1746 modules to a deleted external temporary directory all pass. The earlier pinned 19/19 backend evidence remains applicable because no runtime file changed.
 - Re-review-r12 gate: commit this scoped remediation boundary, then request a fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
+- Re-review-r12 boundary: `implementation-review-012.md`, authored by `independent-implementation-reviewer-2026-07-19-r12`, returned `revise` with `high` confidence against stable commit `e4a3faa45d358890515a28a812eb4a15143a3425`. It confirmed all implementation-review-011 findings and prior key regressions closed, then found the contract's explicit YAML printable ranges include U+FDD0-U+FDEF and supplementary plane-end noncharacters while its generic exclusion says noncharacters fail closed; the checker correctly follows the listed ranges and independent YAML parsing accepts those values.
+- Remediation-r12 gate: record this review separately, choose the YAML-compatible listed-range policy, remove the contradictory generic noncharacter exclusion, add allowed-range and excluded U+FFFE/U+FFFF boundary fixtures, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
