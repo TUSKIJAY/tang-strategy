@@ -15,13 +15,13 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-re-review-r11
+- Next gate: phase-6-remediation-r11
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and remediations r1-r10 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 now requires renewed independent implementation review and a qualifying `accept` before closeout
-- Scope authority: re-review-r11 is read-only except for its review artifact; no further implementation mutation is authorized until a review finding requires bounded remediation, and runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-5 and remediations r1-r10 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r11 is authorized by implementation-review-011 and remains bounded by renewed independent review and closeout gates
+- Scope authority: remediation-r11 may correct only the raw YAML printable-source allowlist for single-line double-quoted scalars and its fixtures/contract wording; runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-010` returned `revise` with `high` confidence against remediation-r9 commit `b5f754b9feed272ea57dad58dfa56c5c553c613b`; remediation-r10 has now closed every recorded YAML numeric/plain mapping-indicator and double-quoted escape finding with 143 passing fixtures and the full bounded verification set. The only next gate is fresh independent implementation re-review-r11 against the stable remediation commit. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-011` returned `revise` with `high` confidence against remediation-r10 commit `ff00efdeb1c1f17d5ed6dbd89c6acf491a320bca`. It confirmed every implementation-review-010 finding closed, then found raw YAML-forbidden DEL/C1 characters can still be accepted inside a double-quoted branch scalar. The only next gate is bounded remediation-r11 followed by fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -750,3 +750,5 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Remediation-r10 result: the shared constrained string parser now rejects YAML 1.1/1.2 binary, octal, hex, underscore-separated, decimal, exponent, float, and sexagesimal numeric spellings plus unquoted terminal-colon mapping indicators. A stdlib single-line YAML double-quoted decoder supports named and `\x`/`\u`/`\U` escapes while rejecting malformed escapes and invalid Unicode scalar values. Branch members and job/step names retain one non-coercing grammar; quoted terminal colons remain valid strings.
 - Remediation-r10 verification: 143 temporary-Git fixtures pass, including flow/block binary and underscore numerics, numeric job/step names, flow/block terminal-colon negatives, quoted terminal-colon positives, YAML `\x6d` positive, and invalid escape negative. Focused/governed/auto checks, startup budget, launcher/checker syntax, `git diff --check`, baseline runtime/data zero-diff, exact frozen hashes, read-only DB integrity/foreign keys/46-day count, and a Vite production build of 1746 modules to a deleted external temporary directory all pass. The earlier pinned 19/19 backend evidence remains applicable because no runtime file changed.
 - Re-review-r11 gate: commit this scoped remediation boundary, then request a fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
+- Re-review-r11 boundary: `implementation-review-011.md`, authored by `independent-implementation-reviewer-2026-07-19-r11`, returned `revise` with `high` confidence against stable commit `ff00efdeb1c1f17d5ed6dbd89c6acf491a320bca`. It confirmed all implementation-review-010 findings and prior key regressions closed, then found raw U+007F-U+0084 and U+0086-U+009F source characters can enter a double-quoted branch member even though YAML parsers reject that source.
+- Remediation-r11 gate: record this review separately, enforce YAML's printable-source ranges for the declared single-line double-quoted scalar, distinguish raw forbidden characters from valid escaped values, add exact fixtures, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
