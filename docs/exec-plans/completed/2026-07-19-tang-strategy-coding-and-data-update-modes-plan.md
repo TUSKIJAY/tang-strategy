@@ -1,7 +1,7 @@
 # Tang Strategy Coding And Data Update Modes
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
 - Revision: `v2-review-foldback-2026-07-19`
 - Plan author ID: `codex-plan-author-2026-07-19`
@@ -12,16 +12,16 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
-- Current phase: phase-6
-- Phase state: complete
-- Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-closeout
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/implementation-review-013.md@accept
+- Final disposition: Completed
+- Verified implementation commit: `994f9176eb74778f346710e62ec6dabde55bae9a`
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-6 and remediations r1-r12 are complete under `user-goal-execute-plan-2026-07-19`; implementation-review-013 provides the qualifying independent `accept`, so only lifecycle closeout remains authorized
-- Scope authority: closeout may reconcile this plan, lifecycle indexes/roadmap, review index, PROGRESS, and HANDOFF; no further implementation, runtime, data, provider, publisher, or remote mutation is authorized
+- Implementation authority: completed; all phases and remediations are closed under qualifying implementation-review-013 `accept`
+- Scope authority: no active implementation authority remains; future changes require a new authorized request and the applicable operating-mode gate
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:complete`. Independent re-review `implementation-review-013` returned `accept` with `high` confidence against remediation-r12 commit `994f9176eb74778f346710e62ec6dabde55bae9a`, with no serious, medium, or minor findings. All implementation phases and acceptance gates are complete; the only next gate is lifecycle closeout to `completed/` with durable implementation and reconciliation evidence. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Completed** with final disposition `Completed`. Independent implementation-review-013 returned `accept` with `high` confidence against verified implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`, with no serious, medium, or minor findings. Lifecycle state, indexes, roadmap, PROGRESS, and HANDOFF are reconciled; the transition commit is recorded by the metadata-only follow-up after that commit exists. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -762,3 +762,4 @@ This plan is **Active** at `phase-6:complete`. Independent re-review `implementa
 - Re-review-r13 gate: commit this scoped remediation boundary, then request a fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
 - Re-review-r13 boundary: `implementation-review-013.md`, authored by `independent-implementation-reviewer-2026-07-19-r13`, returned `accept` with `high` confidence against stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`. It independently confirmed remediation-r12 closed the sole review-012 finding, all 146 fixtures and bounded verification passed, frozen runtime/data/provider/publisher boundaries held, and no implementation findings remained.
 - Phase 6 completion: the qualifying independent `accept` closes the implementation gate. Phase state is `complete`; lifecycle closeout may move the plan to `completed/`, declare the accepted review and verified implementation commit, reconcile all derived state surfaces, and form the separately referenceable lifecycle commit without granting any remote or publication authority.
+- Lifecycle closeout result: moved the plan to `completed/`, set final disposition `Completed`, declared implementation-review-013 and verified implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`, cleared active phase fields, and reconciled active/completed/review indexes, roadmap, PROGRESS, and HANDOFF. The transition commit cannot self-reference, so its hash is added to `Lifecycle reconciliation commit` by one metadata-only follow-up commit.

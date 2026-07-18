@@ -3,22 +3,22 @@
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-6`
-- Phase state: `complete`
-- Next gate: `phase-6-closeout`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Startup Git evidence: this proposal began from `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` with a clean worktree/index; rerun the startup commands for live branch/HEAD/status truth
-- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-6:complete`; `implementation-review-013` returned `accept` with `high` confidence and lifecycle closeout is next
-- Active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
+- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Completed`; implementation-review-013 returned `accept` with `high` confidence and all phases are closed
+- Completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
 - Design reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
-- Implementation boundary: implementation-review-013 accepted stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`; no implementation finding remains and only state/index/commit-pointer closeout is authorized
+- Implementation boundary: implementation-review-013 accepted stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`; the lifecycle transition commit will be recorded by the final metadata-only reconciliation after that commit exists
 - Local Git boundary: after a lifecycle transition or Phase exit passes verification and state reconciliation, create one conventional commit containing only that boundary's plan-scoped paths
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, or other remote change is authorized
 
@@ -26,9 +26,9 @@
 
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
-3. Preserve any unrelated changes and read `docs/operating-modes.md` plus the active plan execution record.
+3. Preserve any unrelated changes and read `docs/operating-modes.md` plus the completed plan execution record.
 4. Phase 5 is complete and committed at `28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`; do not recreate that boundary commit.
-5. Record implementation-review-013 and Phase 6 completion as one scoped boundary, then perform lifecycle closeout to completed and reconcile the separately referenceable lifecycle commit. No further implementation is authorized.
+5. Lifecycle migration is complete in this state. After committing it, record that commit hash in the completed plan metadata, rerun final verification, and create only the metadata-only reconciliation commit. No further implementation is authorized.
 6. At each verified lifecycle/Phase boundary, inspect the diff and use the plan's standing authority to stage only scoped paths and create one local conventional commit. Do not push, open a PR, publish, merge, or change remote settings without separate authority.
 
 ## Verification Evidence
@@ -80,7 +80,7 @@
 | Launcher diff review | `accept`, confidence `high`; final cache-cleanliness observation resolved |
 | Git boundary | standing local commit authority applies only after verified lifecycle/Phase boundaries and only to exact scoped paths; no push, PR, publish, merge, or remote settings change |
 
-Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/`.
+Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/`.
 
 ## Known Non-Blocking Observations
 
@@ -92,7 +92,7 @@ Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-gov
 
 ## Next Gate
 
-Record the implementation-review-013 acceptance boundary, then complete lifecycle migration and durable commit reconciliation. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized.
+After the lifecycle transition commit exists, record its hash in the completed plan metadata and rerun final verification. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized.
 
 ## Handoff Boundary
 

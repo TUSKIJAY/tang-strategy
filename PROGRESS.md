@@ -3,14 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-6`
-- Phase state: `complete`
-- Next gate: `phase-6-closeout`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
 
-2026-07-19: 第十三轮独立实施评审 `implementation-review-013` 针对 remediation-r12 commit `994f9176eb74778f346710e62ec6dabde55bae9a` 返回 `accept`、置信度 `high`，无 serious/medium/minor finding。146/146 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。当前为 `phase-6:complete`，next gate 为 `phase-6-closeout`；真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: `Tang Strategy Coding And Data Update Modes` 已完成全部 Phase、12 轮 bounded remediation 与第十三轮独立 `accept`，并迁移到 `completed/`。Verified implementation commit 为 `994f9176eb74778f346710e62ec6dabde55bae9a`；lifecycle transition commit 形成后将由 metadata-only follow-up 写回 plan。146/146 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -19,13 +19,13 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
-| Active operating-modes plan | `docs/exec-plans/active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
-| Completed execution plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
-| Verification and reviews | `docs/exec-plans/reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/` |
+| Completed operating-modes plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
+| Previous completed plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
+| Verification and reviews | `docs/exec-plans/reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/` |
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:complete`; implementation-review-013 accepted the stable implementation and only lifecycle closeout remains.
+- [ ] None.
 
 ## Blocked
 
@@ -33,12 +33,13 @@
 
 ## To Do
 
-- [ ] Record implementation-review-013 and the Phase 6 completion boundary, then move the plan to completed and reconcile durable commit evidence.
+- [ ] After the lifecycle transition commit exists, record its hash in the completed plan and rerun final verification.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-19 - Completed the Coding/Data Update operating-modes plan with 146 fixtures, accepted independent implementation review, frozen runtime/data/provider/publisher boundaries, and lifecycle migration to `completed/`.
 - [x] 2026-07-19 - Completed Phase 5 with 35 fixtures, contract-text enforcement, 19/19 pinned backend tests, compileall, frontend build, DB integrity, and explicit deferred real-run evidence.
 - [x] 2026-07-19 - Completed Phase 4 config/CI integration, exact command ordering enforcement, 29 fixtures, unchanged job names, and zero Pages workflow diff.
 - [x] 2026-07-19 - Completed Phase 3 Data Update carrier map, existing-test/runbook/publisher compatibility inspection, and explicit future-run evidence boundaries.

@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-- [2026-07-19 Tang Strategy Coding And Data Update Modes](./active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Active; canonical details: [active index](./active/index.md)
+当前无 active 计划。以 [`active/index.md`](./active/index.md) 为当前索引。
 
 ## Proposed Plans
 
@@ -40,3 +40,4 @@
 ## Completed Plans
 
 - [2026-07-18 Tang Strategy governed harness and data safety recovery](./completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
+- [2026-07-19 Tang Strategy Coding And Data Update Modes](./completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
