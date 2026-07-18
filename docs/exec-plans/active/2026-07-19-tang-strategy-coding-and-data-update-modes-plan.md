@@ -15,13 +15,13 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-re-review-r3
+- Next gate: phase-6-remediation-r3
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and both reviewed remediations are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remains bounded by renewed independent review and closeout gates
-- Scope authority: remediation-r2 is complete; only renewed review evidence and lifecycle closeout may proceed, while runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-5 and both prior remediations are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r3 is authorized by implementation-review-003 and remains bounded by renewed independent review and closeout gates
+- Scope authority: remediation-r3 may correct only Completed-disposition implementation-review classification, no-design-review metadata consistency, exact fixed-row Plan cells, and their fixtures; runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:in-progress`. The bounded remediation for `implementation-review-002` is complete and verified; the only next gate is another fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-003` returned `revise` with `high` confidence against remediation-r2 commit `8a93fcd20ea32ed8d09049091b9f16bd8445dbd0`. The only next gate is bounded remediation of its Completed classification, metadata consistency, and fixed-row grammar findings, followed by another fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -710,3 +710,5 @@ This plan is **Active** at `phase-6:in-progress`. The bounded remediation for `i
 - Remediation-r2 result: the reviews index now requires one row for every plan. Rows with no review artifacts link the canonical plan and use exact `none`/`none`, avoiding non-durable empty directories; Proposed and non-implemented Completed state rows likewise require an unlinked `none` sentinel and reject bogus links. Artifact-bearing rows retain exact review-directory/set/latest-verdict enforcement. `design-review` now supports the same delimited suffix grammar as the other four Proposed categories.
 - Remediation-r2 verification: 55 temporary-Git fixtures pass, including truthful-pass and bogus-link-fail cases for pre-review Proposed and non-implemented Completed states, a missing reviews-index row failure, and suffixed positive cases for all five allowed Proposed gate prefixes. Focused/governed/auto checks, startup budget, launcher syntax, DB integrity/FK, runtime zero-diff, frozen hashes, and whitespace pass. The earlier pinned 19/19 backend/compileall and temporary frontend build evidence remains applicable because remediation-r2 changes only the contract, focused checker, and its fixtures.
 - Re-review-r3 gate: commit this scoped remediation boundary, then request another fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
+- Re-review-r3 boundary: `implementation-review-003.md`, authored by `independent-implementation-reviewer-2026-07-19-r3`, returned `revise` with `high` confidence against stable commit `8a93fcd20ea32ed8d09049091b9f16bd8445dbd0`. It confirmed all prior findings and remediation-r2 target cases closed, then found three local false-passes: `Final disposition=Completed` must require implementation `accept` even without commit evidence; `Design reviews=none` must imply latest verdict and independence `none`; and every fixed index Plan cell must contain exactly one canonical link with no appended second link.
+- Remediation-r3 gate: record this review separately, add the three constrained consistency checks and their adversarial fixtures, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
