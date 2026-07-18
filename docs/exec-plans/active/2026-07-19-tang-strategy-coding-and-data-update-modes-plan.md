@@ -15,13 +15,13 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-re-review-r5
+- Next gate: phase-6-remediation-r5
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and all four reviewed remediations are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remains bounded by renewed independent review and closeout gates
-- Scope authority: remediation-r4 is complete; only renewed review evidence and lifecycle closeout may proceed, while runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-5 and all four prior remediations are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r5 is authorized by implementation-review-005 and remains bounded by renewed independent review and closeout gates
+- Scope authority: remediation-r5 may correct only executable workflow/non-comment router carriers, exact index header/sentinel/delimiter grammar, bounded current-state markers, new-schema structured review history, and their fixtures/evidence migration; runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:in-progress`. The bounded remediation for `implementation-review-004` is complete and verified; the only next gate is another fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-005` returned `revise` with `high` confidence against remediation-r4 commit `68f117f84e6cc72fa27bbbe90f8a2f196d404088`. The only next gate is bounded remediation of its workflow/router carrier and constrained-format findings, followed by another fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -720,3 +720,5 @@ This plan is **Active** at `phase-6:in-progress`. The bounded remediation for `i
 - Remediation-r4 result: activation evidence now matches `user-instruction:<non-empty-token>`, Active `Next gate` must be non-`none`, and the table tokenizer removes at most one outer delimiter so trailing empty cells remain visible. Fixed indexes reject arbitrary no-link rows, duplicate/mixed sentinels, appended empty fifth cells, extra cells, and malformed Plan cells. The real Proposed index was migrated from prose to the canonical `none` sentinel.
 - Remediation-r4 verification: 67 temporary-Git fixtures pass, adding empty activation, Active next-gate none, trailing empty fifth cells across all four indexes, arbitrary no-link rows, and mixed sentinel failures. Focused/governed/auto checks, startup budget, launcher syntax, DB integrity/FK, runtime zero-diff, frozen hashes, and whitespace pass. No runtime, provider, broker, tracked-DB mutation, publisher, or remote action occurred.
 - Re-review-r5 gate: commit this scoped remediation boundary, then request another fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
+- Re-review-r5 boundary: `implementation-review-005.md`, authored by `independent-implementation-reviewer-2026-07-19-r5`, returned `revise` with `high` confidence against stable commit `68f117f84e6cc72fa27bbbe90f8a2f196d404088`. It confirmed all prior findings closed, then found four categories: comment-only workflow/router tokens can satisfy carriers; empty indexes can omit sentinels and reserved headers/missing delimiters bypass grammar; current-state markers can be reversed; and new-schema prior-revision reviews can incorrectly use legacy unstructured evidence.
+- Remediation-r5 gate: record this review separately, enforce executable/non-comment carriers and exact constrained grammar, migrate any affected new-schema review metadata without rewriting review findings, add adversarial fixtures, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
