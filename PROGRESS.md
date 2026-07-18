@@ -7,10 +7,10 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-remediation-r7`
+- Next gate: `phase-6-re-review-r8`
 <!-- operating-modes-state:end -->
 
-2026-07-19: 第七轮独立实施评审 `implementation-review-007` 针对 `7c750c24d8b53b41260d926e7a57ae896707c322` 返回 `revise`、置信度 `high`。它确认 implementation-review-006 的全部 repro 与此前关键回归已关闭，并新增三类问题：quoted YAML `if`/执行修饰符、跨行 CommonMark/raw HTML code context、folded scalar 的 false-pass/false-reject。当前为 `phase-6:in-progress`，next gate 为 `phase-6-remediation-r7`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: remediation-r7 已关闭 `implementation-review-007` 的 quoted YAML 条件/执行修饰符、实际 literal/folded scalar 归一化、跨行 CommonMark 与 raw HTML code carrier findings。114/114 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。当前为 `phase-6:in-progress`，next gate 为 `phase-6-re-review-r8`；完成态仍需 fresh independent `accept`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediate only the implementation-review-007 YAML/CommonMark normalization findings and obtain a fresh qualifying implementation review.
+- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediation-r7 is verified and awaits fresh qualifying implementation re-review-r8.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] Keep remediation-r7 limited to execution modifiers, scalar normalization, and multiline/raw-HTML code contexts; then rerun bounded verification and request a fresh independent review.
+- [ ] Commit the verified remediation-r7 boundary, request fresh independent re-review-r8, and close out only after a qualifying `accept`.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 

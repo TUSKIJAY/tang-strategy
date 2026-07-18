@@ -145,7 +145,7 @@ def build_governed_fixture(root: Path) -> None:
     write(
         root,
         ".github/workflows/project-harness.yml",
-        "name: Test\n\non: workflow_dispatch\n\njobs:\n  harness:\n    name: Harness structure\n    runs-on: ubuntu-latest\n    steps:\n      - run: python3 scripts/check-project-harness.py --root . --profile governed\n      - run: python3 -m unittest scripts.tests.test_operating_modes\n",
+        "name: Test\n\non:\n  pull_request:\n    branches:\n      - main\n  workflow_dispatch:\n\njobs:\n  harness:\n    name: Harness structure\n    runs-on: ubuntu-latest\n    steps:\n      - run: python3 scripts/check-project-harness.py --root . --profile governed\n      - run: python3 -m unittest scripts.tests.test_operating_modes\n",
     )
     write(root, ".github/pull_request_template.md", "# PR\n")
     write(
@@ -177,7 +177,7 @@ def build_governed_fixture(root: Path) -> None:
     write(
         root,
         "docs/operating-modes.md",
-        "# Contract\n\n`operating-modes-v1`\n\nrequested -> date_resolved -> fetched -> quality_passed -> candidate_verified -> local_accepted -> publish_authorized -> committed -> published -> hosted_verified\n\n### Local Update Gate\n\n### Publish Gate\n",
+        "# Contract\n\n- Contract schema: `operating-modes-v1`\n\nrequested -> date_resolved -> fetched -> quality_passed -> candidate_verified -> local_accepted -> publish_authorized -> committed -> published -> hosted_verified\n\n### Local Update Gate\n\n### Publish Gate\n",
     )
     import_line = "market_day_id = None if args.skip_import else import_market_json(output_path)\n"
     write(root, "backend/scripts/fetch_tv_live_extended_day.py", import_line)
@@ -836,6 +836,22 @@ None.
         path.write_text(coded, encoding="utf-8")
         self.assert_error("must contain exactly one canonical header")
 
+    def test_multiline_code_span_table_does_not_count(self) -> None:
+        path = self.root / "docs/exec-plans/active/index.md"
+        original = path.read_text(encoding="utf-8")
+        header = original.index("| Plan |")
+        coded = original[:header] + "``\n" + original[header:].rstrip() + "\n``\n"
+        path.write_text(coded, encoding="utf-8")
+        self.assert_error("must contain exactly one canonical header")
+
+    def test_raw_html_pre_table_does_not_count(self) -> None:
+        path = self.root / "docs/exec-plans/active/index.md"
+        original = path.read_text(encoding="utf-8")
+        header = original.index("| Plan |")
+        coded = original[:header] + "<pre><code>\n" + original[header:].rstrip() + "\n</code></pre>\n"
+        path.write_text(coded, encoding="utf-8")
+        self.assert_error("must contain exactly one canonical header")
+
     def test_index_rows_require_terminal_delimiter(self) -> None:
         cases = (
             (
@@ -949,6 +965,16 @@ None.
         self.replace("docs/exec-plans/active/demo-plan.md", "\n## Scope", "\n-->\n\n## Scope")
         self.assert_error("missing required keys")
 
+    def test_plan_metadata_inside_multiline_code_span_does_not_count(self) -> None:
+        self.replace("docs/exec-plans/active/demo-plan.md", "# Demo Plan\n\n", "# Demo Plan\n\n``\n")
+        self.replace("docs/exec-plans/active/demo-plan.md", "\n## Scope", "\n``\n\n## Scope")
+        self.assert_error("missing required keys")
+
+    def test_plan_metadata_inside_raw_html_pre_does_not_count(self) -> None:
+        self.replace("docs/exec-plans/active/demo-plan.md", "# Demo Plan\n\n", "# Demo Plan\n\n<pre><code>\n")
+        self.replace("docs/exec-plans/active/demo-plan.md", "\n## Scope", "\n</code></pre>\n\n## Scope")
+        self.assert_error("missing required keys")
+
     def test_duplicate_review_verdict_key_fails(self) -> None:
         self.replace(
             "docs/exec-plans/reviews/demo-plan/review-001.md",
@@ -974,6 +1000,19 @@ None.
         self.replace("docs/exec-plans/plan-template.md", "# Plan\n\n", "# Plan\n\n<!--\n")
         self.replace("docs/exec-plans/plan-template.md", "\n\n## Body", "\n-->\n\n## Body")
         self.assert_error("plan template: missing constrained keys")
+
+    def test_review_metadata_inside_multiline_code_span_does_not_count(self) -> None:
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "# Review 001\n\n",
+            "# Review 001\n\n``\n",
+        )
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "\n## Findings",
+            "\n``\n\n## Findings",
+        )
+        self.assert_error("lacks constrained reviewer fields")
 
     def test_duplicate_current_state_key_fails(self) -> None:
         self.replace(
@@ -1160,6 +1199,22 @@ None.
         )
         self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
 
+    def test_router_multiline_code_span_pseudo_link_does_not_count(self) -> None:
+        write(
+            self.root,
+            "AGENTS.md",
+            "# Agents\n\n``\n[dead route](./docs/operating-modes.md)\n``\n",
+        )
+        self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
+
+    def test_router_raw_html_code_pseudo_link_does_not_count(self) -> None:
+        write(
+            self.root,
+            "AGENTS.md",
+            "# Agents\n\n<code>[dead route](./docs/operating-modes.md)</code>\n",
+        )
+        self.assert_error("AGENTS.md does not contain a non-comment canonical Markdown link")
+
     def test_config_requires_fixture_command(self) -> None:
         path = self.root / ".harness/config.json"
         config = json.loads(path.read_text(encoding="utf-8"))
@@ -1181,6 +1236,22 @@ None.
             "run: echo missing-fixture-command",
         )
         self.assert_error("verification workflow: missing required command")
+
+    def test_workflow_requires_pull_request_main_trigger(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "  pull_request:\n    branches:\n      - main\n",
+            "  workflow_dispatch:\n",
+        )
+        self.assert_error("missing required pull_request trigger for main")
+
+    def test_commented_pull_request_trigger_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "  pull_request:\n    branches:\n      - main\n",
+            "  # pull_request:\n  #   branches:\n  #     - main\n",
+        )
+        self.assert_error("missing required pull_request trigger for main")
 
     def test_workflow_comment_only_commands_do_not_count(self) -> None:
         for command in (
@@ -1233,6 +1304,18 @@ None.
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])
 
+    def test_workflow_folded_split_command_normalizes_and_passes(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            "      - run: >\n"
+            "          python3 -m unittest\n"
+            "          scripts.tests.test_operating_modes",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
     def test_nested_workflow_run_key_is_not_a_step_command(self) -> None:
         command = "python3 -m unittest scripts.tests.test_operating_modes"
         self.replace(
@@ -1267,6 +1350,78 @@ None.
         )
         self.assert_error("verification workflow: missing required command")
 
+    def test_quoted_conditional_workflow_step_does_not_count(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            f"      - \"if\": false\n        run: {command}",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_quoted_conditional_workflow_job_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "  harness:\n    name:",
+            "  harness:\n    \"if\": false\n    name:",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_required_step_execution_modifiers_do_not_count(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        cases = (
+            "shell: echo {0}",
+            "working-directory: /tmp",
+            "continue-on-error: true",
+            "env: {}",
+        )
+        for modifier in cases:
+            with self.subTest(modifier=modifier):
+                self.replace(
+                    ".github/workflows/project-harness.yml",
+                    f"      - run: {command}",
+                    f"      - run: {command}\n        {modifier}",
+                )
+                self.assert_error("verification workflow: missing required command")
+                self.replace(
+                    ".github/workflows/project-harness.yml",
+                    f"      - run: {command}\n        {modifier}",
+                    f"      - run: {command}",
+                )
+
+    def test_duplicate_run_key_does_not_count(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            f"      - run: {command}\n        run: echo duplicate-key",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_job_run_defaults_disqualify_required_commands(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "  harness:\n    name:",
+            "  harness:\n    defaults:\n      run:\n        working-directory: /tmp\n    name:",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_workflow_run_defaults_disqualify_required_commands(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "jobs:\n",
+            "defaults:\n  run:\n    shell: echo {0}\n\njobs:\n",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_required_job_must_use_the_declared_runner(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "runs-on: ubuntu-latest",
+            "runs-on: unavailable-runner",
+        )
+        self.assert_error("verification workflow: missing required command")
+
     def test_dead_shell_branch_does_not_count_as_workflow_command(self) -> None:
         command = "python3 -m unittest scripts.tests.test_operating_modes"
         self.replace(
@@ -1298,6 +1453,17 @@ None.
             f"      - run: {command}",
             "      - run: |\n"
             "          exit 0\n"
+            f"          {command}",
+        )
+        self.assert_error("verification workflow: missing required command")
+
+    def test_folded_source_comment_does_not_count_as_command(self) -> None:
+        command = "python3 -m unittest scripts.tests.test_operating_modes"
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            f"      - run: {command}",
+            "      - run: >\n"
+            "          # shell comment after YAML folding\n"
             f"          {command}",
         )
         self.assert_error("verification workflow: missing required command")

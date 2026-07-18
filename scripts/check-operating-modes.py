@@ -136,25 +136,55 @@ def read_text(path: Path, label: str, errors: list[str]) -> str:
 
 def inline_code_span_ranges(text: str) -> list[tuple[int, int]]:
     ranges: list[tuple[int, int]] = []
+    cursor = 0
+    while cursor < len(text):
+        if text[cursor] != "`":
+            cursor += 1
+            continue
+        end_of_opener = cursor
+        while end_of_opener < len(text) and text[end_of_opener] == "`":
+            end_of_opener += 1
+        delimiter_length = end_of_opener - cursor
+        probe = end_of_opener
+        closing_end: int | None = None
+        while probe < len(text):
+            next_tick = text.find("`", probe)
+            if next_tick == -1:
+                break
+            run_end = next_tick
+            while run_end < len(text) and text[run_end] == "`":
+                run_end += 1
+            if run_end - next_tick == delimiter_length:
+                closing_end = run_end
+                break
+            probe = run_end
+        if closing_end is None:
+            cursor = end_of_opener
+            continue
+        ranges.append((cursor, closing_end))
+        cursor = closing_end
+    return ranges
+
+
+def mask_full_line_code_spans(text: str) -> str:
+    ranges = inline_code_span_ranges(text)
+    if not ranges:
+        return text
+    kept: list[str] = []
     offset = 0
     for line in text.splitlines(keepends=True):
-        cursor = 0
-        while cursor < len(line):
-            if line[cursor] != "`":
-                cursor += 1
-                continue
-            end_of_opener = cursor
-            while end_of_opener < len(line) and line[end_of_opener] == "`":
-                end_of_opener += 1
-            delimiter = line[cursor:end_of_opener]
-            closing = line.find(delimiter, end_of_opener)
-            if closing == -1:
-                cursor = end_of_opener
-                continue
-            ranges.append((offset + cursor, offset + closing + len(delimiter)))
-            cursor = closing + len(delimiter)
+        content = line.rstrip("\r\n")
+        ending = line[len(content):]
+        leading = len(content) - len(content.lstrip())
+        trailing = len(content.rstrip())
+        content_start = offset + leading
+        content_end = offset + trailing
+        inside_code = content_start < content_end and any(
+            start <= content_start and end >= content_end for start, end in ranges
+        )
+        kept.append(ending if inside_code else line)
         offset += len(line)
-    return ranges
+    return "".join(kept)
 
 
 def operative_markdown_text(text: str) -> str:
@@ -164,10 +194,22 @@ def operative_markdown_text(text: str) -> str:
         return "\n" * match.group(0).count("\n")
 
     without_comments = re.sub(r"<!--.*?(?:-->|$)", mask_comment, text, flags=re.DOTALL)
+    without_raw_code = re.sub(
+        r"<(?P<tag>pre|code)\b[^>]*>.*?</(?P=tag)\s*>",
+        mask_comment,
+        without_comments,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    without_raw_code = re.sub(
+        r"<(?:pre|code)\b[^>]*>.*$",
+        mask_comment,
+        without_raw_code,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
     kept: list[str] = []
     fence_character: str | None = None
     fence_length = 0
-    for line in without_comments.splitlines():
+    for line in without_raw_code.splitlines():
         if fence_character is not None:
             kept.append("")
             closing = re.fullmatch(
@@ -189,7 +231,7 @@ def operative_markdown_text(text: str) -> str:
             kept.append("")
             continue
         kept.append(line)
-    return "\n".join(kept)
+    return mask_full_line_code_spans("\n".join(kept))
 
 
 def has_canonical_markdown_route(path: Path, target: Path, errors: list[str]) -> bool:
@@ -204,21 +246,64 @@ def has_canonical_markdown_route(path: Path, target: Path, errors: list[str]) ->
     return False
 
 
+def yaml_key_value(text: str, key: str) -> str | None:
+    match = re.fullmatch(
+        rf"(?:{re.escape(key)}|'(?:{re.escape(key)})'|\"(?:{re.escape(key)})\")\s*:\s*(.*)",
+        text,
+    )
+    return match.group(1) if match else None
+
+
+def yaml_mapping_key(text: str) -> str | None:
+    match = re.fullmatch(r"(?:([A-Za-z0-9_-]+)|'([A-Za-z0-9_-]+)'|\"([A-Za-z0-9_-]+)\")\s*:\s*.*", text)
+    if not match:
+        return None
+    return next(value for value in match.groups() if value is not None)
+
+
+def clean_yaml_scalar(value: str) -> str:
+    cleaned = value.strip()
+    if len(cleaned) >= 2 and cleaned[0] == cleaned[-1] and cleaned[0] in {"'", '"'}:
+        cleaned = cleaned[1:-1]
+    return cleaned
+
+
+def normalize_block_scalar(lines: list[str], index: int, indent: int, style: str) -> tuple[str, int]:
+    raw_lines: list[str] = []
+    cursor = index + 1
+    while cursor < len(lines):
+        block_line = lines[cursor]
+        block_stripped = block_line.lstrip(" ")
+        block_indent = len(block_line) - len(block_stripped)
+        if block_stripped and block_indent <= indent:
+            break
+        raw_lines.append(block_line)
+        cursor += 1
+    nonempty_indents = [
+        len(line) - len(line.lstrip(" "))
+        for line in raw_lines
+        if line.strip()
+    ]
+    if not nonempty_indents or any("\t" in line[: len(line) - len(line.lstrip())] for line in raw_lines):
+        return "", cursor
+    content_indent = min(nonempty_indents)
+    content = [line[content_indent:] if line.strip() else "" for line in raw_lines]
+    while content and content[-1] == "":
+        content.pop()
+    if not content:
+        return "", cursor
+    if style.startswith("|"):
+        return "\n".join(content), cursor
+    normalized = content[0]
+    for previous, current in zip(content, content[1:]):
+        separator = "\n" if not previous or not current else " "
+        normalized += separator + current
+    return normalized, cursor
+
+
 def normalized_run_command(lines: list[str], index: int, indent: int, value: str) -> tuple[str, int]:
     if value in {"|", "|-", "|+", ">", ">-", ">+"}:
-        executable_lines: list[str] = []
-        cursor = index + 1
-        while cursor < len(lines):
-            block_line = lines[cursor]
-            block_stripped = block_line.lstrip()
-            block_indent = len(block_line) - len(block_stripped)
-            if block_stripped and block_indent <= indent:
-                break
-            if block_stripped and not block_stripped.startswith("#"):
-                executable_lines.append(block_stripped)
-            cursor += 1
-        command = executable_lines[0] if len(executable_lines) == 1 else ""
-        return command, cursor
+        return normalize_block_scalar(lines, index, indent, value)
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         value = value[1:-1]
     return (value if value and not value.startswith("#") else ""), index + 1
@@ -230,6 +315,17 @@ def workflow_step_commands(text: str) -> list[str]:
     candidates: list[tuple[int, int, str]] = []
     conditional_jobs: set[int] = set()
     conditional_steps: set[tuple[int, int]] = set()
+    modified_jobs: set[int] = set()
+    modified_steps: set[tuple[int, int]] = set()
+    job_key_counts: dict[tuple[int, str], int] = {}
+    step_key_counts: dict[tuple[int, int, str], int] = {}
+    workflow_modified = any(
+        len(line) == len(line.lstrip())
+        and yaml_mapping_key(line.strip()) in {"defaults", "env"}
+        for line in lines
+        if line.strip() and not line.lstrip().startswith("#")
+    )
+    runnable_jobs: set[int] = set()
     jobs_active = False
     jobs_indent = 0
     job_indent: int | None = None
@@ -286,9 +382,19 @@ def workflow_step_commands(text: str) -> list[str]:
         if job_field_indent is None:
             job_field_indent = indent
         if indent == job_field_indent:
-            if re.fullmatch(r"if:\s*.+", stripped):
+            job_key = yaml_mapping_key(stripped)
+            if job_key is not None:
+                count_key = (job_id, job_key)
+                job_key_counts[count_key] = job_key_counts.get(count_key, 0) + 1
+                if job_key_counts[count_key] > 1:
+                    modified_jobs.add(job_id)
+            if job_key == "if":
                 conditional_jobs.add(job_id)
-            if re.fullmatch(r"steps:\s*", stripped):
+            if job_key not in {"name", "runs-on", "steps"}:
+                modified_jobs.add(job_id)
+            if job_key == "runs-on" and clean_yaml_scalar(yaml_key_value(stripped, "runs-on") or "") == "ubuntu-latest":
+                runnable_jobs.add(job_id)
+            if yaml_key_value(stripped, "steps") == "":
                 steps_indent = indent
                 step_indent = None
                 step_field_indent = None
@@ -310,15 +416,23 @@ def workflow_step_commands(text: str) -> list[str]:
             step_field_indent = None
             step_id += 1
             step_value = stripped[2:].lstrip()
-            if re.fullmatch(r"if:\s*.+", step_value):
+            step_key = yaml_mapping_key(step_value)
+            if step_key is not None:
+                count_key = (job_id, step_id, step_key)
+                step_key_counts[count_key] = step_key_counts.get(count_key, 0) + 1
+                if step_key_counts[count_key] > 1:
+                    modified_steps.add((job_id, step_id))
+            if step_key == "if":
                 conditional_steps.add((job_id, step_id))
-            run_match = re.fullmatch(r"run:\s*(.*?)\s*", step_value)
-            if run_match:
+            if step_key not in {"name", "run"}:
+                modified_steps.add((job_id, step_id))
+            run_value = yaml_key_value(step_value, "run")
+            if run_value is not None:
                 command, index = normalized_run_command(
                     lines,
                     index,
                     indent,
-                    run_match.group(1),
+                    run_value,
                 )
                 if command:
                     candidates.append((job_id, step_id, command))
@@ -329,15 +443,23 @@ def workflow_step_commands(text: str) -> list[str]:
         if step_indent is not None and indent > step_indent and step_field_indent is None:
             step_field_indent = indent
         if step_indent is not None and indent == step_field_indent:
-            if re.fullmatch(r"if:\s*.+", stripped):
+            step_key = yaml_mapping_key(stripped)
+            if step_key is not None:
+                count_key = (job_id, step_id, step_key)
+                step_key_counts[count_key] = step_key_counts.get(count_key, 0) + 1
+                if step_key_counts[count_key] > 1:
+                    modified_steps.add((job_id, step_id))
+            if step_key == "if":
                 conditional_steps.add((job_id, step_id))
-            run_match = re.fullmatch(r"run:\s*(.*?)\s*", stripped)
-            if run_match:
+            if step_key not in {"name", "run"}:
+                modified_steps.add((job_id, step_id))
+            run_value = yaml_key_value(stripped, "run")
+            if run_value is not None:
                 command, index = normalized_run_command(
                     lines,
                     index,
                     indent,
-                    run_match.group(1),
+                    run_value,
                 )
                 if command:
                     candidates.append((job_id, step_id, command))
@@ -346,9 +468,55 @@ def workflow_step_commands(text: str) -> list[str]:
     return [
         command
         for candidate_job, candidate_step, command in candidates
-        if candidate_job not in conditional_jobs
+        if not workflow_modified
+        and candidate_job in runnable_jobs
+        and job_key_counts.get((candidate_job, "runs-on"), 0) == 1
+        and job_key_counts.get((candidate_job, "steps"), 0) == 1
+        and candidate_job not in conditional_jobs
+        and candidate_job not in modified_jobs
         and (candidate_job, candidate_step) not in conditional_steps
+        and (candidate_job, candidate_step) not in modified_steps
+        and step_key_counts.get((candidate_job, candidate_step, "run"), 0) == 1
     ]
+
+
+def workflow_has_pull_request_main(text: str) -> bool:
+    lines = text.splitlines()
+    on_indent: int | None = None
+    pull_request_indent: int | None = None
+    branches_indent: int | None = None
+    for line in lines:
+        stripped = line.lstrip()
+        indent = len(line) - len(stripped)
+        if not stripped or stripped.startswith("#"):
+            continue
+        key = yaml_mapping_key(stripped)
+        if on_indent is None:
+            if indent == 0 and key == "on" and yaml_key_value(stripped, "on") == "":
+                on_indent = indent
+            continue
+        if indent <= on_indent:
+            return False
+        if pull_request_indent is None:
+            if key == "pull_request" and yaml_key_value(stripped, "pull_request") == "":
+                pull_request_indent = indent
+            continue
+        if indent <= pull_request_indent:
+            pull_request_indent = None
+            branches_indent = None
+            if key == "pull_request" and yaml_key_value(stripped, "pull_request") == "":
+                pull_request_indent = indent
+            continue
+        if branches_indent is None:
+            if key == "branches" and yaml_key_value(stripped, "branches") == "":
+                branches_indent = indent
+            continue
+        if indent <= branches_indent:
+            branches_indent = None
+            continue
+        if stripped == "- main":
+            return True
+    return False
 
 
 def parse_header_bullets(
@@ -1222,6 +1390,8 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
     workflow_path = root / ".github" / "workflows" / "project-harness.yml"
     if workflow_path.is_file():
         workflow = read_text(workflow_path, "verification workflow", errors)
+        if not workflow_has_pull_request_main(workflow):
+            errors.append("verification workflow: missing required pull_request trigger for main")
         workflow_commands = workflow_step_commands(workflow)
         for command in (canonical_command, fixture_command):
             if command not in workflow_commands:
