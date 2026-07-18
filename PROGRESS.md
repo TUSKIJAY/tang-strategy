@@ -2,7 +2,7 @@
 
 ## Current Status
 
-2026-07-19: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` 已在 `review-003: approve` 后依据用户明确指令完成 lifecycle activation recording。plan 已从 `proposed/` 移入 `active/`，当前为 `phase-0:not-started`，activation evidence 已记录；本次 activation 不构成 implementation start。next gate 为单独明确的 start/execute instruction 才可进入 Phase 0。用户另行授予本 plan 的 standing local commit authority：每个 lifecycle transition 或 Phase exit 在验证与状态同步通过后，自动形成一个仅含该边界 scoped files 的本地 conventional commit；这不是逐次小改动 commit，也不授予 push/PR/merge/publish 等远端权限。未实施 mode/checker/CI/runtime/data 变更，未 fetch、rebuild、push、publish、创建 PR 或修改远端设置；实时 Git 状态必须由启动命令获取。
+2026-07-19: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` 已在用户明确的 execute instruction 下完成 Phase 0 baseline/manifest/authority freeze，当前为 `phase-0:complete`，next gate 为 `phase-1-start`。现有 governed checker 与 startup budget 通过；Section 2.2 manifest 无 mismatch；TV/IB default-import、candidate-first rebuild、TV-first runbook 与 Pages publisher 边界已取证。用户既有 standing local commit authority 仅允许每个已验证 Phase/lifecycle 边界的 scoped 本地 conventional commit；未 fetch、rebuild、修改 DB/runtime/provider/publisher，也未获得 push/PR/merge/publish 或远端权限。
 
 ## Navigation
 
@@ -17,7 +17,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-0:not-started`; awaiting a separate explicit start/execute instruction; no implementation has started.
+- [ ] Active operating-modes plan is at `phase-0:complete`; Phase 1 authority/format package is the next implementation slice.
 
 ## Blocked
 
@@ -25,11 +25,13 @@
 
 ## To Do
 
-- [ ] Do not start Phase 0 without a separate explicit start/execute instruction for this active plan.
+- [ ] Start Phase 1 only after the verified Phase 0 scoped local commit succeeds.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
+
+- [x] 2026-07-19 - Completed Phase 0 baseline, exact manifest revalidation, authority freeze, read-only contract/hash capture, governed checker, startup budget, and no-runtime/data/provider/publisher mutation proof.
 
 - [x] 2026-07-18 - Confirmed the clean startup baseline at `codex/project-harness@8c6851d8f469e7a84471cd2900b00b3d9dcbdf07`; `main` and `origin/main` remained at `c262ba0`.
 - [x] 2026-07-18 - Installed the missing governed harness artifacts without overwriting pre-existing startup/state files; plan review advanced from `review-001: revise` to `review-002: approve` before activation.

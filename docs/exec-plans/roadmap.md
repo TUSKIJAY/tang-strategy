@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-- [`2026-07-19 Tang Strategy Coding And Data Update Modes`](./active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Active；`phase-0:not-started`；canonical details: [`active` index](./active/index.md)
+- [`2026-07-19 Tang Strategy Coding And Data Update Modes`](./active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Active；`phase-0:complete`；canonical details: [`active` index](./active/index.md)
 
 ## Proposed Plans
 

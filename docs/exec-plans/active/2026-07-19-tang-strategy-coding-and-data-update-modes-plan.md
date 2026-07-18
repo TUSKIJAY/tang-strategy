@@ -13,15 +13,15 @@
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
 - Current phase: phase-0
-- Phase state: not-started
-- Phase entry gate: `explicit-start-or-execute-instruction`
-- Next gate: phase-0-start
+- Phase state: complete
+- Phase entry gate: `user-goal-execute-plan-2026-07-19`
+- Next gate: phase-1-start
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: not started; a separate explicit start/execute instruction is required before Phase 0 work
-- Scope authority: active lifecycle only; work remains limited to the recorded phase and its unopened entry gate
+- Implementation authority: Phase 0 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
+- Scope authority: Phase 0 baseline/lifecycle evidence only; Phase 1 is the next unopened implementation gate
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,4 +630,18 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-0:not-started`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`) and explicit user activation evidence. Activation recording is complete, but implementation has not started. The only next gate is `phase-0-start`, which requires a separate explicit start/execute instruction. Activation alone creates no implementation, publication, broker, or remote authority; local commits are authorized only by the separate standing boundary authority recorded in Section 12.
+This plan is **Active** at `phase-0:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit user activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 0 passed its baseline, manifest, authority, startup-budget, status, and no-runtime-mutation checks. The only next gate is `phase-1-start`. No publication, broker, provider, remote, PR, merge, or push authority was created; local commits remain limited to the standing boundary authority recorded in Section 12.
+
+## 14. Phase Execution Record
+
+### Phase 0 — complete
+
+- Entry authority: `user-goal-execute-plan-2026-07-19` explicitly instructed Codex to execute this active plan.
+- Startup baseline: repository root `/Users/neowang/Code/tang-strategy-github`, branch `codex/project-harness`, clean index/worktree, and HEAD `a4b4007a9e529d1748f7f3b9884768471751dc33` were observed before implementation. This is historical execution evidence, not a durable live-Git claim.
+- Harness baseline: `python3 scripts/check-project-harness.py --root . --profile governed` returned `passed=true` and `errors=[]`; `python3 scripts/check-startup-doc-budget.py` returned no hard-limit or archive requirement.
+- Manifest revalidation: all existing modification targets and read-only references in Section 2.2 were present; the four planned additions (`docs/operating-modes.md`, the operating-modes decision, focused checker, and fixture test module) were absent as expected. No extra implementation path was required.
+- Checker baseline: `scripts/check-project-harness.py` was 277 lines and had no Git invocation, lifecycle discovery, plan-metadata parser, directory uniqueness check, or state-surface reconciliation.
+- Runtime compatibility baseline: both tracked TV and IB fetch adapters expose `--skip-import` but import into the runtime DB by default; `rebuild_live_extended_db.py` owns candidate-first validation/promotion. The daily runbook remains TV-first and the Pages workflow remains the only `gh-pages` publisher.
+- Frozen read-only hashes: `docs/daily-publish-runbook.md` = `bc7f2fe36b9f5be06ff1fcd43b2f81ea053b64784a2532cfe0a4bf6806ee3aac`; `.github/workflows/publish-static-reviews.yml` = `752459988433320587963c33f18cff6c572bcb2598be94cc610b64d61599277d`; tracked DB = `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8`.
+- Authority freeze: local plan-scoped implementation and verified phase-boundary commits are authorized; fetch, rebuild, DB mutation, broker/provider connection, push, PR, merge, Pages publish, remote administration, and scope expansion are not authorized.
+- Exit result: no unresolved manifest/baseline mismatch; Phase 1 may start after the scoped Phase 0 lifecycle/evidence commit succeeds.
