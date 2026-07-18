@@ -294,6 +294,82 @@ def clean_yaml_scalar(value: str) -> str:
     return cleaned
 
 
+def decode_yaml_double_quoted(value: str) -> str | None:
+    """Decode the declared single-line YAML double-quoted scalar subset."""
+
+    if len(value) < 2 or value[0] != '"' or value[-1] != '"':
+        return None
+    escapes = {
+        "0": "\0",
+        "a": "\a",
+        "b": "\b",
+        "t": "\t",
+        "n": "\n",
+        "v": "\v",
+        "f": "\f",
+        "r": "\r",
+        "e": "\x1b",
+        " ": " ",
+        '"': '"',
+        "/": "/",
+        "\\": "\\",
+        "N": "\u0085",
+        "_": "\u00a0",
+        "L": "\u2028",
+        "P": "\u2029",
+    }
+    decoded: list[str] = []
+    index = 1
+    end = len(value) - 1
+    while index < end:
+        character = value[index]
+        if character == '"' or (ord(character) < 0x20 and character != "\t"):
+            return None
+        if character != "\\":
+            decoded.append(character)
+            index += 1
+            continue
+        index += 1
+        if index >= end:
+            return None
+        escape = value[index]
+        if escape in escapes:
+            decoded.append(escapes[escape])
+            index += 1
+            continue
+        widths = {"x": 2, "u": 4, "U": 8}
+        width = widths.get(escape)
+        if width is None or index + width >= end:
+            return None
+        digits = value[index + 1 : index + 1 + width]
+        if not re.fullmatch(rf"[0-9A-Fa-f]{{{width}}}", digits):
+            return None
+        codepoint = int(digits, 16)
+        if codepoint > 0x10FFFF or 0xD800 <= codepoint <= 0xDFFF:
+            return None
+        decoded.append(chr(codepoint))
+        index += width + 1
+    return "".join(decoded)
+
+
+def yaml_plain_scalar_is_numeric(value: str) -> bool:
+    """Recognize YAML 1.1/1.2 numeric spellings excluded from strings."""
+
+    patterns = (
+        r"[-+]?0[bB][0-1_]+",
+        r"[-+]?0[oO][0-7_]+",
+        r"[-+]?0[0-7_]+",
+        r"[-+]?0[xX][0-9a-fA-F_]+",
+        r"[-+]?[0-9][0-9_]*",
+        r"[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+",
+        r"[-+]?(?:[0-9][0-9_]*)?\.[0-9_]+(?:[eE][-+]?[0-9_]+)?",
+        r"[-+]?[0-9][0-9_]*\.(?:[0-9_]*)?(?:[eE][-+]?[0-9_]+)?",
+        r"[-+]?[0-9][0-9_]*(?:[eE][-+]?[0-9_]+)",
+        r"[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*",
+    )
+    return any(re.fullmatch(pattern, value) for pattern in patterns)
+
+
 def constrained_yaml_string(value: str) -> str | None:
     """Parse the declared plain/quoted YAML string subset without coercion."""
 
@@ -301,11 +377,7 @@ def constrained_yaml_string(value: str) -> str | None:
     if not cleaned:
         return None
     if cleaned.startswith('"'):
-        try:
-            parsed = json.loads(cleaned)
-        except json.JSONDecodeError:
-            return None
-        return parsed if isinstance(parsed, str) else None
+        return decode_yaml_double_quoted(cleaned)
     if cleaned.startswith("'"):
         if len(cleaned) < 2 or not cleaned.endswith("'"):
             return None
@@ -328,16 +400,13 @@ def constrained_yaml_string(value: str) -> str | None:
         return None
     if re.match(r"[-?:](?:\s|$)", cleaned):
         return None
-    if re.search(r":\s|\s#", cleaned):
+    if cleaned.endswith(":") or re.search(r":\s|\s#", cleaned):
         return None
     if cleaned.lower() in {
         "null", "true", "false", "yes", "no", "on", "off", ".nan", ".inf", "+.inf", "-.inf"
     } or cleaned == "~":
         return None
-    if re.fullmatch(
-        r"[-+]?(?:0[xX][0-9a-fA-F]+|0[oO][0-7]+|\d+(?:\.\d*)?(?:[eE][-+]?\d+)?|\.\d+(?:[eE][-+]?\d+)?)",
-        cleaned,
-    ):
+    if yaml_plain_scalar_is_numeric(cleaned):
         return None
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}(?:[Tt ][0-9:.+-]+[Zz]?)?", cleaned):
         return None

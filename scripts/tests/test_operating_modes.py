@@ -1396,6 +1396,37 @@ None.
                 self.assertEqual(completed.returncode, 0, payload["errors"])
         write(self.root, ".github/workflows/project-harness.yml", original)
 
+    def test_yaml_double_quoted_hex_escape_branch_is_supported(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "    branches:\n      - main",
+            '    branches: ["\\x6dain"]',
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_invalid_yaml_double_quoted_escape_does_not_count(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "    branches:\n      - main",
+            '    branches: [main, "bad\\q"]',
+        )
+        self.assert_error("missing required pull_request trigger for main")
+
+    def test_quoted_terminal_colon_branch_strings_are_supported(self) -> None:
+        original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
+        variants = (
+            '    branches: [main, "bad:"]',
+            '    branches:\n      - main\n      - "bad:"',
+        )
+        for branches in variants:
+            with self.subTest(branches=branches):
+                workflow = original.replace("    branches:\n      - main", branches)
+                write(self.root, ".github/workflows/project-harness.yml", workflow)
+                completed, payload = self.check()
+                self.assertEqual(completed.returncode, 0, payload["errors"])
+        write(self.root, ".github/workflows/project-harness.yml", original)
+
     def test_invalid_or_non_scalar_flow_branch_members_do_not_count(self) -> None:
         original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
         variants = (
@@ -1405,6 +1436,11 @@ None.
             "[main, &other branch]",
             "[main, !tag branch]",
             "[main, 123]",
+            "[main, 0b10]",
+            "[main, 0B10]",
+            "[main, 008]",
+            "[main, 1_000]",
+            "[main, bad:]",
             "[main, true]",
             "[main, 2026-07-19]",
             '[main, "unterminated]',
@@ -1418,7 +1454,18 @@ None.
 
     def test_block_branch_mapping_member_does_not_count(self) -> None:
         original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
-        variants = ("{bad: value}", "- nested", "123", "true", "2026-07-19")
+        variants = (
+            "{bad: value}",
+            "- nested",
+            "bad:",
+            "123",
+            "0b10",
+            "0B10",
+            "008",
+            "1_000",
+            "true",
+            "2026-07-19",
+        )
         for member in variants:
             with self.subTest(member=member):
                 workflow = original.replace(
@@ -1551,6 +1598,8 @@ None.
             "~",
             "true",
             "123",
+            "0b10",
+            "1_000",
             '"   "',
         )
         for name in variants:
@@ -1574,6 +1623,21 @@ None.
             "    name: # YAML null",
         )
         self.assert_error("verification workflow: missing required command")
+
+    def test_numeric_required_job_name_does_not_count(self) -> None:
+        for name in ("0b10", "1_000"):
+            with self.subTest(name=name):
+                self.replace(
+                    ".github/workflows/project-harness.yml",
+                    "    name: Harness structure",
+                    f"    name: {name}",
+                )
+                self.assert_error("verification workflow: missing required command")
+                self.replace(
+                    ".github/workflows/project-harness.yml",
+                    f"    name: {name}",
+                    "    name: Harness structure",
+                )
 
     def test_non_job_steps_do_not_count_as_workflow_commands(self) -> None:
         workflow = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
