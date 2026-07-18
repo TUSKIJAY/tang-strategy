@@ -66,7 +66,9 @@ REQUIRED_PATHS = (
     "HANDOFF.md",
     ".harness/config.json",
     ".github/workflows/project-harness.yml",
+    ".github/workflows/publish-static-reviews.yml",
     "docs/README.md",
+    "docs/daily-publish-runbook.md",
     "docs/operating-modes.md",
     "docs/decisions/2026-07-19-operating-modes-and-lifecycle-source.md",
     "docs/exec-plans/plan-template.md",
@@ -78,6 +80,9 @@ REQUIRED_PATHS = (
     "docs/exec-plans/roadmap.md",
     "scripts/check-project-harness.py",
     "scripts/check-operating-modes.py",
+    "backend/scripts/fetch_tv_live_extended_day.py",
+    "backend/scripts/fetch_ib_live_extended_day.py",
+    "backend/scripts/rebuild_live_extended_db.py",
 )
 
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -640,7 +645,91 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
         if workflow_canonical in workflow and workflow_fixture in workflow:
             if workflow.index(workflow_canonical) > workflow.index(workflow_fixture):
                 errors.append("verification workflow: canonical harness command must precede fixture tests")
+    check_data_update_contract(root, errors)
     return files
+
+
+def require_text_tokens(
+    root: Path,
+    relative: str,
+    tokens: tuple[str, ...],
+    label: str,
+    errors: list[str],
+) -> None:
+    path = root / relative
+    if not path.is_file():
+        return
+    text = read_text(path, label, errors)
+    for token in tokens:
+        if token not in text:
+            errors.append(f"{label}: {relative} missing required contract text: {token}")
+
+
+def check_data_update_contract(root: Path, errors: list[str]) -> None:
+    require_text_tokens(
+        root,
+        "AGENTS.md",
+        (
+            "发布 SPY YYYY-MM-DD",
+            "拉一下 YYYY-MM-DD 的 SPY 然后更新页面",
+            "publish SPY review for YYYY-MM-DD",
+            "push 5/20 SPY",
+        ),
+        "data trigger",
+        errors,
+    )
+    require_text_tokens(
+        root,
+        "docs/operating-modes.md",
+        (
+            "requested -> date_resolved -> fetched -> quality_passed -> candidate_verified -> local_accepted -> publish_authorized -> committed -> published -> hosted_verified",
+            "### Local Update Gate",
+            "### Publish Gate",
+        ),
+        "data contract",
+        errors,
+    )
+    require_text_tokens(
+        root,
+        "docs/daily-publish-runbook.md",
+        (
+            "TV default, IB exception only",
+            "Do not preflight, open, or restart IB Gateway before the TV attempt.",
+            "Never mix TV and IB bars inside one market day.",
+            "PYTHONPATH=. python scripts/rebuild_live_extended_db.py",
+            "normal automation must never use it",
+        ),
+        "daily runbook",
+        errors,
+    )
+    import_line = "market_day_id = None if args.skip_import else import_market_json(output_path)"
+    for relative in (
+        "backend/scripts/fetch_tv_live_extended_day.py",
+        "backend/scripts/fetch_ib_live_extended_day.py",
+    ):
+        require_text_tokens(root, relative, (import_line,), "data adapter", errors)
+    require_text_tokens(
+        root,
+        "backend/scripts/rebuild_live_extended_db.py",
+        (
+            "Rebuild live_extended into a verified candidate and atomically promote it.",
+            '"--allow-date-loss"',
+        ),
+        "data rebuild",
+        errors,
+    )
+    require_text_tokens(
+        root,
+        ".github/workflows/publish-static-reviews.yml",
+        (
+            "branches:\n      - main",
+            "PYTHONPATH=. python scripts/export_static_reviews.py",
+            "npm run build:static-reviews",
+            "git push --force origin gh-pages",
+        ),
+        "pages publisher",
+        errors,
+    )
 
 
 def read_git_status(root: Path, errors: list[str]) -> list[str]:

@@ -12,16 +12,16 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
-- Current phase: phase-4
+- Current phase: phase-5
 - Phase state: complete
-- Phase entry gate: `phase-3-complete@549ec914d8fed9c47e96995e552c2d909a599f51`
-- Next gate: phase-5-start
+- Phase entry gate: `phase-4-complete@f8e84d657a6de7bac5a825f620cd6641d4a67c92`
+- Next gate: phase-6-implementation-review
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-4 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
-- Scope authority: Phase 4 harness/config/CI integration slice only; Phase 5 is the next unopened implementation gate
+- Implementation authority: Phases 0-5 completed under `user-goal-execute-plan-2026-07-19`; Phase 6 remains bounded by independent implementation review and closeout gates
+- Scope authority: Phase 5 negative-matrix/compatibility hardening only; Phase 6 independent implementation review is the next unopened gate
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-4:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 4 integrated the canonical governed checker and fixture suite into repository config and the existing Harness structure job while preserving job names and the Pages workflow. The only next gate is `phase-5-start`. No broker, provider, tracked-DB, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-5:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 5 completed the negative matrix, contract compatibility checks, and bounded native verification. The only next gate is `phase-6-implementation-review`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -684,3 +684,13 @@ This plan is **Active** at `phase-4:complete`. Revision `v2-review-foldback-2026
 - Enforcement: the focused checker now rejects missing/misordered canonical or fixture commands in config/workflow. Three new negative fixtures cover config omission, config ordering, and workflow omission; the suite now passes 29 tests.
 - Compatibility: governed and minimal profile behavior, external fixture roots, state-block reconciliation, startup-document budget, Markdown links, workflow job names/order, and no Pages workflow diff all pass. `.github/workflows/publish-static-reviews.yml` retains its Phase 0 hash.
 - Exit result: local and PR harness paths enforce the same operating-modes contract without network, provider, broker, tracked DB, or publication access. Phase 5 may start after the scoped Phase 4 commit succeeds.
+
+### Phase 5 — complete
+
+- Entry evidence: Phase 4 exit commit `f8e84d657a6de7bac5a825f620cd6641d4a67c92` and clean scoped baseline.
+- Negative matrix: added active independence, migrated legacy completed-plan, daily-trigger, TV-first runbook, default fetch-import, and Pages publisher cases. The temporary-Git suite now passes 35 tests and covers every machine-fixture row in Section 9.1 plus Data Update contract-text compatibility cases.
+- Contract enforcement: the focused checker now requires the runbook, Pages workflow, both adapters, and candidate rebuild paths, and validates the four daily triggers, state sequence/gates, TV-first/no-mixing rules, canonical rebuild command/date-loss prohibition, default import calls, candidate/override text, and main-to-`gh-pages` publisher steps.
+- Backend verification: an isolated `/tmp` venv installed the pinned `backend/requirements-tv.txt`; all 19 backend tests passed, including the calendar/holiday/early-close carrier that was unavailable in the pre-existing environments. Backend compileall passed. Third-party calendar libraries emitted only deprecation warnings. The temporary venv and generated caches were removed.
+- Compatibility verification: frontend production build passed with 1746 transformed modules and generated `frontend/dist` was removed; tracked DB read-only `integrity_check=ok` and foreign-key output was empty; focused/composed checkers, startup budget, launcher syntax, Markdown links, job names, whitespace, intended paths, and read-only hashes passed.
+- Deferred evidence: no real provider fetch, IB fallback, tracked-DB update, Tang trade input, local page smoke, data commit/push, Pages run, or hosted URL verification was authorized or executed. Those items are not called passes and remain future Data Update evidence.
+- Exit result: every implementation-scope automated/inspection row passes, all runtime-only rows are truthfully deferred, and Phase 6 independent implementation review may start after the scoped Phase 5 commit succeeds.

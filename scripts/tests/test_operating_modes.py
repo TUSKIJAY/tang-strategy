@@ -115,7 +115,11 @@ None.
 
 
 def build_governed_fixture(root: Path) -> None:
-    write(root, "AGENTS.md", "# Agents\n\nUse docs/operating-modes.md.\n")
+    write(
+        root,
+        "AGENTS.md",
+        "# Agents\n\nUse docs/operating-modes.md.\n\n发布 SPY YYYY-MM-DD\n拉一下 YYYY-MM-DD 的 SPY 然后更新页面\npublish SPY review for YYYY-MM-DD\npush 5/20 SPY\n",
+    )
     write(root, "INSTRUCTIONS.md", "# Instructions\n\nUse docs/operating-modes.md.\n")
     block = state_block("Active", "phase-1", "complete", "phase-2-start")
     write(root, "PROGRESS.md", f"# Progress\n\n{block}")
@@ -140,6 +144,11 @@ def build_governed_fixture(root: Path) -> None:
         "name: Test\n\non: workflow_dispatch\n\njobs:\n  harness:\n    name: Harness structure\n    runs-on: ubuntu-latest\n    steps:\n      - run: python3 scripts/check-project-harness.py --root . --profile governed\n      - run: python3 -m unittest scripts.tests.test_operating_modes\n",
     )
     write(root, ".github/pull_request_template.md", "# PR\n")
+    write(
+        root,
+        ".github/workflows/publish-static-reviews.yml",
+        "on:\n  push:\n    branches:\n      - main\n\njobs:\n  publish:\n    steps:\n      - run: PYTHONPATH=. python scripts/export_static_reviews.py\n      - run: npm run build:static-reviews\n      - run: git push --force origin gh-pages\n",
+    )
     write(root, "scripts/check-project-harness.py", "# fixture path\n")
     write(root, "scripts/check-operating-modes.py", "# fixture path\n")
     write(root, "scripts/check-startup-doc-budget.py", "# fixture path\n")
@@ -148,7 +157,6 @@ def build_governed_fixture(root: Path) -> None:
         "docs/architecture.md",
         "docs/roadmap.md",
         "docs/planning.md",
-        "docs/daily-publish-runbook.md",
         "docs/decisions/index.md",
         "docs/decisions/decision-template.md",
         "docs/optimization/index.md",
@@ -157,7 +165,24 @@ def build_governed_fixture(root: Path) -> None:
         "docs/progress-archive/index.md",
     ):
         write(root, relative, f"# {Path(relative).stem}\n")
-    write(root, "docs/operating-modes.md", "# Contract\n\n`operating-modes-v1`\n")
+    write(
+        root,
+        "docs/daily-publish-runbook.md",
+        "# Runbook\n\nTV default, IB exception only\n\nDo not preflight, open, or restart IB Gateway before the TV attempt.\nNever mix TV and IB bars inside one market day.\n\nPYTHONPATH=. python scripts/rebuild_live_extended_db.py\n\nnormal automation must never use it\n",
+    )
+    write(
+        root,
+        "docs/operating-modes.md",
+        "# Contract\n\n`operating-modes-v1`\n\nrequested -> date_resolved -> fetched -> quality_passed -> candidate_verified -> local_accepted -> publish_authorized -> committed -> published -> hosted_verified\n\n### Local Update Gate\n\n### Publish Gate\n",
+    )
+    import_line = "market_day_id = None if args.skip_import else import_market_json(output_path)\n"
+    write(root, "backend/scripts/fetch_tv_live_extended_day.py", import_line)
+    write(root, "backend/scripts/fetch_ib_live_extended_day.py", import_line)
+    write(
+        root,
+        "backend/scripts/rebuild_live_extended_db.py",
+        'description = "Rebuild live_extended into a verified candidate and atomically promote it."\nflag = "--allow-date-loss"\n',
+    )
     write(
         root,
         "docs/decisions/2026-07-19-operating-modes-and-lifecycle-source.md",
@@ -469,6 +494,10 @@ None.
         )
         self.assert_error("lacks user-instruction activation evidence")
 
+    def test_active_without_independence_attestation_fails(self) -> None:
+        self.replace("docs/exec-plans/active/demo-plan.md", "- Review independence: attested", "- Review independence: none")
+        self.assert_error("Review independence must be attested")
+
     def test_proposed_with_approve_and_no_activation_passes(self) -> None:
         self.make_proposed()
         completed, payload = self.check()
@@ -480,6 +509,26 @@ None.
 
     def test_valid_completed_plan_passes(self) -> None:
         self.make_completed()
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_migrated_legacy_completed_plan_passes_without_rewriting_reviews(self) -> None:
+        self.make_completed()
+        self.replace(
+            "docs/exec-plans/completed/demo-plan.md",
+            "- Lifecycle schema: `operating-modes-v1`",
+            "- Lifecycle schema: `operating-modes-legacy-v1`",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "# Historical Design Review\n\n**裁决**: approve\n\nHistorical prose stays untouched.\n",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/reviews/demo-plan/implementation-review-001.md",
+            "# Historical Implementation Review\n\n**裁决**: accept\n\nHistorical prose stays untouched.\n",
+        )
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])
 
@@ -565,6 +614,34 @@ None.
             "run: echo missing-fixture-command",
         )
         self.assert_error("verification workflow: missing required command")
+
+    def test_daily_trigger_contract_is_enforced(self) -> None:
+        self.replace("AGENTS.md", "push 5/20 SPY", "removed trigger")
+        self.assert_error("data trigger: AGENTS.md missing required contract text: push 5/20 SPY")
+
+    def test_tv_first_runbook_contract_is_enforced(self) -> None:
+        self.replace(
+            "docs/daily-publish-runbook.md",
+            "Do not preflight, open, or restart IB Gateway before the TV attempt.",
+            "Gateway first",
+        )
+        self.assert_error("daily runbook: docs/daily-publish-runbook.md missing required contract text")
+
+    def test_pages_publisher_contract_is_enforced(self) -> None:
+        self.replace(
+            ".github/workflows/publish-static-reviews.yml",
+            "git push --force origin gh-pages",
+            "echo no publish",
+        )
+        self.assert_error("pages publisher: .github/workflows/publish-static-reviews.yml missing required contract text")
+
+    def test_default_fetch_import_contract_is_enforced(self) -> None:
+        self.replace(
+            "backend/scripts/fetch_tv_live_extended_day.py",
+            "market_day_id = None if args.skip_import else import_market_json(output_path)",
+            "market_day_id = None",
+        )
+        self.assert_error("data adapter: backend/scripts/fetch_tv_live_extended_day.py missing required contract text")
 
     def test_checker_is_read_only(self) -> None:
         before = {

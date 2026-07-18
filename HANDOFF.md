@@ -5,20 +5,20 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-4`
+- Current phase: `phase-5`
 - Phase state: `complete`
-- Next gate: `phase-5-start`
+- Next gate: `phase-6-implementation-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Startup Git evidence: this proposal began from `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` with a clean worktree/index; rerun the startup commands for live branch/HEAD/status truth
-- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-4:complete`; config/CI integration and 29 fixtures are recorded
+- Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Active` at `phase-5:complete`; 35 fixtures and compatibility/native verification are recorded
 - Active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
 - Design reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
-- Implementation boundary: Phase 4 config/workflow/checker-fixture integration only; no runtime/data/provider/publisher change; Phase 5 is next
+- Implementation boundary: implementation is stable through Phase 5; no runtime/data/provider/publisher change; independent implementation review is next
 - Local Git boundary: after a lifecycle transition or Phase exit passes verification and state reconciliation, create one conventional commit containing only that boundary's plan-scoped paths
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, or other remote change is authorized
 
@@ -27,8 +27,8 @@
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve any unrelated changes and read `docs/operating-modes.md` plus the active plan execution record.
-4. Phase 4 is complete. Verify and create its exact scoped local commit before entering Phase 5.
-5. Phase 5 completes the negative matrix, error specificity, migration compatibility, contract-text comparisons, and bounded full verification; do not fabricate deferred real-run evidence.
+4. Phase 5 is complete. Verify and create its exact scoped local commit before requesting independent implementation review.
+5. Phase 6 requires a qualifying independent `accept`; remediate findings before completed disposition and lifecycle reconciliation.
 6. At each verified lifecycle/Phase boundary, inspect the diff and use the plan's standing authority to stage only scoped paths and create one local conventional commit. Do not push, open a PR, publish, merge, or change remote settings without separate authority.
 
 ## Verification Evidence
@@ -48,6 +48,7 @@
 | Phase 2 lifecycle checker | pass: current focused/composed checks plus 26 temporary-Git Coding/lifecycle fixtures; minimal profile excluded; read-only proof passed |
 | Phase 3 Data Update mapping | pass: 19 carrier rows mapped; 18/19 backend tests passed and one calendar prerequisite is explicitly unavailable/not passed; real-run receipts deferred |
 | Phase 4 harness/CI integration | pass: config/workflow canonical ordering, 29 fixtures, external roots/profiles, unchanged three job names, and unchanged Pages workflow |
+| Phase 5 compatibility closeout | pass: 35 fixtures; 19/19 pinned backend tests; compileall; frontend build; DB integrity/FK; exact trigger/runbook/adapter/rebuild/publisher text |
 | Independent review | `accept`, confidence `high` |
 | Local page acceptance | pass: root command, `/tmp` SQLite backup, 46 days, integrity `ok`, frontend/OpenAPI HTTP 200, immediate same-port restart, occupied-port refusal, and repeated Ctrl-C cleanup |
 | Tracked DB protection | SHA-256 before/after `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8` |
@@ -66,7 +67,7 @@ Detailed evidence is under `docs/exec-plans/reviews/2026-07-18-tang-strategy-gov
 
 ## Next Gate
 
-Create the verified scoped local Phase 4 commit, then enter `phase-5-start` for full negative-matrix and compatibility closeout. Runtime, provider, DB, publication, and remote actions remain unauthorized.
+Create the verified scoped local Phase 5 commit, then request qualifying independent implementation review for Phase 6. Runtime, provider, DB mutation, publication, and remote actions remain unauthorized.
 
 ## Handoff Boundary
 

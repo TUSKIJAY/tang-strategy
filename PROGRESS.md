@@ -5,12 +5,12 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-4`
+- Current phase: `phase-5`
 - Phase state: `complete`
-- Next gate: `phase-5-start`
+- Next gate: `phase-6-implementation-review`
 <!-- operating-modes-state:end -->
 
-2026-07-19: Phase 4 已将 canonical governed checker 与 operating-modes fixture suite 接入 `.harness/config.json` 和现有 `Harness structure` job，当前为 `phase-4:complete`，next gate 为 `phase-5-start`。focused checker 同时验证 config/workflow 命令与顺序；29 个 fixtures 通过；三个 GitHub job display name 不变；Pages publisher workflow 零 diff。未运行 network/provider/broker/DB/publish 行为，远端权限仍未授予。
+2026-07-19: Phase 5 已完成 full negative matrix 与 Data Update contract-text compatibility closeout，当前为 `phase-5:complete`，next gate 为 `phase-6-implementation-review`。35 个 temporary-Git fixtures、focused/composed checker、startup budget、launcher syntax、pinned temporary environment 下 19/19 backend tests 与 compileall、frontend production build、tracked DB integrity/foreign keys 均通过；临时 venv、cache 和 `dist` 已清理。真实 provider/IB/DB update/Tang input/commit/push/Pages/hosted evidence 未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-4:complete`; Phase 5 full negative matrix and compatibility closeout are next.
+- [ ] Active operating-modes plan is at `phase-5:complete`; Phase 6 independent implementation review and closeout are next.
 
 ## Blocked
 
@@ -33,12 +33,13 @@
 
 ## To Do
 
-- [ ] Start Phase 5 only after the verified Phase 4 scoped local commit succeeds.
+- [ ] Start Phase 6 review only after the verified Phase 5 scoped local commit succeeds.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-19 - Completed Phase 5 with 35 fixtures, contract-text enforcement, 19/19 pinned backend tests, compileall, frontend build, DB integrity, and explicit deferred real-run evidence.
 - [x] 2026-07-19 - Completed Phase 4 config/CI integration, exact command ordering enforcement, 29 fixtures, unchanged job names, and zero Pages workflow diff.
 - [x] 2026-07-19 - Completed Phase 3 Data Update carrier map, existing-test/runbook/publisher compatibility inspection, and explicit future-run evidence boundaries.
 - [x] 2026-07-19 - Completed Phase 2 legacy metadata migration, compact routers, focused read-only checker, governed external-root composition, and 26 Coding/lifecycle fixtures.
