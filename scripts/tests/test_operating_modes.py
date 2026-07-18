@@ -1415,7 +1415,7 @@ None.
 
     def test_raw_yaml_forbidden_double_quoted_characters_do_not_count(self) -> None:
         original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
-        for codepoint in (0x7F, 0x80, 0x84, 0x85, 0x86, 0x9F):
+        for codepoint in (0x7F, 0x80, 0x84, 0x85, 0x86, 0x9F, 0xFFFE, 0xFFFF):
             with self.subTest(codepoint=f"U+{codepoint:04X}"):
                 member = f'x{chr(codepoint)}y'
                 workflow = original.replace(
@@ -1434,6 +1434,20 @@ None.
         )
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_yaml_allowed_noncharacter_range_values_are_supported(self) -> None:
+        original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
+        for codepoint in (0xFDD0, 0xFDEF, 0x1FFFE, 0x1FFFF, 0x10FFFE, 0x10FFFF):
+            with self.subTest(codepoint=f"U+{codepoint:04X}"):
+                member = f'x{chr(codepoint)}y'
+                workflow = original.replace(
+                    "    branches:\n      - main",
+                    f'    branches: [main, "{member}"]',
+                )
+                write(self.root, ".github/workflows/project-harness.yml", workflow)
+                completed, payload = self.check()
+                self.assertEqual(completed.returncode, 0, payload["errors"])
+        write(self.root, ".github/workflows/project-harness.yml", original)
 
     def test_quoted_terminal_colon_branch_strings_are_supported(self) -> None:
         original = (self.root / ".github/workflows/project-harness.yml").read_text(encoding="utf-8")
