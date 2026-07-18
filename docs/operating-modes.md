@@ -219,3 +219,31 @@ The focused checker is read-only and Python-stdlib-only; it may call installed `
 Machine fixtures cover plan discovery/uniqueness, metadata/state invariants, exact index/roadmap sets, review structure and revision matching, current-state blocks, historical Git markers, required paths/routing, read-only behavior, external-root composition, and governed/minimal profile separation. Contract inspection covers routing, Data Update ordering, unchanged daily trigger/runbook/publisher boundaries, and migration text. Existing backend tests remain the carrier for actual calendar, TV quality, rebuild, non-shrink, DB, and assemble behavior. Human evidence remains required for identity, authority, command order, optional checks, bounded-maintenance classification, and anomaly return decisions. Real commit/push/Pages/hosted proof is deferred to a separately authorized daily run.
 
 No fixture or offline inspection may claim a real provider fetch, broker connection, tracked-DB update, push, Pages publication, or hosted verification passed.
+
+## 8. Data Update Verification Carrier Map
+
+This map binds the Data Update cases to current repository evidence without turning offline inspection into a real daily-run receipt.
+
+| Case | Current carrier | Evidence boundary |
+| --- | --- | --- |
+| Calendar resolves normal, early-close, and holiday sessions | `backend/tests/test_fetch_tv_live_extended_day.py::test_market_calendar_resolves_normal_early_close_and_holiday`; `test_expected_times_support_normal_and_early_close_sessions`; future authorized run | The deterministic expected-time test passes without provider access. The calendar test requires the pinned `requirements-tv.txt` environment; a missing dependency is a prerequisite failure, not a pass. |
+| IB is checked before a TV failure | `AGENTS.md` daily trigger contract plus `docs/daily-publish-runbook.md` Source policy/Pre-flight; human command evidence | Contract prohibits it; only a real command log can prove order. |
+| TV RTH/session/OHLCV/derived-5m gate fails | `test_sparse_extended_session_passes_when_rth_is_complete`, `test_missing_rth_minute_fails_hard_gate`, expected-times test, and source inspection of `validate_source_rows`/payload derivation | Existing tests exercise RTH coverage and early-close counts. A future run supplies provider payload evidence. |
+| IB fallback lacks whole-day/gap/session proof | Daily runbook Section 2 plus future authorized run | The IB adapter reports counts/gaps but the runbook/human gate owns acceptance; no offline fixture claims it passed. |
+| TV and IB are mixed within one day | Runbook Source policy and this contract; future provenance evidence | Prohibited by contract; real payload metadata proves the selected source. |
+| Fetch imports before rebuild | `backend/scripts/fetch_tv_live_extended_day.py` and `fetch_ib_live_extended_day.py` default branches calling `import_market_json`; future before/after evidence | `--skip-import` exists, but the tracked default path imports. Inspection proves code shape, not a real DB mutation. |
+| Candidate loses market/non-market rows or fails integrity/drift | all 11 tests in `backend/tests/test_rebuild_live_extended_db.py` plus all 4 in `backend/tests/test_db_safety.py` | Temporary SQLite fixtures cover empty/subset/corrupt/semantic/non-market/drift/rollback and successful promotion without touching the tracked DB. |
+| Local seed is incomplete relative to tracked DB | `test_subset_seed_reports_missing_date_and_preserves_original_bytes`; `test_no_seed_refuses_and_preserves_original_bytes` | Default rebuild refuses shrink. The override test proves the override exists but does not authorize its routine use. |
+| Requested day, DB checks, or non-empty assemble payload fails | rebuild/DB safety tests; completed recovery-plan acceptance evidence; future authorized run | No dedicated current unit test proves a newly requested real day through `/api/reviews/assemble`; that receipt remains mandatory and deferred to the real update. |
+| Optional static export/build/page smoke is not run | Daily runbook Section 5 and human handoff evidence | Record `not run`; do not call it pass. |
+| Local acceptance has no publish authority | Git status plus human authority evidence | Stop before stage/commit/push/publish unless the Publish Gate is separately open. |
+| Publish trigger exists but a local gate fails | `AGENTS.md` triggers, Local Update Gate ordering, and human command evidence | Pending publication authority cannot skip or relabel a failed local gate. |
+| Tang trade/context is supplied | Daily runbook Section 4, existing `load_tang_trades` validation command, and future authorized run | Validate the user-supplied JSON before an authorized commit; absence of supplied context creates no synthetic trade. |
+| Anomaly proves no system defect | human diagnosis evidence | Return only to the last safe Data Update state for a bounded retry. |
+| Anomaly requires a system change | Coding Mode hard-routing contract plus human diagnosis evidence | Stop Data Update Mode and route the change; the data request grants no code authority. |
+| Routine update edits code, weakens a gate, uses date-loss override, or fabricates data | contract inspection plus human diff/command evidence | Stop; none is allowed as a completion shortcut. |
+| Routine existing-system update has no Exec Plan | peer-mode/routing contract inspection | Allowed when all existing gates work and no system change is needed. |
+| Daily triggers, runbook sequence, and Pages publisher remain compatible | exact text/path inspection of `AGENTS.md`, `docs/daily-publish-runbook.md`, and `.github/workflows/publish-static-reviews.yml` | Compatibility evidence only; it is not a hosted publish test. |
+| Commit/push/Pages/hosted sequence succeeds | future authorized run | No offline fixture, implementation phase, or green local check can satisfy this row. |
+
+Current runtime gaps are explicit: the default adapters can mutate the tracked DB before rebuild acceptance; IB quality acceptance depends on runbook/human evidence; and a newly requested day's assemble receipt is collected during the real update rather than by this contract-only implementation. Any proposal to change those facts is separate Coding Mode work.

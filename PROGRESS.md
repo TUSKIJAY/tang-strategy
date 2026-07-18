@@ -5,12 +5,12 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-2`
+- Current phase: `phase-3`
 - Phase state: `complete`
-- Next gate: `phase-3-start`
+- Next gate: `phase-4-start`
 <!-- operating-modes-state:end -->
 
-2026-07-19: Phase 2 已完成 legacy completed-plan metadata-only migration、compact Coding/Data Update router、stdlib read-only focused checker、governed external-root composition 与 26 个 Coding/lifecycle temporary-Git fixtures，当前为 `phase-2:complete`，next gate 为 `phase-3-start`。当前仓库的 focused/composed checker 均通过；minimal profile 不组合 focused checker；checker 前后 fixture bytes 与 Git status 不变。未添加 transition helper，未修改 runtime/DB/provider/publisher，远端权限仍未授予。
+2026-07-19: Phase 3 已完成 19 行 Data Update carrier map 与现有 runbook/publisher/adapter/backend-test 对照，当前为 `phase-3:complete`，next gate 为 `phase-4-start`。本机 system Python 运行 19 个 backend tests：18 通过，唯一 calendar test 因两个现有 Python 环境都缺 `pandas_market_calendars` 而报 prerequisite error，未被记为 pass 或 code regression。真实 provider/IB/DB/assemble/publish/hosted evidence 仍明确 deferred；未运行 fetch/rebuild/publish，未修改 runbook/runtime/DB/provider/publisher。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-2:complete`; Phase 3 Data Update evidence mapping is next.
+- [ ] Active operating-modes plan is at `phase-3:complete`; Phase 4 harness/config/CI integration is next.
 
 ## Blocked
 
@@ -33,12 +33,13 @@
 
 ## To Do
 
-- [ ] Start Phase 3 only after the verified Phase 2 scoped local commit succeeds.
+- [ ] Start Phase 4 only after the verified Phase 3 scoped local commit succeeds.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-19 - Completed Phase 3 Data Update carrier map, existing-test/runbook/publisher compatibility inspection, and explicit future-run evidence boundaries.
 - [x] 2026-07-19 - Completed Phase 2 legacy metadata migration, compact routers, focused read-only checker, governed external-root composition, and 26 Coding/lifecycle fixtures.
 - [x] 2026-07-19 - Completed Phase 1 single authority contract, accepted decision, constrained plan/review/index/roadmap/state-block formats, and fixture-carrier attestation.
 - [x] 2026-07-19 - Completed Phase 0 baseline, exact manifest revalidation, authority freeze, read-only contract/hash capture, governed checker, startup budget, and no-runtime/data/provider/publisher mutation proof.

@@ -12,16 +12,16 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
-- Current phase: phase-2
+- Current phase: phase-3
 - Phase state: complete
-- Phase entry gate: `phase-1-complete@e1b976820aeb93e6e8889eb2fb5d1c8b9a603a7b`
-- Next gate: phase-3-start
+- Phase entry gate: `phase-2-complete@10e19e71012c2573334e743395507349125f34c2`
+- Next gate: phase-4-start
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-2 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
-- Scope authority: Phase 2 legacy metadata/router/focused-checker/Coding-fixture slice only; Phase 3 is the next unopened implementation gate
+- Implementation authority: Phases 0-3 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
+- Scope authority: Phase 3 Data Update contract/evidence-mapping slice only; Phase 4 is the next unopened implementation gate
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-2:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 2 migrated legacy metadata, added compact routers, and implemented the read-only focused checker plus Coding/lifecycle fixtures. The only next gate is `phase-3-start`. No runtime, DB, provider, publisher, broker, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-3:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 3 finalized the Data Update carrier map against current runbook, publisher, adapter, and backend-test evidence without executing provider/DB/publication behavior. The only next gate is `phase-4-start`. No broker, provider, tracked-DB, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -666,3 +666,12 @@ This plan is **Active** at `phase-2:complete`. Revision `v2-review-foldback-2026
 - Coding/lifecycle fixtures: 26 temporary Git-repository tests passed, including valid active/proposed/completed states; duplicate/status/index/reviews/roadmap failures; missing approve/activation/phase/disposition/implementation review; current-block mismatch; historical versus forbidden Git claims; required-path/router/reviewer/revision checks; read-only byte/status preservation; governed external-root composition; and minimal-profile exclusion.
 - Current repository: focused checker and composed governed checker pass with the migrated legacy plan and active v2 plan. No transition helper was added.
 - Exit result: invalid lifecycle states fail specifically, valid migrated state passes, and Phase 3 may start after the scoped Phase 2 commit succeeds.
+
+### Phase 3 — complete
+
+- Entry evidence: Phase 2 exit commit `10e19e71012c2573334e743395507349125f34c2` and clean scoped baseline.
+- Contract finalization: added an explicit 19-row Data Update carrier map to `docs/operating-modes.md`, covering calendar/source ordering, TV/IB quality, import-before-rebuild, candidate safety, local acceptance, optional checks, publication separation, anomaly routing, and future hosted evidence.
+- Existing test mapping: calendar/RTH cases map to `test_fetch_tv_live_extended_day.py`; candidate/non-shrink/semantic/integrity/drift/rollback cases map to all 11 rebuild and 4 DB-safety tests. The current system-Python run executed 19 tests: 18 passed and only the calendar test errored because `pandas_market_calendars` is absent from both available local Python environments. Per repository contract this is an environment prerequisite failure, not a code pass or regression.
+- Runtime-only evidence: a new requested day's real provider provenance, default-import before/after DB evidence, IB whole-day/gap/session proof, assemble 1m/5m receipt, optional page smoke status, user-supplied Tang JSON, command order, Git publication boundary, Pages run, and hosted URL remain future authorized-run or human evidence.
+- Compatibility inspection: daily trigger phrases, TV-first runbook ordering, `--allow-date-loss` prohibition, default TV/IB `import_market_json` calls, tracked-DB publisher input, and the sole `gh-pages` workflow remain unchanged. Frozen hashes still match Phase 0.
+- Exit result: local success cannot be interpreted as publish authority, no offline evidence claims a real publish, and no separately proposed runtime change is required for this plan. Phase 4 may start after the scoped Phase 3 commit succeeds.
