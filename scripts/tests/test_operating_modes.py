@@ -557,6 +557,24 @@ None.
         )
         self.assert_error("lacks user-instruction activation evidence")
 
+    def test_active_rejects_empty_activation_reference(self) -> None:
+        self.replace(
+            "docs/exec-plans/active/demo-plan.md",
+            "- Activation evidence: `user-instruction:fixture-activation`",
+            "- Activation evidence: `user-instruction:`",
+        )
+        self.assert_error("Activation evidence must be none or a non-empty user-instruction reference")
+
+    def test_active_next_gate_must_be_non_none(self) -> None:
+        for relative in (
+            "docs/exec-plans/active/demo-plan.md",
+            "docs/exec-plans/active/index.md",
+            "PROGRESS.md",
+            "HANDOFF.md",
+        ):
+            self.replace(relative, "phase-2-start", "none")
+        self.assert_error("Active plan Next gate must be non-none")
+
     def test_active_without_independence_attestation_fails(self) -> None:
         self.replace("docs/exec-plans/active/demo-plan.md", "- Review independence: attested", "- Review independence: none")
         self.assert_error("Review independence must be attested")
@@ -677,6 +695,40 @@ None.
             "| phase-2-start | extra |",
         )
         self.assert_error("fixed row must contain exactly four cells")
+
+    def test_all_indexes_reject_trailing_empty_fifth_cell(self) -> None:
+        cases = (
+            ("docs/exec-plans/proposed/index.md", "| None | — | — | none |"),
+            ("docs/exec-plans/active/index.md", "| [Demo](./demo-plan.md) | phase-1:complete | [review-001](../reviews/demo-plan/review-001.md) | phase-2-start |"),
+            ("docs/exec-plans/completed/index.md", "| None | — | — | none |"),
+            ("docs/exec-plans/reviews/index.md", "| [Demo](./demo-plan/) | [review-001](./demo-plan/review-001.md) | approve | Active |"),
+        )
+        for relative, row in cases:
+            with self.subTest(index=relative):
+                self.replace(relative, row, f"{row}|")
+                completed, payload = self.check()
+                self.assertNotEqual(completed.returncode, 0)
+                self.assertTrue(
+                    any("exactly four cells" in str(item) or "exact None sentinel" in str(item) for item in payload["errors"]),
+                    payload["errors"],
+                )
+                self.replace(relative, f"{row}|", row)
+
+    def test_index_rejects_arbitrary_no_link_data_row(self) -> None:
+        path = self.root / "docs/exec-plans/active/index.md"
+        path.write_text(
+            path.read_text(encoding="utf-8") + "| forged | x | y | z |\n",
+            encoding="utf-8",
+        )
+        self.assert_error("data row must use a canonical Plan link or exact None sentinel")
+
+    def test_index_rejects_none_sentinel_mixed_with_plan_rows(self) -> None:
+        path = self.root / "docs/exec-plans/active/index.md"
+        path.write_text(
+            path.read_text(encoding="utf-8") + "| None | — | — | none |\n",
+            encoding="utf-8",
+        )
+        self.assert_error("cannot mix a None sentinel with plan rows")
 
     def test_migrated_legacy_completed_plan_passes_without_rewriting_reviews(self) -> None:
         self.make_completed()

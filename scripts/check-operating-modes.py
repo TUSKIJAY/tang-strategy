@@ -82,6 +82,7 @@ REQUIRED_PATHS = (
 
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 GATE_RE = re.compile(r"^[A-Za-z0-9._:@/-]+$")
+ACTIVATION_RE = re.compile(r"^user-instruction:[A-Za-z0-9][A-Za-z0-9._:@/-]*$")
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 LINK_RE = re.compile(r"\[([^]]+)\]\(([^)]+)\)")
 LEGACY_GIT_KEY_RE = re.compile(
@@ -290,6 +291,11 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
         review_results.append((verdict, target_revision, raw_path, review_path, structured))
 
     activation = meta.get("Activation evidence", "")
+    if activation != "none" and not ACTIVATION_RE.fullmatch(activation):
+        errors.append(
+            f"plan metadata: {relative} Activation evidence must be none or a non-empty "
+            "user-instruction reference"
+        )
     implementation = meta.get("Implementation review", "")
     if plan.directory_state == "proposed":
         if activation != "none" or phase != "none" or phase_state != "none" or meta.get("Phase entry gate") != "none":
@@ -312,10 +318,12 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
             errors.append(f"plan state: {relative} Active plan Latest design verdict must be approve")
         if independence != "attested":
             errors.append(f"plan state: {relative} Active plan Review independence must be attested")
-        if not activation.startswith("user-instruction:"):
+        if not ACTIVATION_RE.fullmatch(activation):
             errors.append(f"plan state: {relative} Active plan lacks user-instruction activation evidence")
         if phase == "none" or phase_state == "none" or meta.get("Phase entry gate") == "none":
             errors.append(f"plan state: {relative} Active plan lacks phase, phase state, or phase entry gate")
+        if meta.get("Next gate") == "none":
+            errors.append(f"plan state: {relative} Active plan Next gate must be non-none")
         if disposition != "none" or implementation != "none":
             errors.append(f"plan state: {relative} Active plan must not have final disposition or implementation review")
     elif plan.directory_state == "completed":
@@ -455,10 +463,16 @@ def validate_implementation_review(root: Path, plan: Plan, value: str, errors: l
 def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[list[str], str, str]]:
     text = read_text(path, "index", errors)
     rows: list[tuple[list[str], str, str]] = []
+    sentinel_count = 0
+    state_sentinel = ["None", "—", "—", "none"]
+    reviews_sentinel = ["None", "—", "none", "None"]
+    expected_sentinel = reviews_sentinel if path.parent.name == "reviews" else state_sentinel
     for line in text.splitlines():
-        if not line.startswith("|") or re.fullmatch(r"\|[\s|:-]+\|?", line):
+        raw = line.strip()
+        if not raw.startswith("|") or re.fullmatch(r"\|[\s|:-]+\|?", raw):
             continue
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        body = raw[1:-1] if raw.endswith("|") else raw[1:]
+        cells = [cell.strip() for cell in body.split("|")]
         if not cells or cells[0] in {"Plan", "Decision"}:
             continue
         links = list(LINK_RE.finditer(cells[0]))
@@ -473,6 +487,17 @@ def parse_table_rows(path: Path, root: Path, errors: list[str]) -> list[tuple[li
                 )
             match = links[0]
             rows.append((cells, match.group(2).strip().strip("<>"), line))
+        elif cells == expected_sentinel:
+            sentinel_count += 1
+        else:
+            errors.append(
+                f"index: {path.relative_to(root)} data row must use a canonical Plan link or "
+                f"exact None sentinel: {line}"
+            )
+    if sentinel_count > 1:
+        errors.append(f"index: {path.relative_to(root)} contains duplicate None sentinel rows")
+    if sentinel_count and rows:
+        errors.append(f"index: {path.relative_to(root)} cannot mix a None sentinel with plan rows")
     return rows
 
 

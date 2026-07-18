@@ -7,10 +7,10 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-remediation-r4`
+- Next gate: `phase-6-re-review-r5`
 <!-- operating-modes-state:end -->
 
-2026-07-19: 第四轮独立实施评审 `implementation-review-004` 针对 `b3625e907c4ce843f3b9dc52c7376a0bfebb5fca` 返回 `revise`、置信度 `high`。它确认此前全部 finding 已关闭，并新增三条 false-pass：空 `user-instruction:`、Active `Next gate=none`、以及 trailing empty fifth cell/no-link data row 被 table parser 忽略。当前为 `phase-6:in-progress`，next gate 为 `phase-6-remediation-r4`。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
+2026-07-19: `implementation-review-004` 的 bounded remediation 已完成，当前为 `phase-6:in-progress`，next gate 为 `phase-6-re-review-r5`。Active activation 与 next gate 现在必须非空/non-none；table tokenizer 保留 trailing empty cell 并拒绝 no-link/mixed/duplicate sentinel/extra-cell 行；真实 Proposed index 已迁移为 canonical `none` sentinel。67 fixtures、focused/governed/auto、startup budget、launcher syntax、DB integrity/FK、runtime zero-diff、frozen hashes 与 whitespace 均通过。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediate the three implementation-review-004 findings and obtain a fresh qualifying implementation review.
+- [ ] Active operating-modes plan is at `phase-6:in-progress`; remediation-r4 is verified and another fresh qualifying implementation review is next.
 
 ## Blocked
 
@@ -33,7 +33,7 @@
 
 ## To Do
 
-- [ ] Keep remediation-r4 limited to Active activation/next-gate rules and exact fixed-table tokenization/sentinel grammar; then rerun bounded verification and request a fresh independent review.
+- [ ] After the scoped remediation-r4 commit, request another fresh independent implementation review against that stable boundary; require `accept` before closeout.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
