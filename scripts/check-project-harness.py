@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -239,6 +240,35 @@ def check_markdown_contracts(root: Path, errors: list[str]) -> dict[str, list[st
     return checked
 
 
+def check_operating_modes_contract(root: Path, errors: list[str]) -> dict[str, Any]:
+    checker = Path(__file__).resolve().with_name("check-operating-modes.py")
+    try:
+        completed = subprocess.run(
+            [sys.executable, str(checker), "--root", str(root)],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        errors.append(f"operating modes: checker invocation failed: {type(exc).__name__}: {exc}")
+        return {}
+    try:
+        payload = json.loads(completed.stdout.splitlines()[0])
+    except (IndexError, json.JSONDecodeError) as exc:
+        errors.append(
+            f"operating modes: checker returned invalid JSON: {type(exc).__name__}: {exc}; "
+            f"stderr={completed.stderr.strip()!r}"
+        )
+        return {}
+    nested_errors = payload.get("errors")
+    if isinstance(nested_errors, list):
+        errors.extend(f"operating modes: {item}" for item in nested_errors if isinstance(item, str))
+    elif completed.returncode != 0:
+        errors.append(f"operating modes: checker failed with code {completed.returncode}")
+    return payload
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
@@ -255,6 +285,7 @@ def main(argv: list[str] | None = None) -> int:
     config = load_config(root, profile, errors)
     github_contract = check_github_contract(root, config, errors) if config else {}
     markdown_links = check_markdown_contracts(root, errors) if profile == "governed" else {}
+    operating_modes = check_operating_modes_contract(root, errors) if profile == "governed" else {}
 
     payload = {
         "schema_version": "project-local-harness-check-v2",
@@ -264,6 +295,7 @@ def main(argv: list[str] | None = None) -> int:
         "missing": missing,
         "github_contract": github_contract,
         "markdown_links": markdown_links,
+        "operating_modes": operating_modes,
         "errors": errors,
         "passed": not errors,
     }

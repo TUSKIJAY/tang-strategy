@@ -12,6 +12,10 @@ Before substantive work:
 
 Preserve all unrelated user changes. Do not overwrite, revert, stage, or commit them as part of another task.
 
+## Operating Modes Router
+
+Use [`docs/operating-modes.md`](./docs/operating-modes.md) as the single normative routing and lifecycle contract. Coding Mode and Data Update Mode are peer modes. Read-only/ambiguous work starts in Coding Lane 1; bounded maintenance is legal only when every Lane 2 criterion passes; governance, DB, market-data, publication, security, cross-contract, broad, or difficult-to-rollback changes require a reviewed Lane 3 Exec Plan. Routine use of existing fetch/rebuild/acceptance tooling uses Data Update Mode. Local acceptance never grants commit, push, or publication authority; the daily triggers below are the only standing publish triggers.
+
 ## Project Structure & Module Organization
 
 This repo is a frontend/backend workspace for Tang Strategy.

@@ -24,6 +24,7 @@ Optimization records, decisions, proposed plans, and reviews do not grant execut
 - `INSTRUCTIONS.md` — stable project facts, boundaries, and verification contract.
 - `PROGRESS.md` — current lifecycle truth.
 - `HANDOFF.md` — latest resume point, evidence, blocker, and next gate.
+- `docs/operating-modes.md` — normative peer-mode routing, lifecycle formats, reviewer evidence, and authority gates.
 - `.harness/config.json` — machine-readable governed profile and verification/GitHub contract.
 - `backend/app/` — FastAPI API, SQLite access, import, auth, and review payload assembly.
 - `backend/scripts/`, `backend/tests/` — fetch/rebuild/recovery/export tooling and backend tests.
@@ -55,7 +56,7 @@ Generated review JSON belongs in `frontend/public/reviews`, the Vite build belon
 
 ## Agent Behavior Rules
 
-1. Read the startup chain and current active plan before modifying files.
+1. Read the startup chain, `docs/operating-modes.md`, and the current active plan before modifying files.
 2. Use repository evidence; do not invent architecture, completion, decisions, test results, or authority.
 3. Preserve unrelated user changes. Do not reset, restore, stash, checkout, stage, commit, or push them.
 4. Keep `PROGRESS.md` truthful when lifecycle state changes; keep `HANDOFF.md` limited to the latest resume point.
@@ -78,6 +79,8 @@ The script resolves the repository root independently of the caller's current di
 ### Repository Checks
 
 - `python3 scripts/check-project-harness.py --root . --profile governed`
+- `python3 scripts/check-operating-modes.py --root .`
+- `python3 -m unittest scripts.tests.test_operating_modes`
 - `python3 scripts/check-startup-doc-budget.py`
 - `cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'`
 - `cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests`

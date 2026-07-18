@@ -5,12 +5,12 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-coding-and-data-update-modes-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-1`
+- Current phase: `phase-2`
 - Phase state: `complete`
-- Next gate: `phase-2-start`
+- Next gate: `phase-3-start`
 <!-- operating-modes-state:end -->
 
-2026-07-19: Phase 1 已完成 `operating-modes-v1` authority contract、Accepted decision、plan/review metadata schema、fixed index/roadmap rows 与匹配的 current-state blocks，当前为 `phase-1:complete`，next gate 为 `phase-2-start`。Section 9 每个 matrix row 都有可实施 carrier；machine fixture、contract inspection、existing backend test、human evidence 与 future authorized run 边界已明确。本阶段未实施 checker/CI/runtime/data/provider/publisher 变更，远端权限仍未授予。
+2026-07-19: Phase 2 已完成 legacy completed-plan metadata-only migration、compact Coding/Data Update router、stdlib read-only focused checker、governed external-root composition 与 26 个 Coding/lifecycle temporary-Git fixtures，当前为 `phase-2:complete`，next gate 为 `phase-3-start`。当前仓库的 focused/composed checker 均通过；minimal profile 不组合 focused checker；checker 前后 fixture bytes 与 Git status 不变。未添加 transition helper，未修改 runtime/DB/provider/publisher，远端权限仍未授予。
 
 ## Navigation
 
@@ -25,7 +25,7 @@
 
 ## In Progress
 
-- [ ] Active operating-modes plan is at `phase-1:complete`; Phase 2 legacy migration/router/checker/Coding fixtures are next.
+- [ ] Active operating-modes plan is at `phase-2:complete`; Phase 3 Data Update evidence mapping is next.
 
 ## Blocked
 
@@ -33,12 +33,13 @@
 
 ## To Do
 
-- [ ] Start Phase 2 only after the verified Phase 1 scoped local commit succeeds.
+- [ ] Start Phase 3 only after the verified Phase 2 scoped local commit succeeds.
 - [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-19 - Completed Phase 2 legacy metadata migration, compact routers, focused read-only checker, governed external-root composition, and 26 Coding/lifecycle fixtures.
 - [x] 2026-07-19 - Completed Phase 1 single authority contract, accepted decision, constrained plan/review/index/roadmap/state-block formats, and fixture-carrier attestation.
 - [x] 2026-07-19 - Completed Phase 0 baseline, exact manifest revalidation, authority freeze, read-only contract/hash capture, governed checker, startup budget, and no-runtime/data/provider/publisher mutation proof.
 

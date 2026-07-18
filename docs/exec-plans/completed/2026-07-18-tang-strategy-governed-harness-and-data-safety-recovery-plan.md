@@ -1,6 +1,22 @@
 # Tang Strategy Governed Harness And Data Safety Recovery
 
+- Lifecycle schema: `operating-modes-legacy-v1`
 - Status: Completed
+- Plan slug: `2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan`
+- Revision: `legacy-approved-2026-07-18`
+- Plan author ID: `legacy-plan-author-2026-07-18`
+- Design reviews: ../reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/review-001.md@revise@legacy-initial-2026-07-18, ../reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/review-002.md@approve@legacy-approved-2026-07-18
+- Latest design verdict: approve
+- Review independence: legacy-unattested
+- Activation evidence: `user-instruction:2026-07-18-recovery-plan-execution`
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: `a70be643a968cc24215fe508e69b3e0496d3c34a`
+- Lifecycle reconciliation commit: `2454ccb7fc1c927f2a52a3bd2db7debe41998594`
 - Owner: Codex
 - Created: 2026-07-18
 - Completed: 2026-07-18

@@ -7,21 +7,21 @@
 - Plan author ID: `codex-plan-author-2026-07-19`
 - Owner: Codex
 - Created: 2026-07-19
-- Design reviews: `review-001.md@revise@v1-initial`, `review-002.md@revise@v1-initial`, `review-003.md@approve@v2-review-foldback-2026-07-19`
+- Design reviews: ../reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/review-001.md@revise@v1-initial, ../reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/review-002.md@revise@v1-initial, ../reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/review-003.md@approve@v2-review-foldback-2026-07-19
 - Review status: v1 reviews revise; v2 matching-revision design review `review-003` returned approve; user activation instruction recorded
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-move-proposed-plan-to-active`
-- Current phase: phase-1
+- Current phase: phase-2
 - Phase state: complete
-- Phase entry gate: `phase-0-complete@6b1707cd75a2396dc39b6611ff6028fdacf851d2`
-- Next gate: phase-2-start
+- Phase entry gate: `phase-1-complete@e1b976820aeb93e6e8889eb2fb5d1c8b9a603a7b`
+- Next gate: phase-3-start
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-1 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
-- Scope authority: Phase 1 authority/format/template/index/current-state slice only; Phase 2 is the next unopened implementation gate
+- Implementation authority: Phases 0-2 completed under `user-goal-execute-plan-2026-07-19`; later phases remain bounded by their recorded entry and exit gates
+- Scope authority: Phase 2 legacy metadata/router/focused-checker/Coding-fixture slice only; Phase 3 is the next unopened implementation gate
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-1:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 1 delivered the authority contract and complete Constrained Format Package without checker, runtime, data, provider, or publisher changes. The only next gate is `phase-2-start`. No publication, broker, provider, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-2:complete`. Revision `v2-review-foldback-2026-07-19` has a qualifying matching-revision design review (`review-003: approve`), explicit activation evidence, and the separate implementation instruction `user-goal-execute-plan-2026-07-19`. Phase 2 migrated legacy metadata, added compact routers, and implemented the read-only focused checker plus Coding/lifecycle fixtures. The only next gate is `phase-3-start`. No runtime, DB, provider, publisher, broker, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -655,3 +655,14 @@ This plan is **Active** at `phase-1:complete`. Revision `v2-review-foldback-2026
 - Migration treatment: existing completed-plan prose remains untouched until metadata-only migration in Phase 2; fixed current index rows already use the future deterministic shapes.
 - Fixture-carrier attestation: every Section 9.1 and 9.2 row has an implementable carrier. Lifecycle/state/review/read-only/profile cases map to temporary-repository fixtures; routing and unchanged text map to contract inspection; actual calendar/TV/rebuild/DB/assemble behavior maps to named existing backend tests in Phase 3; identity/authority/order/optional checks map to human evidence; real publish proof remains a future authorized run.
 - Exit result: no checker requirement depends on ambiguous prose, and no offline carrier claims a provider, broker, DB update, push, Pages run, or hosted verification passed. Phase 2 may start after the scoped Phase 1 commit succeeds.
+
+### Phase 2 — complete
+
+- Entry evidence: Phase 1 exit commit `e1b976820aeb93e6e8889eb2fb5d1c8b9a603a7b` and clean scoped baseline.
+- Legacy migration: added only constrained lifecycle metadata to the 2026-07-18 completed plan, using `operating-modes-legacy-v1`, explicit design/implementation review paths, final disposition, implementation commit, and lifecycle reconciliation commit. Historical narrative and review bodies remain unchanged.
+- Routing: `AGENTS.md` now links the single normative contract with a compact peer-mode/risk router while preserving every daily trigger; `INSTRUCTIONS.md` routes the same contract and lists focused verification commands.
+- Checker: added dependency-free `scripts/check-operating-modes.py`. It discovers canonical plans, rejects duplicate slug/state mismatch, validates state invariants and reviewer evidence, compares state indexes/reviews index/roadmap, reconciles the two current-state blocks, rejects forbidden live-Git keys, reports dynamic Git status, validates required contract paths/routes/templates, emits JSON/errors, and performs no writes.
+- Harness composition: governed `scripts/check-project-harness.py` invokes the focused checker with the caller's explicit `--root`; minimal profile does not invoke it.
+- Coding/lifecycle fixtures: 26 temporary Git-repository tests passed, including valid active/proposed/completed states; duplicate/status/index/reviews/roadmap failures; missing approve/activation/phase/disposition/implementation review; current-block mismatch; historical versus forbidden Git claims; required-path/router/reviewer/revision checks; read-only byte/status preservation; governed external-root composition; and minimal-profile exclusion.
+- Current repository: focused checker and composed governed checker pass with the migrated legacy plan and active v2 plan. No transition helper was added.
+- Exit result: invalid lifecycle states fail specifically, valid migrated state passes, and Phase 3 may start after the scoped Phase 2 commit succeeds.
