@@ -15,13 +15,13 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-5-complete@28629a59a2eb7d0fdce362e2754d8476b7f4aa8e`
-- Next gate: phase-6-re-review-r9
+- Next gate: phase-6-remediation-r9
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation authority: Phases 0-5 and remediations r1-r8 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 now requires renewed independent implementation review and a qualifying `accept` before closeout
-- Scope authority: re-review-r9 is read-only except for its review artifact; no further implementation mutation is authorized until a review finding requires bounded remediation, and runtime, data, provider, publisher, and remote surfaces remain frozen
+- Implementation authority: Phases 0-5 and remediations r1-r8 are complete under `user-goal-execute-plan-2026-07-19`; Phase 6 remediation-r9 is authorized by implementation-review-009 and remains bounded by renewed independent review and closeout gates
+- Scope authority: remediation-r9 may correct only branch scalar tokenization, YAML null/comment semantics for constrained step names, bare/null direct step handling, and their fixtures/contract wording; runtime, data, provider, publisher, and remote surfaces remain frozen
 - Standing local commit authority: `user-instruction:2026-07-19-commit-at-lifecycle-or-phase-boundary`
 - Local Git boundary: after a lifecycle transition or Phase exit passes its required verification and state/handoff reconciliation, stage only that boundary's plan-scoped files and create exactly one local conventional commit
 - Remote boundary: no push, pull request, merge, Pages publish, branch-protection change, environment approval, or other remote mutation
@@ -630,7 +630,7 @@ Before commit, rollback is removal/revision of the scoped uncommitted implementa
 
 ## 13. Current Gate
 
-This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-008` returned `revise` with `high` confidence against remediation-r7 commit `9dad5a9396ecc0efd0e776707aa6f0a5a27dedaf`; remediation-r8 has now closed every recorded unique/direct workflow hierarchy, same-job order, equivalent-YAML, and nested raw-code finding with 133 passing fixtures and the full bounded verification set. The only next gate is fresh independent implementation re-review-r9 against the stable remediation commit. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
+This plan is **Active** at `phase-6:in-progress`. Independent re-review `implementation-review-009` returned `revise` with `high` confidence against remediation-r8 commit `fbc3729c35e55f8f28e383c5ed7dc2b475f4f3ef`. It confirmed every implementation-review-008 finding closed, then found malformed/non-scalar branch flow members and YAML-null step/name values can still false-pass. The only next gate is bounded remediation-r9 followed by fresh independent implementation review. Completed disposition still requires `accept`. No broker, provider, tracked-DB mutation, publication, remote, PR, merge, or push authority was created.
 
 ## 14. Phase Execution Record
 
@@ -740,3 +740,5 @@ This plan is **Active** at `phase-6:in-progress`. Independent re-review `impleme
 - Remediation-r8 result: workflow evidence now rejects duplicate top-level mappings, duplicate direct event/field keys, duplicate job IDs including inline shadow values, structurally nested trigger lookalikes, and commands split across concurrent jobs. `on.pull_request.branches` must be a unique direct hierarchy containing `main`, while plain/quoted constrained keys, plain/quoted block sequence items, flow branch sequences, quoted runners, and declared literal/folded block indicators normalize consistently. Both required commands must occur in order in one qualifying job. Operative Markdown uses a nested stack for raw HTML `code`/`pre`, masks matching outer carriers and unclosed carriers, and retains real links with code-formatted labels.
 - Remediation-r8 verification: 133 temporary-Git fixtures pass, including all implementation-review-008 reproductions, duplicate top-level/event/field mappings, duplicate top-level `jobs`, block and inline duplicate job IDs, nested trigger, path-filter and second-document weakening, cross-job order, nested route/plan/review/table raw-code contexts, custom tag boundary, quoted keys, quoted/flow branch sequences, quoted `jobs`/job IDs, and explicit block indentation indicators. Focused/governed/auto checks, startup budget, launcher/checker syntax, `git diff --check`, baseline runtime/data zero-diff, exact frozen hashes, read-only DB integrity/foreign keys/46-day count, and a Vite production build of 1746 modules to an external temporary directory all pass. The earlier pinned 19/19 backend evidence remains applicable because no runtime file changed.
 - Re-review-r9 gate: commit this scoped remediation boundary, then request a fresh independent review against the stable commit. `Implementation review` remains `none` until a qualifying `accept` artifact exists.
+- Re-review-r9 boundary: `implementation-review-009.md`, authored by `independent-implementation-reviewer-2026-07-19-r9`, returned `revise` with `high` confidence against stable commit `fbc3729c35e55f8f28e383c5ed7dc2b475f4f3ef`. It confirmed all implementation-review-008 reproductions and prior key regressions closed, then found two serious source-grammar false-passes: a branch flow sequence can contain empty or mapping members alongside `main`, and a qualifying job can silently skip a bare null step or treat comment-null `name` as non-empty.
+- Remediation-r9 gate: record this review separately, fully consume and validate declared branch string scalars, reject empty/mapping/collection/anchor/alias/tag members, reject bare/null/scalar direct steps, interpret comment/null/whitespace names as absent, add all recorded negative and retained positive fixtures, rerun bounded verification, and obtain a fresh independent `accept` before closeout.
