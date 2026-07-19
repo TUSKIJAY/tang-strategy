@@ -17,7 +17,7 @@
 - Optimization provenance: `docs/optimization/2026-07-19-review-ui-and-trader-editing.md`; the user-confirmed default visual baseline is `design/references/2026-07-19-review-ui-reference-v1.png` at SHA-256 `57c34ea...d3c5`
 - Proposal baseline: live pre-proposal HEAD was `codex/project-harness@772b94595ccd15d41d06f966dd72e0bb7829c441`; related optimization/state/design inputs were uncommitted and unrelated `output/` artifacts were excluded
 - Current plan status: Completed with final disposition `Completed`; matching-revision v3 design approval and Phases 0-6 are closed. Final integrated acceptance is 78/78 backend, 38/38 frontend, 146/146 lifecycle, both builds, desktop+narrow interactive/static/accessibility recovery, and unchanged DB/content/workflow/exporter boundaries. External Grok Build `implementation-review-001` independently accepted frozen `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc` with high confidence, no findings, and direct vision inspection of all 19 required PNGs; next gate `closed`
-- Current authority: the design-review, implementation-start, Kimi-limit takeover, external-review, and Phase 6 closeout authorities are fully consumed. `user-instruction:2026-07-20-commit-and-push` separately authorizes only the exact plan-scoped commits and current `codex/project-harness` push in this maintenance task. No active implementation authority remains; PR, merge, Pages, hosted verification, provider/broker, tracked DB/canonical data, and other remote changes remain unauthorized
+- Current authority: the design-review, implementation-start, Kimi-limit takeover, external-review, Phase 6 closeout, and `user-instruction:2026-07-20-commit-and-push` authorities are fully consumed. No active implementation, commit, or push authority remains; PR, merge, Pages, hosted verification, provider/broker, tracked DB/canonical data, and other remote changes remain unauthorized
 - Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is `Completed`; remediation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055` received `implementation-review-002: accept/high` and all phases are closed
 - Completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md`
 - Authority boundary: the plan's local implementation, real TradingView receipts, Windows-transfer checkpoint, Phase 6 cutover, stable implementation, review, and accepted closeout authorities are consumed; push, IB access, PR, merge, Pages publication, hosted verification, and other remote changes remain unauthorized
@@ -29,8 +29,8 @@
 - Completed operating-modes plan reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB SHA-256 is `125fcc9d...8d23` with 49 active datasets (46 SPY + first 3 QQQ days 2026-07-10/14/17), 52 total datasets (3 superseded), and 2/33/33/46/7/5 normalized trade rows (traders/groups/legs/events/outcomes/contexts) including `vordin`; the local data/content checkpoint is already at `772b945`, while push/Pages remain unauthorized
 - Implementation boundary: implementation-review-002 accepted stable multi-trader implementation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`; lifecycle reconciliation is recorded at `6e57f18f7644d2956c81795fed3b3838158497e6`
-- Local Git boundary: Review Workspaces frozen implementation and accepted evidence are committed at `ab655568d50d20c2a97e970658ec9fa3b41719b7`; lifecycle reconciliation is committed at `65fd15dd3a3b7030bc3d15fc0590ea26a048490c`; the final metadata commit records those immutable IDs
-- Remote boundary: `user-instruction:2026-07-20-commit-and-push` is single-use authority for the exact current `codex/project-harness` commit chain through metadata reconciliation; it is not reusable. PR, merge, Pages publish, branch protection, environment, hosted verification, IB, and every other remote change remain unauthorized
+- Local Git boundary: Review Workspaces frozen implementation and accepted evidence are committed at `ab655568d50d20c2a97e970658ec9fa3b41719b7`; lifecycle reconciliation is committed at `65fd15dd3a3b7030bc3d15fc0590ea26a048490c`; commit-boundary metadata is committed at `02fc3e524ec47f3f8bf3ddf17768969ca1fd6a59`
+- Remote boundary: the exact current `codex/project-harness` commit chain was pushed to `origin/codex/project-harness`; the single-use authority is consumed and cannot be reused. PR, merge, Pages publish, branch protection, environment, hosted verification, IB, and every other remote change remain unauthorized
 
 ## Resume Checklist
 
@@ -40,7 +40,7 @@
 4. The multi-trader plan is Completed under implementation-review-002 `accept/high`; no implementation authority remains.
 5. Lifecycle migration and durable reconciliation are complete; no plan implementation or closeout authority remains.
 6. The completed operating-modes plan remains closed; do not reuse its implementation authority for this proposal.
-7. The transfer and Phase 6 instructions are consumed. Push and every remote/publication action remain separately unauthorized.
+7. The transfer, Phase 6, and one-time 2026-07-20 commit/push instructions are consumed. Every further push and remote/publication action requires new authority.
 8. Treat the Review UI/trader-editing plan as Completed under `implementation-review-001: accept/high`; all four design reviews and the implementation review are append-only evidence, all phases are closed, and no implementation or closeout gate remains.
 
 ## Verification Evidence
@@ -106,7 +106,7 @@
 | Multi-trader implementation-review-001 | `revise`, confidence `high`: post-promotion verified-backup cleanup failure reproduced old canonical content/new DB projection divergence; remediation-r1 now passes full-chain new/new coherence, retained-backup/warning, 76 backend, compileall, 11 frontend, two builds, 146 fixtures, and governance checks |
 | Multi-trader implementation-review-002 | `accept`, confidence `high`: exact remediation diff, isolated new/new fault replay, 1/1 focused, 76/76 backend, 11/11 frontend, two builds, 146/146 fixtures, SQLite integrity/FK, and authority boundary all passed |
 | Launcher diff review | `accept`, confidence `high`; final cache-cleanliness observation resolved |
-| Git boundary | exact Review Workspaces scoped commits plus one current-branch push are authorized by `user-instruction:2026-07-20-commit-and-push`; no PR, publish, merge, remote settings change, or unrelated-path commit is authorized |
+| Git boundary | exact Review Workspaces scoped commits and current-branch push completed; the one-time authority is consumed; no further push, PR, publish, merge, remote settings change, or unrelated-path commit is authorized |
 
 Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/`.
 
@@ -121,7 +121,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Closed. The plan is Completed under external Grok Build `implementation-review-001: accept/high`; the accepted frozen revision is `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`, and all phases have final disposition `Completed`. The only current maintenance step is the exact plan-scoped commit/push authorized by `user-instruction:2026-07-20-commit-and-push`. PR, merge, Pages, hosted verification, provider/broker access, tracked DB/canonical data changes, and other remote actions remain unauthorized.
+Closed. The plan is Completed under external Grok Build `implementation-review-001: accept/high`; the accepted frozen revision is `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`, and all phases have final disposition `Completed`. The exact plan-scoped commit/push is complete and its single-use authority is consumed. No further Git, PR, merge, Pages, hosted verification, provider/broker, tracked DB/canonical data, or remote action is authorized.
 
 ## Handoff Boundary
 
