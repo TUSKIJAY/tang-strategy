@@ -4,13 +4,19 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `design-review`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
 
-2026-07-19: 用户明确要求将 `docs/optimization/2026-07-19-review-ui-and-trader-editing.md` 转为 proposed plan，并另行授权完成后做一次本地 commit。`Tang Strategy Review Workspaces And Trader Point Editing` revision `v1-proposal-2026-07-19` 已建立于 `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`，统一覆盖 OPT-001 至 OPT-004：ticker/date workspace、K-line/页面控制权、availability-driven trader、表单式点位预览/编辑、interactive/static parity 和 accessibility。当前仅为 review-only Proposed，next gate 是 `design-review`；未激活、未实现、未改 DB/API/data/publisher、未 push/PR/merge/Pages/hosted/provider/broker。
+2026-07-19: Kimi `review-003` 与 Grok `review-004` 已对同一 frozen `v3-round-1-review-foldback-2026-07-19` / SHA-256 `10fa26a1...e7ae69` 独立返回 `approve/high`。依照 `user-instruction:2026-07-19-dual-review-loop-through-active`，plan 已从 `proposed/` 移动到 `active/`，状态为 `phase-0:not-started`，next gate `phase-0-start`。Kimi 留下的 new-group `normalization` 明示化建议是 Phase 0 contract-freeze 内的非阻断观察；当前 activation 仅为 lifecycle 记录，不启动 Phase 0、不授权实现、数据写入、provider/broker、push/PR/merge/Pages/hosted 或远端动作。
+
+2026-07-19: Kimi `review-001` 与 Grok `review-002` 已对 frozen `v2-review-loop-baseline-2026-07-19` / SHA-256 `c9040670...01acc17` 独立返回 `revise/high`。两者一致识别出 ticker/trader scoped editor 与 date-keyed multi-ticker whole-day PUT 之间的数据丢失风险；Grok 进一步证明 public `GET /api/trade-records` 是 lossy projection，不能作为 write base。plan 已回折到 `v3-round-1-review-foldback-2026-07-19`：加入 admin-only write-valid canonical registry/day GET、完整日合并与 untouched ID/count/value receipt、workspace-only ticker/date authority、复用 `UnifiedKlineEngine` 的 admin preview、稳定 test carrier 和 pure accessibility fixtures。该轮结束时仍为 review-only Proposed，等待新 revision 同版双审；未开始实现，未授权 push/PR/merge/Pages/hosted/provider/broker/DB/data/remote。
+
+2026-07-19: 用户通过 `user-instruction:2026-07-19-dual-review-loop-through-active` 授权 Kimi/Grok 对同一冻结 revision 独立双审、两份输出落盘后再折回、重复至 matching-revision 双 `approve`、随后 lifecycle-only activation 并做一次本地范围 commit。plan 先做 authority-only refresh 到 `v2-review-loop-baseline-2026-07-19`；当前授权范围不含实现或远端动作。
+
+2026-07-19: 用户明确要求将 `docs/optimization/2026-07-19-review-ui-and-trader-editing.md` 转为 proposed plan，并另行授权完成后做一次本地 commit。`Tang Strategy Review Workspaces And Trader Point Editing` initial revision `v1-proposal-2026-07-19` 已建立于 `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`，统一覆盖 OPT-001 至 OPT-004：ticker/date workspace、K-line/页面控制权、availability-driven trader、表单式点位预览/编辑、interactive/static parity 和 accessibility。该 initial proposal 未激活、未实现、未改 DB/API/data/publisher、未 push/PR/merge/Pages/hosted/provider/broker。
 
 2026-07-19: 用户此前在优化记录模式中确认四项 Data/Review/Admin/Static UI 摩擦。OPT-001 是控制权问题：K 线引擎内置 toolbar 与 Review 历史外层 toolbar 同时存在，后续边界为通用图表操作归引擎、业务上下文归 Review。OPT-002 记录 admin-only 折叠图标和 raw JSON editor 导致交易者点位编辑不可发现。OPT-003 记录 Data 与 Review 的 SPY/QQQ 默认列表/选择器必须按 ticker workspace 隔离，避免 market days 混排；候选分类为 ticker tabs + date rail（当前优先）、collapsible groups、workspace landing，并新增 availability-driven trader 硬规则：当前 ticker/date 无实际点位的交易者不得显示名字/checkbox/Focus，切换上下文必须清理 stale selection。OPT-004 记录 StaticReviewsApp 不是完整本地应用而是独立 Review，并同样存在 ticker 混排和外层控制重复；未来交互版/静态版必须共享控制权、ticker 分区与 unavailable-trader suppression 契约。用户确认的最终示意图保存在 `design/references/2026-07-19-review-ui-reference-v1.png`，作为后续生成/规划默认视觉基准。当前 `/tmp` rehearsal 已成功导出/build 49 days（46 SPY + 3 QQQ）/9 strategies，未发布或验证 hosted Pages。该记录现已按后续明确指令提升为上述 review-only Proposed plan。
 
@@ -53,7 +59,7 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
-| Proposed Review UI plan | `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` |
+| Active Review UI plan | `docs/exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` |
 | Completed multi-trader plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md` |
 | Completed operating-modes plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
 | Previous completed plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
@@ -69,7 +75,7 @@
 
 ## To Do
 
-- [ ] Obtain an independent design review of `v1-proposal-2026-07-19`; approval does not activate or implement it, and later activation/implementation require separate user instructions.
+- [ ] Await a new explicit implementation-start instruction before opening `phase-0-start`; Active status and dual design approval do not authorize Phase 0 work.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed

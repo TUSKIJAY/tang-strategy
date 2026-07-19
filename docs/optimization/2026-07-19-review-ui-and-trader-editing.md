@@ -1,13 +1,13 @@
 # Optimization Batch · 2026-07-19 Review UI, Ticker Workspaces, Static Parity, And Trader Editing
 
-> Source intake promoted to a review-only proposed plan. Neither this record nor the proposal authorizes implementation.
+> Source intake promoted to a reviewed active plan at `phase-0:not-started`. Neither this record nor lifecycle activation authorizes implementation.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Define Review/K-line control ownership and unify the control surface | Review UI / information architecture | proposed | [proposed plan](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) | Keep generic chart operations in the engine and business context in Review |
-| OPT-002 | Make trader-point editing discoverable and task-oriented | Navigation / admin workflow | proposed | [proposed plan](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) | Clarify admin access and the editing path; raw JSON is not a discoverable point editor |
-| OPT-003 | Separate SPY and QQQ browsing workspaces | Data + Review information architecture | proposed | [proposed plan](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) | Choose ticker context before browsing market days or reviews |
-| OPT-004 | Keep interactive and static Review governance aligned | Static Pages / Review parity | proposed | [proposed plan](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) | Apply ticker partitioning and control ownership to both Review implementations |
+| OPT-001 | Define Review/K-line control ownership and unify the control surface | Review UI / information architecture | active | [active plan](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) | Keep generic chart operations in the engine and business context in Review |
+| OPT-002 | Make trader-point editing discoverable and task-oriented | Navigation / admin workflow | active | [active plan](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) | Clarify admin access and the editing path; raw JSON is not a discoverable point editor |
+| OPT-003 | Separate SPY and QQQ browsing workspaces | Data + Review information architecture | active | [active plan](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) | Choose ticker context before browsing market days or reviews |
+| OPT-004 | Keep interactive and static Review governance aligned | Static Pages / Review parity | active | [active plan](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) | Apply ticker partitioning and control ownership to both Review implementations |
 
 ## Visual Reference
 
@@ -29,7 +29,7 @@
 - Acceptance direction: every visible control has one named owner and appears once; changing Review context refreshes all dependent business data without resetting unrelated engine preferences unless explicitly required; generic engine behavior remains reusable in Review, Backtest, and Teaching without page-specific duplicate controls; narrow and collapsed layouts retain the same ownership model.
 - Accessibility risk: duplicated actions and overlapping context selectors create ambiguous labels, reading order, and focus destinations. Consolidation should retain programmatic labels, expose current state once, announce Review loading/state changes, and preserve keyboard access inside the engine; screenshot evidence alone cannot verify keyboard or screen-reader behavior.
 - Boundary that must not change: do not weaken current market-day assembly, normalized trade filtering, export reconciliation, or SQLite/data safety contracts.
-- Lifecycle status: proposed via [`Tang Strategy Review Workspaces And Trader Point Editing`](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md); review-only
+- Lifecycle status: active via [`Tang Strategy Review Workspaces And Trader Point Editing`](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md); `phase-0:not-started`, no implementation authority
 
 ## OPT-002 Make Trader-Point Editing Discoverable And Task-Oriented
 
@@ -39,7 +39,7 @@
 - Acceptance direction: an authenticated user can determine within one navigation action whether editing is available; an admin can locate a day and point without editing raw repository JSON; save remains validation-first and failure leaves canonical content plus DB projection coherent.
 - Accessibility risk: icon-only navigation relies on hover/title discovery and the raw JSON editor has weak task instructions and error recovery. A future flow should preserve visible labels in collapsed navigation through an accessible disclosure pattern and provide field-level errors/focus management; keyboard and assistive-technology behavior still require interactive verification.
 - Boundary that must not change: admin-only mutation, schema validation, candidate projection, atomic content replacement, rollback coherence, and secret/auth boundaries remain mandatory. This record does not authorize a new route, editor implementation, login change, or data write.
-- Lifecycle status: proposed via [`Tang Strategy Review Workspaces And Trader Point Editing`](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md); review-only
+- Lifecycle status: active via [`Tang Strategy Review Workspaces And Trader Point Editing`](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md); `phase-0:not-started`, no implementation authority
 
 ## OPT-003 Separate SPY And QQQ Browsing Workspaces
 
@@ -55,7 +55,7 @@
 - Acceptance direction: a user can tell whether they are in SPY or QQQ before choosing a date; default Data and Review lists never interleave symbols; a Data-page day selection opens/reconciles Review to the same ticker/day; switching ticker cannot leave stale chart, signal, unavailable trader names, statistics, or export state from the prior ticker; an explicit future comparison mode, if desired, is separate from the default workflow.
 - Accessibility risk: the ticker workspace selector must have a programmatic group label, visible selected state, and predictable focus/state-change behavior. Color or ticker logos alone must not carry the distinction; screenshot evidence alone cannot verify keyboard or screen-reader behavior.
 - Boundary that must not change: do not fabricate missing QQQ/SPY dates, silently substitute one ticker for another, weaken pair/provider/data gates, or relabel a UI partition as database isolation.
-- Lifecycle status: proposed via [`Tang Strategy Review Workspaces And Trader Point Editing`](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md); review-only
+- Lifecycle status: active via [`Tang Strategy Review Workspaces And Trader Point Editing`](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md); `phase-0:not-started`, no implementation authority
 
 ## OPT-004 Keep Interactive And Static Review Governance Aligned
 
@@ -65,8 +65,8 @@
 - Acceptance direction: the same SPY/QQQ partitioning, unavailable-trader suppression, and single-owner control rules pass in both implementations; a static deep link resolves ticker/day deterministically; legacy day hashes continue to open or receive an explicit compatibility decision; static mode never exposes admin mutation; verified-only trade visibility is clearly represented; interactive/static fixture tests prove selection, chart, signal, trader marker, and export reconciliation.
 - Evidence limit: the 2026-07-19 rehearsal verified export contents and a production static build in `/tmp`; it did not publish or visually inspect the hosted GitHub Pages site. The current hosted site remains whatever is already published from `main`.
 - Boundary that must not change: local build or fixture parity does not authorize a push, Pages workflow, `gh-pages` update, hosted verification, or any remote action. Publication remains a separate explicit gate.
-- Lifecycle status: proposed via [`Tang Strategy Review Workspaces And Trader Point Editing`](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md); review-only
+- Lifecycle status: active via [`Tang Strategy Review Workspaces And Trader Point Editing`](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md); `phase-0:not-started`, no implementation authority
 
 ## Promotion Boundary
 
-The user's 2026-07-19 instruction promoted OPT-001 through OPT-004 together into [`docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`](../exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md). The optimization record remains source provenance. The proposal is review-only and does not authorize activation, implementation, data writes, provider/broker access, push, PR, merge, Pages publication, hosted verification, or remote changes.
+The user's 2026-07-19 instructions promoted OPT-001 through OPT-004 together, ran independent same-revision Kimi/Grok reviews to matching v3 `approve/high`, and moved the plan to [`docs/exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`](../exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md). The optimization record remains source provenance. Activation stops at `phase-0:not-started` and does not authorize implementation, data writes, provider/broker access, push, PR, merge, Pages publication, hosted verification, or remote changes.

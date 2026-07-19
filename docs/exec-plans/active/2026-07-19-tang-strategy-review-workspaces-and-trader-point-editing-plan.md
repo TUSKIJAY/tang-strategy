@@ -1,18 +1,18 @@
 # Tang Strategy Review Workspaces And Trader Point Editing
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Proposed
+- Status: Active
 - Plan slug: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
-- Revision: `v1-proposal-2026-07-19`
+- Revision: `v3-round-1-review-foldback-2026-07-19`
 - Plan author ID: `codex-plan-author-2026-07-19-review-workspaces`
-- Design reviews: none
-- Latest design verdict: none
-- Review independence: none
-- Activation evidence: none
-- Current phase: none
-- Phase state: none
-- Phase entry gate: none
-- Next gate: `design-review`
+- Design reviews: ../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/review-001.md@revise@v2-review-loop-baseline-2026-07-19, ../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/review-002.md@revise@v2-review-loop-baseline-2026-07-19, ../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/review-003.md@approve@v3-round-1-review-foldback-2026-07-19, ../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/review-004.md@approve@v3-round-1-review-foldback-2026-07-19
+- Latest design verdict: approve
+- Review independence: attested
+- Activation evidence: `user-instruction:2026-07-19-dual-review-loop-through-active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Phase entry gate: `phase-0-start`
+- Next gate: `phase-0-start`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -21,8 +21,8 @@
 - Created: 2026-07-19
 - Source intake: [`docs/optimization/2026-07-19-review-ui-and-trader-editing.md`](../../optimization/2026-07-19-review-ui-and-trader-editing.md), OPT-001 through OPT-004
 - Visual baseline: [`design/references/2026-07-19-review-ui-reference-v1.png`](../../../design/references/2026-07-19-review-ui-reference-v1.png), SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`
-- Scope authority: review-only; this proposal does not authorize activation, implementation, data writes, provider/broker access, push, PR, merge, Pages publication, hosted verification, or remote changes
-- Current request authority: one local proposal-documentation commit only; it does not grant future implementation or implementation-commit authority
+- Scope authority: lifecycle-only activation is complete at `phase-0:not-started`; implementation, Phase 0 start, data writes, provider/broker access, push, PR, merge, Pages publication, hosted verification, and remote changes require separate authority and remain unauthorized
+- Current request authority: `user-instruction:2026-07-19-dual-review-loop-through-active` has been consumed through independent Kimi/Grok same-revision design reviews and lifecycle-only activation, and authorizes one final local lifecycle commit; it does not authorize Phase 0 start, implementation, implementation commits, push, publication, provider/broker access, or remote changes
 
 ## 1. Context And Evidence
 
@@ -36,13 +36,28 @@ The proposal was drafted from live repository evidence at `codex/project-harness
 - `frontend/src/kline/kline-engine.js` already owns timeframe, replay navigation, playback speed, zoom, follow mode, indicator visibility, candle type/fill, and theme. `UnifiedKlineEngine.jsx` exposes the corresponding imperative API. The engine lacks a visible fit/overview action even though the wrapper implements `overview()`.
 - `TraderFilters.jsx` renders every registry trader and initializes all active traders without first deriving which traders have displayable groups for the resolved ticker/date. Review payload changes reset the filter object, but there is no reusable stale-selection reconciliation contract.
 - `Layout.jsx` exposes the trader workspace only to admins and collapses it to an icon. `AdminTradersPage.jsx` can inspect normalized groups, but mutation is driven by raw registry/day JSON textareas instead of a trader/day/group/event task flow.
-- The existing backend contract is sufficient for the planned editor: `GET /api/trade-records`, `PUT /api/admin/traders`, and `PUT /api/admin/trade-records` already enforce readonly/admin roles, schema validation, candidate projection, atomic canonical replacement, DB drift checks, and rollback coherence. This proposal does not add or weaken an API route.
+- `GET /api/trade-records` is a readonly public projection, not a canonical write base: it is ticker-filtered, projects full `normalization` to `normalization_method`, and cannot represent every ticker/trader/context in a date-keyed canonical day file. The existing admin PUT routes already enforce schema validation, candidate projection, atomic canonical replacement, DB drift checks, and rollback coherence, but safe form editing additionally requires narrow admin-only canonical registry/day reads before using those unchanged PUT boundaries.
 - `export_static_reviews.py` already includes ticker/date/session metadata in a flat manifest and preserves `#<ticker>-<date>-<session>` day slugs. Static parity can therefore be implemented by shared client-side workspace resolution without changing the export or Pages workflow.
 - The confirmed visual reference fixes the preferred direction: compact dark trading-terminal layout, explicit SPY/QQQ tabs, ticker-scoped date rail, Review-owned business context in the left panel, one engine-owned generic toolbar, availability-driven trader controls, and a secondary but discoverable `编辑交易者点位` action.
 
 ### 1.2 Why Coding Mode Lane 3 is required
 
 OPT-001 through OPT-004 form one cross-surface behavior contract spanning shared chart ownership, authenticated Data/Review state, admin-only mutation UX, static Review routing, responsive layout, and accessibility. The change is broader than bounded maintenance and difficult to verify safely as isolated page edits. It therefore requires a reviewed Lane 3 Exec Plan even though the intended implementation leaves the database, market-data, API, and publisher contracts unchanged.
+
+### 1.3 Review-loop and activation instruction
+
+The user's `user-instruction:2026-07-19-dual-review-loop-through-active` instruction requires Kimi and Grok to review each frozen revision independently. Both outputs for one revision must be captured before any finding is folded back. If either reviewer returns `revise` or `reject`, the plan author produces a new revision and both reviewers inspect that same new revision without sibling-review context. Lifecycle activation is allowed only after both reviewers return `approve` for the same revision. Activation stops at `phase-0:not-started`; it does not start Phase 0 or authorize source/runtime/data/publication work.
+
+### 1.4 Round 1 review foldback
+
+Kimi `review-001` and Grok `review-002` independently returned `revise/high` against frozen revision `v2-review-loop-baseline-2026-07-19` at SHA-256 `c90406702862991511c68fb10d33e94b9a20a8b5430399bcaddd9d77101acc17`. This revision folds every finding into the contract:
+
+- the public projection is explicitly forbidden as an editor write base, and the candidate surface now includes admin-only canonical registry/day GET handlers that return write-valid documents without changing roles or PUT authority;
+- every edit begins from the complete date document and preserves all untouched tickers, traders, groups, events, legs, outcomes, and note contexts; count/ID/diff receipts make silent group loss a hard failure;
+- trader filter ticker/date inputs are removed as independent authorities and may only be readonly mirrors of the resolved workspace;
+- Admin preview is frozen as one read-only `UnifiedKlineEngine` chart using the resolved market day plus the candidate's shared marker/list helpers; no second chart implementation or auto-save path is allowed;
+- the existing `test:trade-records` carrier name remains stable and is broadened to include new review contract tests, so `.harness/config.json` and the CI workflow require no command rename;
+- pure label/selected/disabled-state fixtures supplement, but do not replace, browser keyboard/focus/announcement acceptance.
 
 ## 2. Objective And Success Criteria
 
@@ -60,8 +75,8 @@ Create one coherent SPY/QQQ review workspace in which ticker/date is the authori
 6. Review's `Rescan` recomputes the current resolved review. `Backtest` has a distinct business action and may navigate with the current strategy/ticker context; it must not remain a second label bound to the Rescan handler.
 7. For a resolved ticker/date, only traders with at least one currently displayable group appear by name, checkbox, or Focus action. No matching groups produces a neutral empty state. Stale selected/focused traders cannot affect markers, statistics, lists, or exports after a context switch.
 8. Every authenticated user can discover `交易记录 / 点位管理` in one navigation action and understand the readonly/admin capability difference. Static Review never exposes this authenticated editing entry.
-9. An admin can choose ticker/date/trader, inspect groups and events against the selected chart, add or edit a point through labeled fields, preview the canonical candidate and marker/list effect, and explicitly save through the existing atomic admin endpoint without editing raw JSON as the primary path.
-10. Readonly users can inspect the workspace without mutation controls. Failed client/server validation focuses or identifies the responsible field when possible, never writes partial canonical content, and never leaves content and DB projection on different boundaries.
+9. An admin can load the write-valid canonical registry and complete multi-ticker day through admin-only reads, choose ticker/date/trader, inspect groups and events against one reused `UnifiedKlineEngine` preview, add or edit a point through labeled fields, preview the merged canonical candidate and marker/list effect, and explicitly save the complete day through the existing atomic admin PUT without editing raw JSON as the primary path.
+10. Readonly users can inspect the public workspace without mutation controls. A successful save preserves every untouched group/context/ID from the complete day base; failed client/server validation focuses or identifies the responsible field when possible, never writes partial canonical content, and never leaves content and DB projection on different boundaries.
 11. Existing static `#<ticker>-<date>-<session>` links still resolve. Static mode remains Review-only, verified-record-only, and mutation-free while using the same ticker/date/trader/control-ownership rules as interactive Review.
 12. Interactive and static fixtures prove asymmetric SPY/QQQ history, pending/verified differences, available/unavailable traders, empty-trader dates, stale-selection reset, legacy hash resolution, and chart/signal/trade/export reconciliation.
 13. The confirmed `1672 x 941` reference is the desktop fidelity baseline. Narrow/collapsed layouts preserve ownership, reading order, labels, keyboard reachability, and visible selected state without recreating a duplicate control bar.
@@ -70,7 +85,7 @@ Create one coherent SPY/QQQ review workspace in which ticker/date is the authori
 
 - No SQLite schema/data migration, market-data fetch, seed change, historical backfill, SPY/QQQ pair-policy change, provider or broker access.
 - No authentication/login redesign, role expansion, credentials UI, secret handling change, or readonly mutation capability.
-- No new backend/admin route in this revision. If the form cannot meet validation/preview requirements through pure client candidate assembly plus the existing authoritative PUT paths, that is a plan scope change requiring revision and independent re-review.
+- No database/schema/auth-role change or new write route. The only planned API additions are admin-only canonical GET handlers for the full trader registry and one complete date document; public `GET /api/trade-records` remains a lossy readonly projection, and the existing authoritative PUT paths remain the only mutation boundaries.
 - No static Data, Backtest, Teaching, login, or Admin application. Static remains a standalone read-only Review surface.
 - No Pages workflow, export-manifest schema, daily runbook, `gh-pages`, or hosted-site mutation. Local static build/browser acceptance is evidence only.
 - No physical SPY/QQQ database separation, comparison mode, synthetic dates, or automatic cross-ticker fallback.
@@ -92,7 +107,7 @@ Add one pure workspace model consumed by Data, Review, Admin inspection/editing,
 - canonical static hash formatting/parsing compatible with `#spy-2026-07-17-extended` and `#qqq-2026-07-17-extended`;
 - explicit invalid/missing-route behavior that selects a deterministic valid local item and reports the resolution without pretending the missing day exists.
 
-Interactive state gains an explicit selected-ticker context rather than inferring independent ticker values in Review and trader filters. The selected market day remains the assembled review identity; any child ticker/date fields derive from it and cannot disagree.
+Interactive state gains an explicit selected-ticker context rather than inferring independent ticker values in Review and trader filters. The selected market day remains the assembled review identity; any child ticker/date fields derive from it and cannot disagree. `TraderFilters` no longer owns editable ticker/date selectors: those controls are removed or rendered only as readonly mirrors derived from the workspace, and pure fixtures reject any child-filter attempt to diverge from the resolved market day.
 
 ### 3.2 Control ownership contract
 
@@ -127,17 +142,21 @@ An empty available set hides names, checkboxes, and Focus actions and renders on
 The primary editor is form-driven and preserves the existing canonical hierarchy and backend authority:
 
 - context selection: ticker, date, trader;
+- canonical load base: an admin-only full registry read plus an admin-only date-keyed trade-day read returning the write-valid canonical document, including full `normalization`, all underlyings, all traders, all trade groups, and all note contexts; public `GET /api/trade-records` is inspection-only and must never seed a write;
 - record selection: existing trade group or explicit new group;
-- group fields: stable ID rules, direction, status, review status, three eligibility flags, outcomes, and notes/provenance where the schema permits;
+- group fields: immutable resolved trade date, underlying, trader, stable ID rules, direction, status, review status, three eligibility flags, outcomes, and notes/provenance where the schema permits;
 - leg fields: instrument/side/type, expiry, strike, contract multiplier, and their provenance;
 - event fields: action, sequence, occurred-at/New York offset, time precision/incomplete flag, premium, quantity, fees, note, and fact provenance;
 - registry metadata: display name, color, active state, and sort order, while `trader_id` remains immutable once referenced;
-- candidate preview: canonical structured summary plus the same list/marker rendering helpers used by Review; no save occurs during preview;
-- explicit save: one existing admin PUT call after client-required/format checks and user confirmation; the server remains authoritative for schema, repository-wide IDs, timezone, candidate projection, drift, and rollback;
+- full-day merge: clone the complete loaded day, apply only the scoped form edit, and carry every untouched ticker/trader group, leg, event, outcome, and note context byte-equivalently at the semantic document boundary; never construct a PUT payload from a ticker/trader-filtered projection;
+- candidate preview: canonical structured summary plus the same list/marker rendering helpers used by Review, rendered against one read-only `UnifiedKlineEngine` chart for the resolved market day; no second chart implementation and no save occurs during preview;
+- explicit save: one existing admin PUT call containing the complete merged date document after client-required/format checks, preservation-diff checks, and user confirmation; the server remains authoritative for schema, repository-wide IDs, timezone, candidate projection, drift, and rollback;
 - error handling: retain unsaved form state, surface a general server message and field association when safely derivable, and never retry or partially write automatically;
 - readonly behavior: inspection/export remains available, while add/edit/save controls and mutable fields are absent or disabled with a clear role explanation.
 
 Raw JSON textareas are not the primary workflow. Retaining an advanced raw view is optional only if design review accepts it, it is clearly secondary/admin-only, and it uses the same preview/save gate without creating a bypass.
+
+The admin canonical reads do not widen inspection or mutation authority: readonly users continue to inspect the existing public projection, admin authentication is required for full canonical reads and every PUT, and no secret/private evidence field is added to public or static payloads.
 
 ### 3.5 Interactive/static parity contract
 
@@ -165,7 +184,11 @@ Phase 0 may split these into smaller same-boundary frontend modules, but must re
 
 ### 4.2 Candidate modifications
 
+- `backend/app/main.py`
+- `backend/app/services/trade_records.py`
+- `backend/tests/test_trade_records.py`
 - `frontend/src/main.jsx`
+- `frontend/src/api/client.js`
 - `frontend/src/components/Layout.jsx`
 - `frontend/src/pages/DashboardPage.jsx`
 - `frontend/src/pages/ReviewPage.jsx`
@@ -196,11 +219,12 @@ Phase 0 may split these into smaller same-boundary frontend modules, but must re
 - Work:
   - rerun the startup contract and preserve unrelated worktree paths;
   - capture HEAD/upstream/status, tracked DB hash/integrity/FK/counts, Pages workflow/export hashes, existing static hash behavior, source control inventory, and current interactive/static screenshots;
-  - verify the existing admin endpoints and projection tests remain sufficient; any required new backend route blocks this revision;
+  - freeze the exact contracts for `GET /api/admin/traders` and `GET /api/admin/trade-records?trade_date=<YYYY-MM-DD>`: admin-only, canonical/write-valid, no default fabricated day, no public/static exposure, and no change to the existing PUT handlers;
+  - prove the public projection is not write-valid and record the current multi-ticker full-day shape that the editor must preserve;
   - freeze exact Add/Modify/Remove paths and a component/state/control ownership table;
-  - create fixtures covering 46 SPY + 3 QQQ asymmetry, verified/pending records, two traders, a date with no visible trader, invalid hash, and narrow/collapsed layout.
-- Verification: governed/auto harness, operating-mode checks/tests, startup budget, current frontend tests/builds, backend trade-record tests, SQLite read-only checks, workflow/export exact hashes, and `git diff --check`.
-- Exit gate: exact scope/evidence manifest is durable, no unreviewed backend/data/publisher change is needed, and all baseline checks are truthfully classified as pass/fail/not-run.
+  - create fixtures covering 46 SPY + 3 QQQ asymmetry, verified/pending records, two traders, a date with no visible trader, a multi-ticker day preservation case, invalid hash, and narrow/collapsed layout.
+- Verification: governed/auto harness, operating-mode checks/tests, startup budget, current frontend tests/builds, backend trade-record tests, admin role/read-shape tests, SQLite read-only checks, workflow/export exact hashes, and `git diff --check`.
+- Exit gate: exact scope/evidence manifest is durable, the two reviewed canonical read routes are sufficient without a DB/auth-role/write-route/publisher change, and all baseline checks are truthfully classified as pass/fail/not-run.
 
 ### Phase 1 — Pure Workspace And Trader-Availability Contracts
 
@@ -209,6 +233,7 @@ Phase 0 may split these into smaller same-boundary frontend modules, but must re
   - implement pure ticker/date grouping, deterministic default, same-date fallback, interactive ID/static slug resolution, and legacy hash parsing/formatting;
   - implement context-transition and stale trader-selection reconciliation rules;
   - separate trader availability from selected-trader filtering so unavailable names cannot enter controls or output;
+  - remove independent ticker/date authority from `TraderFilters` and pin readonly mirror behavior plus accessible labels/selected/disabled states;
   - extend the frontend test command to run all review contract tests deterministically.
 - Verification: pure Node fixtures for asymmetric histories, SPY default, missing target date, invalid hash, pending-only/static behavior, no-trader state, intentional empty selection, context-change fallback, focused-trader clearing, and export selection reconciliation.
 - Exit gate: the state contract has no DOM/API side effects, every transition produces one internally consistent context/filter result, and current trade-record tests remain green.
@@ -232,12 +257,14 @@ Phase 0 may split these into smaller same-boundary frontend modules, but must re
 - Work:
   - render only displayable traders and add the neutral no-points state;
   - make the authenticated trader workspace visible and capability-labeled for readonly/admin roles;
+  - implement admin-only full canonical registry/day reads while preserving public projection and existing PUT/auth boundaries;
   - replace the primary raw JSON mutation flow with ticker/date/trader/group/leg/event forms;
-  - assemble a canonical in-memory candidate, validate required/format fields, preview list/marker/canonical effects, and save only after an explicit action through the existing PUT endpoints;
+  - load the complete date document, merge the scoped edit while retaining every untouched ticker/trader/group/context, and fail closed if the preservation diff exceeds the intended edit;
+  - validate required/format fields, preview canonical/list/marker effects against one reused read-only `UnifiedKlineEngine`, and save the complete merged day only after an explicit action through the existing PUT endpoints;
   - keep server validation authoritative and preserve unsaved state/error focus on failure;
   - retain immutable IDs, fact provenance, eligibility, pending/verified, unknown/null, and private/export boundaries.
-- Verification: pure candidate construction tests, role/capability tests, existing 76+ backend trade-record/full-suite baseline or the then-current full count, compileall, readonly/admin browser flows, successful temp-copy save, injected validation failure, injected projection/cleanup failure, and before/after canonical + temporary DB coherence checks. The tracked DB and canonical repository remain unchanged during acceptance.
-- Exit gate: an admin completes a point edit without raw JSON, readonly cannot mutate, unavailable traders never render, and every failure replay proves content/DB coherence.
+- Verification: pure candidate construction/merge/diff tests; full admin-read shape and public-projection non-write-base tests; role/capability tests; existing 76+ backend trade-record/full-suite baseline or the then-current full count; compileall; readonly/admin browser flows; successful temp-copy save on a mixed SPY/QQQ date; injected validation failure; injected projection/cleanup failure; and before/after canonical + temporary DB coherence checks. The tracked DB and canonical repository remain unchanged during acceptance.
+- Exit gate: an admin completes a point edit without raw JSON, the reused chart shows the candidate marker/list effect, readonly cannot access canonical reads or mutate, unavailable traders never render, untouched group/leg/event/outcome/context IDs and semantic values survive exactly, the full-day group-count delta equals only the intended edit, and every failure replay proves content/DB coherence.
 
 ### Phase 4 — Static Review Parity And Link Compatibility
 
@@ -284,6 +311,8 @@ Phase 0 may split these into smaller same-boundary frontend modules, but must re
 | No trader points are present | Hide trader options and show neutral empty state; do not infer registry availability | Interactive/static empty-day fixture |
 | Page and engine both expose a generic control | Treat source/DOM duplicate as failure; page may call engine only programmatically | Source assertion and browser control inventory |
 | Admin form produces invalid canonical data | Block client save for known field errors; server PUT remains authoritative and atomic | Validation failures with unchanged content/temp DB |
+| Public/ticker-filtered projection is used as a write base | Public payload is never accepted by candidate construction; admin editor must load the write-valid full registry/day documents | Shape/round-trip tests proving public payload fails canonical validation and admin payload passes |
+| Scoped edit drops untouched same-day tickers, traders, groups, or contexts | Merge into the complete date document and fail closed when the semantic diff exceeds the intended edit | Mixed SPY/QQQ temp-copy save with exact untouched ID/count/value receipts |
 | Projection fails after content replacement | Existing rollback restores canonical content and DB coherence; no UI success state | Injected projection/cleanup tests and hashes |
 | Readonly or static gains mutation capability | No save handler/control for readonly/static; server admin dependency remains unchanged | Role/source/browser/API authorization checks |
 | Static route breaks old links | Preserve exact day slug parser/formatter; invalid route resolves explicitly | Legacy SPY/QQQ hash fixtures and browser loads |
@@ -311,7 +340,7 @@ cd frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews
 git diff --check
 ```
 
-Phase 1 may rename the frontend test script to cover all review tests; the exact command must then be synchronized in `.harness/config.json` only if the existing configured carrier changes. A configuration/workflow change beyond this command synchronization requires review against the frozen manifest.
+Keep the `test:trade-records` script name as the stable `.harness/config.json` and `.github/workflows/project-harness.yml` carrier; broaden its underlying command to include the review workspace tests. Any later carrier rename or configuration/workflow modification is outside this frozen surface and requires plan revision and independent re-review.
 
 ### 7.2 Plan-specific acceptance matrix
 
@@ -319,10 +348,10 @@ Phase 1 may rename the frontend test script to cover all review tests; the exact
 - Review: SPY 2026-07-17 and QQQ 2026-07-17 assemble non-empty 1m/5m bars with the known strategy and reconcile chart/signals/traders/exports.
 - Asymmetry: QQQ 2026-07-10/14/17 and 46-day SPY history never interleave in the default date rail; a missing same-date fallback is deterministic.
 - Trader visibility: verified groups render only their actual traders; QQQ 2026-07-14's pending record does not create a static trader option; an empty set has no name/checkbox/Focus remnants.
-- Admin: readonly inspection, admin add/edit/preview/save, invalid field, duplicate ID, timezone/offset error, and projection failure are exercised against temporary canonical/DB copies.
+- Admin: readonly public inspection; admin-only canonical full-registry/full-day reads; public-payload write rejection; mixed-ticker full-day preservation; reused-engine candidate chart/list/marker preview; admin add/edit/save; invalid field; duplicate ID; timezone/offset error; and projection failure are exercised against temporary canonical/DB copies.
 - Engine: Review, Static, Backtest, and Teaching expose one generic toolbar; page-specific actions remain functional.
 - Static: both ticker hashes and at least one legacy hash open directly; static has no admin/mutation path and no mixed-symbol date list.
-- Accessibility: tabs/date rail/form fields have group/element labels, selected state, keyboard operation, predictable focus, and non-color-only identity.
+- Accessibility: pure/component fixtures pin tabs/date rail/form/overview accessible names plus selected/disabled state; browser evidence separately proves keyboard operation, predictable focus, announcements, and non-color-only identity.
 - Fidelity: reference-size screenshot is compared with the confirmed layout direction; narrow/collapsed evidence proves the same ownership model.
 - Protection: tracked DB SHA/integrity/FK, canonical content hashes, Pages workflow/export hashes, and remote state are unchanged unless a later separately reviewed and authorized scope says otherwise.
 
@@ -332,8 +361,8 @@ Detailed phase receipts belong under `docs/exec-plans/reviews/2026-07-19-tang-st
 
 ## 8. Commit, Remote, And Publication Boundaries
 
-- The current user instruction authorizes one local commit containing this proposal and its optimization/lifecycle routing only. It does not authorize implementation or future implementation commits.
-- Design review may add append-only review artifacts and fold findings only under a later explicit request; an `approve` verdict does not activate the plan.
+- The current user instruction authorizes independent same-revision Kimi/Grok design reviews, append-only review artifacts, bounded foldback, lifecycle-only activation after matching-revision dual approval, and one final local commit containing the review/plan/lifecycle batch. It does not authorize implementation or future implementation commits.
+- Each review round freezes one revision. Both outputs are captured before foldback, and neither reviewer receives the sibling output. An individual `approve` verdict does not activate the plan.
 - Activation, implementation start, implementation commits, push, PR, merge, Pages publication, hosted verification, branch settings, provider access, and broker access remain separate gates.
 - No plan phase may stage or commit unrelated `output/` artifacts or other user changes.
 - Static export/build/browser acceptance must use temporary or generated paths and clean up only artifacts created by that acceptance run.
@@ -342,11 +371,11 @@ Detailed phase receipts belong under `docs/exec-plans/reviews/2026-07-19-tang-st
 ## 9. Design Review And Activation Gate
 
 - Review target: `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`
-- Review target revision: `v1-proposal-2026-07-19`
+- Review target revision: `v3-round-1-review-foldback-2026-07-19`
 - Review location: `docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/`
 - Required review method: an independent reviewer who did not draft this revision must inspect the live frontend/backend contracts, optimization intake, visual reference identity, exact planned surface, phase gates, testability, stale-state behavior, admin atomicity, static hash compatibility, accessibility, and authority boundaries.
-- Required verdict before activation: `approve` with qualifying constrained metadata and attested independence.
-- Required user approval: a separate explicit instruction to activate the approved revision.
-- Activation is lifecycle-only: move one plan from `proposed/` to `active/`, reconcile all indexes/roadmap/state blocks, set `phase-0:not-started`, and run the read-only checker. It performs no source implementation.
+- Required verdict before activation: satisfied by Kimi `review-003: approve/high` and Grok `review-004: approve/high`, both targeting frozen `v3-round-1-review-foldback-2026-07-19` with attested independence.
+- Required user approval: satisfied and recorded as `user-instruction:2026-07-19-dual-review-loop-through-active`.
+- Activation completed as lifecycle-only: the plan moved from `proposed/` to `active/`, indexes/roadmap/state blocks were reconciled, and state is `phase-0:not-started`. No source implementation was performed.
 - Implementation requires another explicit start/execute instruction after activation recording and the Phase 0 entry gate.
 - Any material revision after review invalidates matching-revision approval until the revised plan is independently reviewed.

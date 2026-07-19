@@ -31,11 +31,11 @@
 
 ## Active Plans
 
-当前无 active 计划。以 [`active/index.md`](./active/index.md) 为当前索引。
+- [Tang Strategy Review Workspaces And Trader Point Editing](./active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) — Active; canonical details: [active index](./active/index.md)
 
 ## Proposed Plans
 
-- [Tang Strategy Review Workspaces And Trader Point Editing](./proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
+当前无 proposed 计划。以 [`proposed/index.md`](./proposed/index.md) 为当前索引。
 
 ## Completed Plans
 

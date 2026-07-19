@@ -4,20 +4,20 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `design-review`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current proposed plan: `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`, revision `v1-proposal-2026-07-19`, covering OPT-001 through OPT-004 as one Review/Data/Admin/Static UI contract
+- Current active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`, frozen revision `v3-round-1-review-foldback-2026-07-19`, covering OPT-001 through OPT-004 as one Review/Data/Admin/Static UI contract
 - Optimization provenance: `docs/optimization/2026-07-19-review-ui-and-trader-editing.md`; the user-confirmed default visual baseline is `design/references/2026-07-19-review-ui-reference-v1.png` at SHA-256 `57c34ea...d3c5`
 - Proposal baseline: live pre-proposal HEAD was `codex/project-harness@772b94595ccd15d41d06f966dd72e0bb7829c441`; related optimization/state/design inputs were uncommitted and unrelated `output/` artifacts were excluded
-- Proposal status: review-only Proposed; design reviews `none`; next gate `design-review`
-- Proposal authority: the user authorized generation plus one local proposal-documentation commit; activation, implementation, implementation commits, push, PR, merge, Pages, hosted verification, provider/broker, DB/data, and remote changes remain unauthorized
+- Current plan status: Active at `phase-0:not-started`; round 1 Kimi `review-001` and Grok `review-002` returned `revise/high` on frozen v2, all findings were folded into v3, and round 2 Kimi `review-003` plus Grok `review-004` both returned `approve/high` on the same frozen v3; next gate `phase-0-start`
+- Current authority: `user-instruction:2026-07-19-dual-review-loop-through-active` has been consumed through independent Kimi/Grok review rounds and lifecycle-only activation; it also authorizes one final local lifecycle commit. Phase 0 start, implementation, implementation commits, push, PR, merge, Pages, hosted verification, provider/broker, DB/data, and remote changes remain unauthorized
 - Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is `Completed`; remediation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055` received `implementation-review-002: accept/high` and all phases are closed
 - Completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md`
 - Authority boundary: the plan's local implementation, real TradingView receipts, Windows-transfer checkpoint, Phase 6 cutover, stable implementation, review, and accepted closeout authorities are consumed; push, IB access, PR, merge, Pages publication, hosted verification, and other remote changes remain unauthorized
@@ -41,7 +41,7 @@
 5. Lifecycle migration and durable reconciliation are complete; no plan implementation or closeout authority remains.
 6. The completed operating-modes plan remains closed; do not reuse its implementation authority for this proposal.
 7. The transfer and Phase 6 instructions are consumed. Push and every remote/publication action remain separately unauthorized.
-8. Treat the Review UI/trader-editing scope as Proposed at `v1-proposal-2026-07-19`; obtain an independent design review next. Do not activate or change frontend/admin/static behavior without later explicit authority.
+8. Treat the Review UI/trader-editing scope as frozen Active revision `v3-round-1-review-foldback-2026-07-19`; all four design reviews are append-only evidence and matching-revision dual approval is satisfied. Do not start Phase 0 or source implementation without a new explicit implementation-start instruction.
 
 ## Verification Evidence
 
@@ -112,10 +112,11 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 - Browser console recorded only the existing missing `favicon.ico` request (`404`); product APIs and flows returned successfully.
 - The isolated backend environment emitted third-party calendar-library deprecation warnings; the 19 tests still passed.
 - `actionlint` is not installed in the current shell. The dependency-free checker validated workflow paths, configured checks, exact job names, and ordering. No hosted run was authorized.
+- Kimi `review-003` records one non-blocking Phase 0 clarification: pin every schema-required new-group field, including the group-level `normalization` block. Existing full-day merge and authoritative validation already fail closed, so this did not block v3 approval or activation.
 
 ## Next Gate
 
-Obtain an independent design review of `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` revision `v1-proposal-2026-07-19`. An `approve` verdict remains review-only; activation recording and implementation start each require later explicit user instructions. Push, PR, merge, Pages, hosted verification, provider/broker access, DB/data changes, and remote actions remain unauthorized.
+The plan is Active at `phase-0:not-started`. The next gate is `phase-0-start`, which requires a new explicit implementation-start instruction; lifecycle activation and design approval do not open implementation. Push, PR, merge, Pages, hosted verification, provider/broker access, DB/data changes, and remote actions remain unauthorized.
 
 ## Handoff Boundary
 
