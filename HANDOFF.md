@@ -7,14 +7,14 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-implementation-review`
+- Next gate: `phase-6-implementation-re-review-r1`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Proposal baseline: `codex/project-harness@25ba77fd9947c504f68cab1c7700d9f5c84d62b4` was clean before the new proposal; rerun startup commands for live Git truth
-- Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is Active at `phase-6:in-progress`; Phases 0-5, both macOS/Windows receipts, and the complete local Phase 6 promotion/removal/cutover acceptance passed; the authorized stable commit and independent implementation review are the current gate
+- Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is Active at `phase-6:in-progress`; stable commit `f92e273b0153eefac14e5c54f94926a2bd4e707e` received `implementation-review-001: revise/high`, remediation-r1 is verified, and a new stable commit plus independent re-review are the current gate
 - Active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md`
 - Authority boundary: local/offline implementation, Phase 5 real TradingView receipts, the consumed Windows-transfer checkpoint commit/push, local Phase 6 tracked-DB promotion/declared legacy removal/formal cutover, and the plan-scoped local commits required for stable implementation plus accepted lifecycle closeout are authorized; push, IB access, PR, merge, Pages publication, hosted verification, and other remote changes are not
 - Completed operating-modes historical startup: `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` was that earlier plan's clean baseline; it is not the current proposal baseline
@@ -25,7 +25,7 @@
 - Completed operating-modes plan reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: promoted tracked DB SHA-256 is `4a5bce13...2c34` with 46 active SPY datasets, 43,425/8,821 bars, 1/27/27/30/4/2 normalized trade rows, logical SHA-256 `f7ca32...70a34`, integrity `ok`, and zero FK rows; no historical QQQ day was fabricated
 - Implementation boundary: implementation-review-013 accepted stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`; lifecycle reconciliation is recorded at `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`
-- Local Git boundary: the Windows-transfer stage/commit/push authority is consumed at `80f74f63f32849eddaaa99321f5f779446503458`; `user-instruction:2026-07-19-authorize-phase6-stable-commit-review-closeout` now authorizes plan-scoped local commit/reconciliation only, with no push
+- Local Git boundary: the Windows-transfer stage/commit/push authority is consumed at `80f74f63f32849eddaaa99321f5f779446503458`; stable Phase 6 implementation is committed at `f92e273b0153eefac14e5c54f94926a2bd4e707e`, and the current instruction authorizes plan-scoped local remediation/review/accepted-closeout commits only, with no push
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, hosted verification, IB, or other remote change is authorized
 
 ## Resume Checklist
@@ -33,8 +33,8 @@
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve any unrelated changes and read `docs/operating-modes.md`, the current proposed multi-trader plan, and its review directory/index.
-4. The multi-trader plan is Active at `phase-6:in-progress`; local promotion/removal/cutover is complete and accepted, and the next gate is an independent implementation review against the authorized stable commit.
-5. Preserve the promoted DB, 22 planned deletions, and normalized consumer boundary; stage only the exact plan surface for the authorized local commit, and do not call IB or publish Pages.
+4. The multi-trader plan is Active at `phase-6:in-progress`; remediation-r1 closes implementation-review-001's reproducible post-promotion cleanup/rollback coherence defect, and a stable remediation commit plus independent re-review are required.
+5. Preserve the promoted DB, 22 planned deletions, normalized consumer boundary, and review artifact; stage only the exact plan remediation surface, and do not call IB or publish Pages.
 6. The completed operating-modes plan remains closed; do not reuse its implementation authority for this proposal.
 7. The transfer instruction is consumed. The new Phase 6 instruction authorizes only the plan-scoped local commit/review/closeout sequence; push and every remote/publication action remain separately unauthorized.
 
@@ -93,6 +93,7 @@
 | Multi-trader Phase 5 offline | pass: 13 pair tests, 80 backend tests, compileall, exact `ts`/offset/`t` NYSE gates, pair-level contention lock, offline tracked-target refusal, absolute provider-subprocess bootstrap, SPY/QQQ exchange routing, POSIX/Windows lock branches, workflow YAML, normal/static builds, and current-code candidate preservation |
 | Multi-trader Phase 5 external gate | pass: real macOS and Windows TV pair receipts passed at exact RTH 390/78 for SPY/QQQ with temporary 46 -> 47 candidate acceptance, 45 non-target grandfathered days preserved, integrity `ok`, zero FK failures, and unchanged tracked DB; that receipt authority did not itself grant Phase 6, which was authorized separately later and completed locally |
 | Multi-trader Phase 6 local cutover | pass: tracked DB `4a5bce13...2c34`, 46/46 day hashes preserved, exact 22 legacy removals, normalized-only API/static/frontend/default pair carriers, coherent old-boundary rollback, 75 backend + 11 frontend tests, normal/static builds, real-browser Review/Backtest/Teaching/Admin/downloads, 146 fixtures, and clean runtime/secret/generated-output scans |
+| Multi-trader implementation-review-001 | `revise`, confidence `high`: post-promotion verified-backup cleanup failure reproduced old canonical content/new DB projection divergence; remediation-r1 now passes full-chain new/new coherence, retained-backup/warning, 76 backend, compileall, 11 frontend, two builds, 146 fixtures, and governance checks |
 | Launcher diff review | `accept`, confidence `high`; final cache-cleanliness observation resolved |
 | Git boundary | the Windows-transfer commit/push is consumed; the current instruction authorizes plan-scoped local Phase 6 commit/review/accepted-closeout reconciliation only, with no push, PR, publish, merge, or remote settings change |
 
@@ -108,7 +109,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Create the authorized stable Phase 6 implementation commit, request independent implementation review, and reconcile lifecycle closeout only after `accept`. Push, PR, merge, Pages, hosted verification, and IB remain unauthorized.
+Create the verified remediation-r1 stable local commit and request independent re-review. Reconcile lifecycle closeout only after `accept`; push, PR, merge, Pages, hosted verification, and IB remain unauthorized.
 
 ## Handoff Boundary
 

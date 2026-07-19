@@ -3,9 +3,12 @@ from __future__ import annotations
 import copy
 import json
 import shutil
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from app.services.trade_records import (
     DAY_FIELDS,
@@ -223,6 +226,65 @@ class TradeRecordValidationTests(unittest.TestCase):
             )
             registry_report = handle_trader_registry_admin_write("admin", content, registry)
             self.assertEqual(registry_report["traders"], 2)
+
+    def test_post_promotion_backup_cleanup_failure_keeps_content_and_db_coherent(self) -> None:
+        import app.main as main_module
+
+        root = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as raw_directory:
+            workspace = Path(raw_directory)
+            content = workspace / "content"
+            shutil.copytree(root / "content" / "traders", content / "traders")
+            shutil.copytree(root / "content" / "trades", content / "trades")
+            live = workspace / "live.db"
+            shutil.copy2(root / "data" / "sqlite" / "tang_strategy_live_extended.db", live)
+
+            target = content / "trades" / "2026-07-17.json"
+            day = json.loads(target.read_text(encoding="utf-8"))
+            note_text = "Post-promotion cleanup fixture."
+            day["trade_groups"][0]["notes"].append(
+                {"text": note_text, "provenance": "user_provided"}
+            )
+            real_unlink = Path.unlink
+
+            def fail_verified_backup_cleanup(path: Path, *args: object, **kwargs: object) -> None:
+                if ".trade-sync-" in path.name and path.name.endswith(".backup.db"):
+                    raise PermissionError("forced verified backup cleanup failure")
+                real_unlink(path, *args, **kwargs)
+
+            with (
+                patch.object(
+                    main_module,
+                    "settings",
+                    SimpleNamespace(db_path=live, content_dir=content),
+                ),
+                patch.object(Path, "unlink", fail_verified_backup_cleanup),
+            ):
+                report = handle_trade_day_admin_write(
+                    "admin",
+                    content,
+                    day,
+                    after_replace=main_module._sync_trade_projection,
+                )
+
+            with sqlite3.connect(live) as connection:
+                notes = json.loads(
+                    connection.execute(
+                        "SELECT notes_json FROM trade_groups WHERE trade_group_id=?",
+                        ("tg_20260717_tang_spy_001",),
+                    ).fetchone()[0]
+                )
+
+            self.assertIn(note_text, target.read_text(encoding="utf-8"))
+            self.assertTrue(any(note["text"] == note_text for note in notes))
+            self.assertEqual(
+                report["projection"]["cleanup_warnings"],
+                ["verified DB backup cleanup failed: forced verified backup cleanup failure"],
+            )
+            self.assertEqual(
+                len(list(workspace.glob(".live.trade-sync-*.backup.db"))),
+                1,
+            )
 
     def test_phase_6_routes_are_registered_without_legacy_compatibility(self) -> None:
         from app.main import app

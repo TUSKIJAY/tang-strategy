@@ -12,7 +12,7 @@
 - Current phase: phase-6
 - Phase state: in-progress
 - Phase entry gate: `phase-6-start`
-- Next gate: `phase-6-implementation-review`
+- Next gate: `phase-6-implementation-re-review-r1`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -511,6 +511,8 @@ Execution evidence: macOS and Windows pinned-runtime TradingView receipts both p
 - Exit gate: `phase-6-complete` and lifecycle closeout only after independent `accept`; otherwise remain Active with the exact finding/blocker.
 
 Execution evidence: the local tracked DB was atomically promoted from byte SHA-256 `76a885c2...28f8` to target-schema `4a5bce13...2c34` while preserving all 46 logical keys/day digests and logical market SHA-256 `f7ca32e4...70a34`. The 20 legacy JSON files and two declared legacy code consumers were removed; API/static/Review/Admin/K-line/workflow/runbook/operating-mode carriers now use only normalized `trade_records` and the pair-first default path. The complete local matrix passed: 75 pinned backend tests, 11 frontend tests, normal/static builds, real-browser Review/Backtest/Teaching/Admin plus four downloads, rollback rehearsal, 146 operating-mode fixtures, governed/auto/startup/YAML/diff checks, and zero runtime legacy/default-SPY/secret/untracked-output findings. No QQQ history was fabricated, and no remote/Pages/hosted/IB action ran. The user separately authorized the plan-scoped local stable commit, independent implementation review, and accepted closeout; Phase 6 is `in-progress` at `phase-6-implementation-review` until that stable commit receives a qualifying independent verdict.
+
+Implementation review `implementation-review-001` independently inspected stable commit `f92e273b0153eefac14e5c54f94926a2bd4e707e` and returned `revise` with `high` confidence. Its isolated fault injection proved that a verified-backup cleanup exception after successful admin DB promotion escaped to the canonical writer, which then restored old content while the DB retained the new projection. Remediation-r1 treats post-promotion backup deletion as non-transactional cleanup, returns a visible warning while retaining the verified backup, and adds a full temporary-content/DB regression requiring new content/new DB coherence. The fault injection now yields new content/new DB, one visible warning, and one retained backup; 76 pinned backend tests, compileall, 11 frontend tests, normal/static builds, 146 fixtures, governed/auto/startup/diff checks, and unchanged tracked-DB hash all pass. Phase 6 remains Active at `phase-6-implementation-re-review-r1` until a new stable remediation commit receives an independent verdict.
 
 ## 7. Data-Safety And Rollback Matrix
 

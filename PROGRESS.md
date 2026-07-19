@@ -7,10 +7,10 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
 - Phase state: `in-progress`
-- Next gate: `phase-6-implementation-review`
+- Next gate: `phase-6-implementation-re-review-r1`
 <!-- operating-modes-state:end -->
 
-2026-07-19: Phase 6 本地 cutover 与验收已完成：tracked DB 由 `76a885c2...28f8` 原子 promotion 为 `4a5bce13...2c34`，46/46 logical keys/day digests 与 `f7ca32...70a34` logical hash 保持一致；1/27/27/30/4/2 trade projection、integrity/FK、20 legacy JSON + 2 legacy code removals、`trade_records` API/static/Review/Admin/K-line/default pair carriers、旧边界回滚演练均通过。最终结果为 75 backend、11 frontend、normal/static builds、real-browser Review/Backtest/Teaching/Admin + 4 downloads、146 fixtures、governed/auto/startup/YAML/diff/secret/runtime scan 全通过。用户现已授权 plan-scoped 本地稳定提交、独立 implementation review 与 accepted closeout，计划恢复为 `phase-6:in-progress`，next gate 为 `phase-6-implementation-review`；push、PR、Pages、hosted 与 IB 仍未授权。
+2026-07-19: Phase 6 stable commit `f92e273b0153eefac14e5c54f94926a2bd4e707e` 已完成；独立 `implementation-review-001` 返回 `revise/high`，并在全临时 content/DB 副本复现 post-promotion backup cleanup 异常导致 old content/new DB 分叉。remediation-r1 已把该清理改为成功后的 non-transactional warning/backup retention，并加入 new content/new DB coherence fault-injection regression；复现现为 new/new、one warning、retained backup，76 backend、compileall、11 frontend、两种 build、146 fixtures 与治理检查全通过。计划保持 `phase-6:in-progress`，next gate 为 `phase-6-implementation-re-review-r1`；push、PR、Pages、hosted 与 IB 仍未授权。
 
 2026-07-19: 用户通过 `user-instruction:2026-07-19-authorize-phase6-cutover` 明确授权本地 Phase 6 tracked-DB promotion、冻结清单内 legacy removal 与正式 cutover。Phase 5 双平台 receipt exit gate 已满足，Phase 6 进入 `in-progress`；本次权限不包含新的 stage/commit/push、PR、merge、Pages、hosted、IB 或其他远端动作。
 
@@ -54,7 +54,7 @@
 
 ## In Progress
 
-- [ ] Freeze the accepted Phase 6 implementation in a local commit, obtain an independent implementation verdict, and reconcile closeout only after `accept`.
+- [ ] Freeze the verified remediation-r1 in a new stable local commit and request independent implementation re-review.
 
 ## Blocked
 
@@ -62,7 +62,7 @@
 
 ## To Do
 
-- [ ] Create the authorized stable local implementation commit, request independent implementation review, and close the lifecycle only after `accept`. Push, PR, Pages, merge, and other remote actions remain separately gated.
+- [ ] Create the authorized remediation commit, request independent re-review, and close the lifecycle only after `accept`. Push, PR, Pages, merge, and other remote actions remain separately gated.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed

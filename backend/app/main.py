@@ -326,6 +326,7 @@ def _sync_trade_projection() -> dict[str, Any]:
     candidate = live.parent / f".{live.stem}.trade-sync-{nonce}.candidate.db"
     backup = live.parent / f".{live.stem}.trade-sync-{nonce}.backup.db"
     promoted = False
+    cleanup_warnings: list[str] = []
     try:
         baseline = create_consistent_snapshot(live, backup)
         shutil.copy2(backup, candidate)
@@ -350,11 +351,21 @@ def _sync_trade_projection() -> dict[str, Any]:
 
         promote_candidate(live, candidate, baseline, backup, validate_projection)
         promoted = True
-        return {"promoted": True, "trade_days": len(days), "counts": counts}
+        if backup.exists():
+            try:
+                backup.unlink()
+            except Exception as exc:
+                cleanup_warnings.append(f"verified DB backup cleanup failed: {exc}")
+        return {
+            "promoted": True,
+            "trade_days": len(days),
+            "counts": counts,
+            "cleanup_warnings": cleanup_warnings,
+        }
     finally:
         if candidate.exists() and not promoted:
             candidate.unlink()
-        if backup.exists():
+        if backup.exists() and not promoted:
             backup.unlink()
 
 
