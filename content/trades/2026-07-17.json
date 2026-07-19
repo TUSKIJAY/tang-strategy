@@ -64,7 +64,262 @@
         "source_index": 0,
         "review_flags": []
       }
+    },
+    {
+      "trade_group_id": "tg_20260717_vordin_qqq_001",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-17",
+      "direction": "PUT",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260717_vordin_qqq_001_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "PUT",
+          "strike": 681,
+          "expiry": "2026-07-17",
+          "expiry_provenance": "rule_default",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260717_vordin_qqq_001_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-07-17T09:42-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 0.84,
+              "quantity": 150,
+              "fees": null,
+              "note": "群聊原话「qqq put 681 150张 0.84」；时间为群聊消息发布时间（截图 UTC+9 换算），非券商成交时间。",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260717_vordin_qqq_001_l1_e2",
+              "sequence": 2,
+              "action": "sell_close",
+              "occurred_at": "2026-07-17T10:43-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 0.15,
+              "quantity": null,
+              "fees": null,
+              "note": "群聊原话「0.15全出了」；平仓数量未在消息中明确；时间为群聊消息发布时间。",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": null,
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "QQQ 2026-07-17 681 Put（0DTE，到期日为规则默认）；用户口述 Put 侧成本 $12,600（10:05 EDT）。",
+          "provenance": "user_provided"
+        }
+      ],
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "chat_screenshot",
+        "source_path": "records/2026/2026-07-17-day03/record.md",
+        "source_index": null,
+        "review_flags": ["message_time_not_fill_time", "missing_close_quantity"]
+      }
+    },
+    {
+      "trade_group_id": "tg_20260717_vordin_qqq_002",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-17",
+      "direction": "CALL",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260717_vordin_qqq_002_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "CALL",
+          "strike": 691,
+          "expiry": "2026-07-17",
+          "expiry_provenance": "rule_default",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260717_vordin_qqq_002_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-07-17T09:42-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 1.8,
+              "quantity": 70,
+              "fees": null,
+              "note": "群聊原话「Call 691」「70张 1.8」；时间为群聊消息发布时间（截图 UTC+9 换算），非券商成交时间。",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260717_vordin_qqq_002_l1_e2",
+              "sequence": 2,
+              "action": "sell_partial",
+              "occurred_at": "2026-07-17T09:50-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 2.3,
+              "quantity": 12,
+              "fees": null,
+              "note": "群聊原话「2.3出12张」；时间为群聊消息发布时间。",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260717_vordin_qqq_002_l1_e3",
+              "sequence": 3,
+              "action": "sell_partial",
+              "occurred_at": "2026-07-17T09:50-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 2.9,
+              "quantity": 12,
+              "fees": null,
+              "note": "群聊原话「2.9出12张」；时间为群聊消息发布时间。",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260717_vordin_qqq_002_l1_e4",
+              "sequence": 4,
+              "action": "sell_partial",
+              "occurred_at": "2026-07-17T09:57-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 3.8,
+              "quantity": 22,
+              "fees": null,
+              "note": "群聊原话「3.8出22张」；时间为群聊消息发布时间。",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260717_vordin_qqq_002_l1_e5",
+              "sequence": 5,
+              "action": "sell_partial",
+              "occurred_at": "2026-07-17T09:57-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 4.3,
+              "quantity": 12,
+              "fees": null,
+              "note": "群聊原话「4.3出12张」；时间为群聊消息发布时间。",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260717_vordin_qqq_002_l1_e6",
+              "sequence": 6,
+              "action": "sell_close",
+              "occurred_at": "2026-07-17T10:01-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 5.5,
+              "quantity": null,
+              "fees": null,
+              "note": "群聊原话「5.5 all out」；平仓数量未在消息中明确；时间为群聊消息发布时间。",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": {
+        "return_pct": null,
+        "gross_pnl": null,
+        "net_pnl": 13760,
+        "provenance": "user_provided",
+        "note": "10:05 EDT 用户口述「目前call这边盈利13760刀」，截图确认；手续费口径未提供。"
+      },
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "QQQ 2026-07-17 691 Call（0DTE，到期日为规则默认）。",
+          "provenance": "user_provided"
+        }
+      ],
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "chat_screenshot",
+        "source_path": "records/2026/2026-07-17-day03/record.md",
+        "source_index": null,
+        "review_flags": ["message_time_not_fill_time", "missing_close_quantity"]
+      }
     }
   ],
-  "note_contexts": []
+  "note_contexts": [
+    {
+      "context_id": "ctx_20260717_vordin_qqq_001",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-17",
+      "text": "用户口述（截图确认）：10:05 EDT Call 侧盈利 $13,760、Put 侧成本 $12,600、两侧合计成本 $25,200、当时保底收益 $1,160；10:43 EDT 最终实际结余 $3,410、盈利比率 13.53%；手续费口径未提供。",
+      "status": "active",
+      "review_status": "verified",
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "chat_screenshot",
+        "source_path": "records/2026/2026-07-17-day03/record.md",
+        "source_index": null,
+        "review_flags": []
+      }
+    }
+  ]
 }

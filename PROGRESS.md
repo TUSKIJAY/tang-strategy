@@ -10,6 +10,8 @@
 - Next gate: `none`
 <!-- operating-modes-state:end -->
 
+2026-07-19: 添加第二位 trader `vordin`（沃德哥）：registry + 2026-07-10/07-14/07-17 三个 canonical QQQ day files（6 groups / 3 contexts，逐字段 fact_provenance，07-14 无截图保持 `pending`，不进 static export）。为满足 trade 投影的 market-day 完整性约束，补齐首批 QQQ 市场日：07-14/07-17 走 TradingView 匿名源（历史窗口需 `--bar-count 5000`），07-10 因 TV 匿名历史不足触发 QQQ RTH 317/390 hard gate 后走 IBKR；同日期 SPY 按 same-provider pair 合约一并重导入，46 -> 49 market days / 52 datasets（3 superseded）。同时修复 fetch 脚本在 dataset-ownership schema 下失效的 `fetch_prior_closes` join（改用 `bar_market_day_join`）。验收计数更新为 22 days / 33 groups / 5 contexts；76/76 backend tests、compileall、harness、QQQ static export 探针通过。全部改动未 commit、未 push、未发布 Pages。
+
 2026-07-19: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` 已完成 Phase 0-6、双平台 pinned-runtime receipts、tracked DB promotion、exact legacy removal、normalized cutover、remediation-r1 与独立 `implementation-review-002: accept/high`，并迁移到 `completed/`。Verified implementation commit 为 `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`，lifecycle reconciliation commit 为 `6e57f18f7644d2956c81795fed3b3838158497e6`。push、PR、Pages、hosted、IB 与新 provider run 未授权、未执行。
 
 2026-07-19: 用户通过 `user-instruction:2026-07-19-authorize-phase6-cutover` 明确授权本地 Phase 6 tracked-DB promotion、冻结清单内 legacy removal 与正式 cutover。Phase 5 双平台 receipt exit gate 已满足，Phase 6 进入 `in-progress`；本次权限不包含新的 stage/commit/push、PR、merge、Pages、hosted、IB 或其他远端动作。

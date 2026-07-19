@@ -209,7 +209,7 @@ class TradeRecordValidationTests(unittest.TestCase):
             self.assertEqual(list(target.parent.glob(".*.rollback")), [])
 
             report = handle_trade_day_admin_write("admin", content, day)
-            self.assertEqual(report["trade_groups"], 1)
+            self.assertEqual(report["trade_groups"], 3)
             self.assertIn("Atomic admin fixture.", target.read_text(encoding="utf-8"))
 
             registry = json.loads(
@@ -221,11 +221,11 @@ class TradeRecordValidationTests(unittest.TestCase):
                     "display_name": "Alice",
                     "color": "#3366CC",
                     "active": True,
-                    "sort_order": 20,
+                    "sort_order": 30,
                 }
             )
             registry_report = handle_trader_registry_admin_write("admin", content, registry)
-            self.assertEqual(registry_report["traders"], 2)
+            self.assertEqual(registry_report["traders"], 3)
 
     def test_post_promotion_backup_cleanup_failure_keeps_content_and_db_coherent(self) -> None:
         import app.main as main_module

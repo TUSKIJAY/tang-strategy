@@ -30,7 +30,7 @@ MIGRATION_EVIDENCE = (
 
 
 class LegacyMigrationTests(unittest.TestCase):
-    def test_cutover_canonical_repository_preserves_20_27_2_acceptance(self) -> None:
+    def test_cutover_canonical_repository_preserves_22_33_5_acceptance(self) -> None:
         registry = load_trader_registry(REPOSITORY_ROOT / "content" / "traders" / "index.json")
         days = validate_trade_repository(CANONICAL_DIR.glob("*.json"), registry)
         serialized = {
@@ -40,12 +40,12 @@ class LegacyMigrationTests(unittest.TestCase):
         registry_path = REPOSITORY_ROOT / "content" / "traders" / "index.json"
         serialized["traders/index.json"] = registry_path.read_text(encoding="utf-8")
 
-        self.assertEqual(len(days), 20)
-        self.assertEqual(sum(len(day["trade_groups"]) for day in days), 27)
-        self.assertEqual(sum(len(day["note_contexts"]) for day in days), 2)
+        self.assertEqual(len(days), 22)
+        self.assertEqual(sum(len(day["trade_groups"]) for day in days), 33)
+        self.assertEqual(sum(len(day["note_contexts"]) for day in days), 5)
         self.assertEqual(
             hashlib.sha256("".join(serialized[key] for key in sorted(serialized)).encode()).hexdigest(),
-            "f22c5866cea04f39ec772b7542f75f06b1537bcae860668773dd7dd2da589a7e",
+            "58783cfe888f6f922810eceb6a402ef0a002646d91830acb6476e3db371512ec",
         )
         evidence = MIGRATION_EVIDENCE.read_text(encoding="utf-8")
         self.assertIn("- Source files: `20`", evidence)
@@ -123,12 +123,12 @@ class LegacyMigrationTests(unittest.TestCase):
             baseline, first_report = build_target_candidate(live, first, registry, days)
             second_baseline, second_report = build_target_candidate(first, second, registry, days)
             expected = {
-                "traders": 1,
-                "trade_groups": 27,
-                "trade_legs": 27,
-                "trade_events": 30,
-                "trade_outcomes": 4,
-                "trade_note_contexts": 2,
+                "traders": 2,
+                "trade_groups": 33,
+                "trade_legs": 33,
+                "trade_events": 46,
+                "trade_outcomes": 7,
+                "trade_note_contexts": 5,
             }
             self.assertEqual(
                 {key: first_report["counts"][key] for key in expected},

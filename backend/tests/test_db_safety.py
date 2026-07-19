@@ -207,7 +207,7 @@ class DatabaseSafetyTests(unittest.TestCase):
                 build_target_candidate(live, candidate, failure_hook=drift_live)
             self._assert_dates(live, ["2026-07-17", "2026-07-18"])
 
-    def test_repository_candidate_projects_46_days_and_agent_filters(self) -> None:
+    def test_repository_candidate_projects_49_days_and_agent_filters(self) -> None:
         root = Path(__file__).resolve().parents[2]
         live = root / "data" / "sqlite" / "tang_strategy_live_extended.db"
         registry = load_trader_registry(root / "content" / "traders" / "index.json")
@@ -220,10 +220,10 @@ class DatabaseSafetyTests(unittest.TestCase):
                 registry,
                 days,
             )
-            self.assertEqual(report["counts"]["market_days"], 46)
-            self.assertEqual(report["counts"]["market_datasets"], 46)
-            self.assertEqual(report["counts"]["trade_groups"], 27)
-            self.assertEqual(report["counts"]["trade_outcomes"], 4)
+            self.assertEqual(report["counts"]["market_days"], 49)
+            self.assertEqual(report["counts"]["market_datasets"], 52)
+            self.assertEqual(report["counts"]["trade_groups"], 33)
+            self.assertEqual(report["counts"]["trade_outcomes"], 7)
             self.assertEqual(report["logical_market_sha256"], baseline.logical_sha256)
             with contextlib.closing(sqlite3.connect(candidate)) as connection:
                 connection.row_factory = sqlite3.Row

@@ -23,6 +23,7 @@ from app.services.bar_utils import (
     normalize_session_vwap,
     recalculate_ma_fields,
 )
+from app.services.db_safety import bar_market_day_join
 from app.services.importer import import_market_json
 from app.settings import settings
 
@@ -145,11 +146,11 @@ def fetch_prior_closes(table: str, ticker: str, trade_date: date, session_mode: 
         raise ValueError(f"Unsupported bars table: {table}")
     init_db()
     with connect() as conn:
+        join = bar_market_day_join(conn, table)
         rows = conn.execute(
             f"""
             SELECT {table}.close
-            FROM {table}
-            JOIN market_days ON market_days.id = {table}.market_day_id
+            {join}
             WHERE market_days.ticker=?
               AND market_days.session_mode=?
               AND market_days.trade_date<?

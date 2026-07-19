@@ -1,0 +1,229 @@
+{
+  "schema_version": "trades-day-v1",
+  "trade_date": "2026-07-10",
+  "timezone": "America/New_York",
+  "trade_groups": [
+    {
+      "trade_group_id": "tg_20260710_vordin_qqq_001",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-10",
+      "direction": "CALL",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260710_vordin_qqq_001_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "CALL",
+          "strike": 726,
+          "expiry": "2026-07-10",
+          "expiry_provenance": "user_provided",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260710_vordin_qqq_001_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": null,
+              "time_precision": null,
+              "time_incomplete": true,
+              "premium": 0.89,
+              "quantity": 10,
+              "fees": null,
+              "note": "买入截图确认 $0.89 × 10；交易时间未提供。",
+              "fact_provenance": {
+                "occurred_at": "unknown",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": null,
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "买入截图显示 QQQ 2026-07-10 726 Call $0.89 × 10；用户口述 Call 资金成本 $900，与截图金额 $890 存在对调冲突，待核验。",
+          "provenance": "user_provided"
+        },
+        {
+          "text": "Call 最终平仓成交、准确交易时间及手续费明细均未提供。",
+          "provenance": "normalized_summary"
+        }
+      ],
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "screenshot",
+        "source_path": "records/2026/2026-07-10-day01/record.md",
+        "source_index": null,
+        "review_flags": ["missing_event_times", "missing_exit_fills", "cost_basis_conflict"]
+      }
+    },
+    {
+      "trade_group_id": "tg_20260710_vordin_qqq_002",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-10",
+      "direction": "PUT",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260710_vordin_qqq_002_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "PUT",
+          "strike": 720,
+          "expiry": "2026-07-10",
+          "expiry_provenance": "user_provided",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260710_vordin_qqq_002_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": null,
+              "time_precision": null,
+              "time_incomplete": true,
+              "premium": 0.9,
+              "quantity": 10,
+              "fees": null,
+              "note": "买入截图确认 $0.90 × 10；交易时间未提供。",
+              "fact_provenance": {
+                "occurred_at": "unknown",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260710_vordin_qqq_002_l1_e2",
+              "sequence": 2,
+              "action": "sell_partial",
+              "occurred_at": null,
+              "time_precision": null,
+              "time_incomplete": true,
+              "premium": 1.2,
+              "quantity": 1,
+              "fees": null,
+              "note": "卖出截图确认；交易时间未提供。",
+              "fact_provenance": {
+                "occurred_at": "unknown",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260710_vordin_qqq_002_l1_e3",
+              "sequence": 3,
+              "action": "sell_partial",
+              "occurred_at": null,
+              "time_precision": null,
+              "time_incomplete": true,
+              "premium": 2.08,
+              "quantity": 2,
+              "fees": null,
+              "note": "卖出截图确认；交易时间未提供。",
+              "fact_provenance": {
+                "occurred_at": "unknown",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260710_vordin_qqq_002_l1_e4",
+              "sequence": 4,
+              "action": "sell_partial",
+              "occurred_at": null,
+              "time_precision": null,
+              "time_incomplete": true,
+              "premium": 1.65,
+              "quantity": 3,
+              "fees": null,
+              "note": "卖出截图确认；交易时间未提供。",
+              "fact_provenance": {
+                "occurred_at": "unknown",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260710_vordin_qqq_002_l1_e5",
+              "sequence": 5,
+              "action": "sell_partial",
+              "occurred_at": null,
+              "time_precision": null,
+              "time_incomplete": true,
+              "premium": 1.35,
+              "quantity": 2,
+              "fees": null,
+              "note": "卖出截图确认；交易时间未提供。",
+              "fact_provenance": {
+                "occurred_at": "unknown",
+                "premium": "user_provided",
+                "quantity": "user_provided",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": null,
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "用户口述 Put 资金成本 $890，与买入截图 $0.90 × 10（$900）存在对调冲突，待核验。",
+          "provenance": "user_provided"
+        },
+        {
+          "text": "卖出截图共确认 8 张平仓（1+2+3+2）；口述称卖出 9 张，缺少一笔成交证据，剩余仓位去向未提供。",
+          "provenance": "normalized_summary"
+        }
+      ],
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "screenshot",
+        "source_path": "records/2026/2026-07-10-day01/record.md",
+        "source_index": null,
+        "review_flags": ["missing_event_times", "sell_quantity_evidence_gap"]
+      }
+    }
+  ],
+  "note_contexts": [
+    {
+      "context_id": "ctx_20260710_vordin_qqq_001",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-10",
+      "text": "用户口述当日结果：盈利侧利润 $758（扣除手续费口径）、亏损侧亏损 $693（含手续费口径）、净利润 $65、利润率 3.63%；两侧成本口径与买入截图存在对调冲突，待核验。",
+      "status": "active",
+      "review_status": "pending",
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "user_text",
+        "source_path": "records/2026/2026-07-10-day01/record.md",
+        "source_index": null,
+        "review_flags": ["result_basis_conflict"]
+      }
+    }
+  ]
+}
