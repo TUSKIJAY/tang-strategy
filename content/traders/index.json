@@ -1,0 +1,12 @@
+{
+  "schema_version": "traders-v1",
+  "traders": [
+    {
+      "trader_id": "tang",
+      "display_name": "Tang",
+      "color": "#E45756",
+      "active": true,
+      "sort_order": 10
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "schema_version": "trades-day-v1",
+  "trade_date": "2026-07-07",
+  "timezone": "America/New_York",
+  "trade_groups": [
+    {
+      "trade_group_id": "tg_20260707_tang_spy_001",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-07-07",
+      "direction": "PUT",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260707_tang_spy_001_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "PUT",
+          "strike": null,
+          "expiry": "2026-07-07",
+          "expiry_provenance": "legacy_preserved",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260707_tang_spy_001_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-07-07T09:52-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": null,
+              "fact_provenance": {
+                "occurred_at": "legacy_preserved",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": null,
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "9:52 put；40% 仓位。用户未提供具体 option strike。",
+          "provenance": "legacy_preserved"
+        }
+      ],
+      "normalization": {
+        "method": "legacy_preserve",
+        "source": "screenshot",
+        "source_path": "content/trader-trades/2026-07-07.json",
+        "source_index": 0,
+        "review_flags": []
+      }
+    },
+    {
+      "trade_group_id": "tg_20260707_tang_spy_002",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-07-07",
+      "direction": "PUT",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260707_tang_spy_002_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "PUT",
+          "strike": null,
+          "expiry": "2026-07-07",
+          "expiry_provenance": "legacy_preserved",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260707_tang_spy_002_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-07-07T10:23-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": null,
+              "fact_provenance": {
+                "occurred_at": "legacy_preserved",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": null,
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "10:23 put；30% 仓位。用户未提供具体 option strike。",
+          "provenance": "legacy_preserved"
+        }
+      ],
+      "normalization": {
+        "method": "legacy_preserve",
+        "source": "screenshot",
+        "source_path": "content/trader-trades/2026-07-07.json",
+        "source_index": 1,
+        "review_flags": []
+      }
+    },
+    {
+      "trade_group_id": "tg_20260707_tang_spy_003",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-07-07",
+      "direction": "PUT",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260707_tang_spy_003_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "PUT",
+          "strike": null,
+          "expiry": "2026-07-07",
+          "expiry_provenance": "legacy_preserved",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260707_tang_spy_003_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-07-07T10:35-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": null,
+              "fact_provenance": {
+                "occurred_at": "legacy_preserved",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": null,
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "10:35 put；35% 仓位。Tang 备注：说过啦，不要 call，随便吃。用户未提供具体 option strike。",
+          "provenance": "legacy_preserved"
+        }
+      ],
+      "normalization": {
+        "method": "legacy_preserve",
+        "source": "screenshot",
+        "source_path": "content/trader-trades/2026-07-07.json",
+        "source_index": 2,
+        "review_flags": []
+      }
+    }
+  ],
+  "note_contexts": []
+}

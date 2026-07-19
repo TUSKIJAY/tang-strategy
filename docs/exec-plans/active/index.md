@@ -4,4 +4,4 @@ Only reviewed, user-approved plans belong here. Presence in this directory autho
 
 | Plan | Current phase | Evidence | Next gate |
 | --- | --- | --- | --- |
-| None | — | — | none |
+| [2026-07-19 Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor](./2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md) | phase-5:blocked | [review-008](../reviews/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan/review-008.md) | phase-5-external-tv-receipts |

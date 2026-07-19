@@ -7,18 +7,49 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from app.db import SCHEMA
+from app.db import SCHEMA, migrate_candidate_schema
 from app.services.db_safety import BAR_COLUMNS, file_sha256, validate_sqlite
-from scripts.rebuild_live_extended_db import rebuild_db, run_candidate_import
+from scripts.rebuild_live_extended_db import (
+    discover_seed_manifest,
+    rebuild_db,
+    run_candidate_import,
+    validate_candidate_semantics,
+)
 
 
 class RebuildLiveExtendedDatabaseTests(unittest.TestCase):
+    def test_rebuild_semantics_accept_target_dataset_ownership(self) -> None:
+        with self._workspace() as workspace:
+            self._write_seed(workspace, "2026-07-17")
+            candidate = workspace / "candidate.db"
+            run_candidate_import(
+                candidate,
+                workspace / "live_extended",
+                workspace / "strategies",
+                workspace / "content",
+            )
+            migrate_candidate_schema(candidate)
+            manifest = discover_seed_manifest(
+                workspace / "live_extended",
+                workspace / "strategies",
+                workspace / "content",
+            )
+
+            result = validate_candidate_semantics(candidate, manifest, None, False)
+
+            self.assertEqual(result["market_days"], 1)
+            with contextlib.closing(sqlite3.connect(candidate)) as connection:
+                self.assertEqual(
+                    connection.execute("SELECT COUNT(*) FROM market_datasets WHERE state='active'").fetchone()[0],
+                    1,
+                )
+
     def test_no_seed_refuses_and_preserves_original_bytes(self) -> None:
         with self._workspace() as workspace:
             live = self._create_live_db(workspace, ["2026-07-17"])
             before = file_sha256(live)
 
-            with self.assertRaisesRegex(RuntimeError, "no SPY_/SPX_"):
+            with self.assertRaisesRegex(RuntimeError, "no SPY_/QQQ_/SPX_"):
                 self._rebuild(workspace)
 
             self.assertEqual(file_sha256(live), before)
@@ -153,6 +184,26 @@ class RebuildLiveExtendedDatabaseTests(unittest.TestCase):
             validate_sqlite(live)
             self._assert_dates(live, ["2026-07-17", "2026-07-18"])
 
+    def test_same_date_spy_qqq_seeds_are_discovered_and_rebuilt_together(self) -> None:
+        with self._workspace() as workspace:
+            live = self._create_live_db(workspace, ["2026-07-17"])
+            self._write_seed(workspace, "2026-07-17")
+            self._write_seed(workspace, "2026-07-18")
+            self._write_seed(workspace, "2026-07-18", ticker="QQQ")
+
+            result = self._rebuild(workspace)
+
+            self.assertTrue(result["promoted"])
+            self.assertEqual(result["validation"]["market_days"], 3)
+            with contextlib.closing(sqlite3.connect(live)) as connection:
+                rows = connection.execute(
+                    "SELECT ticker, trade_date FROM market_days ORDER BY trade_date, ticker"
+                ).fetchall()
+            self.assertEqual(
+                rows,
+                [("SPY", "2026-07-17"), ("QQQ", "2026-07-18"), ("SPY", "2026-07-18")],
+            )
+
     def test_concurrent_source_drift_refuses_promotion_and_preserves_new_write(self) -> None:
         with self._workspace() as workspace:
             live = self._create_live_db(workspace, ["2026-07-17"])
@@ -251,7 +302,13 @@ class RebuildLiveExtendedDatabaseTests(unittest.TestCase):
                     (day_id, *values),
                 )
 
-    def _write_seed(self, workspace: Path, trade_date: str, declared_1m: int = 1) -> None:
+    def _write_seed(
+        self,
+        workspace: Path,
+        trade_date: str,
+        declared_1m: int = 1,
+        ticker: str = "SPY",
+    ) -> None:
         directory = workspace / "live_extended" / trade_date
         directory.mkdir(parents=True, exist_ok=True)
         bar = {
@@ -266,7 +323,7 @@ class RebuildLiveExtendedDatabaseTests(unittest.TestCase):
         }
         payload = {
             "meta": {
-                "ticker": "SPY",
+                "ticker": ticker,
                 "date": trade_date,
                 "session_mode": "extended",
                 "counts": {"bars_1m": declared_1m, "bars_5m": 1},
@@ -274,7 +331,7 @@ class RebuildLiveExtendedDatabaseTests(unittest.TestCase):
             "bars_1m": [bar],
             "bars_5m": [bar],
         }
-        (directory / f"SPY_{trade_date}.json").write_text(
+        (directory / f"{ticker}_{trade_date}.json").write_text(
             json.dumps(payload),
             encoding="utf-8",
         )

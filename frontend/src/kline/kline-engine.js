@@ -643,6 +643,8 @@
             type: annotation.type || 'info',
             style: annotation.style || 'blue',
             anchor_side: annotation.anchor_side || 'top',
+            marker_color: annotation.marker_color || null,
+            marker_shape: annotation.marker_shape || null,
             score: Object.prototype.hasOwnProperty.call(annotation, 'score') ? annotation.score : null,
           }));
         }
@@ -2170,7 +2172,17 @@
           'tang-put':  { fill: '#b389ff', stroke: '#b389ff', dim: 'rgba(179,137,255,0.34)' },
         };
 
-        _annoColor(style) {
+        _annoColor(style, explicitColor = null) {
+          if (/^#[0-9a-f]{6}$/i.test(explicitColor || '')) {
+            const red = parseInt(explicitColor.slice(1, 3), 16);
+            const green = parseInt(explicitColor.slice(3, 5), 16);
+            const blue = parseInt(explicitColor.slice(5, 7), 16);
+            return {
+              fill: explicitColor,
+              stroke: explicitColor,
+              dim: `rgba(${red},${green},${blue},0.34)`,
+            };
+          }
           return KlineEngine.ANNO_COLORS[style] || KlineEngine.ANNO_COLORS.blue;
         }
 
@@ -2208,7 +2220,7 @@
             const anchorPrice = isTop ? high : low;
             const anchorY = rc.yForPrice(anchorPrice);
 
-            const colors = this._annoColor(anno.style);
+            const colors = this._annoColor(anno.style, anno.marker_color);
             const isHigh = this._isHighScore(anno);
             // Beefier defaults so non-high-score pins remain visible against
             // candles + MA lines; halo ring keeps them legible on busy charts.
@@ -2249,6 +2261,71 @@
               ctx.lineTo(x + radius, markerY);
               ctx.lineTo(x, markerY + radius);
               ctx.lineTo(x - radius, markerY);
+              ctx.closePath();
+              ctx.strokeStyle = haloColor;
+              ctx.lineWidth = 3;
+              ctx.stroke();
+              ctx.fillStyle = colors.fill;
+              ctx.fill();
+
+              ctx.font = '700 11px ui-monospace, SFMono-Regular, Menlo, monospace';
+              const textW = Math.ceil(ctx.measureText(label).width);
+              const labelW = textW + 12;
+              const labelH = 18;
+              const labelX = clamp(x + 10, rc.area.x + 4, rc.chartRight - labelW - 4);
+              const labelY = clamp(markerY - labelH / 2, rc.area.y + 4, rc.volumeY - labelH - 4);
+              ctx.fillStyle = this.theme === 'light' ? 'rgba(255,255,255,0.94)' : 'rgba(20,20,18,0.94)';
+              ctx.strokeStyle = colors.stroke;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.roundRect(labelX, labelY, labelW, labelH, 4);
+              ctx.fill();
+              ctx.stroke();
+              ctx.fillStyle = colors.fill;
+              ctx.fillText(label, labelX + 6, labelY + 12.5);
+
+              const hitX = Math.min(x - radius - 4, labelX);
+              const hitY = Math.min(markerY - radius - 4, labelY);
+              const hitRight = Math.max(x + radius + 4, labelX + labelW);
+              const hitBottom = Math.max(markerY + radius + 4, labelY + labelH);
+              this._annoHitZones.push({
+                x: hitX,
+                y: hitY,
+                w: hitRight - hitX,
+                h: hitBottom - hitY,
+                anno,
+                screenX: x,
+                screenY: markerY,
+              });
+              return;
+            }
+
+            if (anno.type === 'trade_record') {
+              const radius = isHigh ? 10 : 8;
+              const markerY = stemEnd + stemDir * (radius * 0.5);
+              const label = anno.marker_label || anno.title || anno.trader_id || 'Trade';
+              const points = anno.marker_shape === 'triangle_down'
+                ? [[x, markerY + radius], [x - radius, markerY - radius], [x + radius, markerY - radius]]
+                : [[x, markerY - radius], [x - radius, markerY + radius], [x + radius, markerY + radius]];
+
+              ctx.globalAlpha = 1;
+              ctx.strokeStyle = haloColor;
+              ctx.lineWidth = 4;
+              ctx.beginPath();
+              ctx.moveTo(x, stemStart);
+              ctx.lineTo(x, stemEnd);
+              ctx.stroke();
+              ctx.strokeStyle = colors.stroke;
+              ctx.lineWidth = 1.8;
+              ctx.beginPath();
+              ctx.moveTo(x, stemStart);
+              ctx.lineTo(x, stemEnd);
+              ctx.stroke();
+
+              ctx.beginPath();
+              ctx.moveTo(points[0][0], points[0][1]);
+              ctx.lineTo(points[1][0], points[1][1]);
+              ctx.lineTo(points[2][0], points[2][1]);
               ctx.closePath();
               ctx.strokeStyle = haloColor;
               ctx.lineWidth = 3;
@@ -2386,7 +2463,7 @@
           if (zone.anno.score != null) {
             scoreEl.textContent = String(zone.anno.score);
             scoreEl.style.display = '';
-            const colors = this._annoColor(zone.anno.style);
+            const colors = this._annoColor(zone.anno.style, zone.anno.marker_color);
             scoreEl.style.background = colors.dim;
             scoreEl.style.color = colors.fill;
           } else {

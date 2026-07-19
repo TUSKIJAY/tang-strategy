@@ -15,9 +15,11 @@ TradingView fetch/tests additionally require the pins in `requirements-tv.txt`.
 
 ## Data Contract
 
-- Accepted market seed: `data/seed/market-data/live_extended/<YYYY-MM-DD>/SPY_<YYYY-MM-DD>.json` (and the equivalent SPX name).
+- Accepted internal/candidate market seeds: `data/seed/market-data/live_extended/<YYYY-MM-DD>/<TICKER>_<YYYY-MM-DD>.json` for SPY, QQQ, and the existing SPX format.
 - Tracked runtime/Pages input: `data/sqlite/tang_strategy_live_extended.db`.
 - Safe rebuild: `PYTHONPATH=. python scripts/rebuild_live_extended_db.py`.
+
+Phase 5 QQQ support is internal/candidate capability. The standing daily entry remains the existing SPY/Tang runbook until the governed cutover gate changes the public/default contract. `scripts/update_spy_qqq_market_day.py` stages both tickers, rejects mixed or partial pairs, and requires separate provider authorization before a real TV/IB call.
 
 Rebuild imports into a candidate and refuses empty/invalid bars, count disagreement, integrity/foreign-key failure, market-day loss, strategy/teaching shrink, or live DB drift. `--allow-date-loss` is an explicit supervised override for intentional market-day shrink only.
 

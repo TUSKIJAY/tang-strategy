@@ -1,0 +1,266 @@
+{
+  "schema_version": "trades-day-v1",
+  "trade_date": "2026-06-08",
+  "timezone": "America/New_York",
+  "trade_groups": [
+    {
+      "trade_group_id": "tg_20260608_tang_spy_001",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-06-08",
+      "direction": "CALL",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": true,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260608_tang_spy_001_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "CALL",
+          "strike": null,
+          "expiry": "2026-06-08",
+          "expiry_provenance": "legacy_preserved",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260608_tang_spy_001_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-06-08T11:33-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": null,
+              "fact_provenance": {
+                "occurred_at": "legacy_preserved",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260608_tang_spy_001_l1_e2",
+              "sequence": 2,
+              "action": "sell_close",
+              "occurred_at": "2026-06-08T11:41-04:00",
+              "time_precision": "approximate",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": "Exit time extracted conservatively from the preserved legacy note.",
+              "fact_provenance": {
+                "occurred_at": "legacy_rule_extract",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": {
+        "return_pct": 50.0,
+        "gross_pnl": null,
+        "net_pnl": null,
+        "provenance": "legacy_rule_extract",
+        "note": "Reported percentage extracted from the preserved legacy note; no fill was inferred."
+      },
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "11:33 call；11:41 附近反馈 +50%。后续补充理由为 5min VWAP 支撑，15min 也有对应支撑。截图未提供具体 option strike。",
+          "provenance": "legacy_preserved"
+        }
+      ],
+      "normalization": {
+        "method": "legacy_rule_extract",
+        "source": "screenshot",
+        "source_path": "content/trader-trades/2026-06-08.json",
+        "source_index": 0,
+        "review_flags": []
+      }
+    },
+    {
+      "trade_group_id": "tg_20260608_tang_spy_002",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-06-08",
+      "direction": "CALL",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": true,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260608_tang_spy_002_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "CALL",
+          "strike": null,
+          "expiry": "2026-06-08",
+          "expiry_provenance": "legacy_preserved",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260608_tang_spy_002_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-06-08T13:53-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": null,
+              "fact_provenance": {
+                "occurred_at": "legacy_preserved",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260608_tang_spy_002_l1_e2",
+              "sequence": 2,
+              "action": "sell_close",
+              "occurred_at": "2026-06-08T14:07-04:00",
+              "time_precision": "approximate",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": "Exit time extracted conservatively from the preserved legacy note.",
+              "fact_provenance": {
+                "occurred_at": "legacy_rule_extract",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": {
+        "return_pct": 40.0,
+        "gross_pnl": null,
+        "net_pnl": null,
+        "provenance": "legacy_rule_extract",
+        "note": "Reported percentage extracted from the preserved legacy note; no fill was inferred."
+      },
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "13:53 last try call；14:07 附近 +40% 出清。理由为 5min 撑住 MA200 且 MA10 多头排列成型，15min MA50 提供支撑；若跌破则马上走人，但作为最后一条均线预计会有一定护盘力度。截图未提供具体 option strike。",
+          "provenance": "legacy_preserved"
+        }
+      ],
+      "normalization": {
+        "method": "legacy_rule_extract",
+        "source": "screenshot",
+        "source_path": "content/trader-trades/2026-06-08.json",
+        "source_index": 1,
+        "review_flags": []
+      }
+    },
+    {
+      "trade_group_id": "tg_20260608_tang_spy_003",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-06-08",
+      "direction": "CALL",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": true,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260608_tang_spy_003_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "CALL",
+          "strike": null,
+          "expiry": "2026-06-08",
+          "expiry_provenance": "legacy_preserved",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260608_tang_spy_003_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-06-08T14:18-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": null,
+              "fact_provenance": {
+                "occurred_at": "legacy_preserved",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260608_tang_spy_003_l1_e2",
+              "sequence": 2,
+              "action": "sell_close",
+              "occurred_at": "2026-06-08T14:31-04:00",
+              "time_precision": "approximate",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": "Exit time extracted conservatively from the preserved legacy note.",
+              "fact_provenance": {
+                "occurred_at": "legacy_rule_extract",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": {
+        "return_pct": 40.0,
+        "gross_pnl": null,
+        "net_pnl": null,
+        "provenance": "legacy_rule_extract",
+        "note": "Reported percentage extracted from the preserved legacy note; no fill was inferred."
+      },
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "14:18 call；14:31 附近反馈 +40%。逻辑同样是 15min 支撑未破，5min 多头排列回测 MA10，1min MA200 作为目标。截图未提供具体 option strike。",
+          "provenance": "legacy_preserved"
+        }
+      ],
+      "normalization": {
+        "method": "legacy_rule_extract",
+        "source": "screenshot",
+        "source_path": "content/trader-trades/2026-06-08.json",
+        "source_index": 2,
+        "review_flags": []
+      }
+    }
+  ],
+  "note_contexts": []
+}

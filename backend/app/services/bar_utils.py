@@ -157,9 +157,9 @@ def normalize_session_vwap(
     return normalized
 
 
-def bar_tuple_from_seed(market_day_id: int, idx: int, bar: dict[str, Any]) -> tuple[Any, ...]:
+def bar_tuple_from_seed(bar_owner_id: int | str, idx: int, bar: dict[str, Any]) -> tuple[Any, ...]:
     return (
-        market_day_id,
+        bar_owner_id,
         idx,
         pick_value(bar, "ts"),
         pick_value(bar, "t", "time"),

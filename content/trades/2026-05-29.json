@@ -1,0 +1,24 @@
+{
+  "schema_version": "trades-day-v1",
+  "trade_date": "2026-05-29",
+  "timezone": "America/New_York",
+  "trade_groups": [],
+  "note_contexts": [
+    {
+      "context_id": "ctx_20260529_tang_spy_001",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-05-29",
+      "text": "SPY 盘前偏 bullish，开盘后 09:35-09:36 突破盘前 756.3 阻力确认趋势；当天 SPY IV 偏高，未记录 SPY 0DTE 实盘入场。",
+      "status": "active",
+      "review_status": "verified",
+      "normalization": {
+        "method": "legacy_preserve",
+        "source": "legacy_day_note",
+        "source_path": "content/trader-trades/2026-05-29.json",
+        "source_index": 0,
+        "review_flags": []
+      }
+    }
+  ]
+}

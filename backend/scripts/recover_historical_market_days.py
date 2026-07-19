@@ -19,6 +19,8 @@ from app.services.db_safety import (
     BAR_COLUMNS,
     MARKET_DAY_COLUMNS,
     DatabaseToken,
+    bar_owner,
+    bars_use_datasets,
     create_consistent_snapshot,
     day_sha256,
     file_sha256,
@@ -132,11 +134,19 @@ def copy_market_day(candidate_path: Path, source: SourceSpec) -> dict[str, Any]:
         if source_ticker is None:
             raise RuntimeError(f"Historical source has no ticker row for {source.ticker}: {source.db_path}")
         bars: dict[str, list[sqlite3.Row]] = {}
+        source_owner_column, source_owner_id = bar_owner(source_connection, source_id)
+        source_dataset = None
+        if source_owner_column == "dataset_id":
+            dataset_row = source_connection.execute(
+                "SELECT * FROM market_datasets WHERE dataset_id=?",
+                (source_owner_id,),
+            ).fetchone()
+            source_dataset = dict(dataset_row) if dataset_row is not None else None
         for table, declared_column in (("bars_1m", "bar_count_1m"), ("bars_5m", "bar_count_5m")):
             rows = source_connection.execute(
                 f"SELECT {', '.join(BAR_COLUMNS)} FROM {table} "
-                "WHERE market_day_id=? ORDER BY idx",
-                (source_id,),
+                f"WHERE {source_owner_column}=? ORDER BY idx",
+                (source_owner_id,),
             ).fetchall()
             declared = int(source_day[declared_column])
             if not rows or len(rows) != declared:
@@ -177,12 +187,19 @@ def copy_market_day(candidate_path: Path, source: SourceSpec) -> dict[str, Any]:
                 "SELECT id FROM market_days WHERE ticker=? AND trade_date=? AND session_mode=?",
                 source.key,
             ).fetchone()[0])
+            candidate_owner_column, candidate_owner_id = _recovery_bar_owner(
+                candidate_connection,
+                candidate_id,
+                source_day,
+                source_hash,
+                source_dataset,
+            )
             placeholders = ", ".join("?" for _ in BAR_COLUMNS)
             for table in ("bars_1m", "bars_5m"):
                 candidate_connection.executemany(
-                    f"INSERT INTO {table}(market_day_id, {', '.join(BAR_COLUMNS)}) "
+                    f"INSERT INTO {table}({candidate_owner_column}, {', '.join(BAR_COLUMNS)}) "
                     f"VALUES (?, {placeholders})",
-                    [(candidate_id, *(row[column] for column in BAR_COLUMNS)) for row in bars[table]],
+                    [(candidate_owner_id, *(row[column] for column in BAR_COLUMNS)) for row in bars[table]],
                 )
     finally:
         candidate_connection.close()
@@ -235,20 +252,21 @@ def summarize_day(db_path: Path, source: SourceSpec) -> dict[str, Any]:
             "metadata": safe_metadata,
         }
         for table in ("bars_1m", "bars_5m"):
+            owner_column, owner_id = bar_owner(connection, int(day["id"]))
             first = connection.execute(
                 f"SELECT idx, ts, time, open, vwap FROM {table} "
-                "WHERE market_day_id=? ORDER BY idx LIMIT 1",
-                (day["id"],),
+                f"WHERE {owner_column}=? ORDER BY idx LIMIT 1",
+                (owner_id,),
             ).fetchone()
             last = connection.execute(
                 f"SELECT idx, ts, time, close, vwap FROM {table} "
-                "WHERE market_day_id=? ORDER BY idx DESC LIMIT 1",
-                (day["id"],),
+                f"WHERE {owner_column}=? ORDER BY idx DESC LIMIT 1",
+                (owner_id,),
             ).fetchone()
             aggregate = connection.execute(
                 f"SELECT COUNT(*), MIN(low), MAX(high), SUM(volume), MIN(vwap), MAX(vwap) "
-                f"FROM {table} WHERE market_day_id=?",
-                (day["id"],),
+                f"FROM {table} WHERE {owner_column}=?",
+                (owner_id,),
             ).fetchone()
             result[table] = {
                 "count": int(aggregate[0]),
@@ -261,6 +279,47 @@ def summarize_day(db_path: Path, source: SourceSpec) -> dict[str, Any]:
                 "vwap_max": aggregate[5],
             }
         return result
+
+
+def _recovery_bar_owner(
+    candidate_connection: sqlite3.Connection,
+    candidate_market_day_id: int,
+    source_day: sqlite3.Row,
+    source_hash: dict[str, str],
+    source_dataset: dict[str, Any] | None,
+) -> tuple[str, int | str]:
+    if not bars_use_datasets(candidate_connection):
+        return "market_day_id", candidate_market_day_id
+    checksum = hashlib.sha256(
+        f"{source_hash['bars_1m']}\n{source_hash['bars_5m']}".encode("utf-8")
+    ).hexdigest()
+    safe_session = "".join(
+        character if character.isalnum() else "_"
+        for character in str(source_day["session_mode"]).lower()
+    )
+    dataset_id = (
+        str(source_dataset["dataset_id"])
+        if source_dataset is not None
+        else f"mds_{str(source_day['ticker']).lower()}_"
+        f"{str(source_day['trade_date']).replace('-', '')}_{safe_session}_recovery"
+    )
+    candidate_connection.execute(
+        "INSERT INTO market_datasets(dataset_id, market_day_id, provider, venue, "
+        "source_revision, fetcher_revision, imported_at, checksum, quality_json, state) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')",
+        (
+            dataset_id,
+            candidate_market_day_id,
+            source_dataset["provider"] if source_dataset is not None else str(source_day["source"] or "historical_recovery"),
+            source_dataset["venue"] if source_dataset is not None else None,
+            source_dataset["source_revision"] if source_dataset is not None else None,
+            source_dataset["fetcher_revision"] if source_dataset is not None else None,
+            source_dataset["imported_at"] if source_dataset is not None else source_day["imported_at"],
+            source_dataset["checksum"] if source_dataset is not None else checksum,
+            source_dataset["quality_json"] if source_dataset is not None else "{}",
+        ),
+    )
+    return "dataset_id", dataset_id
 
 
 def redact_sensitive(value: Any) -> Any:

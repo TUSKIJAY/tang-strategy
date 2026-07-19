@@ -8,6 +8,7 @@ import { ReviewPage } from './pages/ReviewPage.jsx';
 import { BacktestPage } from './pages/BacktestPage.jsx';
 import { TeachingPage } from './pages/TeachingPage.jsx';
 import { StaticReviewsApp } from './pages/StaticReviewsApp.jsx';
+import './pages/AdminTradersPage.jsx';
 import './styles.css';
 
 function App() {

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tang-strategy.local/schemas/traders.schema.json",
+  "title": "Tang Strategy Trader Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "traders"],
+  "properties": {
+    "schema_version": {
+      "const": "traders-v1"
+    },
+    "traders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["trader_id", "display_name", "color", "active", "sort_order"],
+        "properties": {
+          "trader_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,63}$"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,399 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tang-strategy.local/schemas/trades-day.schema.json",
+  "title": "Tang Strategy Canonical Trade Day",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "trade_date", "timezone", "trade_groups", "note_contexts"],
+  "properties": {
+    "schema_version": {
+      "const": "trades-day-v1"
+    },
+    "trade_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "timezone": {
+      "const": "America/New_York"
+    },
+    "trade_groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/trade_group"
+      }
+    },
+    "note_contexts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/note_context"
+      }
+    }
+  },
+  "$defs": {
+    "normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "source", "review_flags"],
+      "properties": {
+        "method": {
+          "enum": ["manual_normalization", "legacy_preserve", "legacy_rule_extract"]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_path": {
+          "type": ["string", "null"]
+        },
+        "source_index": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "review_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "note": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "provenance"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance": {
+          "enum": ["user_provided", "legacy_preserved", "normalized_summary"]
+        }
+      }
+    },
+    "reported_outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["return_pct", "gross_pnl", "net_pnl", "provenance", "note"],
+      "properties": {
+        "return_pct": {
+          "type": ["number", "null"]
+        },
+        "gross_pnl": {
+          "type": ["number", "null"]
+        },
+        "net_pnl": {
+          "type": ["number", "null"]
+        },
+        "provenance": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "calculated_outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "return_pct",
+        "gross_pnl",
+        "net_pnl",
+        "closed_quantity",
+        "average_entry_premium",
+        "average_exit_premium",
+        "calculation_version"
+      ],
+      "properties": {
+        "return_pct": {
+          "type": "number"
+        },
+        "gross_pnl": {
+          "type": "number"
+        },
+        "net_pnl": {
+          "type": ["number", "null"]
+        },
+        "closed_quantity": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "average_entry_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "average_exit_premium": {
+          "type": "number",
+          "minimum": 0
+        },
+        "calculation_version": {
+          "const": "long-premium-v1"
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "sequence",
+        "action",
+        "occurred_at",
+        "time_precision",
+        "time_incomplete",
+        "premium",
+        "quantity",
+        "fees",
+        "note",
+        "fact_provenance"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,191}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "action": {
+          "enum": ["buy_open", "buy_add", "sell_partial", "sell_close"]
+        },
+        "occurred_at": {
+          "type": ["string", "null"]
+        },
+        "time_precision": {
+          "enum": ["exact", "minute", "approximate", null]
+        },
+        "time_incomplete": {
+          "type": "boolean"
+        },
+        "premium": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "quantity": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0
+        },
+        "fees": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "note": {
+          "type": ["string", "null"]
+        },
+        "fact_provenance": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": ["user_provided", "legacy_preserved", "legacy_rule_extract", "rule_default", "unknown"]
+          }
+        }
+      }
+    },
+    "leg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "leg_id",
+        "instrument_type",
+        "position_side",
+        "option_type",
+        "strike",
+        "expiry",
+        "expiry_provenance",
+        "contract_multiplier",
+        "contract_multiplier_provenance",
+        "events"
+      ],
+      "properties": {
+        "leg_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,159}$"
+        },
+        "instrument_type": {
+          "const": "option"
+        },
+        "position_side": {
+          "const": "long"
+        },
+        "option_type": {
+          "enum": ["CALL", "PUT"]
+        },
+        "strike": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0
+        },
+        "expiry": {
+          "type": "string",
+          "format": "date"
+        },
+        "expiry_provenance": {
+          "enum": ["user_provided", "legacy_preserved", "rule_default"]
+        },
+        "contract_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "contract_multiplier_provenance": {
+          "enum": ["user_provided", "rule_default"]
+        },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/event"
+          }
+        }
+      }
+    },
+    "trade_group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trade_group_id",
+        "trader_id",
+        "underlying",
+        "trade_date",
+        "direction",
+        "status",
+        "review_status",
+        "display_eligible",
+        "reported_stats_eligible",
+        "calculated_stats_eligible",
+        "legs",
+        "reported_outcome",
+        "calculated_outcome",
+        "result_conflict",
+        "notes",
+        "normalization"
+      ],
+      "properties": {
+        "trade_group_id": {
+          "type": "string",
+          "pattern": "^tg_[a-z0-9_]{3,124}$"
+        },
+        "trader_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,63}$"
+        },
+        "underlying": {
+          "enum": ["SPY", "QQQ"]
+        },
+        "trade_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "direction": {
+          "enum": ["CALL", "PUT"]
+        },
+        "status": {
+          "enum": ["active", "voided", "superseded"]
+        },
+        "review_status": {
+          "enum": ["pending", "verified"]
+        },
+        "display_eligible": {
+          "type": "boolean"
+        },
+        "reported_stats_eligible": {
+          "type": "boolean"
+        },
+        "calculated_stats_eligible": {
+          "type": "boolean"
+        },
+        "supersedes_trade_group_id": {
+          "type": ["string", "null"]
+        },
+        "legs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/$defs/leg"
+          }
+        },
+        "reported_outcome": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/reported_outcome"
+            }
+          ]
+        },
+        "calculated_outcome": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/calculated_outcome"
+            }
+          ]
+        },
+        "result_conflict": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/note"
+          }
+        },
+        "normalization": {
+          "$ref": "#/$defs/normalization"
+        }
+      }
+    },
+    "note_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "context_id",
+        "trader_id",
+        "underlying",
+        "trade_date",
+        "text",
+        "status",
+        "review_status",
+        "normalization"
+      ],
+      "properties": {
+        "context_id": {
+          "type": "string",
+          "pattern": "^ctx_[a-z0-9_]{3,124}$"
+        },
+        "trader_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,63}$"
+        },
+        "underlying": {
+          "enum": ["SPY", "QQQ"]
+        },
+        "trade_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["active", "voided", "superseded"]
+        },
+        "review_status": {
+          "enum": ["pending", "verified"]
+        },
+        "normalization": {
+          "$ref": "#/$defs/normalization"
+        }
+      }
+    }
+  }
+}

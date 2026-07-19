@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-当前无 active 计划。以 [`active/index.md`](./active/index.md) 为当前索引。
+- [2026-07-19 Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor](./active/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md) — Active; canonical details: [active index](./active/index.md)
 
 ## Proposed Plans
 

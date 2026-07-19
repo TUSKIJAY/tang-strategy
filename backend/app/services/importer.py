@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
 import re
 import sqlite3
@@ -10,7 +11,7 @@ from typing import Any
 from ..db import connect, init_db
 from ..settings import settings
 from .bar_utils import BAR_MA_WINDOWS, bar_tuple_from_seed, recalculate_ma_fields
-from .db_safety import db_write_lock
+from .db_safety import bar_market_day_join, bars_use_datasets, db_write_lock
 
 
 def slugify(value: str) -> str:
@@ -77,20 +78,31 @@ def _import_market_data(
         "SELECT id FROM market_days WHERE ticker=? AND trade_date=? AND session_mode=?",
         (ticker, trade_date, session_mode),
     ).fetchone()["id"])
-    conn.execute("DELETE FROM bars_1m WHERE market_day_id=?", (market_day_id,))
-    conn.execute("DELETE FROM bars_5m WHERE market_day_id=?", (market_day_id,))
     bars_5m = recalculate_ma_fields(
         bars_5m,
         warmup_closes=_fetch_prior_5m_closes(conn, ticker, trade_date, session_mode),
     )
+    owner_column, owner_id = _prepare_bar_owner(
+        conn,
+        market_day_id,
+        ticker,
+        trade_date,
+        session_mode,
+        meta,
+        bars_1m,
+        bars_5m,
+        path,
+    )
+    conn.execute(f"DELETE FROM bars_1m WHERE {owner_column}=?", (owner_id,))
+    conn.execute(f"DELETE FROM bars_5m WHERE {owner_column}=?", (owner_id,))
     conn.executemany(
-        BAR_INSERT_SQL.format(table="bars_1m"),
-        [bar_tuple_from_seed(market_day_id, i, b) for i, b in enumerate(bars_1m)],
+        BAR_INSERT_SQL.format(table="bars_1m", owner_column=owner_column),
+        [bar_tuple_from_seed(owner_id, i, b) for i, b in enumerate(bars_1m)],
     )
     if bars_5m:
         conn.executemany(
-            BAR_INSERT_SQL.format(table="bars_5m"),
-            [bar_tuple_from_seed(market_day_id, i, b) for i, b in enumerate(bars_5m)],
+            BAR_INSERT_SQL.format(table="bars_5m", owner_column=owner_column),
+            [bar_tuple_from_seed(owner_id, i, b) for i, b in enumerate(bars_5m)],
         )
     return market_day_id
 
@@ -166,7 +178,7 @@ def _import_teaching_data(
 def import_default_seed() -> dict[str, int]:
     counts = {"market_days": 0, "strategies": 0, "teaching_assets": 0}
     for path in sorted(settings.live_extended_dir.glob("**/*.json")):
-        if path.name.startswith("SPY_") or path.name.startswith("SPX_"):
+        if path.name.startswith(("SPY_", "QQQ_", "SPX_")):
             import_market_json(path)
             counts["market_days"] += 1
     for path in sorted(settings.strategies_dir.glob("*.json")):
@@ -195,11 +207,11 @@ def _date_from_name(name: str) -> str:
 
 
 def _fetch_prior_5m_closes(conn, ticker: str, trade_date: str, session_mode: str) -> list[float | None]:
+    join = bar_market_day_join(conn, "bars_5m")
     rows = conn.execute(
-        """
+        f"""
         SELECT bars_5m.close
-        FROM bars_5m
-        JOIN market_days ON market_days.id = bars_5m.market_day_id
+        {join}
         WHERE market_days.ticker=?
           AND market_days.session_mode=?
           AND market_days.trade_date<?
@@ -212,9 +224,67 @@ def _fetch_prior_5m_closes(conn, ticker: str, trade_date: str, session_mode: str
     return [row["close"] for row in reversed(rows)]
 
 
+def _prepare_bar_owner(
+    conn: sqlite3.Connection,
+    market_day_id: int,
+    ticker: str,
+    trade_date: str,
+    session_mode: str,
+    meta: dict[str, Any],
+    bars_1m: list[dict[str, Any]],
+    bars_5m: list[dict[str, Any]],
+    path: Path,
+) -> tuple[str, int | str]:
+    if not bars_use_datasets(conn):
+        return "market_day_id", market_day_id
+    checksum = hashlib.sha256(
+        json.dumps(
+            {"bars_1m": bars_1m, "bars_5m": bars_5m},
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+    safe_session = re.sub(r"[^a-z0-9]+", "_", session_mode.lower()).strip("_")
+    dataset_id = f"mds_{ticker.lower()}_{trade_date.replace('-', '')}_{safe_session}_{checksum[:16]}"
+    conn.execute(
+        "UPDATE market_datasets SET state='superseded' "
+        "WHERE market_day_id=? AND state='active' AND dataset_id<>?",
+        (market_day_id, dataset_id),
+    )
+    conn.execute(
+        """
+        INSERT INTO market_datasets(
+            dataset_id, market_day_id, provider, venue, source_revision, fetcher_revision,
+            imported_at, checksum, quality_json, state
+        ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, 'active')
+        ON CONFLICT(dataset_id) DO UPDATE SET
+            provider=excluded.provider,
+            venue=excluded.venue,
+            source_revision=excluded.source_revision,
+            fetcher_revision=excluded.fetcher_revision,
+            imported_at=CURRENT_TIMESTAMP,
+            checksum=excluded.checksum,
+            quality_json=excluded.quality_json,
+            state='active'
+        """,
+        (
+            dataset_id,
+            market_day_id,
+            str(meta.get("provider") or meta.get("source") or path.name),
+            meta.get("venue"),
+            meta.get("source_revision") or meta.get("generated_at"),
+            meta.get("fetcher_revision") or meta.get("fetch_revision"),
+            checksum,
+            json.dumps(meta.get("quality") or {}, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+        ),
+    )
+    return "dataset_id", dataset_id
+
+
 BAR_INSERT_SQL = """
 INSERT INTO {table}(
-    market_day_id, idx, ts, time, open, high, low, close, volume, vwap,
+    {owner_column}, idx, ts, time, open, high, low, close, volume, vwap,
     ha_open, ha_high, ha_low, ha_close, m5, m10, m20, m30, m50, m60, m120, m200, m250
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """

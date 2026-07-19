@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import contextlib
-import fcntl
+import errno
 import hashlib
 import json
 import math
@@ -11,6 +11,16 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Callable, Iterable, Iterator, Sequence
+
+try:
+    import fcntl as _fcntl
+except ModuleNotFoundError:  # Windows
+    _fcntl = None
+
+try:
+    import msvcrt as _msvcrt
+except ModuleNotFoundError:  # POSIX
+    _msvcrt = None
 
 
 MARKET_DAY_COLUMNS = (
@@ -93,23 +103,58 @@ def db_write_lock(db_path: Path, timeout_seconds: float = 30.0) -> Iterator[Path
     resolved = db_path.expanduser().resolve()
     resolved.parent.mkdir(parents=True, exist_ok=True)
     lock_path = Path(f"{resolved}.write.lock")
-    descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+    descriptor = os.open(
+        lock_path,
+        os.O_CREAT | os.O_RDWR | getattr(os, "O_BINARY", 0),
+        0o600,
+    )
     deadline = time.monotonic() + timeout_seconds
     try:
         while True:
-            try:
-                fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            if _try_descriptor_lock(descriptor):
                 break
-            except BlockingIOError:
-                if time.monotonic() >= deadline:
-                    raise TimeoutError(f"Timed out waiting for DB write lock: {lock_path}")
-                time.sleep(0.05)
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"Timed out waiting for DB write lock: {lock_path}")
+            time.sleep(0.05)
         yield lock_path
     finally:
         try:
-            fcntl.flock(descriptor, fcntl.LOCK_UN)
+            _unlock_descriptor(descriptor)
         finally:
             os.close(descriptor)
+
+
+def _try_descriptor_lock(descriptor: int) -> bool:
+    if _fcntl is not None:
+        try:
+            _fcntl.flock(descriptor, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+            return True
+        except BlockingIOError:
+            return False
+    if _msvcrt is not None:
+        if os.fstat(descriptor).st_size == 0:
+            os.write(descriptor, b"\0")
+            os.fsync(descriptor)
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        try:
+            _msvcrt.locking(descriptor, _msvcrt.LK_NBLCK, 1)
+            return True
+        except OSError as exc:
+            if exc.errno in {errno.EACCES, errno.EAGAIN} or getattr(exc, "winerror", None) in {33, 36}:
+                return False
+            raise
+    raise RuntimeError("No supported file-lock backend is available")
+
+
+def _unlock_descriptor(descriptor: int) -> None:
+    if _fcntl is not None:
+        _fcntl.flock(descriptor, _fcntl.LOCK_UN)
+        return
+    if _msvcrt is not None:
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        _msvcrt.locking(descriptor, _msvcrt.LK_UNLCK, 1)
+        return
+    raise RuntimeError("No supported file-lock backend is available")
 
 
 def readonly_connect(db_path: Path) -> sqlite3.Connection:
@@ -127,9 +172,6 @@ def create_consistent_snapshot(source_path: Path, snapshot_path: Path) -> Databa
     snapshot = snapshot_path.expanduser().resolve()
     if snapshot.exists():
         raise FileExistsError(f"Snapshot path already exists: {snapshot}")
-    if source.parent != snapshot.parent:
-        raise ValueError("Snapshot must be adjacent to the source DB")
-
     with db_write_lock(source):
         _checkpoint_and_require_quiescent(source)
         with contextlib.closing(readonly_connect(source)) as source_connection:
@@ -231,6 +273,78 @@ def validate_sqlite(db_path: Path) -> None:
         foreign_keys = connection.execute("PRAGMA foreign_key_check").fetchall()
         if foreign_keys:
             raise RuntimeError(f"SQLite foreign_key_check failed for {db_path}: {foreign_keys}")
+
+
+def table_columns(connection: sqlite3.Connection, table: str) -> frozenset[str]:
+    if not table.replace("_", "").isalnum():
+        raise ValueError(f"Unsafe SQLite table name: {table}")
+    return frozenset(str(row[1]) for row in connection.execute(f"PRAGMA table_info({table})"))
+
+
+def bars_use_datasets(connection: sqlite3.Connection) -> bool:
+    one_minute = table_columns(connection, "bars_1m")
+    five_minute = table_columns(connection, "bars_5m")
+    if one_minute != five_minute:
+        raise RuntimeError("bars_1m and bars_5m ownership schemas do not match")
+    has_dataset = "dataset_id" in one_minute
+    has_market_day = "market_day_id" in one_minute
+    if has_dataset == has_market_day:
+        raise RuntimeError("Bars must have exactly one owner column: dataset_id or market_day_id")
+    return has_dataset
+
+
+def active_dataset_id(connection: sqlite3.Connection, market_day_id: int) -> str:
+    rows = connection.execute(
+        "SELECT dataset_id FROM market_datasets WHERE market_day_id=? AND state='active' "
+        "ORDER BY dataset_id",
+        (market_day_id,),
+    ).fetchall()
+    if len(rows) != 1:
+        raise RuntimeError(
+            "Expected exactly one active market dataset for market_day_id="
+            f"{market_day_id}; found {len(rows)}"
+        )
+    return str(rows[0][0])
+
+
+def bar_owner(connection: sqlite3.Connection, market_day_id: int) -> tuple[str, int | str]:
+    if bars_use_datasets(connection):
+        return "dataset_id", active_dataset_id(connection, market_day_id)
+    return "market_day_id", market_day_id
+
+
+def bar_market_day_join(connection: sqlite3.Connection, table: str) -> str:
+    if table not in {"bars_1m", "bars_5m"}:
+        raise ValueError(f"Unsupported bars table: {table}")
+    if bars_use_datasets(connection):
+        return (
+            f"FROM {table} "
+            f"JOIN market_datasets ON market_datasets.dataset_id={table}.dataset_id "
+            "AND market_datasets.state='active' "
+            "JOIN market_days ON market_days.id=market_datasets.market_day_id"
+        )
+    return f"FROM {table} JOIN market_days ON market_days.id={table}.market_day_id"
+
+
+def validate_exactly_one_active_dataset(connection: sqlite3.Connection) -> None:
+    if not bars_use_datasets(connection):
+        return
+    failures = connection.execute(
+        "SELECT market_days.id, market_days.ticker, market_days.trade_date, "
+        "market_days.session_mode, COUNT(market_datasets.dataset_id) AS active_count "
+        "FROM market_days LEFT JOIN market_datasets "
+        "ON market_datasets.market_day_id=market_days.id AND market_datasets.state='active' "
+        "GROUP BY market_days.id HAVING active_count != 1 "
+        "ORDER BY market_days.ticker, market_days.trade_date, market_days.session_mode"
+    ).fetchall()
+    if failures:
+        details = [
+            f"{row[1]}|{row[2]}|{row[3]}={row[4]}"
+            for row in failures
+        ]
+        raise RuntimeError(
+            "Candidate requires exactly one active dataset per market day: " + ", ".join(details)
+        )
 
 
 def day_sha256(
@@ -348,6 +462,11 @@ def fsync_file(path: Path) -> None:
 
 
 def fsync_directory(path: Path) -> None:
+    # Python does not expose a portable directory handle that FlushFileBuffers
+    # accepts on Windows. Files are fsynced before replacement; directory fsync
+    # remains an additional POSIX durability barrier.
+    if _fcntl is None and _msvcrt is not None:
+        return
     descriptor = os.open(path, os.O_RDONLY)
     try:
         os.fsync(descriptor)
@@ -382,9 +501,10 @@ def _bar_values(
 ) -> Iterable[list[object]]:
     if table not in {"bars_1m", "bars_5m"}:
         raise ValueError(f"Unsupported bars table: {table}")
+    owner_column, owner_id = bar_owner(connection, market_day_id)
     rows = connection.execute(
-        f"SELECT {', '.join(BAR_COLUMNS)} FROM {table} WHERE market_day_id=? ORDER BY idx",
-        (market_day_id,),
+        f"SELECT {', '.join(BAR_COLUMNS)} FROM {table} WHERE {owner_column}=? ORDER BY idx",
+        (owner_id,),
     )
     for row in rows:
         yield [row[column] for column in BAR_COLUMNS]

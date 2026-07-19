@@ -16,12 +16,14 @@ from typing import Any, Callable
 
 from app.services.db_safety import (
     DatabaseToken,
+    bar_owner,
     create_consistent_snapshot,
     db_write_lock,
     fsync_directory,
     fsync_file,
     promote_candidate,
     readonly_connect,
+    validate_exactly_one_active_dataset,
     validate_sqlite,
 )
 
@@ -78,11 +80,11 @@ def discover_seed_manifest(
     market_paths = sorted(
         path
         for path in live_extended_dir.expanduser().resolve().glob("**/*.json")
-        if path.name.startswith("SPY_") or path.name.startswith("SPX_")
+        if path.name.startswith(("SPY_", "QQQ_", "SPX_"))
     )
     if not market_paths:
         raise RuntimeError(
-            f"Refusing to rebuild: no SPY_/SPX_ market-day JSON files found under "
+            f"Refusing to rebuild: no SPY_/QQQ_/SPX_ market-day JSON files found under "
             f"{live_extended_dir.expanduser().resolve()}"
         )
     market_seeds = tuple(parse_market_seed(path) for path in market_paths)
@@ -286,6 +288,7 @@ def validate_candidate_semantics(
 
     by_key = {seed.key: seed for seed in manifest.market_seeds}
     with contextlib.closing(readonly_connect(candidate_path)) as connection:
+        validate_exactly_one_active_dataset(connection)
         active_strategies = int(connection.execute(
             "SELECT COUNT(*) FROM strategies WHERE active=1"
         ).fetchone()[0])
@@ -299,13 +302,14 @@ def validate_candidate_semantics(
             ).fetchone()
             if day is None:
                 raise RuntimeError(f"Candidate is missing imported day: {'|'.join(key)}")
+            owner_column, owner_id = bar_owner(connection, int(day["id"]))
             for table, declared_column, expected in (
                 ("bars_1m", "bar_count_1m", seed.bars_1m),
                 ("bars_5m", "bar_count_5m", seed.bars_5m),
             ):
                 actual, distinct_indexes = connection.execute(
-                    f"SELECT COUNT(*), COUNT(DISTINCT idx) FROM {table} WHERE market_day_id=?",
-                    (day["id"],),
+                    f"SELECT COUNT(*), COUNT(DISTINCT idx) FROM {table} WHERE {owner_column}=?",
+                    (owner_id,),
                 ).fetchone()
                 declared = int(day[declared_column])
                 if actual <= 0 or actual != distinct_indexes or actual != declared or actual != expected:

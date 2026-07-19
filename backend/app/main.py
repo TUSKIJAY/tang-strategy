@@ -12,6 +12,7 @@ from .auth import create_token, require_admin, require_readonly, role_from_passw
 from .db import connect, init_db, rows_to_dicts
 from .services.importer import import_default_seed, import_market_json, import_strategy_json
 from .services.bar_utils import BAR_MA_WINDOWS, bar_row_to_payload, build_5m_bars_from_1m, recalculate_ma_fields
+from .services.db_safety import bar_market_day_join, bar_owner
 from .services.tang_trades import load_tang_trades
 from .settings import settings
 
@@ -25,7 +26,7 @@ app.add_middleware(
 )
 
 BAR_SELECT_COLUMNS = (
-    "market_day_id, idx, ts, time, open, high, low, close, volume, vwap, "
+    "idx, ts, time, open, high, low, close, volume, vwap, "
     "ha_open, ha_high, ha_low, ha_close, m5, m10, m20, m30, m50, m60, m120, m200, m250"
 )
 
@@ -235,9 +236,11 @@ def _safe_repo_path(raw_path: str, allowed_root: Path) -> Path:
 
 
 def _fetch_bar_rows(conn, table: str, market_day_id: int) -> list[Any]:
+    owner_column, owner_id = bar_owner(conn, market_day_id)
     return conn.execute(
-        f"SELECT {BAR_SELECT_COLUMNS} FROM {table} WHERE market_day_id=? ORDER BY idx",
-        (market_day_id,),
+        f"SELECT {owner_column} AS market_day_id, {BAR_SELECT_COLUMNS} "
+        f"FROM {table} WHERE {owner_column}=? ORDER BY idx",
+        (owner_id,),
     ).fetchall()
 
 
@@ -257,11 +260,11 @@ def _build_5m_payload(conn, day: Any, bars_1m_rows: list[Any]) -> list[dict[str,
 
 
 def _fetch_prior_5m_closes(conn, day: Any) -> list[float | None]:
+    join = bar_market_day_join(conn, "bars_5m")
     rows = conn.execute(
-        """
+        f"""
         SELECT bars_5m.close
-        FROM bars_5m
-        JOIN market_days ON market_days.id = bars_5m.market_day_id
+        {join}
         WHERE market_days.ticker=?
           AND market_days.session_mode=?
           AND market_days.trade_date<?

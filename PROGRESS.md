@@ -3,12 +3,32 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `none`
+- Current plan: `2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan`
+- Lifecycle status: `Active`
+- Current phase: `phase-5`
+- Phase state: `blocked`
+- Next gate: `phase-5-external-tv-receipts`
 <!-- operating-modes-state:end -->
+
+2026-07-19: 用户明确授权 `commit and push` 当前 `codex/project-harness` branch，用于在 Windows checkout 拉取并执行尚缺的 Phase 5 pinned-runtime TradingView receipt。授权仅覆盖当前 75-path 计划内 checkpoint 的一次 stage/commit/push；不授权 PR、merge、Pages、IB、tracked DB promotion、Phase 6 或其他远端变更。Windows receipt 在真实执行并记录前仍为 `not run`，Phase 5 继续保持 `phase-5:blocked`。
+
+2026-07-19: 用户已单独授权真实 TradingView provider run。macOS pinned-runtime receipt 已通过：修复 provider 子进程绝对 `PYTHONPATH` 与 SPY=`AMEX`/QQQ=`NASDAQ` routing 后，真实 2026-07-17 pair 获得 SPY 868/192、QQQ 915/191 total bars，双方 RTH 均为 390/78 且零缺失/重复；临时候选库 46 -> 47、integrity/FK/45 grandfathered-day preservation 通过，tracked DB hash 不变。13 pair tests、80 backend tests、compileall、governed/auto checks 通过。用户明确将 Windows receipt 延期到 Windows 端准备并 `git pull` 后再执行，因此 Windows 仍为 `not run`，Phase 5 按 exit gate 保持 `phase-5:blocked`；在该时点，75 个计划内改动尚未 commit/push。IB、tracked DB promotion、Pages 与 Phase 6 仍未授权。
+
+2026-07-19: Multi-trader Phase 5 offline acceptance 已完成并通过完成性补强：SPY/QQQ discovery/rebuild、same-provider pair orchestrator、NYSE session + exact `ts` date/offset/instant/`t` RTH 390/78 gates、pair-level concurrency lock、offline staged-input tracked-target refusal、candidate/non-shrink/drift、rollback-protected seed pair 与 POSIX/Windows lock backend 已实现。当时 12 pair tests、79 backend tests、10 Node tests、normal/static build、真实浏览器 Review/Backtest/Teaching、146 lifecycle fixtures、workflow YAML、当前代码在真实 46-day DB copy 上的 46 grandfathered-day preservation，以及只读 `git archive HEAD` 的旧 app/DB/20-file legacy 整体回滚演练均通过；在后续真实 provider 授权前，双平台 receipts 尚未运行，因此当时如实停在 `phase-5:blocked`。
+
+2026-07-19: Multi-trader Phase 4 已完成：fixture-driven SPY/QQQ filters、all-active/multi-select/focus、trader color + CALL/PUT shape、true grouped markers、group-first reported/calculated statistics、leg/event drilldown、admin/readonly editor gate 与 current-filter JSON + 3 CSV 已实现。9 Node tests、normal/static Vite builds、65 pinned backend tests、146 lifecycle fixtures 与 harness checks 通过；Review/Static consumer、public payload、registered routes、tracked DB 与 Pages 未切换。当前进入 `phase-5:in-progress` offline pair implementation；真实 TV/IB receipts 仍需单独授权。
+
+2026-07-19: Multi-trader Phase 3 已完成：1 trader registry + 20 canonical days 与 pure render 21/21 exact match，27 groups / 2 contexts / zero unaccounted；unregistered read/admin handlers、role/filter/atomic-write 与 explicit candidate projection 通过。65 pinned backend tests、compileall、runtime/static exact hash compatibility 与 lifecycle checks 通过；legacy sources/tracked DB/route/consumer/Pages 未切换。当前进入 `phase-4:in-progress` fixture-driven frontend work。
+
+2026-07-19: Multi-trader Phase 2 已完成：candidate-only target schema、46 active datasets、bar re-key、old/new logical digest、trade projection、4 Agent views、import/recovery/rebuild adaptive ownership 与 rollback/drift/FK gates 已通过。60 pinned backend tests、compileall、实际 46-day candidate preservation、API/static exact hash compatibility 均通过；tracked DB SHA-256 仍为 `76a885c2...28f8`，未 promotion。当前进入 `phase-3:in-progress` canonical migration/backend handler work。
+
+2026-07-19: Multi-trader Phase 1 已完成：`trade-records-v1` exact response/public-private contract、两份 JSON Schema、pure validator/timezone/default/stable-ID/outcome/statistics/export/classifier 已落地。34 focused + 53 complete pinned backend tests、compileall、20/27/2 deterministic classifier、API/static hash preservation 与 lifecycle checks 通过；canonical daily files、tracked DB、legacy/public payload/Pages 均未切换。当前进入 `phase-2:in-progress` candidate-only SQLite work。
+
+2026-07-19: Multi-trader Phase 0 已完成并通过 exit gate：44 Add / 42 Modify / 22 Remove exact paths 已冻结，20 legacy files / 27 trades / 2 day notes 已逐文件哈希；tracked DB identity、DDL、46 logical keys、row counts、integrity/FK、logical/bar/non-market digests、API/static/hash route 与 workflow/runbook hashes 已写入四个 bounded evidence artifacts。governed/auto/focused checks、146 fixtures、startup budget、whitespace 全通过，tracked DB SHA-256 保持 `76a885c2...28f8`。当前已进入 `phase-1:in-progress`。
+
+2026-07-19: 用户已发出独立 implementation-start 指令。Phase 0 entry gate 已通过：现场 branch/HEAD/worktree 与 frozen v5 dual-review approval 均核验，startup baseline 四项通过。当前正在只读冻结 manifest、tracked DB/API/static/hash-route/workflow/runbook 基线；stage/commit、provider/IB、tracked DB promotion、Phase 6、remote Git 与 Pages 仍未授权。
+
+2026-07-19: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` round 4 已完成：Kimi `review-007` 与 Grok `review-008` 对 frozen v5 均返回 `approve/high`。Kimi 仅记录 Windows IANA tzdata 的非阻塞环境前置观察；Phase 0 manifest revalidation 与 Phase 5 fail-closed receipt gate 已覆盖其风险。依照用户 `2026-07-19-start-dual-review-loop-through-active` 指令，plan 已迁移到 `active/`，状态为 `phase-0:not-started`，next gate 为 `phase-0-start`。本次 activation 为 lifecycle-only；实现、provider/IB、tracked DB、commit、push、PR、merge 与 Pages 发布仍未授权、未开始。
 
 2026-07-19: `Tang Strategy Coding And Data Update Modes` 已完成全部 Phase、12 轮 bounded remediation 与第十三轮独立 `accept`，并迁移到 `completed/`。Verified implementation commit 为 `994f9176eb74778f346710e62ec6dabde55bae9a`，lifecycle reconciliation commit 为 `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`。146/146 fixtures、focused/governed/auto、startup budget、syntax/whitespace、runtime/data zero-diff、frozen hashes、read-only DB checks 和临时 Vite build 均通过。真实 provider/IB/DB update/Tang input/push/Pages/hosted evidence仍未授权、未执行、未冒充 pass。
 
@@ -19,25 +39,33 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
+| Active multi-trader plan | `docs/exec-plans/active/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md` |
 | Completed operating-modes plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
 | Previous completed plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
 | Verification and reviews | `docs/exec-plans/reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/` |
 
 ## In Progress
 
-- [ ] None.
+- [ ] None; macOS receipt collection is complete and Windows validation is explicitly deferred by the user.
 
 ## Blocked
 
-- [ ] None.
+- [ ] Multi-trader SPY/QQQ plan is `phase-5:blocked`. The real macOS pinned-runtime receipt passed; the user deferred the required real Windows receipt until the Windows checkout is prepared. IB remains unauthorized and Phase 6 is forbidden.
 
 ## To Do
 
-- [ ] At each verified lifecycle/Phase boundary, use the plan's standing authority for one scoped local commit; push, PR, Pages publish, merge, branch protection, environment approval, and remote configuration still require separate authority.
+- [ ] Push the authorized plan-scoped checkpoint to `origin/codex/project-harness`; from Windows, pull that exact checkpoint and run the pinned-runtime real TV pair receipt. Until it passes, retain `phase-5:blocked` and keep IB closed.
+- [ ] After Phase 5 can actually close, obtain separate Phase 6 tracked-DB promotion/legacy-removal/cutover authority. This plan still grants no stage, commit, push, PR, Pages, merge, or remote authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-19 - Completed Multi-trader Phase 0 with exact manifest, DB/API/static/route/boundary hashes, 20/27/2 legacy inventory, cross-platform timezone prerequisite assessment, and unchanged tracked DB bytes.
+- [x] 2026-07-19 - Completed Multi-trader Phase 1 with frozen canonical/public/export contracts, 34 focused and 53 complete backend tests, deterministic 20/27/2 classification, and zero runtime/data/publication diff.
+- [x] 2026-07-19 - Completed Multi-trader Phase 2 with a 46-day candidate-only target schema migration, exact old/new logical preservation, normalized trade projection, Agent views, rollback/drift/FK gates, 60 pinned backend tests, and unchanged tracked DB/API/static hashes.
+- [x] 2026-07-19 - Completed Multi-trader Phase 3 with an exact 21-document canonical migration, zero-unaccounted 27/2 parity, private read/admin handlers, atomic writes, candidate projection, 65 pinned backend tests, and unchanged legacy/runtime/data/publication boundaries.
+- [x] 2026-07-19 - Completed Multi-trader Phase 4 with 9 pure Node tests, normal/static builds, fixture-only multi-trader rendering/admin/statistics/download contracts, generalized K-line color/shape markers, and no current consumer/route/publication switch.
+- [x] 2026-07-19 - Completed the authorized Phase 5 offline boundary and completion audit, then passed the real macOS TV receipt after provider-subprocess and ticker/exchange routing hardening; current totals are 13 pair tests, 80 backend tests, 10 frontend tests, real-browser acceptance, actual candidate preservation, local SPY/QQQ static export, and truthful Windows-receipt gating.
 - [x] 2026-07-19 - Completed the Coding/Data Update operating-modes plan with 146 fixtures, accepted independent implementation review, frozen runtime/data/provider/publisher boundaries, and lifecycle reconciliation commit `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`.
 - [x] 2026-07-19 - Completed Phase 5 with 35 fixtures, contract-text enforcement, 19/19 pinned backend tests, compileall, frontend build, DB integrity, and explicit deferred real-run evidence.
 - [x] 2026-07-19 - Completed Phase 4 config/CI integration, exact command ordering enforcement, 29 fixtures, unchanged job names, and zero Pages workflow diff.

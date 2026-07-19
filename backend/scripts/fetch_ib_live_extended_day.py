@@ -262,7 +262,9 @@ def write_payload(payload: dict[str, Any], output_dir: Path) -> Path:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Fetch one SPY extended-session day from IBKR and import it.")
+    parser = argparse.ArgumentParser(
+        description="Fetch one supported symbol extended-session day from IBKR and import it."
+    )
     parser.add_argument("date", help="Trade date, YYYY-MM-DD.")
     parser.add_argument("--symbol", default="SPY")
     parser.add_argument("--host", default=settings.ibkr_host)

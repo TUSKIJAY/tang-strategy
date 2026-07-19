@@ -7,6 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "build:static-reviews": "vite build --base=./",
+    "test:trade-records": "node --test src/features/review/tradeRecords.test.js",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
