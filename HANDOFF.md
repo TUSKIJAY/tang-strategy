@@ -3,27 +3,31 @@
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Proposal baseline: `codex/project-harness@25ba77fd9947c504f68cab1c7700d9f5c84d62b4` was clean before the new proposal; rerun startup commands for live Git truth
+- Current proposed plan: `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`, revision `v1-proposal-2026-07-19`, covering OPT-001 through OPT-004 as one Review/Data/Admin/Static UI contract
+- Optimization provenance: `docs/optimization/2026-07-19-review-ui-and-trader-editing.md`; the user-confirmed default visual baseline is `design/references/2026-07-19-review-ui-reference-v1.png` at SHA-256 `57c34ea...d3c5`
+- Proposal baseline: live pre-proposal HEAD was `codex/project-harness@772b94595ccd15d41d06f966dd72e0bb7829c441`; related optimization/state/design inputs were uncommitted and unrelated `output/` artifacts were excluded
+- Proposal status: review-only Proposed; design reviews `none`; next gate `design-review`
+- Proposal authority: the user authorized generation plus one local proposal-documentation commit; activation, implementation, implementation commits, push, PR, merge, Pages, hosted verification, provider/broker, DB/data, and remote changes remain unauthorized
 - Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is `Completed`; remediation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055` received `implementation-review-002: accept/high` and all phases are closed
 - Completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md`
 - Authority boundary: the plan's local implementation, real TradingView receipts, Windows-transfer checkpoint, Phase 6 cutover, stable implementation, review, and accepted closeout authorities are consumed; push, IB access, PR, merge, Pages publication, hosted verification, and other remote changes remain unauthorized
 - Completed operating-modes historical startup: `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` was that earlier plan's clean baseline; it is not the current proposal baseline
 - Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Completed`; implementation-review-013 returned `accept` with `high` confidence and all phases are closed
 - Completed operating-modes plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
-- Current-plan design reviews: `review-001.md` (Kimi revise/high@v2), `review-002.md` (Grok revise/high@v2), `review-003.md` (Kimi approve/high@v3), `review-004.md` (Grok revise/high@v3), `review-005.md` (Kimi revise/high@v4), `review-006.md` (Grok approve/high@v4), `review-007.md` (Kimi approve/high@v5), `review-008.md` (Grok approve/high@v5)
+- Completed multi-trader design reviews: `review-001.md` (Kimi revise/high@v2), `review-002.md` (Grok revise/high@v2), `review-003.md` (Kimi approve/high@v3), `review-004.md` (Grok revise/high@v3), `review-005.md` (Kimi revise/high@v4), `review-006.md` (Grok approve/high@v4), `review-007.md` (Kimi approve/high@v5), `review-008.md` (Grok approve/high@v5)
 - Review monitor: 10-minute current-task heartbeat `tang-dual-review-loop-monitor` reached its activation stop condition and is removed during closeout
 - Completed operating-modes plan reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
-- Data: tracked DB SHA-256 is `125fcc9d...8d23` with 49 active datasets (46 SPY + first 3 QQQ days 2026-07-10/14/17), 52 total datasets (3 superseded), 2/33/33/46/7/5 normalized trade rows (traders/groups/legs/events/outcomes/contexts) including new trader `vordin`; working tree holds uncommitted vordin content + QQQ market days, commit/push/Pages still unauthorized
+- Data: tracked DB SHA-256 is `125fcc9d...8d23` with 49 active datasets (46 SPY + first 3 QQQ days 2026-07-10/14/17), 52 total datasets (3 superseded), and 2/33/33/46/7/5 normalized trade rows (traders/groups/legs/events/outcomes/contexts) including `vordin`; the local data/content checkpoint is already at `772b945`, while push/Pages remain unauthorized
 - Implementation boundary: implementation-review-002 accepted stable multi-trader implementation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`; lifecycle reconciliation is recorded at `6e57f18f7644d2956c81795fed3b3838158497e6`
 - Local Git boundary: Windows-transfer commit/push authority is consumed at `80f74f63f32849eddaaa99321f5f779446503458`; the current Phase 6 instruction is exhausted by the stable implementation, remediation, acceptance, lifecycle transition, and this final metadata-only reconciliation, with no push
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, hosted verification, IB, or other remote change is authorized
@@ -37,6 +41,7 @@
 5. Lifecycle migration and durable reconciliation are complete; no plan implementation or closeout authority remains.
 6. The completed operating-modes plan remains closed; do not reuse its implementation authority for this proposal.
 7. The transfer and Phase 6 instructions are consumed. Push and every remote/publication action remain separately unauthorized.
+8. Treat the Review UI/trader-editing scope as Proposed at `v1-proposal-2026-07-19`; obtain an independent design review next. Do not activate or change frontend/admin/static behavior without later explicit authority.
 
 ## Verification Evidence
 
@@ -110,7 +115,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-No active plan remains. Any future change requires a new authorized request and its applicable operating-mode gate; push, PR, merge, Pages, hosted verification, and IB remain unauthorized.
+Obtain an independent design review of `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` revision `v1-proposal-2026-07-19`. An `approve` verdict remains review-only; activation recording and implementation start each require later explicit user instructions. Push, PR, merge, Pages, hosted verification, provider/broker access, DB/data changes, and remote actions remain unauthorized.
 
 ## Handoff Boundary
 

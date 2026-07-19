@@ -3,12 +3,16 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-19: 用户明确要求将 `docs/optimization/2026-07-19-review-ui-and-trader-editing.md` 转为 proposed plan，并另行授权完成后做一次本地 commit。`Tang Strategy Review Workspaces And Trader Point Editing` revision `v1-proposal-2026-07-19` 已建立于 `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`，统一覆盖 OPT-001 至 OPT-004：ticker/date workspace、K-line/页面控制权、availability-driven trader、表单式点位预览/编辑、interactive/static parity 和 accessibility。当前仅为 review-only Proposed，next gate 是 `design-review`；未激活、未实现、未改 DB/API/data/publisher、未 push/PR/merge/Pages/hosted/provider/broker。
+
+2026-07-19: 用户此前在优化记录模式中确认四项 Data/Review/Admin/Static UI 摩擦。OPT-001 是控制权问题：K 线引擎内置 toolbar 与 Review 历史外层 toolbar 同时存在，后续边界为通用图表操作归引擎、业务上下文归 Review。OPT-002 记录 admin-only 折叠图标和 raw JSON editor 导致交易者点位编辑不可发现。OPT-003 记录 Data 与 Review 的 SPY/QQQ 默认列表/选择器必须按 ticker workspace 隔离，避免 market days 混排；候选分类为 ticker tabs + date rail（当前优先）、collapsible groups、workspace landing，并新增 availability-driven trader 硬规则：当前 ticker/date 无实际点位的交易者不得显示名字/checkbox/Focus，切换上下文必须清理 stale selection。OPT-004 记录 StaticReviewsApp 不是完整本地应用而是独立 Review，并同样存在 ticker 混排和外层控制重复；未来交互版/静态版必须共享控制权、ticker 分区与 unavailable-trader suppression 契约。用户确认的最终示意图保存在 `design/references/2026-07-19-review-ui-reference-v1.png`，作为后续生成/规划默认视觉基准。当前 `/tmp` rehearsal 已成功导出/build 49 days（46 SPY + 3 QQQ）/9 strategies，未发布或验证 hosted Pages。该记录现已按后续明确指令提升为上述 review-only Proposed plan。
 
 2026-07-19: 添加第二位 trader `vordin`（沃德哥）：registry + 2026-07-10/07-14/07-17 三个 canonical QQQ day files（6 groups / 3 contexts，逐字段 fact_provenance，07-14 无截图保持 `pending`，不进 static export）。为满足 trade 投影的 market-day 完整性约束，补齐首批 QQQ 市场日：07-14/07-17 走 TradingView 匿名源（历史窗口需 `--bar-count 5000`），07-10 因 TV 匿名历史不足触发 QQQ RTH 317/390 hard gate 后走 IBKR；同日期 SPY 按 same-provider pair 合约一并重导入，46 -> 49 market days / 52 datasets（3 superseded）。同时修复 fetch 脚本在 dataset-ownership schema 下失效的 `fetch_prior_closes` join（改用 `bar_market_day_join`）。验收计数更新为 22 days / 33 groups / 5 contexts；76/76 backend tests、compileall、harness、QQQ static export 探针通过。全部改动未 commit、未 push、未发布 Pages。
 
@@ -49,6 +53,7 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
+| Proposed Review UI plan | `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` |
 | Completed multi-trader plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md` |
 | Completed operating-modes plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
 | Previous completed plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
@@ -64,6 +69,7 @@
 
 ## To Do
 
+- [ ] Obtain an independent design review of `v1-proposal-2026-07-19`; approval does not activate or implement it, and later activation/implementation require separate user instructions.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed

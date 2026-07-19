@@ -35,7 +35,7 @@
 
 ## Proposed Plans
 
-当前无 proposed 计划。以 [`proposed/index.md`](./proposed/index.md) 为当前索引。
+- [Tang Strategy Review Workspaces And Trader Point Editing](./proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
 
 ## Completed Plans
 
