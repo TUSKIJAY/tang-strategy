@@ -194,9 +194,11 @@ class TradeRecordValidationTests(unittest.TestCase):
 
             report = handle_trade_day_admin_write("admin", content, day)
             self.assertEqual(report["trade_groups"], 1)
-            self.assertIn("Atomic admin fixture.", target.read_text())
+            self.assertIn("Atomic admin fixture.", target.read_text(encoding="utf-8"))
 
-            registry = json.loads((content / "traders" / "index.json").read_text())
+            registry = json.loads(
+                (content / "traders" / "index.json").read_text(encoding="utf-8")
+            )
             registry["traders"].append(
                 {
                     "trader_id": "alice",
@@ -217,8 +219,12 @@ class TradeRecordValidationTests(unittest.TestCase):
 
     def test_machine_readable_schemas_are_valid_json_and_freeze_top_level(self) -> None:
         root = Path(__file__).resolve().parents[2]
-        traders = json.loads((root / "content/schemas/traders.schema.json").read_text())
-        day = json.loads((root / "content/schemas/trades-day.schema.json").read_text())
+        traders = json.loads(
+            (root / "content/schemas/traders.schema.json").read_text(encoding="utf-8")
+        )
+        day = json.loads(
+            (root / "content/schemas/trades-day.schema.json").read_text(encoding="utf-8")
+        )
 
         self.assertEqual(traders["properties"]["schema_version"]["const"], "traders-v1")
         self.assertEqual(set(day["required"]), DAY_FIELDS)

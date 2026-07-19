@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Sequence
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from .db_safety import fsync_directory
+
 
 TRADER_SCHEMA_VERSION = "traders-v1"
 TRADE_DAY_SCHEMA_VERSION = "trades-day-v1"
@@ -583,11 +585,7 @@ def _atomic_replace_text(
             handle.flush()
             os.fsync(handle.fileno())
         replace(temporary, target)
-        directory_descriptor = os.open(target.parent, os.O_RDONLY)
-        try:
-            os.fsync(directory_descriptor)
-        finally:
-            os.close(directory_descriptor)
+        fsync_directory(target.parent)
     finally:
         if temporary.exists():
             temporary.unlink()

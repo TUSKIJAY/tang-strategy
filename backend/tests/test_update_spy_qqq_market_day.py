@@ -347,8 +347,11 @@ class SpyQqqPairUpdateTests(unittest.TestCase):
             self.assertEqual(rows, [("QQQ", "tradingview", 1), ("SPY", "tradingview", 1)])
             for symbol in PAIR:
                 accepted = workspace["accepted"] / self.trade_date / f"{symbol}_{self.trade_date}.json"
-                self.assertEqual(json.loads(accepted.read_text())["meta"]["ticker"], symbol)
-                self.assertNotIn("old", accepted.read_text())
+                self.assertEqual(
+                    json.loads(accepted.read_text(encoding="utf-8"))["meta"]["ticker"],
+                    symbol,
+                )
+                self.assertNotIn("old", accepted.read_text(encoding="utf-8"))
 
     @contextlib.contextmanager
     def _workspace(self, existing_pair: bool = False):

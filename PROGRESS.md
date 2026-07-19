@@ -6,9 +6,13 @@
 - Current plan: `2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan`
 - Lifecycle status: `Active`
 - Current phase: `phase-5`
-- Phase state: `blocked`
-- Next gate: `phase-5-external-tv-receipts`
+- Phase state: `complete`
+- Next gate: `phase-6-authorization`
 <!-- operating-modes-state:end -->
+
+2026-07-19: 用户授权修复真实 Windows receipt 暴露的 Phase 5 portability defects。实现改为 writable binary descriptor `fsync`、仅在成功获取后释放 `msvcrt` byte lock、复用 Windows-safe directory-fsync，并为受影响测试固定 UTF-8；未放宽任何 quality/provider/candidate/rollback gate。最终 Windows CPython 3.13.11 receipt 通过：13/13 focused、80/80 backend、compileall，真实 SPY=`AMEX` 868/192 与 QQQ=`NASDAQ` 915/191，双方 RTH 390/78、零 missing/duplicate、`synthetic_padding=false`；临时候选 46 -> 47、45 non-target grandfathered days preserved、integrity/FK 通过，tracked DB hash 前后同为 `76a885c2...28f8`。macOS/Windows receipts 现均通过，Phase 5 更新为 `phase-5:complete`，next gate 为 `phase-6-authorization`；IB、tracked DB promotion、Phase 6、Pages 与 hosted 均未运行。
+
+2026-07-19: Windows 在 `codex/project-harness@ea3c264ddebb7c6a3f3f2b537b62daec2ee6c6b6` 使用本地 CPython 3.13.11 建立 pinned runtime；依赖安装与 `America/New_York` 标准/夏令时 offset 通过，但 focused Phase 5 suite 运行 13 tests 后出现 1 failure / 4 errors。失败集中在 Windows `os.fsync` bad file descriptor 与 `msvcrt` lock timeout 清理的 permission error，发生在任何 TradingView 请求、candidate DB copy 或 accepted seed 创建之前。receipt 保留在 `%TEMP%\tang-tv-windows-receipt-ffac6bf6699e4aeabdcb4b81a3912d40`，focused log SHA-256 为 `79caf1b...7257a`。Phase 5 继续 `phase-5:blocked`，next gate 不变；未调用 IB，未进入 Phase 6。
 
 2026-07-19: 用户明确授权 `commit and push` 当前 `codex/project-harness` branch，用于在 Windows checkout 拉取并执行尚缺的 Phase 5 pinned-runtime TradingView receipt。授权仅覆盖当前 75-path 计划内 checkpoint 的一次 stage/commit/push；不授权 PR、merge、Pages、IB、tracked DB promotion、Phase 6 或其他远端变更。Windows receipt 在真实执行并记录前仍为 `not run`，Phase 5 继续保持 `phase-5:blocked`。
 
@@ -46,16 +50,15 @@
 
 ## In Progress
 
-- [ ] None; macOS receipt collection is complete and Windows validation is explicitly deferred by the user.
+- [ ] None; Phase 5 is complete and no Phase 6 work is authorized.
 
 ## Blocked
 
-- [ ] Multi-trader SPY/QQQ plan is `phase-5:blocked`. The real macOS pinned-runtime receipt passed; the user deferred the required real Windows receipt until the Windows checkout is prepared. IB remains unauthorized and Phase 6 is forbidden.
+- [ ] None; Phase 6 is awaiting separate user authorization.
 
 ## To Do
 
-- [ ] Push the authorized plan-scoped checkpoint to `origin/codex/project-harness`; from Windows, pull that exact checkpoint and run the pinned-runtime real TV pair receipt. Until it passes, retain `phase-5:blocked` and keep IB closed.
-- [ ] After Phase 5 can actually close, obtain separate Phase 6 tracked-DB promotion/legacy-removal/cutover authority. This plan still grants no stage, commit, push, PR, Pages, merge, or remote authority.
+- [ ] Obtain separate Phase 6 tracked-DB promotion/legacy-removal/cutover authority. This plan still grants no stage, commit, push, PR, Pages, merge, or remote authority.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
@@ -66,6 +69,7 @@
 - [x] 2026-07-19 - Completed Multi-trader Phase 3 with an exact 21-document canonical migration, zero-unaccounted 27/2 parity, private read/admin handlers, atomic writes, candidate projection, 65 pinned backend tests, and unchanged legacy/runtime/data/publication boundaries.
 - [x] 2026-07-19 - Completed Multi-trader Phase 4 with 9 pure Node tests, normal/static builds, fixture-only multi-trader rendering/admin/statistics/download contracts, generalized K-line color/shape markers, and no current consumer/route/publication switch.
 - [x] 2026-07-19 - Completed the authorized Phase 5 offline boundary and completion audit, then passed the real macOS TV receipt after provider-subprocess and ticker/exchange routing hardening; current totals are 13 pair tests, 80 backend tests, 10 frontend tests, real-browser acceptance, actual candidate preservation, local SPY/QQQ static export, and truthful Windows-receipt gating.
+- [x] 2026-07-19 - Completed Phase 5 after real Windows surfaced and verified portability fixes; both macOS/Windows TV receipts now pass exact SPY/QQQ RTH 390/78, candidate/integrity/FK/grandfathered preservation, and tracked-DB byte protection.
 - [x] 2026-07-19 - Completed the Coding/Data Update operating-modes plan with 146 fixtures, accepted independent implementation review, frozen runtime/data/provider/publisher boundaries, and lifecycle reconciliation commit `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`.
 - [x] 2026-07-19 - Completed Phase 5 with 35 fixtures, contract-text enforcement, 19/19 pinned backend tests, compileall, frontend build, DB integrity, and explicit deferred real-run evidence.
 - [x] 2026-07-19 - Completed Phase 4 config/CI integration, exact command ordering enforcement, 29 fixtures, unchanged job names, and zero Pages workflow diff.

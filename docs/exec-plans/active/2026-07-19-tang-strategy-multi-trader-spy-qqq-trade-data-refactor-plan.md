@@ -10,9 +10,9 @@
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-start-dual-review-loop-through-active`
 - Current phase: phase-5
-- Phase state: blocked
+- Phase state: complete
 - Phase entry gate: `phase-5-start`
-- Next gate: `phase-5-external-tv-receipts`
+- Next gate: `phase-6-authorization`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -486,6 +486,8 @@ Generated `frontend/public/reviews`, `frontend/dist`, provider diagnostics, temp
   - IB pair path only if separately authorized after a named TV hard failure;
   - Pages workflow syntax/build locally; no push or hosted claim.
 - Exit gate: `phase-5-complete` only after both platform receipts and all pair atomicity checks pass. Missing/failing platform evidence sets Phase 5 to `Blocked`, keeps the current default contract unchanged, and forbids Phase 6 entry.
+
+Execution evidence: macOS and Windows pinned-runtime TradingView receipts both passed for 2026-07-17. The Windows receipt required in-manifest portability fixes for writable file fsync, acquired-only `msvcrt` unlock, Windows-safe directory fsync reuse, and explicit UTF-8 test reads; the unchanged 13 focused tests and 80-test backend suite then passed. The real Windows pair accepted `AMEX:SPY` and `NASDAQ:QQQ` with exact RTH 390/78, zero missing/duplicate RTH minutes, no synthetic padding, a 46 -> 47 temporary candidate preserving 45 non-target grandfathered days, integrity `ok`, zero foreign-key failures, and unchanged tracked DB bytes. Phase 5 is complete; Phase 6 remains unauthorized and has not started.
 
 ### Phase 6 — Full Cutover, Tracked Candidate Promotion, And Closeout
 

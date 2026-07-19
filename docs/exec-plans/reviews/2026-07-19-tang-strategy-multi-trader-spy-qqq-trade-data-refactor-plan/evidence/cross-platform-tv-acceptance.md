@@ -55,13 +55,51 @@ These are offline implementation facts, not provider receipts:
 | Required external evidence | Final Phase 5 state | Reason |
 | --- | --- | --- |
 | macOS real TradingView SPY/QQQ pair | pass | Pinned-runtime receipt above passed against real TradingView with exact pair quality and temporary-candidate acceptance. |
-| Windows real TradingView SPY/QQQ pair | not run | User explicitly deferred validation until preparing and pulling the repository on Windows; simulated Windows branches do not qualify. A plan-scoped `codex/project-harness` checkpoint commit/push is now explicitly authorized for that transfer, but the Windows receipt remains not run until the pulled HEAD is verified and the real command completes. |
+| Windows real TradingView SPY/QQQ pair | pass | The initial focused gate exposed real Windows fsync/lock/encoding portability defects. After the user authorized in-manifest fixes, the unchanged 13 focused tests, 80-test backend suite, compileall, real pair fetch, temporary candidate, seed pair, and tracked-DB preservation gates all passed. |
 | IB complete-pair fallback | not run | The transient QQQ failure was traced to and fixed as an AMEX/NASDAQ routing defect, after which the complete TV pair passed; IB was neither needed nor authorized. |
 | Pages/hosted workflow | not run | Publication and remote workflow authority were not granted. |
 
-### Deferred Windows continuation procedure
+### Authorized Windows pinned-runtime receipt and remediation
 
-This is a prepared continuation procedure, not a Windows receipt. Run it only after the Windows checkout contains the authorized Phase 5 checkpoint on branch `codex/project-harness` and its HEAD matches the commit named in the transfer handoff. The user has explicitly authorized one plan-scoped checkpoint commit/push for this purpose; that Git transfer is not evidence that Windows validation passed.
+Initial result: fail before provider on Windows. The complete failure/remediation/pass receipt is retained at `C:\Users\LENOVO\AppData\Local\Temp\tang-tv-windows-receipt-ffac6bf6699e4aeabdcb4b81a3912d40`.
+
+| Evidence | Result |
+| --- | --- |
+| Git | `codex/project-harness@ea3c264ddebb7c6a3f3f2b537b62daec2ee6c6b6`; clean before and after; zero staged paths |
+| Runtime | Windows 10 Home China, version 2009, build 26200, 64-bit; CPython 3.13.11 AMD64 |
+| Pinned dependencies | pandas 2.3.3; pandas-market-calendars 5.4.0; exchange-calendars 4.13.2; tzdata 2026.3; tvdatafeed 2.1.0 from pinned commit `e6f6aaa7de439ac6e454d9b26d2760ded8dc4923` |
+| Timezone | `America/New_York` resolved to `-05:00` on 2026-01-15 and `-04:00` on 2026-07-15 |
+| Focused tests | fail: 13 run in 4.732 seconds; 1 failure and 4 errors |
+| Named gate | `create_consistent_snapshot -> fsync_file -> os.fsync` raised `OSError: [Errno 9] Bad file descriptor`; pair-lock timeout cleanup also raised `PermissionError: [Errno 13] Permission denied` from `msvcrt.LK_UNLCK` |
+| Focused log | `focused-tests.log`; SHA-256 `79caf1b89c778b9b2191f906b4a7b6719d30a559c34bc99f940682a05537257a` |
+| Runtime metadata | `windows-runtime.json`; SHA-256 `0e0eef2dc5d0e812ac90951df0a741db9f9a77d1e619a6458b7d6ce07db7ec62` |
+| Python metadata | `python-runtime.txt`; SHA-256 `09c47eab991151fa665cbcd351d2621190c9c5f1d4c13077f3d1adad1e5b54a3` |
+| Dependency receipt | `pip-freeze.txt`; SHA-256 `7cc98dff91b9255534b1cb289fc3a6b405e8595223898c447dcb4ef4a303387f` |
+| Timezone receipt | `timezone.txt`; SHA-256 `411e8d68425dd2dffc39fd106d6078d12173caf83140ed8623dcb0e2b3209458` |
+| Tracked DB | current SHA-256 `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8`; the run stopped before copying or opening it for pair acceptance |
+| Provider/candidate/seed | not run: no `pair-run.log`, candidate DB, or accepted seed file exists |
+| Full/backend/governance | not run after the focused failure, per the fail-closed stop rule |
+| External actions | no TradingView request, IB/Gateway, tracked-DB promotion, Pages, hosted verification, Phase 6, commit, push, PR, or merge |
+
+The user then authorized correction. The implementation now opens files with a writable binary descriptor before `fsync`, unlocks the Windows byte lock only after successful acquisition, reuses the existing Windows-safe directory-fsync helper for atomic trade-record replacement, and pins UTF-8 in affected tests. No quality, provider, candidate, or rollback gate was weakened.
+
+Final result: pass on Windows with the same pinned runtime and receipt root.
+
+| Evidence | Result |
+| --- | --- |
+| Final focused tests | pass: 13/13 in 2.017 seconds; `focused-tests-final.log` SHA-256 `297a6d4d2e0fb072317d90ec74d8eeb3a535e2070d20f4b50745826c06ff906c` |
+| Complete backend / compileall | pass: 80/80 in 12.565 seconds / pass; `backend-tests-after-fix-r3.log` SHA-256 `68f0ebcff7ef1e34ab0fa6a5526005713efa84de9a52acb62f64f4a7229fb38f` |
+| SPY accepted seed | `AMEX:SPY`; 2026-07-17 `extended` `tradingview`; 868/192 total 1m/5m; RTH 390/78; zero missing/duplicate RTH minutes; `synthetic_padding=false`; SHA-256 `d38da15b7aa21f15ad7a66e730328ddee0f870d5225cda61996424be7f159405` |
+| QQQ accepted seed | `NASDAQ:QQQ`; 2026-07-17 `extended` `tradingview`; 915/191 total 1m/5m; RTH 390/78; zero missing/duplicate RTH minutes; `synthetic_padding=false`; SHA-256 `53b390b0c40347f68ebcbfc3e3dd4da01e9b8ca193ff1ebf0244c5aa716d00e1` |
+| Pair log | `pair-run-after-fix.log`; SHA-256 `e2274ca4c55f3ea809ea104ce61acadcd1f85face9b9f709a1e27fe9a04034cb` |
+| Temporary candidate | 46 -> 47 market days; 46 SPY + 1 QQQ; 45 non-target grandfathered days preserved; integrity `ok`; zero foreign-key failures; SHA-256 `b2ed0567648113800dd2966e394633330603e61f9c4fd928b621b645aa36a5ff` |
+| Tracked DB | before/after `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8`; unchanged |
+| Repository outputs | accepted seeds and candidate remain under the receipt root; repository seed, tracked DB, `frontend/public`, Pages, and hosted outputs unchanged |
+| External actions | no IB/Gateway, tracked-DB promotion, Phase 6, commit, push, PR, merge, Pages, or hosted verification |
+
+### Windows reproduction procedure
+
+The following procedure remains a reproduction reference. The accepted Windows receipt used the local `python3.13.exe` directly to create the venv; use any direct executable or launcher only after proving it is CPython 3.13. A Git transfer by itself is not evidence that Windows validation passed.
 
 Prerequisites:
 
@@ -126,4 +164,4 @@ Write-Output "receipt_root=$receiptRoot"
 
 The receipt passes only if the focused tests and pair command exit zero, the output proves both SPY and QQQ have exact 390/78 RTH bars with no missing or duplicate RTH timestamps, the candidate DB reports `ok` and zero foreign-key failures, and the tracked DB before/after hashes are identical. Retain the receipt directory, including the console logs, temporary DB, accepted seed pair, runtime metadata, and `pip-freeze.txt`. If TradingView fails, report the exact ticker and failed quality/provider gate and stop; do not silently switch to IB. Do not stage, commit, push, publish, or enter Phase 6 as part of this procedure.
 
-Accordingly, Phase 5 is `Blocked`, not complete: the macOS receipt passed and the Windows receipt is user-deferred until the Windows checkout is prepared. The next gate remains `phase-5-external-tv-receipts`; Phase 6 is forbidden and the current SPY/Tang default/public contract remains unchanged.
+Accordingly, Phase 5 is complete: both macOS and Windows pinned-runtime real TradingView receipts passed the same-date pair quality, temporary candidate, grandfathered preservation, integrity/FK, and tracked-DB protection gates. The next gate is `phase-6-authorization`; Phase 6 remains forbidden until the user separately authorizes tracked-DB promotion, legacy removal, and cutover. The current SPY/Tang default/public contract remains unchanged.

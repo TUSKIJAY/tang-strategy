@@ -109,9 +109,11 @@ def db_write_lock(db_path: Path, timeout_seconds: float = 30.0) -> Iterator[Path
         0o600,
     )
     deadline = time.monotonic() + timeout_seconds
+    lock_acquired = False
     try:
         while True:
             if _try_descriptor_lock(descriptor):
+                lock_acquired = True
                 break
             if time.monotonic() >= deadline:
                 raise TimeoutError(f"Timed out waiting for DB write lock: {lock_path}")
@@ -119,7 +121,8 @@ def db_write_lock(db_path: Path, timeout_seconds: float = 30.0) -> Iterator[Path
         yield lock_path
     finally:
         try:
-            _unlock_descriptor(descriptor)
+            if lock_acquired:
+                _unlock_descriptor(descriptor)
         finally:
             os.close(descriptor)
 
@@ -454,7 +457,7 @@ def sqlite_sidecars(db_path: Path) -> tuple[Path, Path, Path]:
 
 
 def fsync_file(path: Path) -> None:
-    descriptor = os.open(path, os.O_RDONLY)
+    descriptor = os.open(path, os.O_RDWR | getattr(os, "O_BINARY", 0))
     try:
         os.fsync(descriptor)
     finally:
