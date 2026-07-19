@@ -6,11 +6,11 @@
 - Current plan: `2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan`
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
-- Phase state: `in-progress`
-- Next gate: `phase-6-implementation-re-review-r1`
+- Phase state: `complete`
+- Next gate: `phase-6-closeout`
 <!-- operating-modes-state:end -->
 
-2026-07-19: Phase 6 stable commit `f92e273b0153eefac14e5c54f94926a2bd4e707e` 已完成；独立 `implementation-review-001` 返回 `revise/high`，并在全临时 content/DB 副本复现 post-promotion backup cleanup 异常导致 old content/new DB 分叉。remediation-r1 已把该清理改为成功后的 non-transactional warning/backup retention，并加入 new content/new DB coherence fault-injection regression；复现现为 new/new、one warning、retained backup，76 backend、compileall、11 frontend、两种 build、146 fixtures 与治理检查全通过。计划保持 `phase-6:in-progress`，next gate 为 `phase-6-implementation-re-review-r1`；push、PR、Pages、hosted 与 IB 仍未授权。
+2026-07-19: Phase 6 remediation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055` 已获得独立 `implementation-review-002: accept/high`。同一临时 content/DB 故障注入为 new/new、相等、one warning、one retained backup；定点 1/1、backend 76/76、frontend 11/11、两种 build、146/146 fixtures、SQLite integrity/FK 与治理检查全通过。Phase 6 更新为 `complete`，next gate 为 `phase-6-closeout`；push、PR、Pages、hosted、IB 与新 provider run 未授权、未执行。
 
 2026-07-19: 用户通过 `user-instruction:2026-07-19-authorize-phase6-cutover` 明确授权本地 Phase 6 tracked-DB promotion、冻结清单内 legacy removal 与正式 cutover。Phase 5 双平台 receipt exit gate 已满足，Phase 6 进入 `in-progress`；本次权限不包含新的 stage/commit/push、PR、merge、Pages、hosted、IB 或其他远端动作。
 
@@ -54,7 +54,7 @@
 
 ## In Progress
 
-- [ ] Freeze the verified remediation-r1 in a new stable local commit and request independent implementation re-review.
+- [ ] Reconcile the accepted Phase 6 lifecycle closeout locally without push.
 
 ## Blocked
 
@@ -62,7 +62,7 @@
 
 ## To Do
 
-- [ ] Create the authorized remediation commit, request independent re-review, and close the lifecycle only after `accept`. Push, PR, Pages, merge, and other remote actions remain separately gated.
+- [ ] Move the accepted plan to `completed/`, reconcile lifecycle surfaces, and record the separately referenceable closeout commit. Push, PR, Pages, merge, and other remote actions remain separately gated.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
