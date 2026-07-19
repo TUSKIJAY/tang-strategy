@@ -90,5 +90,13 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Test trade-record contracts
+        run: npm run test:trade-records
+
       - name: Build frontend
         run: npm run build
+
+      - name: Build static frontend
+        env:
+          VITE_STATIC_REVIEWS: "true"
+        run: npm run build:static-reviews

@@ -20,7 +20,7 @@ The engine consumes the same normalized shape from two supported sources:
 - interactive API: `/api/reviews/assemble` or page-composed bar payloads;
 - static Pages: exported `frontend/public/reviews/days/*.json` loaded by `StaticReviewsApp`.
 
-Required top-level fields are `meta`, `bars_1m`, and `bars_5m`. Annotation arrays and Tang overlay data are optional consumers layered by the page.
+Required top-level fields are `meta`, `bars_1m`, and `bars_5m`. Annotation arrays and normalized `trade_records` are optional consumers layered by the page. Trade annotations use trader color independently from CALL/PUT triangle shape and may group same-bar events without losing IDs.
 
 Bar fields include `ts`, `t`, `O/H/L/C`, `hO/hH/hL/hC`, `V`, `vw`, and available `m*` values.
 

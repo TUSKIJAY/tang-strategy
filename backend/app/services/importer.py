@@ -8,7 +8,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from ..db import connect, init_db
+from ..db import connect, init_db, replace_trade_repository
 from ..settings import settings
 from .bar_utils import BAR_MA_WINDOWS, bar_tuple_from_seed, recalculate_ma_fields
 from .db_safety import bar_market_day_join, bars_use_datasets, db_write_lock
@@ -176,7 +176,15 @@ def _import_teaching_data(
 
 
 def import_default_seed() -> dict[str, int]:
-    counts = {"market_days": 0, "strategies": 0, "teaching_assets": 0}
+    counts = {
+        "market_days": 0,
+        "strategies": 0,
+        "teaching_assets": 0,
+        "traders": 0,
+        "trade_groups": 0,
+        "trade_events": 0,
+        "trade_note_contexts": 0,
+    }
     for path in sorted(settings.live_extended_dir.glob("**/*.json")):
         if path.name.startswith(("SPY_", "QQQ_", "SPX_")):
             import_market_json(path)
@@ -196,6 +204,17 @@ def import_default_seed() -> dict[str, int]:
         if path.exists():
             import_teaching_asset(path, asset_type, slug)
             counts["teaching_assets"] += 1
+    registry_path = content / "traders" / "index.json"
+    if registry_path.exists():
+        from .trade_records import load_trader_registry, validate_trade_repository
+
+        registry = load_trader_registry(registry_path)
+        trade_days = validate_trade_repository((content / "trades").glob("*.json"), registry)
+        projected = replace_trade_repository(settings.db_path, registry, trade_days)
+        counts["traders"] = projected["traders"]
+        counts["trade_groups"] = projected["trade_groups"]
+        counts["trade_events"] = projected["trade_events"]
+        counts["trade_note_contexts"] = projected["trade_note_contexts"]
     return counts
 
 

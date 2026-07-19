@@ -39,12 +39,12 @@ This repo is a frontend/backend workspace for Tang Strategy.
 
 - Python: 4-space indent, type hints on new/changed functions where practical.
 - JS/JSX/CSS: 2-space indent.
-- Data files: `SPY_YYYY-MM-DD.json` under `live_extended/<YYYY-MM-DD>/`.
+- Data files: paired `SPY_YYYY-MM-DD.json` and `QQQ_YYYY-MM-DD.json` under `live_extended/<YYYY-MM-DD>/` for newly accepted dates.
 - Keep naming lowercase with underscores for strategy/case/rule assets.
 
 ## Testing Guidelines
 
-- For logic changes: validate SPY 2026-07-17 market day assembly with `tang-v4-4-slope-4-4` and a known strategy end-to-end through frontend.
+- For logic changes: validate SPY 2026-07-17 market day assembly with `tang-v4-4-slope-4-4`, normalized trade records, and a known strategy end-to-end through frontend.
 - Backend validation: `/api/reviews/assemble` should return payload with 1m and 5m bars.
 - Frontend validation: open Review and Backtest pages, run one-day regression manually.
 - Harness validation: `python3 scripts/check-project-harness.py --root . --profile auto`.
@@ -78,36 +78,35 @@ If the user says any of:
 - "拉一下 YYYY-MM-DD 的 SPY 然后更新页面"
 - "publish SPY review for YYYY-MM-DD"
 - "push 5/20 SPY"
+- "发布 SPY/QQQ YYYY-MM-DD"
 
 …they mean run the full daily publish flow defined in [`docs/daily-publish-runbook.md`](./docs/daily-publish-runbook.md). Execute the steps below without re-asking — the user has already given consent by using the trigger phrase. If they omit the date, resolve the latest completed session from the actual US equity trading calendar and current ET time; do not use weekday-only logic.
 
-Market-source rule: the tracked TradingView adapter is the default daily source.
+Market-source rule: the tracked SPY/QQQ pair orchestrator with TradingView is the default daily source.
 Do not check, open, or require IB Gateway before the TV attempt. A closed Gateway
 is normal and must not block publishing. Ask for IB Gateway only after the TV
 retries or a hard TV quality gate fail, and report the exact failed gate first.
 
 ```bash
-# 1. Fetch and validate the day from TradingView.
+# 1. Validate any supplied normalized trader/day content before the pair run.
 cd backend
-PYTHONPATH=. python scripts/fetch_tv_live_extended_day.py <YYYY-MM-DD>
+PYTHONPATH=. python -c "from pathlib import Path; from app.services.trade_records import load_trader_registry, validate_trade_repository; r=load_trader_registry(Path('../content/traders/index.json')); print(len(validate_trade_repository(Path('../content/trades').glob('*.json'), r)))"
 
-# 2. Canonicalize the runtime DB.
-PYTHONPATH=. python scripts/rebuild_live_extended_db.py
+# 2. Fetch, validate, candidate-build, and atomically accept one same-provider pair.
+PYTHONPATH=. python scripts/update_spy_qqq_market_day.py <YYYY-MM-DD> --provider tradingview
 
-# 3. Record Tang SPY 0DTE trades/context when provided.
-# Edit ../content/trader-trades/<YYYY-MM-DD>.json:
-# - actual SPY 0DTE entries go in "trades"
-# - no SPY trade / SPY context only goes in "notes" with "trades": []
+# 3. If normalized trader content is added after step 2, use the admin endpoint/UI;
+# its atomic content replacement also candidate-projects and promotes the DB.
 
 # 4. (Optional) Local export + static build as sanity check.
-PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit 250 --ticker SPY --strategy-families v3,v4,v5
+PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit 250 --strategy-families v3,v4,v5
 cd ../frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews
 rm -rf public/reviews dist && cd ..
 
-# 5. Commit the DB plus Tang trade JSON if created/changed, then push.
+# 5. Commit the DB plus normalized trader/day JSON if created/changed, then push.
 git add data/sqlite/tang_strategy_live_extended.db
-git add content/trader-trades/<YYYY-MM-DD>.json  # only if created or changed
-git commit -m "feat: publish SPY <YYYY-MM-DD> review"
+git add content/traders/index.json content/trades/<YYYY-MM-DD>.json  # only if changed
+git commit -m "feat: publish SPY/QQQ <YYYY-MM-DD> review"
 git push origin main
 
 # 6. Watch the Pages workflow. URL: https://tuskijay.github.io/tang-strategy/#spy-<YYYY-MM-DD>-extended
@@ -115,4 +114,4 @@ gh run list --repo TUSKIJAY/tang-strategy --workflow "Publish static reviews" --
 gh run watch <run-id> --repo TUSKIJAY/tang-strategy --exit-status
 ```
 
-Pre-flight assumptions: install the pinned TV runtime from `backend/requirements-tv.txt` when needed. The script uses the actual NYSE calendar, including scheduled early closes, and writes only after its hard gates pass. If TV fails after retries or a hard quality gate fails, report the failed gate, ask the user to start IB Gateway on live port 4002, wait for HMDS `2106`, and then use the documented IB fallback. Do not skip step 2; the Pages workflow reads from the committed DB, not from the seed JSON (which is gitignored).
+Pre-flight assumptions: install the pinned TV runtime from `backend/requirements-tv.txt` when needed. The pair orchestrator uses the actual NYSE calendar, including scheduled early closes, and writes neither ticker unless both hard gates and the single candidate pass. If TV fails after retries or a hard quality gate fails, report the failed ticker/gate, ask the user to start IB Gateway on live port 4002, wait for HMDS `2106`, and rerun the complete pair with `--provider ibkr`. Do not bypass the pair step; Pages reads the committed DB, not gitignored seed JSON.

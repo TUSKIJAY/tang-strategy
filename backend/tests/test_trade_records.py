@@ -192,6 +192,19 @@ class TradeRecordValidationTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), original)
             self.assertEqual(list(target.parent.glob(".*.candidate")), [])
 
+            def fail_projection() -> None:
+                raise RuntimeError("forced projection failure")
+
+            with self.assertRaisesRegex(RuntimeError, "forced projection failure"):
+                handle_trade_day_admin_write(
+                    "admin",
+                    content,
+                    day,
+                    after_replace=fail_projection,
+                )
+            self.assertEqual(target.read_bytes(), original)
+            self.assertEqual(list(target.parent.glob(".*.rollback")), [])
+
             report = handle_trade_day_admin_write("admin", content, day)
             self.assertEqual(report["trade_groups"], 1)
             self.assertIn("Atomic admin fixture.", target.read_text(encoding="utf-8"))
@@ -211,11 +224,21 @@ class TradeRecordValidationTests(unittest.TestCase):
             registry_report = handle_trader_registry_admin_write("admin", content, registry)
             self.assertEqual(registry_report["traders"], 2)
 
-    def test_phase_3_handlers_are_not_registered_as_routes(self) -> None:
+    def test_phase_6_routes_are_registered_without_legacy_compatibility(self) -> None:
         from app.main import app
 
         paths = {route.path for route in app.routes}
-        self.assertFalse(any("trade-record" in path or "traders" in path for path in paths))
+        self.assertTrue({
+            "/api/trade-records",
+            "/api/admin/traders",
+            "/api/admin/trade-records",
+        }.issubset(paths))
+        self.assertFalse(any("tang-trade" in path for path in paths))
+        importer_source = (
+            Path(__file__).resolve().parents[1] / "app" / "services" / "importer.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("replace_trade_repository(settings.db_path", importer_source)
+        self.assertNotIn("project_trade_repository(settings.db_path", importer_source)
 
     def test_machine_readable_schemas_are_valid_json_and_freeze_top_level(self) -> None:
         root = Path(__file__).resolve().parents[2]

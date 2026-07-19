@@ -124,3 +124,23 @@ The current-code temporary 48-day candidate at `/tmp/tang-phase5-current.N9HN1F/
 The current candidate byte SHA-256 is `1503359defd0b276f9ee8806e934c70ce6e2317cc9f7c10d62e96121f9ea3d05`; all 46 grandfathered logical-day hashes remained unchanged. The prior generated build carrier remains outside the repository, and the completion-audit build was moved to `/tmp/tang-completion-audit.u8pZJK/frontend-dist`.
 
 Pages workflow SHA-256 remains `75245998...694`; project-harness workflow remains `898acd92...d96`; the runbook, AGENTS, operating modes, Review/Static consumers, hash-route contract, and tracked DB have no Phase 5 cutover diff. No workflow was invoked and no hosted claim is made.
+
+## Phase 6 Public/Static/Link Cutover Recheck
+
+The promoted tracked DB and current cutover code were exported locally without a ticker restriction. The manifest contains 46 grandfathered SPY reviews and 9 strategies; it intentionally contains no QQQ market review because Phase 6 did not fabricate a historical QQQ backfill.
+
+| Carrier | Result |
+| --- | --- |
+| Interactive assemble | keys: `annotations_1m`, `annotations_5m`, `bars_1m`, `bars_5m`, `market_day`, `meta`, `strategy`, `trade_records` |
+| Interactive counts/hash | 868 / 192 / 1 normalized group; sorted compact SHA-256 `e0cf279a2c296f3b0b166685328e6a775953665c8fa43c000b13e3e6f4af8b08` |
+| Static day | `days/spy-2026-07-17-extended.json`; SHA-256 `154d8dd9d4a4eb592457517a2bec306a2179e6023a656585532a98abf45f3105` |
+| Static day counts/member | 868 / 192 / 1 normalized group; `trade_records` present; `tang_trades` absent |
+| Existing route | `#spy-2026-07-17-extended` remains unchanged |
+| Asymmetric history | all 46 SPY links remain legal; no QQQ link invented before a real accepted pair exists |
+| Static/default publisher | exporter and workflow no longer pin SPY; future accepted SPY/QQQ pairs are both exported |
+| Real browser | Review normalized group/filter/download, 10-day Backtest 43 signals, Teaching 7/6/3, and Admin registry/group hydration passed |
+| Builds | normal and static Vite builds passed at 1,750 transformed modules |
+
+Boundary hashes after cutover are: AGENTS `53af582e499654ec589e1d9fecc75661e3fe900dca9991690a8b8e5324c79c53`, daily runbook `2010e73b65483009a2273a380faa3ae081f0bb725089013effe7dd755d0f230f`, operating modes `969a4b004067f6921dbf2e5b4218f11d447b34db6a62a4ad8dd79bd253e85f77`, project harness workflow `31de168a898380ac5f44808475483f78e1040abed4ae1f0d0e4023d37e3d0dac`, Pages workflow `7fe8c2e9bf54f4d33b556ba75250fdaa192bb6771661e461e44b562423c50dc8`, and static exporter `601548fae38a3206d7cdd382ed51ca1947791e8755ad580dcb095a2426c47996`.
+
+All checks in this section are local. No GitHub workflow ran, no Pages branch or hosted URL was changed or inspected, and no publication claim is made.

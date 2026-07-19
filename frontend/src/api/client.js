@@ -57,5 +57,8 @@ export const Api = {
   review: (marketDayId, strategyId) => api(`/reviews/assemble?market_day_id=${marketDayId}&strategy_id=${strategyId}`),
   strategy: (id) => api(`/strategies/${id}`),
   teaching: (type) => api(`/teaching/${type}`),
+  tradeRecords: (params = {}) => api(`/trade-records?${new URLSearchParams(params)}`),
+  saveTraders: (payload) => api('/admin/traders', { method: 'PUT', body: JSON.stringify(payload) }),
+  saveTradeRecords: (payload) => api('/admin/trade-records', { method: 'PUT', body: JSON.stringify(payload) }),
   importSeed: () => api('/admin/import/seed', { method: 'POST' }),
 };

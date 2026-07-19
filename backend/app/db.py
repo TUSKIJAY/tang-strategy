@@ -35,8 +35,9 @@ def init_db(db_path: Path | None = None) -> None:
     target = (db_path or settings.db_path).expanduser().resolve()
     with db_write_lock(target):
         with contextlib.closing(connect(target)) as conn, conn:
-            conn.executescript(SCHEMA)
+            _execute_schema(conn, TARGET_SCHEMA)
             _migrate_raw_json_columns(conn)
+            validate_exactly_one_active_dataset(conn)
 
 
 def init_target_db(db_path: Path) -> None:
@@ -608,6 +609,7 @@ def migrate_candidate_schema(
                 _migrate_bar_ownership(conn)
             _execute_schema(conn, TARGET_EXTENSION_SCHEMA)
             if registry is not None:
+                _clear_trade_projection(conn)
                 _project_trade_records(conn, registry, trade_days)
             validate_exactly_one_active_dataset(conn)
             if failure_hook is not None:
@@ -706,6 +708,55 @@ def project_trade_repository(
                 "trade_note_contexts",
             )
         }
+
+
+def replace_trade_repository(
+    candidate_path: Path,
+    registry: Mapping[str, Any],
+    trade_days: Sequence[Mapping[str, Any]],
+) -> dict[str, int]:
+    """Replace the normalized trade projection on an explicit target-schema candidate."""
+
+    candidate = candidate_path.expanduser().resolve()
+    with contextlib.closing(connect(candidate)) as conn:
+        if "dataset_id" not in _table_columns(conn, "bars_1m"):
+            raise RuntimeError("Trade replacement requires an explicit target-schema candidate")
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            _clear_trade_projection(conn)
+            _project_trade_records(conn, registry, trade_days)
+            foreign_key_failures = conn.execute("PRAGMA foreign_key_check").fetchall()
+            if foreign_key_failures:
+                raise RuntimeError(
+                    f"Trade replacement foreign-key validation failed: {foreign_key_failures}"
+                )
+            validate_exactly_one_active_dataset(conn)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        return {
+            table: int(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+            for table in (
+                "traders",
+                "trade_groups",
+                "trade_legs",
+                "trade_events",
+                "trade_outcomes",
+                "trade_note_contexts",
+            )
+        }
+
+
+def _clear_trade_projection(conn: sqlite3.Connection) -> None:
+    conn.execute("DELETE FROM trade_market_context")
+    conn.execute("DELETE FROM analysis_runs")
+    conn.execute("DELETE FROM trade_outcomes")
+    conn.execute("DELETE FROM trade_events")
+    conn.execute("DELETE FROM trade_legs")
+    conn.execute("DELETE FROM trade_note_contexts")
+    conn.execute("DELETE FROM trade_groups")
+    conn.execute("DELETE FROM traders")
 
 
 def _execute_schema(conn: sqlite3.Connection, schema: str) -> None:

@@ -485,18 +485,18 @@ print(json.dumps({
                 continue
             payload_path = output_directory / "days" / f"spy-{source.trade_date}-{source.session_mode}.json"
             payload = json.loads(payload_path.read_text(encoding="utf-8"))
-            tang_trades = payload.get("tang_trades") or {}
-            if not tang_trades.get("trades") and not tang_trades.get("notes"):
-                raise RuntimeError(f"Tang overlay is empty after export for {source.trade_date}")
+            trade_records = payload.get("trade_records") or {}
+            if not trade_records.get("trade_groups") and not trade_records.get("note_contexts"):
+                raise RuntimeError(f"Trade-record overlay is empty after export for {source.trade_date}")
             overlays[source.trade_date] = {
                 "payload": str(payload_path.relative_to(output_directory)),
-                "trades": len(tang_trades.get("trades") or []),
-                "notes": len(tang_trades.get("notes") or []),
+                "trade_groups": len(trade_records.get("trade_groups") or []),
+                "note_contexts": len(trade_records.get("note_contexts") or []),
             }
         return {
             "assemble_2026-07-17": regression_summary,
             "export_stdout": export.stdout.strip(),
-            "tang_overlays": overlays,
+            "trade_record_overlays": overlays,
         }
 
 

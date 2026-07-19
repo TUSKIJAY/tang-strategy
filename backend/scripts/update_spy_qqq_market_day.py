@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 from zoneinfo import ZoneInfo
 
-from app.db import connect, migrate_candidate_schema
+from app.db import connect, migrate_candidate_schema, replace_trade_repository
 from app.services.db_safety import (
     DatabaseToken,
     capture_database_token,
@@ -32,6 +32,7 @@ from app.services.db_safety import (
     validate_sqlite,
 )
 from app.services.importer import _import_market_data
+from app.services.trade_records import load_trader_registry, validate_trade_repository
 from scripts.rebuild_live_extended_db import parse_market_seed, runtime_keys
 
 
@@ -384,6 +385,7 @@ def accept_staged_pair(
     before_promote_hook: Callable[[Path], None] | None = None,
     replace_file: ReplaceFile = os.replace,
     pair_lock_timeout_seconds: float = 30.0,
+    content_dir: Path | None = None,
 ) -> dict[str, Any]:
     live = db_path.expanduser().resolve()
     with db_write_lock(
@@ -401,6 +403,7 @@ def accept_staged_pair(
             candidate_hook=candidate_hook,
             before_promote_hook=before_promote_hook,
             replace_file=replace_file,
+            content_dir=content_dir,
         )
 
 
@@ -415,6 +418,7 @@ def _accept_staged_pair_locked(
     candidate_hook: Callable[[Path], None] | None = None,
     before_promote_hook: Callable[[Path], None] | None = None,
     replace_file: ReplaceFile = os.replace,
+    content_dir: Path | None = None,
 ) -> dict[str, Any]:
     validation = validate_staged_pair(payload_paths, trade_date, provider)
     live = db_path.expanduser().resolve()
@@ -463,6 +467,12 @@ def _accept_staged_pair_locked(
                     payload["bars_5m"],
                     payload_paths[symbol].expanduser().resolve(),
                 )
+        trade_projection: dict[str, int] | None = None
+        if content_dir is not None:
+            content = content_dir.expanduser().resolve()
+            registry = load_trader_registry(content / "traders" / "index.json")
+            trade_days = validate_trade_repository((content / "trades").glob("*.json"), registry)
+            trade_projection = replace_trade_repository(candidate, registry, trade_days)
         if candidate_hook is not None:
             candidate_hook(candidate)
         candidate_receipt = _validate_pair_candidate(
@@ -483,7 +493,13 @@ def _accept_staged_pair_locked(
             candidate,
             baseline_token,
             backup,
-            lambda path: _validate_promoted_pair(path, baseline_keys.market_days, trade_date, provider),
+            lambda path: _validate_promoted_pair(
+                path,
+                baseline_keys.market_days,
+                trade_date,
+                provider,
+                trade_projection,
+            ),
         )
         promoted = True
         seed_committed = False
@@ -514,6 +530,7 @@ def _accept_staged_pair_locked(
             },
             "pair": {key: value for key, value in validation.items() if key != "payloads"},
             "candidate": candidate_receipt,
+            "trade_projection": trade_projection,
             "accepted_seeds": [
                 str(accepted_root / trade_date / f"{symbol}_{trade_date}.json") for symbol in PAIR
             ],
@@ -611,6 +628,7 @@ def _validate_promoted_pair(
     baseline_market_keys: frozenset[tuple[str, str, str]],
     trade_date: str,
     provider: str,
+    trade_projection: Mapping[str, int] | None = None,
 ) -> None:
     validate_sqlite(live)
     expected = baseline_market_keys | {(symbol, trade_date, SESSION_MODE) for symbol in PAIR}
@@ -631,6 +649,16 @@ def _validate_promoted_pair(
         ("SPY", provider),
     ]:
         raise RuntimeError(f"Promoted pair provider gate failed: {providers}")
+    if trade_projection is not None:
+        with contextlib.closing(readonly_connect(live)) as connection:
+            actual = {
+                table: int(connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+                for table in trade_projection
+            }
+        if actual != dict(trade_projection):
+            raise RuntimeError(
+                f"Promoted pair trade projection mismatch: expected={trade_projection} actual={actual}"
+            )
 
 
 def _prepare_seed_pair(
@@ -705,6 +733,7 @@ def run_pair_update(
     repo_dir: Path = REPO_DIR,
     fetch_one: FetchOne = fetch_one_symbol,
     git_baseline: Mapping[str, Any] | None = None,
+    content_dir: Path | None = None,
     **accept_kwargs: Any,
 ) -> dict[str, Any]:
     datetime.strptime(trade_date, "%Y-%m-%d")
@@ -721,6 +750,7 @@ def run_pair_update(
             accepted_seed_dir,
             baseline,
             expected_db_token=pre_fetch_db_token,
+            content_dir=content_dir,
             **accept_kwargs,
         )
 
@@ -751,6 +781,7 @@ def main(argv: list[str] | None = None) -> int:
                 accepted_seed_dir=args.accepted_seed_dir,
                 repo_dir=args.repo_dir,
                 git_baseline=baseline,
+                content_dir=args.repo_dir / "content",
             )
         else:
             if args.db_path.expanduser().resolve() == DEFAULT_DB_PATH.resolve():
@@ -772,6 +803,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.db_path,
                 args.accepted_seed_dir,
                 baseline,
+                content_dir=args.repo_dir / "content",
             )
     except Exception as exc:
         print(f"SPY/QQQ pair update refused: {exc}", file=sys.stderr)

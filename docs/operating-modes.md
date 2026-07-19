@@ -194,25 +194,25 @@ The state sequence is:
 
 `requested -> date_resolved -> fetched -> quality_passed -> candidate_verified -> local_accepted -> publish_authorized -> committed -> published -> hosted_verified`
 
-The TV and IB adapters currently import/upsert into the tracked DB by default after producing a valid seed payload; `--skip-import` exists, but the daily contract does not use it. Candidate-first protection begins at `rebuild_live_extended_db.py`. Therefore a successful fetch may already be an unaccepted tracked-DB mutation. A later failure must report before/after evidence and must not claim unchanged DB bytes.
+The TV and IB one-symbol adapters are provider primitives. The daily contract invokes them only through `update_spy_qqq_market_day.py`, which stages both tickers with import disabled and admits one same-provider candidate only after pair quality, preservation, integrity, and drift gates pass. A failed pair must leave the tracked DB and both accepted seeds on the prior coherent boundary.
 
 ### Local Update Gate
 
 1. Resolve a completed NYSE session using the actual calendar and current ET, including holidays and early closes.
 2. Capture Git scope and tracked-DB evidence before fetch.
-3. Use TradingView first without checking, starting, or requesting IB Gateway.
-4. Apply the documented TV retries and hard quality gates.
-5. Request IB fallback only after named TV retry exhaustion or hard-gate failure; never mix TV/IB bars within one market day.
-6. For IB, require whole-day count, gap, and session evidence before `quality_passed`.
-7. Run canonical candidate-first rebuild; reject semantic/integrity/foreign-key/drift/date/non-market shrink and never use `--allow-date-loss` routinely.
-8. Require the requested day plus non-empty 1m and 5m assemble/API payloads and mandatory DB checks.
-9. Validate user-supplied Tang SPY 0DTE trade/context JSON when applicable.
+3. Use the SPY/QQQ pair orchestrator with TradingView first without checking, starting, or requesting IB Gateway.
+4. Apply the documented retries and hard quality gates independently to both tickers, then require same date/session/provider and no partial accepted-seed write.
+5. Request IB fallback only after a named ticker's TV retry exhaustion or hard-gate failure; rerun the complete pair and never mix TV/IB providers.
+6. For IB, require whole-day count, gap, and session evidence for both tickers before `quality_passed`.
+7. Require the orchestrator's single candidate to preserve all grandfathered days and normalized trade projections, pass integrity/foreign keys/drift, and never use `--allow-date-loss` routinely.
+8. Require both requested market days plus non-empty 1m and 5m assemble/API payloads and mandatory DB checks.
+9. Validate user-supplied canonical trader/day JSON when applicable; admin writes must keep content and DB projection rollback-coherent.
 10. Record optional static export/build/browser smoke as executed or not run; never turn not-run into pass.
 11. Stop at `local_accepted` unless publish authority exists.
 
 ### Publish Gate
 
-Only the daily trigger phrases in `AGENTS.md` or an equivalent explicit publish instruction create pending publish authority. Pending authority cannot skip local gates. Local acceptance, green checks, or a changed DB do not grant commit/push/publish. Commit scope remains the authorized tracked DB and applicable Tang trade/context JSON. Push, Pages workflow completion, and hosted URL verification are separate states.
+Only the daily trigger phrases in `AGENTS.md` or an equivalent explicit publish instruction create pending publish authority. Pending authority cannot skip local gates. Local acceptance, green checks, or a changed DB do not grant commit/push/publish. Commit scope remains the authorized tracked DB and applicable canonical trader/day JSON. Push, Pages workflow completion, and hosted URL verification are separate states.
 
 ### Escalation and return
 
@@ -252,7 +252,7 @@ This map binds the Data Update cases to current repository evidence without turn
 | Optional static export/build/page smoke is not run | Daily runbook Section 5 and human handoff evidence | Record `not run`; do not call it pass. |
 | Local acceptance has no publish authority | Git status plus human authority evidence | Stop before stage/commit/push/publish unless the Publish Gate is separately open. |
 | Publish trigger exists but a local gate fails | `AGENTS.md` triggers, Local Update Gate ordering, and human command evidence | Pending publication authority cannot skip or relabel a failed local gate. |
-| Tang trade/context is supplied | Daily runbook Section 4, existing `load_tang_trades` validation command, and future authorized run | Validate the user-supplied JSON before an authorized commit; absence of supplied context creates no synthetic trade. |
+| Canonical trader/day content is supplied | Daily runbook Section 4, trade-record repository validator, atomic admin content/DB projection path, and future authorized run | Validate before an authorized commit; absence of supplied content creates no synthetic trade or context. |
 | Anomaly proves no system defect | human diagnosis evidence | Return only to the last safe Data Update state for a bounded retry. |
 | Anomaly requires a system change | Coding Mode hard-routing contract plus human diagnosis evidence | Stop Data Update Mode and route the change; the data request grants no code authority. |
 | Routine update edits code, weakens a gate, uses date-loss override, or fabricates data | contract inspection plus human diff/command evidence | Stop; none is allowed as a completion shortcut. |
@@ -260,4 +260,4 @@ This map binds the Data Update cases to current repository evidence without turn
 | Daily triggers, runbook sequence, adapters/rebuild, and Pages publisher remain compatible | baseline-to-HEAD exact diff/hash inspection of `AGENTS.md`, `docs/daily-publish-runbook.md`, both fetch adapters, `rebuild_live_extended_db.py`, and `.github/workflows/publish-static-reviews.yml`; named behavior tests where available | Compatibility evidence only; the focused lifecycle checker does not parse these unconstrained sources and this is not a hosted publish test. |
 | Commit/push/Pages/hosted sequence succeeds | future authorized run | No offline fixture, implementation phase, or green local check can satisfy this row. |
 
-Current runtime gaps are explicit: the default adapters can mutate the tracked DB before rebuild acceptance; IB quality acceptance depends on runbook/human evidence; and a newly requested day's assemble receipt is collected during the real update rather than by this contract-only implementation. Any proposal to change those facts is separate Coding Mode work.
+Current evidence boundaries are explicit: IB readiness and quality still depend on runbook/human evidence, and each newly requested date needs its own real pair/provider, assemble, and local-acceptance receipt. Offline fixtures or prior platform receipts cannot satisfy that future Data Update run.

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from app.services import db_safety
 from app.db import SCHEMA, build_target_candidate, connect, init_target_db, migrate_candidate_schema
+from app.services.trade_records import load_trader_registry, validate_trade_repository
 from app.services.importer import _import_market_data
 from app.services.db_safety import (
     BAR_COLUMNS,
@@ -22,7 +23,6 @@ from app.services.db_safety import (
     validate_exactly_one_active_dataset,
     validate_sqlite,
 )
-from scripts.migrate_trader_trades import classify_legacy_corpus
 from scripts.recover_historical_market_days import SourceSpec, copy_market_day
 
 
@@ -210,26 +210,15 @@ class DatabaseSafetyTests(unittest.TestCase):
     def test_repository_candidate_projects_46_days_and_agent_filters(self) -> None:
         root = Path(__file__).resolve().parents[2]
         live = root / "data" / "sqlite" / "tang_strategy_live_extended.db"
-        registry = {
-            "schema_version": "traders-v1",
-            "traders": [
-                {
-                    "trader_id": "tang",
-                    "display_name": "Tang",
-                    "color": "#E45756",
-                    "active": True,
-                    "sort_order": 10,
-                }
-            ],
-        }
-        classified = classify_legacy_corpus((root / "content" / "trader-trades").glob("*.json"))
+        registry = load_trader_registry(root / "content" / "traders" / "index.json")
+        days = validate_trade_repository((root / "content" / "trades").glob("*.json"), registry)
         with tempfile.TemporaryDirectory() as raw_directory:
             candidate = Path(raw_directory) / "candidate.db"
             baseline, report = build_target_candidate(
                 live,
                 candidate,
                 registry,
-                classified["days"],
+                days,
             )
             self.assertEqual(report["counts"]["market_days"], 46)
             self.assertEqual(report["counts"]["market_datasets"], 46)

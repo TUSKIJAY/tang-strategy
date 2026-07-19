@@ -1,19 +1,33 @@
 from __future__ import annotations
 
 import json
+import secrets
+import shutil
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from .auth import create_token, require_admin, require_readonly, role_from_password
-from .db import connect, init_db, rows_to_dicts
+from .db import connect, init_db, replace_trade_repository, rows_to_dicts
 from .services.importer import import_default_seed, import_market_json, import_strategy_json
 from .services.bar_utils import BAR_MA_WINDOWS, bar_row_to_payload, build_5m_bars_from_1m, recalculate_ma_fields
-from .services.db_safety import bar_market_day_join, bar_owner
-from .services.tang_trades import load_tang_trades
+from .services.db_safety import (
+    bar_market_day_join,
+    bar_owner,
+    create_consistent_snapshot,
+    promote_candidate,
+    validate_sqlite,
+)
+from .services.trade_records import (
+    TradeAuthorizationError,
+    TradeValidationError,
+    handle_trade_day_admin_write,
+    handle_trade_records_read,
+    handle_trader_registry_admin_write,
+)
 from .settings import settings
 
 app = FastAPI(title="Tang Strategy API")
@@ -149,7 +163,7 @@ def assemble_review(market_day_id: int, strategy_id: int, _: str = Depends(requi
         bars_1m_rows = _fetch_bar_rows(conn, "bars_1m", market_day_id)
         bars_5m = _build_5m_payload(conn, day, bars_1m_rows)
         strategy_json = json.loads(strategy_row["json_body"])
-        tang_trades = load_tang_trades(day["ticker"], day["trade_date"])
+        trade_records = _trade_records_for_day(day["ticker"], day["trade_date"])
         meta = json.loads(day["meta_json"] or "{}")
         meta.update({
             "ticker": day["ticker"],
@@ -159,7 +173,7 @@ def assemble_review(market_day_id: int, strategy_id: int, _: str = Depends(requi
             "counts": {
                 "bars_1m": len(bars_1m_rows),
                 "bars_5m": len(bars_5m),
-                "tang_trades": len(tang_trades["trades"]),
+                "trade_groups": trade_records["counts"]["trade_groups_total"],
             },
             "strategy": {
                 "id": strategy_row["id"],
@@ -189,8 +203,63 @@ def assemble_review(market_day_id: int, strategy_id: int, _: str = Depends(requi
             "bars_5m": bars_5m,
             "annotations_1m": [],
             "annotations_5m": [],
-            "tang_trades": tang_trades,
+            "trade_records": trade_records,
         }
+
+
+@app.get("/api/trade-records")
+def trade_records(
+    ticker: str,
+    trade_date: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    trader_id: list[str] | None = Query(default=None),
+    status: list[str] | None = Query(default=None),
+    review_status: list[str] | None = Query(default=None),
+    eligibility: str | None = None,
+    role: str = Depends(require_readonly),
+) -> list[dict[str, Any]]:
+    try:
+        return handle_trade_records_read(
+            role,
+            settings.content_dir,
+            ticker,
+            trade_date=trade_date,
+            date_from=date_from,
+            date_to=date_to,
+            trader_ids=trader_id,
+            statuses=status,
+            review_statuses=review_status,
+            eligibility=eligibility,
+        )
+    except (TradeValidationError, TradeAuthorizationError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.put("/api/admin/traders")
+def update_traders(payload: dict[str, Any], role: str = Depends(require_admin)) -> dict[str, Any]:
+    try:
+        return handle_trader_registry_admin_write(
+            role,
+            settings.content_dir,
+            payload,
+            after_replace=_sync_trade_projection,
+        )
+    except (TradeValidationError, TradeAuthorizationError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.put("/api/admin/trade-records")
+def update_trade_records(payload: dict[str, Any], role: str = Depends(require_admin)) -> dict[str, Any]:
+    try:
+        return handle_trade_day_admin_write(
+            role,
+            settings.content_dir,
+            payload,
+            after_replace=_sync_trade_projection,
+        )
+    except (TradeValidationError, TradeAuthorizationError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/api/teaching/{asset_type}")
@@ -233,6 +302,60 @@ def _safe_repo_path(raw_path: str, allowed_root: Path) -> Path:
     if not resolved.exists() or resolved.suffix != ".json":
         raise HTTPException(status_code=400, detail="JSON file not found")
     return resolved
+
+
+def _trade_records_for_day(ticker: str, trade_date: str) -> dict[str, Any]:
+    payloads = handle_trade_records_read(
+        "readonly",
+        settings.content_dir,
+        ticker,
+        trade_date=trade_date,
+    )
+    if len(payloads) != 1:
+        raise RuntimeError(
+            f"Expected one trade-record payload for {ticker}|{trade_date}; found {len(payloads)}"
+        )
+    return payloads[0]
+
+
+def _sync_trade_projection() -> dict[str, Any]:
+    from .services.trade_records import load_trader_registry, validate_trade_repository
+
+    live = settings.db_path.expanduser().resolve()
+    nonce = secrets.token_hex(6)
+    candidate = live.parent / f".{live.stem}.trade-sync-{nonce}.candidate.db"
+    backup = live.parent / f".{live.stem}.trade-sync-{nonce}.backup.db"
+    promoted = False
+    try:
+        baseline = create_consistent_snapshot(live, backup)
+        shutil.copy2(backup, candidate)
+        registry = load_trader_registry(settings.content_dir / "traders" / "index.json")
+        days = validate_trade_repository(
+            (settings.content_dir / "trades").glob("*.json"),
+            registry,
+        )
+        counts = replace_trade_repository(candidate, registry, days)
+
+        def validate_projection(path: Path) -> None:
+            validate_sqlite(path)
+            with connect(path) as connection:
+                actual = {
+                    table: int(connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+                    for table in counts
+                }
+            if actual != counts:
+                raise RuntimeError(
+                    f"Promoted trade projection count mismatch: expected={counts} actual={actual}"
+                )
+
+        promote_candidate(live, candidate, baseline, backup, validate_projection)
+        promoted = True
+        return {"promoted": True, "trade_days": len(days), "counts": counts}
+    finally:
+        if candidate.exists() and not promoted:
+            candidate.unlink()
+        if backup.exists():
+            backup.unlink()
 
 
 def _fetch_bar_rows(conn, table: str, market_day_id: int) -> list[Any]:

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { TradeExportControls } from '../features/review/TradeExportControls.jsx';
 import { TraderFilters } from '../features/review/TraderFilters.jsx';
 import { TraderTradeList } from '../features/review/TraderTradeList.jsx';
@@ -12,10 +12,21 @@ import {
 } from '../features/review/tradeRecords.js';
 
 export function AdminTradersPage({ role = 'readonly', payloads = [], onSaveRegistry, onSaveDay }) {
-  const traders = payloads[0]?.traders || [];
+  const traders = useMemo(
+    () => payloads.find((item) => item?.traders?.length)?.traders || [],
+    [payloads],
+  );
   const [filters, setFilters] = useState(() => initialTradeRecordFilters(traders));
   const [registryText, setRegistryText] = useState(() => JSON.stringify({ schema_version: 'traders-v1', traders }, null, 2));
   const [dayText, setDayText] = useState('');
+  const initializedFromPayloads = useRef(false);
+
+  useEffect(() => {
+    if (initializedFromPayloads.current || !traders.length) return;
+    setFilters(initialTradeRecordFilters(traders));
+    setRegistryText(JSON.stringify({ schema_version: 'traders-v1', traders }, null, 2));
+    initializedFromPayloads.current = true;
+  }, [traders]);
   const availability = useMemo(() => buildTradeAvailability(payloads), [payloads]);
   const resolvedFilters = useMemo(() => ({
     ...filters,
@@ -40,8 +51,8 @@ export function AdminTradersPage({ role = 'readonly', payloads = [], onSaveRegis
     <div className="admin-traders-page">
       <header>
         <div>
-          <h2>Trader records fixture workspace</h2>
-          <p>Phase 4 preview only; live backend routes are not registered.</p>
+          <h2>Trader records workspace</h2>
+          <p>Readonly roles can inspect and export. Admin writes are schema-validated and atomically replaced.</p>
         </div>
         <TradeExportControls payload={payload} groups={groups} filters={resolvedFilters} />
       </header>

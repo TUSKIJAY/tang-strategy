@@ -1,6 +1,6 @@
 # Tang Strategy Product Roadmap
 
-Last updated: 2026-07-18
+Last updated: 2026-07-19
 
 This file owns product/module direction. Execution-plan state belongs in [`exec-plans/roadmap.md`](./exec-plans/roadmap.md).
 
@@ -17,7 +17,7 @@ This file owns product/module direction. Execution-plan state belongs in [`exec-
 
 - list days through `GET /api/market-days`;
 - assemble through `/api/reviews/assemble?market_day_id=<id>&strategy_id=<id>`;
-- render 1m/5m bars, strategy metadata, browser-generated annotations, and Tang trade overlays;
+- render 1m/5m bars, strategy metadata, browser-generated annotations, and normalized multi-trader overlays with independent trader color and CALL/PUT shape;
 - preserve replay and hidden-future behavior in the shared engine.
 
 ## Backtest

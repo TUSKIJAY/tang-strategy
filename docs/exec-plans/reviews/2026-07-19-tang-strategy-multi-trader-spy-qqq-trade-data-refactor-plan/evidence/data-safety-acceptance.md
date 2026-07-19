@@ -556,3 +556,64 @@ The final local/offline audit treated completion as unproven and remapped the re
 | IB, hosted workflow, Pages, Phase 6 | No authorized TV hard failure opened IB; remote/publication/cutover authority is absent | not run / forbidden |
 
 Therefore the Phase 5 exit gate is satisfied and the phase is complete. This does not authorize Phase 6, tracked-DB promotion, legacy removal, public/default cutover, Git publication, Pages, or hosted verification.
+
+## Phase 6 Tracked Promotion, Legacy Removal, And Local Cutover Acceptance
+
+The user instruction `user-instruction:2026-07-19-authorize-phase6-cutover` authorized the local tracked-DB promotion, the exact declared legacy removals, and the formal runtime/static/default cutover. It did not authorize another stage/commit/push, PR, merge, Pages publication, hosted verification, or IB access.
+
+### Recoverable boundary and rollback rehearsal
+
+- Recovery root: `/tmp/tang-phase6-precutover.im4S4p`.
+- Byte-for-byte pre-cutover DB: `tang_strategy_live_extended.pre-cutover.db`, SHA-256 `76a885c2c04749e9cc5d7b5d6f75bfd15fff9939cb47d2b05c806b4c68ba28f8`.
+- SQLite-consistent promotion backup: `tang_strategy_live_extended.atomic-promotion-backup.db`, byte SHA-256 `566025ca4c036c4e73c14e9fbf39de11585f4b1684a137dc44f689275ab865e1`; its logical market SHA-256 is the same `f7ca32e4d621056983c5c2bdae17f78277b8e53a26c12684b34164e30c170a34` as the byte-for-byte backup and promoted DB.
+- Pre-cutover repository archive: `repository-head.tar`, SHA-256 `372aec0d7c74b2837ffcd9f9dffef5ac5930cecd2a06144e6140d3c853e32d33`.
+- The recovery root retains all 20 removed legacy JSON files and the generated browser/static artifacts used for local acceptance.
+- The isolated restore under `rollback-rehearsal/` used the archived old application, restored DB, and restored 20-file legacy directory. The old exporter produced 46 days; `days/spy-2026-07-17-extended.json` contained four old Tang overlay rows, contained `tang_trades`, did not contain `trade_records`, and the restored DB passed integrity/FK with the exact pre-cutover byte hash.
+
+### Candidate and atomic tracked promotion
+
+| Invariant | Result |
+| --- | --- |
+| Candidate byte SHA-256 | `4a5bce13a4d9da31850ad1b04e616c58ce55b614bc88dbb8ecc04466f7442c34` |
+| Pre/promoted logical market SHA-256 | `f7ca32e4d621056983c5c2bdae17f78277b8e53a26c12684b34164e30c170a34` / identical |
+| Tracked DB byte SHA-256 | `76a885c2...28f8` -> `4a5bce13...2c34` |
+| Market keys and day digests | 46 -> 46; exact key sets; 0/46 digest mismatches |
+| Market datasets / active owners | 46 / exactly one per day |
+| Bars | 43,425 1m / 8,821 5m |
+| Trade projection | 1 trader / 27 groups / 27 legs / 30 events / 4 outcomes / 2 contexts |
+| Agent views | active datasets 46 / group performance 27 / event facts 30 / context rows 0 before any analysis run |
+| SQLite integrity / FK | `ok` / zero rows |
+| Promotion behavior | adjacent verified backup + compare-and-swap; candidate consumed; post-validation passed |
+
+The tracked DB intentionally remains the 46 grandfathered SPY-only market-day set. No QQQ market day was fabricated or copied from the Phase 5 receipt; the first future authorized daily pair acceptance will add SPY and QQQ together through the governed pair orchestrator.
+
+### Atomic consumer/default cutover and removals
+
+- Registered `/api/trade-records`, `/api/admin/traders`, and `/api/admin/trade-records`; assemble/static output now contains only `trade_records` and never emits the old public member.
+- Review, Static, Admin, and K-line consumers use normalized trader/group/leg/event data, trader-owned color, and direction-owned marker shape. A real-browser finding that the async Admin payload initially left filters/registry empty was repaired; reload then showed Tang selected, one registry trader, and one 2026-07-17 group.
+- Import/rebuild, recovery acceptance, static export, Pages workflow, project harness, AGENTS/runbook, architecture, roadmap, K-line, and operating-mode carriers now use the normalized pair-first contract.
+- Exactly 22 declared removals are present: 20 legacy JSON files, `backend/app/services/tang_trades.py`, and `frontend/src/features/review/TangTradeList.jsx`; no other file is deleted.
+- Runtime/normative scan returned zero `tang_trades`, `TangTradeList`, `services.tang_trades`, or old K-line branch hits. Historical provenance strings in the migration utility/tests are not runtime or compatibility consumers.
+- Default-carrier scan returned zero `TANG_STATIC_TICKER`, `--ticker SPY`, or direct one-symbol TV-fetch commands in the workflow, AGENTS daily entry, and daily runbook.
+- Secret scan returned zero high-risk credential patterns in the non-DB diff; no raw evidence is present in public API/static/download payloads; no untracked/generated output remains.
+
+### Local acceptance matrix
+
+| Check | Result |
+| --- | --- |
+| Pinned backend suite / compileall | pass: 75 tests / pass after promotion |
+| Frontend pure suite | pass: 11 tests, including async Admin hydration regression |
+| Normal/static Vite builds | pass: 1,750 modules transformed in each mode |
+| API cutover | SPY 2026-07-17 at 868/192/1; keys end in `trade_records`; sorted compact SHA-256 `e0cf279a2c296f3b0b166685328e6a775953665c8fa43c000b13e3e6f4af8b08` |
+| Static cutover | 46 SPY reviews, 9 strategies; day SHA-256 `154d8dd9d4a4eb592457517a2bec306a2179e6023a656585532a98abf45f3105`; 868/192/1; no old member |
+| Review browser | normalized Tang CALL group and filters rendered; JSON plus three CSV downloads completed |
+| Backtest browser | latest 10 days produced 43 signals and loaded unified K-line output |
+| Teaching browser | 7 rules / 6 cases / 3 training groups loaded |
+| Admin browser | admin-only route loaded Tang registry and 2026-07-17 normalized group after hydration repair; no save was invoked |
+| Browser console | product/API requests passed; only existing `favicon.ico` 404 |
+| Acceptance DB protection | tracked DB remained `4a5bce13...2c34` throughout temporary-snapshot browser run |
+| Rollback rehearsal | pass against coherent old app/DB/content boundary |
+| Governed/auto/operating-mode/startup | pass / pass / 146 tests / pass |
+| Workflow YAML / launcher syntax / diff | pass / pass / `git diff --check` pass |
+
+The local Phase 6 implementation and acceptance matrix pass. The plan remains Active at `phase-6:blocked` because its exit gate additionally requires an independent implementation `accept` against a stable implementation commit. The earlier Windows-transfer commit/push authority was consumed; no new stage/commit authority exists, so no qualifying review can yet be requested. No push, PR, merge, workflow run, Pages publication, hosted verification, IB access, or broker action occurred.

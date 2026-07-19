@@ -134,6 +134,14 @@ test('reload defaults select all active traders without persisted filter state',
   assert.equal(reloaded.ticker, 'SPY');
 });
 
+test('admin workspace hydrates async trader payloads once without overwriting later edits', () => {
+  const source = readFileSync(new URL('../../pages/AdminTradersPage.jsx', import.meta.url), 'utf8');
+  assert.match(source, /useEffect\(\(\) => \{/);
+  assert.match(source, /initializedFromPayloads\.current \|\| !traders\.length/);
+  assert.match(source, /setFilters\(initialTradeRecordFilters\(traders\)\)/);
+  assert.match(source, /setRegistryText\(JSON\.stringify\(\{ schema_version: 'traders-v1', traders \}/);
+});
+
 test('only admin role can enable frozen-contract editors', () => {
   assert.equal(canEditTradeRecords('admin'), true);
   assert.equal(canEditTradeRecords('readonly'), false);
@@ -205,9 +213,9 @@ test('marker color is trader-owned while CALL and PUT shapes stay independent', 
   assert.equal(markers[1].marker_shape, 'triangle_down');
 });
 
-test('kline renderer keeps Tang annotations and adds explicit trade color and shape hooks', () => {
+test('kline renderer exposes only normalized trade color and shape hooks', () => {
   const source = readFileSync(new URL('../../kline/kline-engine.js', import.meta.url), 'utf8');
-  assert.match(source, /anno\.type === 'tang_trade'/);
+  assert.doesNotMatch(source, /anno\.type === 'tang_trade'/);
   assert.match(source, /anno\.type === 'trade_record'/);
   assert.match(source, /anno\.marker_shape/);
   assert.match(source, /_annoColor\(anno\.style, anno\.marker_color\)/);

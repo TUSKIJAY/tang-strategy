@@ -18,7 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TANG_STATIC_REVIEW_LIMIT: "250"
-      TANG_STATIC_REVIEW_TICKER: "SPY"
       TANG_STATIC_REVIEW_STRATEGY_FAMILIES: "v3,v4,v5"
 
     steps:
@@ -38,7 +37,7 @@ jobs:
 
       - name: Export latest static review payloads
         working-directory: backend
-        run: PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit "$TANG_STATIC_REVIEW_LIMIT" --ticker "$TANG_STATIC_REVIEW_TICKER" --strategy-families "$TANG_STATIC_REVIEW_STRATEGY_FAMILIES"
+        run: PYTHONPATH=. python scripts/export_static_reviews.py --output ../frontend/public/reviews --limit "$TANG_STATIC_REVIEW_LIMIT" --strategy-families "$TANG_STATIC_REVIEW_STRATEGY_FAMILIES"
 
       - name: Set up Node
         uses: actions/setup-node@v4

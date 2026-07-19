@@ -5,38 +5,38 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-5`
-- Phase state: `complete`
-- Next gate: `phase-6-authorization`
+- Current phase: `phase-6`
+- Phase state: `in-progress`
+- Next gate: `phase-6-implementation-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Proposal baseline: `codex/project-harness@25ba77fd9947c504f68cab1c7700d9f5c84d62b4` was clean before the new proposal; rerun startup commands for live Git truth
-- Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is Active at `phase-5:complete`; Phases 0-5 and both macOS/Windows real TradingView receipts passed, while Phase 6 remains separately gated and unauthorized
+- Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is Active at `phase-6:in-progress`; Phases 0-5, both macOS/Windows receipts, and the complete local Phase 6 promotion/removal/cutover acceptance passed; the authorized stable commit and independent implementation review are the current gate
 - Active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md`
-- Authority boundary: local/offline implementation, real TradingView calls for the Phase 5 macOS/Windows receipts, and one plan-scoped stage/commit/push of `codex/project-harness` for Windows transfer are authorized; IB access, tracked DB promotion, Phase 6 cutover/removal, PR, merge, Pages publication, and other remote changes are not
+- Authority boundary: local/offline implementation, Phase 5 real TradingView receipts, the consumed Windows-transfer checkpoint commit/push, local Phase 6 tracked-DB promotion/declared legacy removal/formal cutover, and the plan-scoped local commits required for stable implementation plus accepted lifecycle closeout are authorized; push, IB access, PR, merge, Pages publication, hosted verification, and other remote changes are not
 - Completed operating-modes historical startup: `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` was that earlier plan's clean baseline; it is not the current proposal baseline
 - Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Completed`; implementation-review-013 returned `accept` with `high` confidence and all phases are closed
 - Completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md`
 - Current-plan design reviews: `review-001.md` (Kimi revise/high@v2), `review-002.md` (Grok revise/high@v2), `review-003.md` (Kimi approve/high@v3), `review-004.md` (Grok revise/high@v3), `review-005.md` (Kimi revise/high@v4), `review-006.md` (Grok approve/high@v4), `review-007.md` (Kimi approve/high@v5), `review-008.md` (Grok approve/high@v5)
 - Review monitor: 10-minute current-task heartbeat `tang-dual-review-loop-monitor` reached its activation stop condition and is removed during closeout
 - Completed operating-modes plan reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
-- Data: tracked DB has 46 market days; recovered 2026-05-15, 2026-06-30, and 2026-07-01; 2026-07-17 remains the regression day
+- Data: promoted tracked DB SHA-256 is `4a5bce13...2c34` with 46 active SPY datasets, 43,425/8,821 bars, 1/27/27/30/4/2 normalized trade rows, logical SHA-256 `f7ca32...70a34`, integrity `ok`, and zero FK rows; no historical QQQ day was fabricated
 - Implementation boundary: implementation-review-013 accepted stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`; lifecycle reconciliation is recorded at `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`
-- Local Git boundary: user instruction `2026-07-19-commit-and-push-branch-for-windows-phase5` authorizes one plan-scoped stage/commit for the current 75-path checkpoint
-- Remote boundary: that same instruction authorizes pushing only `codex/project-harness` for Windows transfer; no PR, merge, Pages publish, branch protection, environment, or other remote change is authorized
+- Local Git boundary: the Windows-transfer stage/commit/push authority is consumed at `80f74f63f32849eddaaa99321f5f779446503458`; `user-instruction:2026-07-19-authorize-phase6-stable-commit-review-closeout` now authorizes plan-scoped local commit/reconciliation only, with no push
+- Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, hosted verification, IB, or other remote change is authorized
 
 ## Resume Checklist
 
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve any unrelated changes and read `docs/operating-modes.md`, the current proposed multi-trader plan, and its review directory/index.
-4. The multi-trader plan is Active at `phase-5:complete`; Phase 0-5 and both real TradingView receipts are complete. Stop at `phase-6-authorization`: do not promote the tracked DB, remove legacy inputs, cut over public/default consumers, enter Phase 6, or call IB without separate authority.
-5. Continue only on temporary/candidate SQLite copies under the existing lock/drift contract; do not promote the tracked DB or expose new runtime routes.
+4. The multi-trader plan is Active at `phase-6:in-progress`; local promotion/removal/cutover is complete and accepted, and the next gate is an independent implementation review against the authorized stable commit.
+5. Preserve the promoted DB, 22 planned deletions, and normalized consumer boundary; stage only the exact plan surface for the authorized local commit, and do not call IB or publish Pages.
 6. The completed operating-modes plan remains closed; do not reuse its implementation authority for this proposal.
-7. The current transfer instruction authorizes only the named checkpoint commit/push and the Windows real TradingView receipt. No PR, publish, merge, IB, tracked DB action, Phase 6, or other remote mutation is authorized.
+7. The transfer instruction is consumed. The new Phase 6 instruction authorizes only the plan-scoped local commit/review/closeout sequence; push and every remote/publication action remain separately unauthorized.
 
 ## Verification Evidence
 
@@ -91,9 +91,10 @@
 | Multi-trader Phase 3 handlers | pass: roles/filters/atomic failure-recovery/candidate projection, 65 pinned backend tests; no new registered route or current consumer switch |
 | Multi-trader Phase 4 frontend | pass: 10 pure Node tests, exact current-filter group/context/count/selection download reconciliation, normal/static Vite builds, and real Chromium Review/Backtest/Teaching regression against a temporary 46-day DB; no new route/current consumer switch |
 | Multi-trader Phase 5 offline | pass: 13 pair tests, 80 backend tests, compileall, exact `ts`/offset/`t` NYSE gates, pair-level contention lock, offline tracked-target refusal, absolute provider-subprocess bootstrap, SPY/QQQ exchange routing, POSIX/Windows lock branches, workflow YAML, normal/static builds, and current-code candidate preservation |
-| Multi-trader Phase 5 external gate | pass: real macOS and Windows TV pair receipts passed at exact RTH 390/78 for SPY/QQQ with temporary 46 -> 47 candidate acceptance, 45 non-target grandfathered days preserved, integrity `ok`, zero FK failures, and unchanged tracked DB; Phase 5 is complete and Phase 6 remains separately forbidden |
+| Multi-trader Phase 5 external gate | pass: real macOS and Windows TV pair receipts passed at exact RTH 390/78 for SPY/QQQ with temporary 46 -> 47 candidate acceptance, 45 non-target grandfathered days preserved, integrity `ok`, zero FK failures, and unchanged tracked DB; that receipt authority did not itself grant Phase 6, which was authorized separately later and completed locally |
+| Multi-trader Phase 6 local cutover | pass: tracked DB `4a5bce13...2c34`, 46/46 day hashes preserved, exact 22 legacy removals, normalized-only API/static/frontend/default pair carriers, coherent old-boundary rollback, 75 backend + 11 frontend tests, normal/static builds, real-browser Review/Backtest/Teaching/Admin/downloads, 146 fixtures, and clean runtime/secret/generated-output scans |
 | Launcher diff review | `accept`, confidence `high`; final cache-cleanliness observation resolved |
-| Git boundary | one plan-scoped checkpoint stage/commit/push of `codex/project-harness` is authorized for Windows transfer; no PR, publish, merge, or remote settings change is authorized |
+| Git boundary | the Windows-transfer commit/push is consumed; the current instruction authorizes plan-scoped local Phase 6 commit/review/accepted-closeout reconciliation only, with no push, PR, publish, merge, or remote settings change |
 
 Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/`.
 
@@ -107,7 +108,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Obtain separate Phase 6 authority for tracked-DB promotion, legacy removal, and public/default cutover. Phase 5 and both platform receipts are complete; IB, Phase 6 execution, tracked DB promotion, legacy removal, public/default cutover, Pages, and hosted publication remain forbidden until separately authorized.
+Create the authorized stable Phase 6 implementation commit, request independent implementation review, and reconcile lifecycle closeout only after `accept`. Push, PR, merge, Pages, hosted verification, and IB remain unauthorized.
 
 ## Handoff Boundary
 

@@ -3,7 +3,15 @@ import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
 import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
 import { ReviewSignalList } from '../features/review/ReviewSignalList.jsx';
-import { buildTangTradeAnnotations, TangTradeList } from '../features/review/TangTradeList.jsx';
+import { TradeExportControls } from '../features/review/TradeExportControls.jsx';
+import { TraderFilters } from '../features/review/TraderFilters.jsx';
+import { TraderTradeList } from '../features/review/TraderTradeList.jsx';
+import {
+  buildTradeAvailability,
+  buildTradeRecordAnnotations,
+  filterTradeGroups,
+  initialTradeRecordFilters,
+} from '../features/review/tradeRecords.js';
 import {
   buildBarIndexMap,
   preferredActivationWickStrategy,
@@ -186,7 +194,8 @@ export function StaticReviewsApp() {
   const [review, setReview] = useState(null);
   const [strategyPayload, setStrategyPayload] = useState(null);
   const [activeSignalId, setActiveSignalId] = useState('');
-  const [activeTangTradeId, setActiveTangTradeId] = useState('');
+  const [activeTradeGroupId, setActiveTradeGroupId] = useState('');
+  const [tradeFilters, setTradeFilters] = useState(() => initialTradeRecordFilters());
   const [error, setError] = useState('');
   const [showExtendedKBars, setShowExtendedKBars] = useState(loadExtendedKBars);
 
@@ -200,7 +209,7 @@ export function StaticReviewsApp() {
 
   useEffect(() => {
     setActiveSignalId('');
-    setActiveTangTradeId('');
+    setActiveTradeGroupId('');
     engineRef.current?.overview();
   }, [showExtendedKBars]);
 
@@ -236,13 +245,23 @@ export function StaticReviewsApp() {
     if (!selectedItem) return;
     setError('');
     setActiveSignalId('');
-    setActiveTangTradeId('');
+    setActiveTradeGroupId('');
     fetch(assetPath(`reviews/${selectedItem.file}`, manifest?.generated_at || Date.now()), { cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error(`Static review payload not found: ${response.status}`);
         return response.json();
       })
-      .then((payload) => setReview(payload))
+      .then((payload) => {
+        setReview(payload);
+        const records = payload.trade_records;
+        if (records) {
+          setTradeFilters({
+            ...initialTradeRecordFilters(records.traders),
+            ticker: records.ticker,
+            tradeDate: records.trade_date,
+          });
+        }
+      })
       .catch((err) => setError(err.message));
   }, [selectedItem?.file]);
 
@@ -294,13 +313,22 @@ export function StaticReviewsApp() {
       .map(chartAnnotation),
     [displayComputed.annotations1m],
   );
-  const tangTradeAnnotations1m = useMemo(
-    () => buildTangTradeAnnotations(displayReview?.tang_trades, bars1m),
-    [displayReview?.tang_trades, bars1m],
+  const tradeRecords = displayReview?.trade_records || null;
+  const tradeAvailability = useMemo(
+    () => buildTradeAvailability(tradeRecords ? [tradeRecords] : []),
+    [tradeRecords],
+  );
+  const filteredTradeGroups = useMemo(
+    () => filterTradeGroups(tradeRecords, tradeFilters),
+    [tradeRecords, tradeFilters],
+  );
+  const tradeRecordAnnotations1m = useMemo(
+    () => buildTradeRecordAnnotations(filteredTradeGroups, tradeRecords?.traders, bars1m),
+    [filteredTradeGroups, tradeRecords?.traders, bars1m],
   );
   const engineAnnotations1m = useMemo(
-    () => [...chartAnnotations1m, ...tangTradeAnnotations1m],
-    [chartAnnotations1m, tangTradeAnnotations1m],
+    () => [...chartAnnotations1m, ...tradeRecordAnnotations1m],
+    [chartAnnotations1m, tradeRecordAnnotations1m],
   );
   const chartAnnotations5m = useMemo(() => [], []);
   const summary = summarizeAnnotations(computed.annotations1m);
@@ -321,7 +349,7 @@ export function StaticReviewsApp() {
   function selectSignal(annotation) {
     if (!annotation) return;
     setActiveSignalId(annotation.id);
-    setActiveTangTradeId('');
+    setActiveTradeGroupId('');
     const timeframe = annotation.timeframe === '5m' ? '5m' : '1m';
     const targetBars = timeframe === '5m' ? bars5m : bars1m;
     if (!targetBars.length) return;
@@ -342,12 +370,13 @@ export function StaticReviewsApp() {
     });
   }
 
-  function selectTangTrade(trade) {
-    if (!trade) return;
-    const annotation = tangTradeAnnotations1m.find((item) => item.trade_id === trade.id || item.id === trade.id) || trade;
-    const targetIndex = resolveAnnotationIndex(annotation, bars1m);
-    setActiveTangTradeId(annotation.trade_id || trade.id);
+  function selectTradeGroup(group) {
+    if (!group) return;
+    const annotation = tradeRecordAnnotations1m.find((item) => item.trade_group_ids?.includes(group.trade_group_id));
+    setActiveTradeGroupId(group.trade_group_id);
     setActiveSignalId('');
+    if (!annotation) return;
+    const targetIndex = resolveAnnotationIndex(annotation, bars1m);
     engineRef.current?.setHighlightRanges({
       timeframe: '1m',
       startIndex: targetIndex,
@@ -376,7 +405,7 @@ export function StaticReviewsApp() {
 
   function overview() {
     setActiveSignalId('');
-    setActiveTangTradeId('');
+    setActiveTradeGroupId('');
     engineRef.current?.overview();
   }
 
@@ -443,12 +472,22 @@ export function StaticReviewsApp() {
               <button type="button" onClick={overview}>总览</button>
             </div>
             <div className="dr-signal-list">
-              <TangTradeList
-                tangTrades={displayReview?.tang_trades}
-                bars={bars1m}
-                strategyAnnotations={displayComputed.annotations1m}
-                activeTradeId={activeTangTradeId}
-                onSelect={selectTangTrade}
+              {tradeRecords && (
+                <>
+                  <TraderFilters
+                    traders={tradeRecords.traders}
+                    availability={tradeAvailability}
+                    value={tradeFilters}
+                    onChange={setTradeFilters}
+                  />
+                  <TradeExportControls payload={tradeRecords} groups={filteredTradeGroups} filters={tradeFilters} />
+                </>
+              )}
+              <TraderTradeList
+                groups={filteredTradeGroups}
+                traders={tradeRecords?.traders}
+                activeGroupId={activeTradeGroupId}
+                onSelect={selectTradeGroup}
               />
               <ReviewSignalList
                 annotations1m={displayComputed.annotations1m}
@@ -476,8 +515,9 @@ export function StaticReviewsApp() {
                 engineOptions={DAILY_REVIEW_ENGINE_OPTIONS}
                 replayStartTime={showExtendedKBars ? '09:00' : '09:30'}
                 onAnnotationClick={(annotation) => {
-                  if (annotation.type === 'tang_trade') {
-                    selectTangTrade(annotation);
+                  if (annotation.type === 'trade_record') {
+                    const groupId = annotation.trade_group_ids?.[0] || annotation.trade_group_id;
+                    selectTradeGroup(filteredTradeGroups.find((group) => group.trade_group_id === groupId));
                     return;
                   }
                   selectSignal(allAnnotations.find((item) => item.id === annotation.id) || annotation);

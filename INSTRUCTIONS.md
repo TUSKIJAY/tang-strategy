@@ -30,7 +30,7 @@ Optimization records, decisions, proposed plans, and reviews do not grant execut
 - `backend/scripts/`, `backend/tests/` — fetch/rebuild/recovery/export tooling and backend tests.
 - `frontend/src/` — Data, Review, Backtest, and Teaching UI plus the shared chart/scanner runtime.
 - `strategies/json/`, `strategies/STRATEGY.md` — strategy definitions and canonical signal-intent documentation.
-- `content/` — teaching/rule/case assets and Tang trade overlays.
+- `content/` — teaching/rule/case assets plus canonical multi-trader SPY/QQQ records and schemas.
 - `data/seed/market-data/live_extended/` — the only accepted market-day seed shape; daily files remain gitignored.
 - `data/sqlite/tang_strategy_live_extended.db` — tracked interactive runtime and Pages export input.
 - `docs/roadmap.md` — product/module roadmap.
@@ -52,7 +52,7 @@ Generated review JSON belongs in `frontend/public/reviews`, the Vite build belon
 - Tracked SQLite remains the runtime and Pages data source. This project is not migrating to LFS, release artifacts, or a fully tracked seed history in the current plan.
 - Rebuild is candidate-first. Empty/invalid input, semantic mismatch, integrity failure, market-day shrink, strategy/teaching shrink, or live DB drift must reject promotion and leave the current DB unchanged.
 - `--allow-date-loss` is a supervised manual override for intentional market-day shrink only. Daily publication and default automation must never use it.
-- Daily data acquisition is TradingView-first. Do not preflight or request IB Gateway until TV retries are exhausted or a hard TV quality gate fails. Never mix TV and IB bars inside one market day.
+- Daily data acquisition uses the atomic SPY/QQQ pair orchestrator with TradingView first. Do not preflight or request IB Gateway until TV retries are exhausted or a named hard gate fails. A newly accepted date never mixes providers or accepts only one ticker.
 
 ## Agent Behavior Rules
 

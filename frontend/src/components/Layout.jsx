@@ -43,9 +43,9 @@ export function Layout({ active, onNavigate, children }) {
           ))}
         </nav>
         {role === 'admin' && (
-          <button className="secondary" onClick={() => onNavigate('admin')} title="Import seed">
+          <button className="secondary" onClick={() => onNavigate('admin')} title="Trader records">
             <RefreshCcw size={18} />
-            <span className="nav-label">Import seed</span>
+            <span className="nav-label">Traders</span>
           </button>
         )}
         <button className="logout" onClick={() => { clearSession(); window.location.reload(); }} title="Logout">

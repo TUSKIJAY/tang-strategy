@@ -10,7 +10,9 @@
     "bash -n scripts/start-local-acceptance.sh",
     "cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'",
     "cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests",
-    "cd frontend && npm run build"
+    "cd frontend && npm run test:trade-records",
+    "cd frontend && npm run build",
+    "cd frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews"
   ],
   "github": {
     "repository": "TUSKIJAY/tang-strategy",

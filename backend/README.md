@@ -19,7 +19,7 @@ TradingView fetch/tests additionally require the pins in `requirements-tv.txt`.
 - Tracked runtime/Pages input: `data/sqlite/tang_strategy_live_extended.db`.
 - Safe rebuild: `PYTHONPATH=. python scripts/rebuild_live_extended_db.py`.
 
-Phase 5 QQQ support is internal/candidate capability. The standing daily entry remains the existing SPY/Tang runbook until the governed cutover gate changes the public/default contract. `scripts/update_spy_qqq_market_day.py` stages both tickers, rejects mixed or partial pairs, and requires separate provider authorization before a real TV/IB call.
+The standing daily entry is `scripts/update_spy_qqq_market_day.py`. It stages SPY and QQQ from one provider, rejects mixed or partial pairs, refreshes the canonical trade projection, and promotes one verified candidate. Real TV/IB calls still require the applicable provider authority.
 
 Rebuild imports into a candidate and refuses empty/invalid bars, count disagreement, integrity/foreign-key failure, market-day loss, strategy/teaching shrink, or live DB drift. `--allow-date-loss` is an explicit supervised override for intentional market-day shrink only.
 
@@ -32,11 +32,12 @@ Rebuild imports into a candidate and refuses empty/invalid bars, count disagreem
 - `GET /api/market-days/{market_day_id}/bars?timeframe=1m|5m`
 - `GET /api/strategies` and `GET /api/strategies/{strategy_id}`
 - `GET /api/reviews/assemble?market_day_id=<id>&strategy_id=<id>`
+- `GET /api/trade-records` — readonly/admin filters for ticker, date/range, trader, status, review status, and eligibility.
 - `GET /api/teaching/{asset_type}`
-- admin-only: `POST /api/admin/import/seed`, `/api/admin/import/market-json`, `/api/admin/import/strategy-json`
+- admin-only: `PUT /api/admin/traders`, `PUT /api/admin/trade-records`, and the existing import endpoints.
 
-There is no rebuild or content-write HTTP endpoint. Repository-managed DB writes share the same lock used by recovery/rebuild promotion.
+Admin trader/day writes validate the whole canonical repository, atomically replace the content file, rebuild the normalized SQLite projection on a candidate, and roll both boundaries back on failure. There is no unrestricted rebuild endpoint.
 
 ## Static Export
 
-`scripts/export_static_reviews.py` reads the tracked DB and writes generated JSON to an explicit output directory, normally `frontend/public/reviews` in CI. It does not publish by itself.
+`scripts/export_static_reviews.py` reads the tracked DB plus canonical normalized trade records and writes generated JSON for every accepted ticker unless `--ticker` narrows the scope. It does not publish by itself.

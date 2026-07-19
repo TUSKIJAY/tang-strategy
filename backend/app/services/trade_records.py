@@ -480,6 +480,7 @@ def handle_trade_day_admin_write(
     content_dir: Path,
     payload: Mapping[str, Any],
     replace: Callable[[str | bytes | os.PathLike[str] | os.PathLike[bytes], str | bytes | os.PathLike[str] | os.PathLike[bytes]], None] = os.replace,
+    after_replace: Callable[[], Any] | None = None,
 ) -> dict[str, Any]:
     """Validate a whole repository candidate before atomically replacing one daily file."""
 
@@ -495,14 +496,17 @@ def handle_trade_day_admin_write(
     validated = validate_trade_day(payload, registry, repository_ids=repository_ids)
     target = root / "trades" / f"{trade_date}.json"
     serialized = _canonical_document(validated)
-    _atomic_replace_text(target, serialized, replace)
-    return {
+    followup = _atomic_replace_text(target, serialized, replace, after_replace=after_replace)
+    result = {
         "path": str(target),
         "trade_date": trade_date,
         "trade_groups": len(validated["trade_groups"]),
         "note_contexts": len(validated["note_contexts"]),
         "sha256": hashlib.sha256(serialized.encode("utf-8")).hexdigest(),
     }
+    if followup is not None:
+        result["projection"] = followup
+    return result
 
 
 def handle_trader_registry_admin_write(
@@ -510,6 +514,7 @@ def handle_trader_registry_admin_write(
     content_dir: Path,
     payload: Mapping[str, Any],
     replace: Callable[[str | bytes | os.PathLike[str] | os.PathLike[bytes], str | bytes | os.PathLike[str] | os.PathLike[bytes]], None] = os.replace,
+    after_replace: Callable[[], Any] | None = None,
 ) -> dict[str, Any]:
     """Validate all canonical days against a candidate registry before replacement."""
 
@@ -519,12 +524,15 @@ def handle_trader_registry_admin_write(
     validate_trade_repository((root / "trades").glob("*.json"), validated)
     target = root / "traders" / "index.json"
     serialized = _canonical_document(validated)
-    _atomic_replace_text(target, serialized, replace)
-    return {
+    followup = _atomic_replace_text(target, serialized, replace, after_replace=after_replace)
+    result = {
         "path": str(target),
         "traders": len(validated["traders"]),
         "sha256": hashlib.sha256(serialized.encode("utf-8")).hexdigest(),
     }
+    if followup is not None:
+        result["projection"] = followup
+    return result
 
 
 def assert_no_raw_evidence_fields(payload: Any, path: str = "root") -> None:
@@ -571,8 +579,10 @@ def _atomic_replace_text(
     target: Path,
     content: str,
     replace: Callable[[str | bytes | os.PathLike[str] | os.PathLike[bytes], str | bytes | os.PathLike[str] | os.PathLike[bytes]], None],
-) -> None:
+    after_replace: Callable[[], Any] | None = None,
+) -> Any:
     target.parent.mkdir(parents=True, exist_ok=True)
+    original = target.read_bytes() if target.exists() else None
     descriptor, raw_temporary = tempfile.mkstemp(
         prefix=f".{target.name}.",
         suffix=".candidate",
@@ -581,6 +591,38 @@ def _atomic_replace_text(
     temporary = Path(raw_temporary)
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        replace(temporary, target)
+        fsync_directory(target.parent)
+        try:
+            return after_replace() if after_replace is not None else None
+        except Exception:
+            if original is None:
+                target.unlink(missing_ok=True)
+                fsync_directory(target.parent)
+            else:
+                _atomic_replace_bytes(target, original, replace)
+            raise
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def _atomic_replace_bytes(
+    target: Path,
+    content: bytes,
+    replace: Callable[[str | bytes | os.PathLike[str] | os.PathLike[bytes], str | bytes | os.PathLike[str] | os.PathLike[bytes]], None],
+) -> None:
+    descriptor, raw_temporary = tempfile.mkstemp(
+        prefix=f".{target.name}.",
+        suffix=".rollback",
+        dir=target.parent,
+    )
+    temporary = Path(raw_temporary)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
             handle.write(content)
             handle.flush()
             os.fsync(handle.fileno())

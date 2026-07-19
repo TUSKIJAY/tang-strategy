@@ -11,11 +11,11 @@ The shared runtime input is `data/sqlite/tang_strategy_live_extended.db`. The ac
 
 ## Daily Data And DB Flow
 
-1. `fetch_tv_live_extended_day.py` requests TradingView first and writes/imports only after NYSE/session/OHLCV/RTH/5m/VWAP gates pass.
-2. If TV retries or a hard gate fail, the operator may separately start IB Gateway and run `fetch_ib_live_extended_day.py`; one day never mixes providers.
-3. `rebuild_live_extended_db.py` validates all discovered inputs, imports into a fresh candidate, verifies bar/count/integrity/date/non-market gates, checks live DB drift, and atomically promotes.
-4. The tracked DB carries market days, 1m/5m bars, strategies, and teaching assets into runtime and Pages export.
-5. `content/trader-trades/<date>.json` stays outside SQLite and is overlaid at assemble/export time.
+1. `update_spy_qqq_market_day.py` invokes the tracked one-symbol adapters into temporary staging, using TradingView first.
+2. Both tickers must pass the same NYSE/session/OHLCV/RTH/5m/VWAP and same-provider gates; otherwise accepted seeds and DB remain on the prior pair.
+3. The orchestrator imports both payloads and the canonical trade repository into one candidate, verifies preservation/integrity/drift, then atomically promotes and replaces the accepted seed pair.
+4. If TV retries or a named hard gate fail, the operator may separately start IB Gateway and rerun the complete pair with `--provider ibkr`; one accepted pair never mixes providers.
+5. The tracked DB carries logical market days, provider datasets, bars, strategies, teaching assets, and normalized trade projections into runtime and Pages export. Canonical source remains under `content/traders` and `content/trades`.
 
 Rebuild never deletes the current DB before candidate validation. Default replacement requires the candidate market-day set to be a superset of the current set; the daily workflow never uses the intentional date-loss override.
 
@@ -25,10 +25,11 @@ Rebuild never deletes the current DB before candidate validation. Default replac
 - discovery: `GET /api/tickers`, `/api/market-days`, `/api/strategies`;
 - bars: `GET /api/market-days/{market_day_id}/bars?timeframe=1m|5m`;
 - assembled review: `GET /api/reviews/assemble?market_day_id=<id>&strategy_id=<id>`;
+- normalized trade reads: `GET /api/trade-records`;
 - teaching assets: `GET /api/teaching/{asset_type}`;
-- controlled writes: three admin import endpoints only.
+- controlled writes: atomic admin trader/day endpoints plus the existing import endpoints.
 
-Readonly/admin endpoints use bearer auth. There is no rebuild/content-write API endpoint.
+Readonly/admin endpoints use bearer auth. Admin canonical writes are validation-, candidate-, drift-, and rollback-protected; there is no unrestricted rebuild endpoint.
 
 ## Static Pages Flow
 

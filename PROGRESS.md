@@ -5,10 +5,14 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-5`
-- Phase state: `complete`
-- Next gate: `phase-6-authorization`
+- Current phase: `phase-6`
+- Phase state: `in-progress`
+- Next gate: `phase-6-implementation-review`
 <!-- operating-modes-state:end -->
+
+2026-07-19: Phase 6 本地 cutover 与验收已完成：tracked DB 由 `76a885c2...28f8` 原子 promotion 为 `4a5bce13...2c34`，46/46 logical keys/day digests 与 `f7ca32...70a34` logical hash 保持一致；1/27/27/30/4/2 trade projection、integrity/FK、20 legacy JSON + 2 legacy code removals、`trade_records` API/static/Review/Admin/K-line/default pair carriers、旧边界回滚演练均通过。最终结果为 75 backend、11 frontend、normal/static builds、real-browser Review/Backtest/Teaching/Admin + 4 downloads、146 fixtures、governed/auto/startup/YAML/diff/secret/runtime scan 全通过。用户现已授权 plan-scoped 本地稳定提交、独立 implementation review 与 accepted closeout，计划恢复为 `phase-6:in-progress`，next gate 为 `phase-6-implementation-review`；push、PR、Pages、hosted 与 IB 仍未授权。
+
+2026-07-19: 用户通过 `user-instruction:2026-07-19-authorize-phase6-cutover` 明确授权本地 Phase 6 tracked-DB promotion、冻结清单内 legacy removal 与正式 cutover。Phase 5 双平台 receipt exit gate 已满足，Phase 6 进入 `in-progress`；本次权限不包含新的 stage/commit/push、PR、merge、Pages、hosted、IB 或其他远端动作。
 
 2026-07-19: 用户授权修复真实 Windows receipt 暴露的 Phase 5 portability defects。实现改为 writable binary descriptor `fsync`、仅在成功获取后释放 `msvcrt` byte lock、复用 Windows-safe directory-fsync，并为受影响测试固定 UTF-8；未放宽任何 quality/provider/candidate/rollback gate。最终 Windows CPython 3.13.11 receipt 通过：13/13 focused、80/80 backend、compileall，真实 SPY=`AMEX` 868/192 与 QQQ=`NASDAQ` 915/191，双方 RTH 390/78、零 missing/duplicate、`synthetic_padding=false`；临时候选 46 -> 47、45 non-target grandfathered days preserved、integrity/FK 通过，tracked DB hash 前后同为 `76a885c2...28f8`。macOS/Windows receipts 现均通过，Phase 5 更新为 `phase-5:complete`，next gate 为 `phase-6-authorization`；IB、tracked DB promotion、Phase 6、Pages 与 hosted 均未运行。
 
@@ -50,19 +54,20 @@
 
 ## In Progress
 
-- [ ] None; Phase 5 is complete and no Phase 6 work is authorized.
+- [ ] Freeze the accepted Phase 6 implementation in a local commit, obtain an independent implementation verdict, and reconcile closeout only after `accept`.
 
 ## Blocked
 
-- [ ] None; Phase 6 is awaiting separate user authorization.
+- [ ] None.
 
 ## To Do
 
-- [ ] Obtain separate Phase 6 tracked-DB promotion/legacy-removal/cutover authority. This plan still grants no stage, commit, push, PR, Pages, merge, or remote authority.
+- [ ] Create the authorized stable local implementation commit, request independent implementation review, and close the lifecycle only after `accept`. Push, PR, Pages, merge, and other remote actions remain separately gated.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-19 - Completed authorized local Phase 6 promotion/removal/cutover and acceptance: target tracked DB, exact 22 removals, normalized public/default consumers, rollback restore, 75 backend tests, 11 frontend tests, both builds, real-browser Review/Backtest/Teaching/Admin/downloads, and full governed/data/link scans passed.
 - [x] 2026-07-19 - Completed Multi-trader Phase 0 with exact manifest, DB/API/static/route/boundary hashes, 20/27/2 legacy inventory, cross-platform timezone prerequisite assessment, and unchanged tracked DB bytes.
 - [x] 2026-07-19 - Completed Multi-trader Phase 1 with frozen canonical/public/export contracts, 34 focused and 53 complete backend tests, deterministic 20/27/2 classification, and zero runtime/data/publication diff.
 - [x] 2026-07-19 - Completed Multi-trader Phase 2 with a 46-day candidate-only target schema migration, exact old/new logical preservation, normalized trade projection, Agent views, rollback/drift/FK gates, 60 pinned backend tests, and unchanged tracked DB/API/static hashes.

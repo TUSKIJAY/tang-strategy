@@ -9,17 +9,17 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-start-dual-review-loop-through-active`
-- Current phase: phase-5
-- Phase state: complete
-- Phase entry gate: `phase-5-start`
-- Next gate: `phase-6-authorization`
+- Current phase: phase-6
+- Phase state: in-progress
+- Phase entry gate: `phase-6-start`
+- Next gate: `phase-6-implementation-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
 - Owner: Codex
 - Created: 2026-07-19
-- Scope authority: implementation start authorized for Phase 0-4 local/offline work and Phase 5 offline work; the current user instructions separately authorize real TradingView provider runs for the required macOS/Windows Phase 5 receipts and one plan-scoped stage/commit/push of `codex/project-harness` to transfer the blocked Phase 5 checkpoint to Windows; IB access, tracked DB promotion, Phase 6 cutover, PR, merge, Pages publication, and other remote changes remain unauthorized
+- Scope authority: implementation start authorized for Phase 0-4 local/offline work and Phase 5 offline work; the current user instructions separately authorized real TradingView provider runs for the required macOS/Windows Phase 5 receipts, the consumed Windows-transfer stage/commit/push now represented by `80f74f63f32849eddaaa99321f5f779446503458`, `user-instruction:2026-07-19-authorize-phase6-cutover` for local Phase 6 tracked-DB promotion, declared legacy removal, and formal cutover, and `user-instruction:2026-07-19-authorize-phase6-stable-commit-review-closeout` for the plan-scoped local commits required to freeze the implementation and reconcile an accepted closeout; push, IB access, PR, merge, Pages publication, and other remote changes remain unauthorized
 
 ## 1. Context And Evidence
 
@@ -487,7 +487,7 @@ Generated `frontend/public/reviews`, `frontend/dist`, provider diagnostics, temp
   - Pages workflow syntax/build locally; no push or hosted claim.
 - Exit gate: `phase-5-complete` only after both platform receipts and all pair atomicity checks pass. Missing/failing platform evidence sets Phase 5 to `Blocked`, keeps the current default contract unchanged, and forbids Phase 6 entry.
 
-Execution evidence: macOS and Windows pinned-runtime TradingView receipts both passed for 2026-07-17. The Windows receipt required in-manifest portability fixes for writable file fsync, acquired-only `msvcrt` unlock, Windows-safe directory fsync reuse, and explicit UTF-8 test reads; the unchanged 13 focused tests and 80-test backend suite then passed. The real Windows pair accepted `AMEX:SPY` and `NASDAQ:QQQ` with exact RTH 390/78, zero missing/duplicate RTH minutes, no synthetic padding, a 46 -> 47 temporary candidate preserving 45 non-target grandfathered days, integrity `ok`, zero foreign-key failures, and unchanged tracked DB bytes. Phase 5 is complete; Phase 6 remains unauthorized and has not started.
+Execution evidence: macOS and Windows pinned-runtime TradingView receipts both passed for 2026-07-17. The Windows receipt required in-manifest portability fixes for writable file fsync, acquired-only `msvcrt` unlock, Windows-safe directory fsync reuse, and explicit UTF-8 test reads; the unchanged 13 focused tests and 80-test backend suite then passed. The real Windows pair accepted `AMEX:SPY` and `NASDAQ:QQQ` with exact RTH 390/78, zero missing/duplicate RTH minutes, no synthetic padding, a 46 -> 47 temporary candidate preserving 45 non-target grandfathered days, integrity `ok`, zero foreign-key failures, and unchanged tracked DB bytes. Phase 5 is complete. At that checkpoint Phase 6 was still unauthorized; the later separate authorization and local Phase 6 execution are recorded in the next section.
 
 ### Phase 6 — Full Cutover, Tracked Candidate Promotion, And Closeout
 
@@ -509,6 +509,8 @@ Execution evidence: macOS and Windows pinned-runtime TradingView receipts both p
   - final independent implementation review against a stable commit;
   - no remote/Pages/hosted pass unless separately authorized and actually observed.
 - Exit gate: `phase-6-complete` and lifecycle closeout only after independent `accept`; otherwise remain Active with the exact finding/blocker.
+
+Execution evidence: the local tracked DB was atomically promoted from byte SHA-256 `76a885c2...28f8` to target-schema `4a5bce13...2c34` while preserving all 46 logical keys/day digests and logical market SHA-256 `f7ca32e4...70a34`. The 20 legacy JSON files and two declared legacy code consumers were removed; API/static/Review/Admin/K-line/workflow/runbook/operating-mode carriers now use only normalized `trade_records` and the pair-first default path. The complete local matrix passed: 75 pinned backend tests, 11 frontend tests, normal/static builds, real-browser Review/Backtest/Teaching/Admin plus four downloads, rollback rehearsal, 146 operating-mode fixtures, governed/auto/startup/YAML/diff checks, and zero runtime legacy/default-SPY/secret/untracked-output findings. No QQQ history was fabricated, and no remote/Pages/hosted/IB action ran. The user separately authorized the plan-scoped local stable commit, independent implementation review, and accepted closeout; Phase 6 is `in-progress` at `phase-6-implementation-review` until that stable commit receives a qualifying independent verdict.
 
 ## 7. Data-Safety And Rollback Matrix
 
@@ -579,8 +581,9 @@ Detailed command output belongs in bounded evidence artifacts, not `PROGRESS.md`
 - This proposal authorizes only the proposal and required lifecycle/index/state reconciliation files.
 - Design reviews do not authorize activation or implementation.
 - The user instruction `2026-07-19-start-dual-review-loop-through-active` authorizes this bounded review/foldback loop and contingent lifecycle activation only after matching-revision dual approval; implementation still requires another explicit start/execute instruction.
-- The user instruction `2026-07-19-commit-and-push-branch-for-windows-phase5` authorizes exactly one plan-scoped stage/commit and push of `codex/project-harness` so the Windows checkout can run the outstanding Phase 5 receipt.
-- That transfer authority does not authorize a PR, merge, tracked DB mutation/promotion, Phase 6, IB/Gateway access, Pages publication, hosted verification, branch protection, environment, or any other remote setting change. The separately authorized real TradingView receipt boundary remains fail-closed and platform-specific.
+- The user instruction `2026-07-19-commit-and-push-branch-for-windows-phase5` authorized one plan-scoped stage/commit/push of `codex/project-harness`; that authority is consumed and the resulting pushed checkpoint is `80f74f63f32849eddaaa99321f5f779446503458`.
+- The user instruction `2026-07-19-authorize-phase6-stable-commit-review-closeout` authorizes the plan-scoped local commits required to freeze the accepted Phase 6 implementation and reconcile a qualifying independent-review closeout. It does not authorize push, PR, merge, IB/Gateway access, Pages publication, hosted verification, branch protection, environment, or any other remote setting change.
+- The consumed transfer authority and the separately authorized Phase 6 cutover instruction grant no additional remote or publication authority.
 - `main` and `gh-pages` remain untouched. All work stays on `codex/project-harness` unless the user separately changes that boundary.
 
 ## 10. Design Review And Activation Gate

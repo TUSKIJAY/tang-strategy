@@ -11,7 +11,7 @@ from typing import Any
 from app.db import connect, init_db
 from app.services.bar_utils import BAR_MA_WINDOWS, bar_row_to_payload, build_5m_bars_from_1m, recalculate_ma_fields
 from app.services.db_safety import BAR_COLUMNS, bar_market_day_join, bar_owner
-from app.services.tang_trades import load_tang_trades
+from app.services.trade_records import handle_trade_records_read
 from app.settings import settings
 
 
@@ -75,7 +75,14 @@ def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
         else build_5m_bars_from_1m(rows, source_vwap_mode="session_cumulative")
     )
     bars_5m = recalculate_ma_fields(bars_5m_source, warmup_closes=fetch_prior_5m_closes(conn, day))
-    tang_trades = load_tang_trades(day["ticker"], day["trade_date"])
+    trade_records = handle_trade_records_read(
+        "readonly",
+        settings.content_dir,
+        day["ticker"],
+        trade_date=day["trade_date"],
+        statuses=["active"],
+        review_statuses=["verified"],
+    )[0]
     meta = json.loads(day["meta_json"] or "{}")
     meta.update({
         "ticker": day["ticker"],
@@ -85,7 +92,7 @@ def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
         "counts": {
             "bars_1m": len(rows),
             "bars_5m": len(bars_5m),
-            "tang_trades": len(tang_trades["trades"]),
+            "trade_groups": trade_records["counts"]["trade_groups_total"],
         },
     })
     return {
@@ -101,7 +108,7 @@ def build_day_payload(conn, day: dict[str, Any]) -> dict[str, Any]:
         "bars_5m": bars_5m,
         "annotations_1m": [],
         "annotations_5m": [],
-        "tang_trades": tang_trades,
+        "trade_records": trade_records,
     }
 
 
@@ -212,7 +219,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Export latest market-day reviews for static GitHub Pages hosting.")
     parser.add_argument("--output", type=Path, default=Path("../frontend/public/reviews"))
     parser.add_argument("--limit", type=int, default=int(os.environ.get("TANG_STATIC_REVIEW_LIMIT", "250")))
-    parser.add_argument("--ticker", default=os.environ.get("TANG_STATIC_REVIEW_TICKER", "SPY"))
+    parser.add_argument(
+        "--ticker",
+        default=os.environ.get("TANG_STATIC_REVIEW_TICKER", ""),
+        help="Optional single-ticker filter; omitted exports every accepted ticker.",
+    )
     parser.add_argument("--strategy-families", default=os.environ.get("TANG_STATIC_REVIEW_STRATEGY_FAMILIES", "v3,v4,v5"))
     args = parser.parse_args()
 
