@@ -4,11 +4,31 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Lifecycle status: `Completed`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `closed`
 <!-- operating-modes-state:end -->
+
+2026-07-20: Phase 6 真实收口完成：external Grok Build `implementation-review-001` 对 frozen `workspace-review-v1:3d24de3...d06717cd@d7350213...23ecc` 独立返回 `accept/high`，无 findings，并直接 vision-inspect 19 张必需 PNG。收口前重算 27 个实现文件、tracked patch、6 个 additions、63 个 accepted evidence 与 composite digest，均与评审冻结值一致；plan 已迁移为 `Completed`，final disposition `Completed`，next gate `closed`。direct operating-modes、governed/auto harness 与 link scan、146/146 lifecycle fixtures、startup budget、launcher syntax、diff/whitespace/staging 检查均通过。用户后续明确授权 `commit and push`；冻结实现与 accepted evidence 已作为 `ab655568d50d20c2a97e970658ec9fa3b41719b7` 本地 commit，lifecycle reconciliation 与当前 branch push 正在本次有界收尾中。未 PR/merge/Pages/provider/broker，tracked DB 与 canonical content 未变。
+
+2026-07-20: Phase 6 review-ready freeze 完成：`docs/architecture.md` 与 `docs/kline-engine.md` 已同步实现真相；27 个实现文件、tracked implementation patch、6 个 untracked additions 与 63 个 accepted evidence 文件按非循环规则冻结为 `workspace-review-v1:3d24de3...d06717cd@d7350213...23ecc`。`evidence/implementation-review-packet-001.md` 已记录 frozen manifest、Phase 0-5 receipts、桌面/窄视口多模态证据、测试矩阵、DB/content/workflow/exporter hashes 和权限边界。当前保持 `phase-6:in-progress`，等待 external Grok Build 对该 exact revision 返回 `accept` / `revise` / `reject`；尚无 implementation verdict，未 stage/commit/push/发布。
+
+2026-07-20: Phase 5 完成：78/78 backend、38/38 frontend、146/146 lifecycle fixtures、compileall、normal/static builds、governed/auto/operating/budget/SQLite/diff/scope 全绿。1672x941 desktop 覆盖 Data/Review/Admin/readonly/Backtest（实跑 44 signals）/Teaching，820x1180 覆盖 interactive/static/Admin validation 且无横向溢出；键盘 Enter、focus、aria selected/pressed/switch、loading status、injected error alert 与 recovery 均有真实浏览器收据。10 张新鲜截图位于 `output/playwright/review-workspaces-phase5-20260720/`。视觉方向与 canonical reference 对比通过；tracked/temporary DB 与 content byte-exact、workflow/exporter 不变。现进入 `phase-6:in-progress`，先冻结 exact review packet。
+
+2026-07-20: Phase 4 完成：Static Review 接入共享 workspace/hash/availability/reconciliation contract，SPY/QQQ date rail 不再混排，legacy/invalid hash 确定性解析，pending-only 日诚实显示 no-trader，页面级重复 1m/5m/replay/Overview 控件移除且 static 无编辑/auth path。37/37 frontend、normal/static builds 通过；隔离临时 DB 导出 49 days/9 strategies。1672x941 真实浏览器 SPY/QQQ/legacy/no-trader/invalid-link 矩阵和 4 张截图通过，最终 console 0 error/0 warning；视觉检查修复 dark sidebar trader 低对比。exporter/workflow/DB/content hashes 不变，临时根已可恢复地移入 Trash。现进入 `phase-5:in-progress`。
+
+2026-07-20: Kimi 因 billing-cycle usage limit 中止后，Codex 在独立临时 content/SQLite 与独立 8033/5194 stack 上接管并完成 Phase 3。真实复现并修复 `occurred_at` 已填写但 candidate 仍保留 `time_incomplete:true` 的配对字段缺陷；36/36 frontend、78/78 backend、compileall、normal/static builds 通过。1672x941 浏览器验收覆盖 temp-copy `+1` group 成功保存、三组与 context 值精确保留、readonly/admin 权限、客户端缺 offset、服务端错误 NY offset、projection/cleanup fault coherence；视觉检查另修复 engine 全局 CSS 泄漏与白底白字。6 张新鲜截图与 console/行为收据位于 `output/playwright/review-workspaces-phase3-20260720/`；tracked DB/canonical content/workflow/export hash 均不变。Phase 3 exit gate 已满足，现进入 `phase-4:in-progress`。
+
+2026-07-19: Phase 2 完成并通过 exit gate：引擎自有 Overview（含 viewport reset 修复）、`ReviewContextPanel`（tabs + 按月 date rail）落地 Data/Review、底部重复控制条删除、Rescan/Backtest 行为分离、TraderFilters readonly 镜像 + availability 渲染、Backtest/Teaching 页面级重复移除。31/31 Node tests、normal/static builds、真实浏览器矩阵 **24/24 PASS**（首轮 step-11 FAIL 已修复并重跑全量）、0 console 错误、双 ticker assemble 冒烟通过、tracked DB hash 不变。证据 `evidence/phase-2-engine-ownership-and-workspaces.md` + `output/phase-2-acceptance-20260719/`。随即进入 `phase-3:in-progress`（availability-driven filters + trader point editing）。
+
+2026-07-19: Phase 1 完成并通过 exit gate：`reviewWorkspace.js` 纯 workspace 契约（分组/默认/same-date fallback/hash 解析/no-fabrication transition）与 `tradeRecords.js` availability/reconciliation/mirror 契约落地，`TraderFilters` 新增 readonly mirror + availability 渲染 + `aria-pressed`（legacy 分支待 Phase 2/3 页面接线时移除），28/28 Node tests、两种 Vite build、harness/budget/diff 全绿；证据 `evidence/phase-1-pure-contracts.md`。随即进入 `phase-2:in-progress`（engine ownership + Data/Review workspace 接线）。
+
+2026-07-19: `phase-1-start` 已开启（entry gate `phase-0:complete` + frozen frontend-only manifest 已满足）。Phase 1 范围：纯 ticker/date 分组、确定性默认选择、same-date fallback、interactive ID/static slug 解析、legacy hash 解析/格式化、context-transition 与 stale trader-selection reconciliation、availability 与 selected-trader 过滤分离、`TraderFilters` ticker/date 降为 readonly mirror、`test:trade-records` carrier 扩到全部 review 契约测试（名称不变）。仅纯契约与前端测试，无 DOM/API 副作用；Git/data/remote 边界不变。
+
+2026-07-19: 用户通过 goal-mode objective 附加本 active plan 发出独立 implementation-start 指令（记录为 `user-instruction:2026-07-19-start-review-workspaces-implementation`），`phase-0-start` 已开启，Phase 0 进入 `in-progress`：baseline/manifest/contract freeze 与 fixtures。该指令不授权 Git stage/commit、push/PR/merge/Pages/hosted、provider/broker 或 DB/data 写入；unrelated `output/` worktree artifacts 保持原样。
+
+2026-07-19: Phase 0 完成并通过 exit gate。Baseline/contract/manifest 三份证据落盘于 `docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/`；`reviewWorkspace.fixtures.js` 已建立并通过 Node 自检与真实 backend validator 的 write-valid/round-trip 验证。DB hash/integrity/FK/counts、workflow/export 精确哈希、static hash 行为、控制盘点、13 张 1672x941 interactive/static 基线截图（零 console 错误）均已捕获；governed/auto harness、146 lifecycle fixtures、startup budget、76/76 backend（pinned venv）、compileall、11/11 frontend tests、两种 Vite build、`git diff --check` 全部如实分类通过；admin read-shape 测试如实记为 not-run（Phase 3 才建路由）。tracked DB 字节不变，未 commit/push/发布，`output/` 既有内容保持原样。下一 gate：`phase-1-start`。
 
 2026-07-19: Kimi `review-003` 与 Grok `review-004` 已对同一 frozen `v3-round-1-review-foldback-2026-07-19` / SHA-256 `10fa26a1...e7ae69` 独立返回 `approve/high`。依照 `user-instruction:2026-07-19-dual-review-loop-through-active`，plan 已从 `proposed/` 移动到 `active/`，状态为 `phase-0:not-started`，next gate `phase-0-start`。Kimi 留下的 new-group `normalization` 明示化建议是 Phase 0 contract-freeze 内的非阻断观察；当前 activation 仅为 lifecycle 记录，不启动 Phase 0、不授权实现、数据写入、provider/broker、push/PR/merge/Pages/hosted 或远端动作。
 
@@ -59,11 +79,12 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
-| Active Review UI plan | `docs/exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` |
+| Completed Review UI plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` |
+| Review-ready packet | `docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/implementation-review-packet-001.md` |
 | Completed multi-trader plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md` |
 | Completed operating-modes plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
 | Previous completed plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
-| Verification and reviews | `docs/exec-plans/reviews/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan/` |
+| Verification and reviews | `docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/` |
 
 ## In Progress
 
@@ -75,11 +96,15 @@
 
 ## To Do
 
-- [ ] Await a new explicit implementation-start instruction before opening `phase-0-start`; Active status and dual design approval do not authorize Phase 0 work.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-20 - Completed Review Workspaces Phase 6 and the full plan after external Grok Build independently accepted the exact frozen revision at high confidence with no findings; digests remained exact, lifecycle/index/state links were reconciled, and protected data/Git/remote boundaries remained unchanged.
+- [x] 2026-07-20 - Completed Review Workspaces Phase 5 with full backend/frontend/governance regression, desktop+narrow interactive/static matrices, keyboard/focus/announcement recovery, ten fresh screenshots, visual-reference comparison, and exact protected-boundary proof.
+- [x] 2026-07-20 - Completed Review Workspaces Phase 4 with shared Static workspace/trader/control contracts, hash compatibility, honest no-trader state, one engine owner, 37/37 tests, isolated 49-day export, four fresh browser artifacts, and unchanged publication/data boundaries.
+- [x] 2026-07-20 - Completed Review Workspaces Phase 3 with form-only admin editing, full-day preservation, readonly denial, event-time contract repair, success/failure coherence replays, visual CSS isolation, 6 fresh browser artifacts, and unchanged canonical/runtime/publication boundaries.
+- [x] 2026-07-19 - Completed Phase 0 of the Review Workspaces plan: baseline/contract/manifest freeze evidence, 49-day asymmetric fixtures validated against the real backend validator, 13 baseline screenshots with zero console errors, all baseline checks truthfully classified, and unchanged tracked DB/content/workflow boundaries.
 - [x] 2026-07-19 - Completed the Multi-Trader SPY/QQQ plan with tracked DB promotion, exact legacy removal, normalized-only cutover, remediation-r1, independent `accept/high`, and lifecycle reconciliation commit `6e57f18f7644d2956c81795fed3b3838158497e6`.
 - [x] 2026-07-19 - Completed authorized local Phase 6 promotion/removal/cutover and acceptance: target tracked DB, exact 22 removals, normalized public/default consumers, rollback restore, 75 backend tests, 11 frontend tests, both builds, real-browser Review/Backtest/Teaching/Admin/downloads, and full governed/data/link scans passed.
 - [x] 2026-07-19 - Completed Multi-trader Phase 0 with exact manifest, DB/API/static/route/boundary hashes, 20/27/2 legacy inventory, cross-platform timezone prerequisite assessment, and unchanged tracked DB bytes.

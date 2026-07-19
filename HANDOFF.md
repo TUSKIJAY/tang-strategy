@@ -4,20 +4,20 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Lifecycle status: `Completed`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `closed`
 <!-- operating-modes-state:end -->
 
-- Last updated: 2026-07-19
+- Last updated: 2026-07-20
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`, frozen revision `v3-round-1-review-foldback-2026-07-19`, covering OPT-001 through OPT-004 as one Review/Data/Admin/Static UI contract
+- Current completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`, frozen revision `v3-round-1-review-foldback-2026-07-19`, covering OPT-001 through OPT-004 as one Review/Data/Admin/Static UI contract
 - Optimization provenance: `docs/optimization/2026-07-19-review-ui-and-trader-editing.md`; the user-confirmed default visual baseline is `design/references/2026-07-19-review-ui-reference-v1.png` at SHA-256 `57c34ea...d3c5`
 - Proposal baseline: live pre-proposal HEAD was `codex/project-harness@772b94595ccd15d41d06f966dd72e0bb7829c441`; related optimization/state/design inputs were uncommitted and unrelated `output/` artifacts were excluded
-- Current plan status: Active at `phase-0:not-started`; round 1 Kimi `review-001` and Grok `review-002` returned `revise/high` on frozen v2, all findings were folded into v3, and round 2 Kimi `review-003` plus Grok `review-004` both returned `approve/high` on the same frozen v3; next gate `phase-0-start`
-- Current authority: `user-instruction:2026-07-19-dual-review-loop-through-active` has been consumed through independent Kimi/Grok review rounds and lifecycle-only activation; it also authorizes one final local lifecycle commit. Phase 0 start, implementation, implementation commits, push, PR, merge, Pages, hosted verification, provider/broker, DB/data, and remote changes remain unauthorized
+- Current plan status: Completed with final disposition `Completed`; matching-revision v3 design approval and Phases 0-6 are closed. Final integrated acceptance is 78/78 backend, 38/38 frontend, 146/146 lifecycle, both builds, desktop+narrow interactive/static/accessibility recovery, and unchanged DB/content/workflow/exporter boundaries. External Grok Build `implementation-review-001` independently accepted frozen `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc` with high confidence, no findings, and direct vision inspection of all 19 required PNGs; next gate `closed`
+- Current authority: the design-review, implementation-start, Kimi-limit takeover, external-review, and Phase 6 closeout authorities are fully consumed. `user-instruction:2026-07-20-commit-and-push` separately authorizes only the exact plan-scoped commits and current `codex/project-harness` push in this maintenance task. No active implementation authority remains; PR, merge, Pages, hosted verification, provider/broker, tracked DB/canonical data, and other remote changes remain unauthorized
 - Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is `Completed`; remediation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055` received `implementation-review-002: accept/high` and all phases are closed
 - Completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md`
 - Authority boundary: the plan's local implementation, real TradingView receipts, Windows-transfer checkpoint, Phase 6 cutover, stable implementation, review, and accepted closeout authorities are consumed; push, IB access, PR, merge, Pages publication, hosted verification, and other remote changes remain unauthorized
@@ -29,8 +29,8 @@
 - Completed operating-modes plan reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB SHA-256 is `125fcc9d...8d23` with 49 active datasets (46 SPY + first 3 QQQ days 2026-07-10/14/17), 52 total datasets (3 superseded), and 2/33/33/46/7/5 normalized trade rows (traders/groups/legs/events/outcomes/contexts) including `vordin`; the local data/content checkpoint is already at `772b945`, while push/Pages remain unauthorized
 - Implementation boundary: implementation-review-002 accepted stable multi-trader implementation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`; lifecycle reconciliation is recorded at `6e57f18f7644d2956c81795fed3b3838158497e6`
-- Local Git boundary: Windows-transfer commit/push authority is consumed at `80f74f63f32849eddaaa99321f5f779446503458`; the current Phase 6 instruction is exhausted by the stable implementation, remediation, acceptance, lifecycle transition, and this final metadata-only reconciliation, with no push
-- Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, hosted verification, IB, or other remote change is authorized
+- Local Git boundary: Review Workspaces frozen implementation and accepted evidence are committed at `ab655568d50d20c2a97e970658ec9fa3b41719b7`; lifecycle reconciliation and metadata commits are bounded to this completed plan
+- Remote boundary: one exact current `codex/project-harness` branch push is authorized by `user-instruction:2026-07-20-commit-and-push`; PR, merge, Pages publish, branch protection, environment, hosted verification, IB, and every other remote change remain unauthorized
 
 ## Resume Checklist
 
@@ -41,12 +41,17 @@
 5. Lifecycle migration and durable reconciliation are complete; no plan implementation or closeout authority remains.
 6. The completed operating-modes plan remains closed; do not reuse its implementation authority for this proposal.
 7. The transfer and Phase 6 instructions are consumed. Push and every remote/publication action remain separately unauthorized.
-8. Treat the Review UI/trader-editing scope as frozen Active revision `v3-round-1-review-foldback-2026-07-19`; all four design reviews are append-only evidence and matching-revision dual approval is satisfied. Do not start Phase 0 or source implementation without a new explicit implementation-start instruction.
+8. Treat the Review UI/trader-editing plan as Completed under `implementation-review-001: accept/high`; all four design reviews and the implementation review are append-only evidence, all phases are closed, and no implementation or closeout gate remains.
 
 ## Verification Evidence
 
 | Check | Result |
 | --- | --- |
+| Current Review Workspaces revision | `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`; packet `implementation-review-packet-001.md`; `implementation-review-001: accept/high`, no findings, Grok session `019f7bdd-3f80-7361-be62-f7be49f24147` |
+| Current Review Workspaces closeout | pass: direct operating-modes, governed/auto harness and links, 146/146 lifecycle fixtures, startup budget, launcher syntax, frozen-digest recomputation, protected hashes, staging, and `git diff --check`; lifecycle `Completed`, next gate `closed` |
+| Current Review Workspaces verification | pass: 78/78 backend, 38/38 frontend, 146/146 lifecycle fixtures, compileall, normal/static builds, governed/auto/operating/budget, SQLite integrity/FK, diff/scope checks |
+| Current Review Workspaces browser | pass: fresh Chromium desktop `1672x941` and narrow `820x1180` interactive/static/Admin/readonly/Backtest/Teaching matrices; Phase 3/4/5 screenshot sets and behavior/console receipts preserved |
+| Current Review Workspaces boundaries | tracked DB `125fcc9d...8d23`, registry `cf6f3122...2716c`, 2026-07-17 day `0d292b43...88fc`, workflow/exporter unchanged; implementation commit `ab655568d50d20c2a97e970658ec9fa3b41719b7`; no canonical write, provider/broker, PR, merge, or publication action |
 | DB recovery | pass: 43 -> 46, exactly three additions, original 43-day map and non-market table hashes unchanged |
 | DB integrity | pass: `integrity_check=ok`, foreign-key rows `0`, post-promotion SHA-256 `76a885c2...28f8` |
 | Rebuild safety | pass: 11 rebuild tests, 4 shared safety tests, actual six-day seed refused against a 46-day temp copy with identical before/after bytes |
@@ -101,7 +106,7 @@
 | Multi-trader implementation-review-001 | `revise`, confidence `high`: post-promotion verified-backup cleanup failure reproduced old canonical content/new DB projection divergence; remediation-r1 now passes full-chain new/new coherence, retained-backup/warning, 76 backend, compileall, 11 frontend, two builds, 146 fixtures, and governance checks |
 | Multi-trader implementation-review-002 | `accept`, confidence `high`: exact remediation diff, isolated new/new fault replay, 1/1 focused, 76/76 backend, 11/11 frontend, two builds, 146/146 fixtures, SQLite integrity/FK, and authority boundary all passed |
 | Launcher diff review | `accept`, confidence `high`; final cache-cleanliness observation resolved |
-| Git boundary | the Windows-transfer commit/push is consumed; the current instruction authorizes plan-scoped local Phase 6 commit/review/accepted-closeout reconciliation only, with no push, PR, publish, merge, or remote settings change |
+| Git boundary | exact Review Workspaces scoped commits plus one current-branch push are authorized by `user-instruction:2026-07-20-commit-and-push`; no PR, publish, merge, remote settings change, or unrelated-path commit is authorized |
 
 Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/`.
 
@@ -116,7 +121,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-The plan is Active at `phase-0:not-started`. The next gate is `phase-0-start`, which requires a new explicit implementation-start instruction; lifecycle activation and design approval do not open implementation. Push, PR, merge, Pages, hosted verification, provider/broker access, DB/data changes, and remote actions remain unauthorized.
+Closed. The plan is Completed under external Grok Build `implementation-review-001: accept/high`; the accepted frozen revision is `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`, and all phases have final disposition `Completed`. The only current maintenance step is the exact plan-scoped commit/push authorized by `user-instruction:2026-07-20-commit-and-push`. PR, merge, Pages, hosted verification, provider/broker access, tracked DB/canonical data changes, and other remote actions remain unauthorized.
 
 ## Handoff Boundary
 

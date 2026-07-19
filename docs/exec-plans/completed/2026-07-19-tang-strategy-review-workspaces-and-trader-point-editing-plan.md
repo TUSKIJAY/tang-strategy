@@ -1,7 +1,7 @@
 # Tang Strategy Review Workspaces And Trader Point Editing
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
 - Revision: `v3-round-1-review-foldback-2026-07-19`
 - Plan author ID: `codex-plan-author-2026-07-19-review-workspaces`
@@ -9,20 +9,30 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-dual-review-loop-through-active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Phase entry gate: `phase-0-start`
-- Next gate: `phase-0-start`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Implementation start evidence: `user-instruction:2026-07-19-start-review-workspaces-implementation`
+- Phase 0 evidence: `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/phase-0-baseline.md`, `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/phase-0-contract-freeze.md`, `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/phase-0-manifest.md`
+- Phase 1 evidence: `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/phase-1-pure-contracts.md`
+- Phase 2 evidence: `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/phase-2-engine-ownership-and-workspaces.md`
+- Phase 3 evidence: `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/phase-3-trader-point-editing.md`
+- Phase 4 evidence: `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/phase-4-static-parity.md`
+- Phase 5 evidence: `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/phase-5-integrated-acceptance.md`
+- Phase 6 review packet: `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/implementation-review-packet-001.md`
+- Review-ready implementation revision: `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: `../reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/implementation-review-001.md@accept`
+- Implementation review session ID: `019f7bdd-3f80-7361-be62-f7be49f24147`
+- Final disposition: Completed
+- Verified implementation commit: `ab655568d50d20c2a97e970658ec9fa3b41719b7`
 - Lifecycle reconciliation commit: none
 - Owner: Codex
 - Created: 2026-07-19
 - Source intake: [`docs/optimization/2026-07-19-review-ui-and-trader-editing.md`](../../optimization/2026-07-19-review-ui-and-trader-editing.md), OPT-001 through OPT-004
 - Visual baseline: [`design/references/2026-07-19-review-ui-reference-v1.png`](../../../design/references/2026-07-19-review-ui-reference-v1.png), SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`
-- Scope authority: lifecycle-only activation is complete at `phase-0:not-started`; implementation, Phase 0 start, data writes, provider/broker access, push, PR, merge, Pages publication, hosted verification, and remote changes require separate authority and remain unauthorized
-- Current request authority: `user-instruction:2026-07-19-dual-review-loop-through-active` has been consumed through independent Kimi/Grok same-revision design reviews and lifecycle-only activation, and authorizes one final local lifecycle commit; it does not authorize Phase 0 start, implementation, implementation commits, push, publication, provider/broker access, or remote changes
+- Scope authority: lifecycle-only activation and Phases 0-6 are complete; `user-instruction:2026-07-19-start-review-workspaces-implementation`, `user-instruction:2026-07-20-kimi-limit-takeover`, and the final Phase 6 closeout instruction are fully consumed. External Grok Build accepted the exact review-ready revision above with high confidence and no findings. `user-instruction:2026-07-20-commit-and-push` separately authorizes only the exact plan-scoped commits and current `codex/project-harness` branch push being completed in this maintenance task; data writes, provider/broker access, PR, merge, Pages publication, hosted verification, and other remote changes remain unauthorized
+- Current request authority: exact plan-scoped local commits and one current-branch push under `user-instruction:2026-07-20-commit-and-push`; this authority does not reopen implementation or extend to data, publication, provider/broker, PR, merge, or remote settings
 
 ## 1. Context And Evidence
 
