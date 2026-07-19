@@ -3,14 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-6`
-- Phase state: `complete`
-- Next gate: `phase-6-closeout`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
 
-2026-07-19: Phase 6 remediation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055` 已获得独立 `implementation-review-002: accept/high`。同一临时 content/DB 故障注入为 new/new、相等、one warning、one retained backup；定点 1/1、backend 76/76、frontend 11/11、两种 build、146/146 fixtures、SQLite integrity/FK 与治理检查全通过。Phase 6 更新为 `complete`，next gate 为 `phase-6-closeout`；push、PR、Pages、hosted、IB 与新 provider run 未授权、未执行。
+2026-07-19: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` 已完成 Phase 0-6、双平台 pinned-runtime receipts、tracked DB promotion、exact legacy removal、normalized cutover、remediation-r1 与独立 `implementation-review-002: accept/high`，并迁移到 `completed/`。Verified implementation commit 为 `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`；lifecycle transition commit 形成后由 metadata-only follow-up 写回 plan。push、PR、Pages、hosted、IB 与新 provider run 未授权、未执行。
 
 2026-07-19: 用户通过 `user-instruction:2026-07-19-authorize-phase6-cutover` 明确授权本地 Phase 6 tracked-DB promotion、冻结清单内 legacy removal 与正式 cutover。Phase 5 双平台 receipt exit gate 已满足，Phase 6 进入 `in-progress`；本次权限不包含新的 stage/commit/push、PR、merge、Pages、hosted、IB 或其他远端动作。
 
@@ -47,14 +47,14 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
-| Active multi-trader plan | `docs/exec-plans/active/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md` |
+| Completed multi-trader plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md` |
 | Completed operating-modes plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
 | Previous completed plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
 | Verification and reviews | `docs/exec-plans/reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/` |
 
 ## In Progress
 
-- [ ] Reconcile the accepted Phase 6 lifecycle closeout locally without push.
+- [ ] None.
 
 ## Blocked
 
@@ -62,11 +62,12 @@
 
 ## To Do
 
-- [ ] Move the accepted plan to `completed/`, reconcile lifecycle surfaces, and record the separately referenceable closeout commit. Push, PR, Pages, merge, and other remote actions remain separately gated.
+- [ ] After the lifecycle transition commit exists, record its hash in the completed plan and rerun final verification. Push, PR, Pages, merge, and other remote actions remain separately gated.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-19 - Completed the Multi-Trader SPY/QQQ plan with tracked DB promotion, exact legacy removal, normalized-only cutover, remediation-r1, independent `accept/high`, and lifecycle migration to `completed/`.
 - [x] 2026-07-19 - Completed authorized local Phase 6 promotion/removal/cutover and acceptance: target tracked DB, exact 22 removals, normalized public/default consumers, rollback restore, 75 backend tests, 11 frontend tests, both builds, real-browser Review/Backtest/Teaching/Admin/downloads, and full governed/data/link scans passed.
 - [x] 2026-07-19 - Completed Multi-trader Phase 0 with exact manifest, DB/API/static/route/boundary hashes, 20/27/2 legacy inventory, cross-platform timezone prerequisite assessment, and unchanged tracked DB bytes.
 - [x] 2026-07-19 - Completed Multi-trader Phase 1 with frozen canonical/public/export contracts, 34 focused and 53 complete backend tests, deterministic 20/27/2 classification, and zero runtime/data/publication diff.

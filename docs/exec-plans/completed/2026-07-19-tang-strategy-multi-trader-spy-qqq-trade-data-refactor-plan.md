@@ -1,7 +1,7 @@
 # Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan`
 - Revision: `v5-round-3-review-foldback-2026-07-19`
 - Plan author ID: `codex-plan-author-2026-07-19-multi-trader`
@@ -9,17 +9,18 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-19-start-dual-review-loop-through-active`
-- Current phase: phase-6
-- Phase state: complete
-- Phase entry gate: `phase-6-start`
-- Next gate: `phase-6-closeout`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan/implementation-review-002.md@accept
+- Final disposition: Completed
+- Verified implementation commit: `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`
 - Lifecycle reconciliation commit: none
 - Owner: Codex
 - Created: 2026-07-19
-- Scope authority: implementation start authorized for Phase 0-4 local/offline work and Phase 5 offline work; the current user instructions separately authorized real TradingView provider runs for the required macOS/Windows Phase 5 receipts, the consumed Windows-transfer stage/commit/push now represented by `80f74f63f32849eddaaa99321f5f779446503458`, `user-instruction:2026-07-19-authorize-phase6-cutover` for local Phase 6 tracked-DB promotion, declared legacy removal, and formal cutover, and `user-instruction:2026-07-19-authorize-phase6-stable-commit-review-closeout` for the plan-scoped local commits required to freeze the implementation and reconcile an accepted closeout; push, IB access, PR, merge, Pages publication, and other remote changes remain unauthorized
+- Implementation authority: completed; all phases and remediation-r1 are closed under qualifying `implementation-review-002: accept/high`
+- Scope authority: no active implementation authority remains; future changes require a new authorized request and the applicable operating-mode gate
 
 ## 1. Context And Evidence
 
@@ -604,3 +605,9 @@ Detailed command output belongs in bounded evidence artifacts, not `PROGRESS.md`
 - Implementation start requires a later explicit start/execute instruction after activation recording.
 
 The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../../operating-modes.md) for state invariants, review paths, gate-token syntax, manual transitions, and closeout fields.
+
+## 11. Closeout Record
+
+- Independent acceptance: `implementation-review-002.md`, authored by `independent-implementation-reviewer-2026-07-19-multi-trader-r2`, returned `accept` with `high` confidence against stable implementation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`; it independently replayed the original coherence defect as new content/new DB with one cleanup warning and one retained verified backup, and found no remaining implementation finding.
+- Phase 6 completion: the qualifying independent acceptance closes tracked-DB promotion, exact legacy removal, normalized-only cutover, remediation-r1, and local acceptance. Hosted/Pages, IB, new provider receipts, push, PR, merge, and the complete browser matrix were not rerun and are not claimed by the closeout review.
+- Lifecycle closeout result: moved this plan to `completed/`, set final disposition `Completed`, declared the accepted review and verified implementation commit, cleared active phase fields, and reconciled active/completed/review indexes, roadmap, PROGRESS, and HANDOFF. The transition commit cannot self-reference, so its hash will be added to `Lifecycle reconciliation commit` by one metadata-only local follow-up commit.

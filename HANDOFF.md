@@ -3,19 +3,19 @@
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-6`
-- Phase state: `complete`
-- Next gate: `phase-6-closeout`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-19
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Proposal baseline: `codex/project-harness@25ba77fd9947c504f68cab1c7700d9f5c84d62b4` was clean before the new proposal; rerun startup commands for live Git truth
-- Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is Active at `phase-6:complete`; remediation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055` received `implementation-review-002: accept/high`, and lifecycle closeout is the current gate
-- Active plan: `docs/exec-plans/active/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md`
+- Lifecycle: `Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor` revision `v5-round-3-review-foldback-2026-07-19` is `Completed`; remediation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055` received `implementation-review-002: accept/high` and all phases are closed
+- Completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md`
 - Authority boundary: local/offline implementation, Phase 5 real TradingView receipts, the consumed Windows-transfer checkpoint commit/push, local Phase 6 tracked-DB promotion/declared legacy removal/formal cutover, and the plan-scoped local commits required for stable implementation plus accepted lifecycle closeout are authorized; push, IB access, PR, merge, Pages publication, hosted verification, and other remote changes are not
 - Completed operating-modes historical startup: `codex/project-harness@2454ccb7fc1c927f2a52a3bd2db7debe41998594` was that earlier plan's clean baseline; it is not the current proposal baseline
 - Lifecycle: `Tang Strategy Coding And Data Update Modes` revision `v2-review-foldback-2026-07-19` is `Completed`; implementation-review-013 returned `accept` with `high` confidence and all phases are closed
@@ -24,7 +24,7 @@
 - Review monitor: 10-minute current-task heartbeat `tang-dual-review-loop-monitor` reached its activation stop condition and is removed during closeout
 - Completed operating-modes plan reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: promoted tracked DB SHA-256 is `4a5bce13...2c34` with 46 active SPY datasets, 43,425/8,821 bars, 1/27/27/30/4/2 normalized trade rows, logical SHA-256 `f7ca32...70a34`, integrity `ok`, and zero FK rows; no historical QQQ day was fabricated
-- Implementation boundary: implementation-review-013 accepted stable implementation commit `994f9176eb74778f346710e62ec6dabde55bae9a`; lifecycle reconciliation is recorded at `4f6f2e0937ba5580e170e32ea7fd17718b7b68e3`
+- Implementation boundary: implementation-review-002 accepted stable multi-trader implementation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`; the lifecycle transition commit will be recorded by the final metadata-only reconciliation after that commit exists
 - Local Git boundary: the Windows-transfer stage/commit/push authority is consumed at `80f74f63f32849eddaaa99321f5f779446503458`; accepted Phase 6 implementation is committed at `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`, and the current instruction authorizes plan-scoped local review/accepted-closeout commits only, with no push
 - Remote boundary: no push, PR, merge, Pages publish, branch protection, environment, hosted verification, IB, or other remote change is authorized
 
@@ -32,9 +32,9 @@
 
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
-3. Preserve any unrelated changes and read `docs/operating-modes.md`, the current proposed multi-trader plan, and its review directory/index.
-4. The multi-trader plan is Active at `phase-6:complete`; implementation-review-002 accepted remediation-r1 with high confidence, and lifecycle closeout is required.
-5. Preserve the promoted DB, 22 planned deletions, normalized consumer boundary, and both implementation reviews; stage only the exact closeout surface, and do not call IB or publish Pages.
+3. Preserve any unrelated changes and read `docs/operating-modes.md`, the completed multi-trader plan, and its review directory/index.
+4. The multi-trader plan is Completed under implementation-review-002 `accept/high`; no implementation authority remains.
+5. Lifecycle migration is complete in this state. After committing it, record that commit hash in the completed plan metadata, rerun final verification, and create only the metadata-only reconciliation commit.
 6. The completed operating-modes plan remains closed; do not reuse its implementation authority for this proposal.
 7. The transfer instruction is consumed. The new Phase 6 instruction authorizes only the plan-scoped local commit/review/closeout sequence; push and every remote/publication action remain separately unauthorized.
 
@@ -110,7 +110,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Move the accepted plan to `completed/`, reconcile indexes/roadmap/state/handoff, and record the separately referenceable local lifecycle commit. Push, PR, merge, Pages, hosted verification, and IB remain unauthorized.
+After the lifecycle transition commit exists, record its hash in the completed plan metadata and rerun final verification. Push, PR, merge, Pages, hosted verification, and IB remain unauthorized.
 
 ## Handoff Boundary
 
