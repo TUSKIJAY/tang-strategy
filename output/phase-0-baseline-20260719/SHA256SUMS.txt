@@ -1,0 +1,13 @@
+88f74a9b9aa1d2fe4a200e14d125f4fcef41df09f973f997925dfc2f9b44fe03  output/phase-0-baseline-20260719/interactive/01-login.png
+50a343c8079ad0411d7b09f5af5e384730f05487095682d5f0313f1026731f00  output/phase-0-baseline-20260719/interactive/02-data.png
+f00f148ddb9f91eaa7260e80a4ee7867f0a8d441f2ff5a37a853ada53c3eac1b  output/phase-0-baseline-20260719/interactive/03-review-default.png
+f00f148ddb9f91eaa7260e80a4ee7867f0a8d441f2ff5a37a853ada53c3eac1b  output/phase-0-baseline-20260719/interactive/04-review-qqq-2026-07-17.png
+e25f70611fbe074baaec818d7fe4294c6c09cee5ceaa96cbc70106737275dc41  output/phase-0-baseline-20260719/interactive/05-review-qqq-2026-07-14.png
+e354c5541c0f444374076bf6dc31d0309f6336b04f68741090c10ce67121b3e8  output/phase-0-baseline-20260719/interactive/06-admin-traders.png
+c8e111063bc50cd1372ffc3d2a30e4bb0b07490391237dedddf73bd4378c8e3a  output/phase-0-baseline-20260719/interactive/07-backtest.png
+01cd96a3a0b67af3d6bca622e1cbbf9184d69625543b9223962ff2102b00f2f1  output/phase-0-baseline-20260719/interactive/08-teaching.png
+e169ecbb8bb282f54ed8a533b8569ca2e4583b8de3a5168ea7cff2ff955e1fbd  output/phase-0-baseline-20260719/static/01-static-default.png
+78850e0c43785b52ea47da078d225384735a3ca146e7b19e2bf69de026b8d6d6  output/phase-0-baseline-20260719/static/02-static-spy-2026-07-17.png
+d50550094725f21ec18dbefcd97ba1d05b20d29da37be58397eca147b8674de7  output/phase-0-baseline-20260719/static/03-static-qqq-2026-07-17.png
+9b79f419c3dbd56b4dae90ef49b63f7666820a51f777e5276ee9b57a93f7a605  output/phase-0-baseline-20260719/static/04-static-qqq-2026-07-14.png
+d50550094725f21ec18dbefcd97ba1d05b20d29da37be58397eca147b8674de7  output/phase-0-baseline-20260719/static/05-static-invalid-hash.png

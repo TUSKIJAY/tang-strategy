@@ -24,8 +24,10 @@ from .services.db_safety import (
 from .services.trade_records import (
     TradeAuthorizationError,
     TradeValidationError,
+    handle_trade_day_admin_read,
     handle_trade_day_admin_write,
     handle_trade_records_read,
+    handle_trader_registry_admin_read,
     handle_trader_registry_admin_write,
 )
 from .settings import settings
@@ -232,6 +234,24 @@ def trade_records(
             review_statuses=review_status,
             eligibility=eligibility,
         )
+    except (TradeValidationError, TradeAuthorizationError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/admin/traders")
+def read_traders(role: str = Depends(require_admin)) -> dict[str, Any]:
+    try:
+        return handle_trader_registry_admin_read(role, settings.content_dir)
+    except (TradeValidationError, TradeAuthorizationError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/admin/trade-records")
+def read_trade_records(trade_date: str, role: str = Depends(require_admin)) -> dict[str, Any]:
+    try:
+        return handle_trade_day_admin_read(role, settings.content_dir, trade_date)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except (TradeValidationError, TradeAuthorizationError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

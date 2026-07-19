@@ -3,16 +3,25 @@ import { Api } from '../api/client.js';
 import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../features/review/scanner.js';
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
 import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
+import { ReviewContextPanel } from '../features/review/ReviewContextPanel.jsx';
 import { ReviewSignalList } from '../features/review/ReviewSignalList.jsx';
 import { TradeExportControls } from '../features/review/TradeExportControls.jsx';
 import { TraderFilters } from '../features/review/TraderFilters.jsx';
 import { TraderTradeList } from '../features/review/TraderTradeList.jsx';
 import {
-  buildTradeAvailability,
   buildTradeRecordAnnotations,
+  deriveAvailableTraders,
   filterTradeGroups,
   initialTradeRecordFilters,
+  reconcileTraderSelection,
 } from '../features/review/tradeRecords.js';
+import {
+  findDay,
+  normalizeInteractiveDays,
+  resolveInitialWorkspace,
+  selectWorkspaceDay,
+  switchTicker,
+} from '../features/review/reviewWorkspace.js';
 import {
   buildBarIndexMap,
   preferredActivationWickStrategy,
@@ -192,7 +201,7 @@ function chartAnnotation(annotation) {
   return annotation;
 }
 
-export function ReviewPage({ state, setState }) {
+export function ReviewPage({ state, setState, onNavigate }) {
   const engineRef = useRef(null);
   const [review, setReview] = useState(null);
   const [activeSignalId, setActiveSignalId] = useState('');
@@ -202,8 +211,32 @@ export function ReviewPage({ state, setState }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showExtendedKBars, setShowExtendedKBars] = useState(loadExtendedKBars);
-  const selectedDay = state.marketDays.find((day) => day.id === Number(state.selectedDayId)) || state.marketDays[0];
+  const workspaceDays = useMemo(() => normalizeInteractiveDays(state.marketDays), [state.marketDays]);
+  const selectedDay = useMemo(() => {
+    const explicit = state.marketDays.find((day) => day.id === Number(state.selectedDayId));
+    if (explicit) return explicit;
+    return resolveInitialWorkspace({ days: workspaceDays }).day?.ref || state.marketDays[0];
+  }, [state.marketDays, state.selectedDayId, workspaceDays]);
+  const workspace = useMemo(() => (selectedDay ? {
+    ticker: selectedDay.ticker,
+    trade_date: selectedDay.trade_date,
+    key: String(selectedDay.id),
+  } : { ticker: '', trade_date: '', key: '' }), [selectedDay]);
+  const currentWorkspaceDay = useMemo(
+    () => findDay(workspaceDays, { ticker: workspace.ticker, tradeDate: workspace.trade_date }),
+    [workspaceDays, workspace],
+  );
   const selectedStrategy = state.strategies.find((strategy) => strategy.id === Number(state.selectedStrategyId)) || preferredActivationWickStrategy(state.strategies);
+
+  function handleSwitchTicker(ticker) {
+    const next = switchTicker(workspaceDays, { day: currentWorkspaceDay }, ticker);
+    if (next.day?.ref) setState((prev) => ({ ...prev, selectedDayId: next.day.ref.id }));
+  }
+
+  function handleSelectDate(tradeDate) {
+    const next = selectWorkspaceDay(workspaceDays, { day: currentWorkspaceDay }, { ticker: workspace.ticker, tradeDate });
+    if (next.day?.ref) setState((prev) => ({ ...prev, selectedDayId: next.day.ref.id }));
+  }
 
   useEffect(() => {
     try {
@@ -230,10 +263,21 @@ export function ReviewPage({ state, setState }) {
         setActiveTradeGroupId('');
         const records = payload.trade_records;
         if (records) {
-          setTradeFilters({
-            ...initialTradeRecordFilters(records.traders),
-            ticker: records.ticker,
-            tradeDate: records.trade_date,
+          const { availableTraderIds } = deriveAvailableTraders(records, records.traders);
+          setTradeFilters((previous) => {
+            const reconciled = reconcileTraderSelection({
+              previousSelectedIds: previous ? previous.traderIds : null,
+              previousFocusedId: previous?.focusedTraderId || '',
+              availableTraderIds,
+              contextChanged: true,
+            });
+            return {
+              ...initialTradeRecordFilters(records.traders),
+              ticker: records.ticker,
+              tradeDate: records.trade_date,
+              traderIds: reconciled.selectedTraderIds,
+              focusedTraderId: reconciled.focusedTraderId,
+            };
           });
         }
         setRunVersion((value) => value + 1);
@@ -277,10 +321,32 @@ export function ReviewPage({ state, setState }) {
     [displayComputed.annotations1m],
   );
   const tradeRecords = displayReview?.trade_records || null;
-  const tradeAvailability = useMemo(
-    () => buildTradeAvailability(tradeRecords ? [tradeRecords] : []),
-    [tradeRecords],
+  // Availability derives from the resolved payload and the current
+  // status/review/eligibility contract, before trader selection (plan §3.3).
+  const traderAvailability = useMemo(
+    () => (tradeRecords
+      ? deriveAvailableTraders(tradeRecords, tradeRecords.traders, tradeFilters)
+      : { availableTraderIds: [], displayableGroups: [] }),
+    [tradeRecords, tradeFilters],
   );
+  // Same-context reconciliation: intersect the current selection with
+  // availability without reviving an intentional empty selection, and always
+  // clear an unavailable focused trader.
+  useEffect(() => {
+    setTradeFilters((previous) => {
+      if (!previous) return previous;
+      const reconciled = reconcileTraderSelection({
+        previousSelectedIds: previous.traderIds,
+        previousFocusedId: previous.focusedTraderId || '',
+        availableTraderIds: traderAvailability.availableTraderIds,
+        contextChanged: false,
+      });
+      const sameSelection = reconciled.selectedTraderIds.join(',') === (previous.traderIds || []).join(',');
+      const sameFocus = reconciled.focusedTraderId === (previous.focusedTraderId || '');
+      if (sameSelection && sameFocus) return previous;
+      return { ...previous, traderIds: reconciled.selectedTraderIds, focusedTraderId: reconciled.focusedTraderId };
+    });
+  }, [tradeRecords, traderAvailability.availableTraderIds]);
   const filteredTradeGroups = useMemo(
     () => filterTradeGroups(tradeRecords, tradeFilters),
     [tradeRecords, tradeFilters],
@@ -359,16 +425,14 @@ export function ReviewPage({ state, setState }) {
     });
   }
 
-  function runBacktest() {
+  function rescan() {
     setRunVersion((value) => value + 1);
     setActiveSignalId('');
     setActiveTradeGroupId('');
   }
 
-  function overview() {
-    setActiveSignalId('');
-    setActiveTradeGroupId('');
-    engineRef.current?.overview();
+  function openBacktest() {
+    onNavigate?.('backtest');
   }
 
   const enginePayload = useMemo(() => {
@@ -390,7 +454,7 @@ export function ReviewPage({ state, setState }) {
 
   return (
     <section className="dr-shell">
-      <div className="dr-app">
+      <div className="dr-app dr-app--no-upload">
         <header className="dr-topbar">
           <div className="dr-title">Daily Review</div>
           <div className="dr-divider" />
@@ -407,18 +471,49 @@ export function ReviewPage({ state, setState }) {
         </header>
 
         <aside className="dr-sidebar">
+          <ReviewContextPanel
+            days={workspaceDays}
+            workspace={workspace}
+            onSwitchTicker={handleSwitchTicker}
+            onSelectDate={handleSelectDate}
+          >
+            <div className="review-context-actions">
+              <label className="review-context-field">
+                Strategy
+                <select value={selectedStrategy?.id || ''} onChange={(event) => setState((prev) => ({ ...prev, selectedStrategyId: event.target.value }))}>
+                  {state.strategies.map((item) => <option key={item.id} value={item.id}>{item.name} v{item.version}</option>)}
+                </select>
+              </label>
+              <div className="review-context-buttons">
+                <button
+                  type="button"
+                  className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
+                  role="switch"
+                  aria-checked={showExtendedKBars}
+                  onClick={() => setShowExtendedKBars((value) => !value)}
+                  disabled={!review || loading}
+                  title="Toggle 09:00-16:30 extended K bars"
+                >
+                  Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
+                </button>
+                <button type="button" onClick={rescan} disabled={!review || loading}>Rescan</button>
+                <button type="button" onClick={openBacktest}>Backtest</button>
+              </div>
+              <span className="dr-storage-status" data-tone={error ? 'error' : 'ok'} role="status" aria-live="polite">{error ? 'Assembly failed' : 'SQLite review assembled automatically'}</span>
+            </div>
+          </ReviewContextPanel>
           <div className="dr-sidebar-header">
             <span>提示 {summary.setups || summary.expired ? `(${summary.total} 进场 · ${summary.setups} 启动 / ${summary.expired} 过期)` : `(${allAnnotations.length})`}</span>
-            <button type="button" onClick={overview}>总览</button>
           </div>
           <div className="dr-signal-list">
             {tradeRecords && (
               <>
                 <TraderFilters
                   traders={tradeRecords.traders}
-                  availability={tradeAvailability}
                   value={tradeFilters}
                   onChange={setTradeFilters}
+                  context={{ ticker: tradeRecords.ticker, tradeDate: tradeRecords.trade_date }}
+                  availableTraderIds={traderAvailability.availableTraderIds}
                 />
                 <TradeExportControls payload={tradeRecords} groups={filteredTradeGroups} filters={tradeFilters} />
               </>
@@ -444,8 +539,8 @@ export function ReviewPage({ state, setState }) {
         </aside>
 
         <main className="dr-chart-area">
-          {error && <div className="dr-error">{error}</div>}
-          {loading && <div className="dr-loading">正在从 SQLite 组装复盘...</div>}
+          {error && <div className="dr-error" role="alert">{error}</div>}
+          {loading && <div className="dr-loading" role="status" aria-live="polite">正在从 SQLite 组装复盘...</div>}
           {!loading && enginePayload && (
             <UnifiedKlineEngine
               ref={engineRef}
@@ -465,45 +560,6 @@ export function ReviewPage({ state, setState }) {
             />
           )}
         </main>
-
-        <footer className="dr-upload-bar">
-          <div className="dr-control-group">
-            <label>Market day</label>
-            <select value={selectedDay?.id || ''} onChange={(event) => setState((prev) => ({ ...prev, selectedDayId: event.target.value }))}>
-              {state.marketDays.map((day) => <option key={day.id} value={day.id}>{day.ticker} {day.trade_date} · {day.session_mode} (live_extended)</option>)}
-            </select>
-          </div>
-          <div className="dr-upload-divider" />
-          <div className="dr-control-group">
-            <label>Strategy</label>
-            <select value={selectedStrategy?.id || ''} onChange={(event) => setState((prev) => ({ ...prev, selectedStrategyId: event.target.value }))}>
-              {state.strategies.map((item) => <option key={item.id} value={item.id}>{item.name} v{item.version}</option>)}
-            </select>
-          </div>
-          <div className="dr-upload-divider" />
-          <div className="dr-action-group">
-            <button
-              type="button"
-              className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
-              role="switch"
-              aria-checked={showExtendedKBars}
-              onClick={() => setShowExtendedKBars((value) => !value)}
-              disabled={!review || loading}
-              title="Toggle 09:00-16:30 extended K bars"
-            >
-              Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
-            </button>
-            <button type="button" onClick={() => engineRef.current?.setTimeframe('1m')}>1m</button>
-            <button type="button" onClick={() => engineRef.current?.setTimeframe('5m')}>5m</button>
-            <button type="button" onClick={() => engineRef.current?.stepBack()} disabled={!review || loading}>Back</button>
-            <button type="button" onClick={() => engineRef.current?.stepForward()} disabled={!review || loading}>Step</button>
-            <button type="button" onClick={() => engineRef.current?.togglePlayback()} disabled={!review || loading}>Play/Pause</button>
-            <button type="button" onClick={runBacktest} disabled={!review || loading}>Backtest</button>
-            <button type="button" onClick={runBacktest} disabled={!review || loading}>Rescan</button>
-            <button type="button" onClick={overview}>Overview</button>
-          </div>
-          <span className="dr-storage-status" data-tone={error ? 'error' : 'ok'}>{error ? 'Assembly failed' : 'SQLite review assembled automatically'}</span>
-        </footer>
       </div>
     </section>
   );

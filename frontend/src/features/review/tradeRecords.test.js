@@ -7,14 +7,34 @@ import {
   buildTradeRecordAnnotations,
   buildTradeRecordDownloads,
   canEditTradeRecords,
+  deriveAvailableTraders,
+  displayableTradeGroups,
   exportSelectionFromFilters,
+  filtersMatchWorkspace,
   filterTradeGroups,
   flattenTradeRecords,
   initialTradeRecordFilters,
+  mirrorWorkspaceContext,
+  reconcileTraderSelection,
   resolveTradeDate,
   reviewHashRoute,
   summarizeTradeGroups,
 } from './tradeRecords.js';
+import {
+  FIXTURE_PRESERVATION_CASE,
+  FIXTURE_TRADE_PAYLOADS,
+  FIXTURE_TRADERS,
+  FIXTURE_MULTI_TICKER_DAY,
+} from './reviewWorkspace.fixtures.js';
+import {
+  applyOccurredAt,
+  buildNewEvent,
+  buildNewGroup,
+  mergeGroupIntoDay,
+  nextGroupId,
+  preservationDiff,
+  validateGroupForm,
+} from './tradeCandidate.js';
 
 const traders = [
   { trader_id: 'alice', display_name: 'Alice', color: '#3366CC', active: true, sort_order: 10 },
@@ -134,12 +154,44 @@ test('reload defaults select all active traders without persisted filter state',
   assert.equal(reloaded.ticker, 'SPY');
 });
 
-test('admin workspace hydrates async trader payloads once without overwriting later edits', () => {
-  const source = readFileSync(new URL('../../pages/AdminTradersPage.jsx', import.meta.url), 'utf8');
-  assert.match(source, /useEffect\(\(\) => \{/);
-  assert.match(source, /initializedFromPayloads\.current \|\| !traders\.length/);
-  assert.match(source, /setFilters\(initialTradeRecordFilters\(traders\)\)/);
-  assert.match(source, /setRegistryText\(JSON\.stringify\(\{ schema_version: 'traders-v1', traders \}/);
+test('admin workspace pins capability labels, no raw JSON, and form editor gate', () => {
+  const pageSource = readFileSync(new URL('../../pages/AdminTradersPage.jsx', import.meta.url), 'utf8');
+  // Raw JSON editing is gone; capability is explicit for both roles.
+  assert.doesNotMatch(pageSource, /textarea/);
+  assert.doesNotMatch(pageSource, /registryText|dayText|JSON\.parse/);
+  assert.match(pageSource, /只读：可检查与导出交易记录；新增\/编辑点位需要管理员权限。/);
+  assert.match(pageSource, /管理员：通过表单新增\/编辑点位并保存/);
+  // Inspection mirrors the workspace; the editor renders only for admins.
+  assert.match(pageSource, /<ReviewContextPanel/);
+  assert.match(pageSource, /availableTraderIds=\{traderAvailability\.availableTraderIds\}/);
+  assert.match(pageSource, /\{isAdmin && \(\s*<TraderPointEditor/);
+  assert.match(pageSource, /保存注册表/);
+
+  const editorSource = readFileSync(new URL('./TraderPointEditor.jsx', import.meta.url), 'utf8');
+  // Canonical admin reads are the only write base; pure candidate contract used.
+  assert.match(editorSource, /Api\.adminTradeDay\(workspace\.trade_date\)/);
+  assert.doesNotMatch(editorSource, /Api\.tradeRecords/);
+  assert.match(editorSource, /mergeGroupIntoDay\(dayDoc, stripMeta\(form\)\)/);
+  assert.match(editorSource, /preservationDiff\(dayDoc, candidate, \{ targetGroupId: stripMeta\(form\)\.trade_group_id \}\)/);
+  assert.match(editorSource, /validateGroupForm\(form\)/);
+  assert.match(editorSource, /buildNewGroup\(dayDoc/);
+  // Save is explicit, confirm-gated, fail-closed, and never auto-retried.
+  assert.match(editorSource, /disabled=\{!canSave\}/);
+  assert.match(editorSource, /window\.confirm\(summary\)/);
+  assert.match(editorSource, /errorCount === 0 && diff\?\.ok/);
+  assert.match(editorSource, /catch \(err\) \{\s*\/\/ Unsaved form state is retained/);
+  // Direction change keeps the leg option_type in sync; 404 maps to the
+  // explicit missing-day branch via the client error status.
+  assert.match(editorSource, /direction: event\.target\.value,\s*\n\s*legs: \[\{ \.\.\.previous\.legs\[0\], option_type: event\.target\.value \}\]/);
+  assert.match(editorSource, /err\.status === 404/);
+  assert.match(editorSource, /updateEvent\(index, applyOccurredAt\(event, e\.target\.value\)\)/);
+  // Missing day requires an explicit user action; readonly renders nothing.
+  assert.match(editorSource, /新建该日期文档/);
+  assert.match(editorSource, /if \(!isAdmin\) return null;/);
+
+  const styleSource = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
+  assert.match(styleSource, /\.tp-group-picker button \{[^}]*background: #fff; color: var\(--ink\);/);
+  assert.match(styleSource, /\.tp-missing-day button \{[^}]*background: #fff; color: var\(--ink\);/);
 });
 
 test('only admin role can enable frozen-contract editors', () => {
@@ -288,4 +340,318 @@ test('downloads synchronize current filters, groups, contexts, counts, and selec
   assert.equal(exported.counts.trade_groups_total, 1);
   assert.equal(exported.counts.note_contexts_total, 1);
   assert.equal(downloads['trade_groups.csv'].trim().split('\n').length - 1, 1);
+});
+
+// --- Availability-driven trader contract (plan §3.3) -------------------------
+
+test('availability derives only traders with displayable groups in registry order', () => {
+  assert.deepEqual(
+    deriveAvailableTraders(FIXTURE_TRADE_PAYLOADS['spy-2026-07-17'], FIXTURE_TRADERS).availableTraderIds,
+    ['tang'],
+  );
+  assert.deepEqual(
+    deriveAvailableTraders(FIXTURE_TRADE_PAYLOADS['qqq-2026-07-17'], FIXTURE_TRADERS).availableTraderIds,
+    ['vordin'],
+  );
+  // Registry order wins over group order: vordin (sort_order 20) follows tang (10).
+  const vordinSpyGroup = {
+    ...FIXTURE_TRADE_PAYLOADS['qqq-2026-07-17'].trade_groups[0],
+    underlying: 'SPY',
+    trade_date: '2026-07-17',
+  };
+  const bothPayload = {
+    ...FIXTURE_TRADE_PAYLOADS['spy-2026-07-17'],
+    trade_groups: [vordinSpyGroup, ...FIXTURE_TRADE_PAYLOADS['spy-2026-07-17'].trade_groups],
+  };
+  assert.deepEqual(
+    deriveAvailableTraders(bothPayload, FIXTURE_TRADERS).availableTraderIds,
+    ['tang', 'vordin'],
+  );
+});
+
+test('pending-only and empty days expose no visible trader option', () => {
+  // QQQ 2026-07-14 is pending-only: invisible under the default display contract.
+  const pending = deriveAvailableTraders(FIXTURE_TRADE_PAYLOADS['qqq-2026-07-14'], FIXTURE_TRADERS);
+  assert.deepEqual(pending.availableTraderIds, []);
+  assert.equal(pending.displayableGroups.length, 0);
+  // An explicit pending review filter makes the same groups displayable again.
+  const pendingIncluded = deriveAvailableTraders(
+    FIXTURE_TRADE_PAYLOADS['qqq-2026-07-14'],
+    FIXTURE_TRADERS,
+    { reviewStatuses: ['pending', 'verified'] },
+  );
+  assert.deepEqual(pendingIncluded.availableTraderIds, ['vordin']);
+  // SPY 2026-05-29 has zero trade groups: no trader renders even though the
+  // registry lists two active traders.
+  const emptyDay = deriveAvailableTraders(FIXTURE_TRADE_PAYLOADS['spy-2026-05-29'], FIXTURE_TRADERS);
+  assert.deepEqual(emptyDay.availableTraderIds, []);
+  // Static view of the pending day is equally empty.
+  assert.deepEqual(
+    deriveAvailableTraders(FIXTURE_TRADE_PAYLOADS['qqq-2026-07-14-static'], FIXTURE_TRADERS).availableTraderIds,
+    [],
+  );
+});
+
+test('selection reconciliation honors context change, intentional empty, and focus', () => {
+  // Initial load selects every available trader.
+  assert.deepEqual(
+    reconcileTraderSelection({ previousSelectedIds: null, availableTraderIds: ['tang', 'vordin'] }),
+    { selectedTraderIds: ['tang', 'vordin'], focusedTraderId: '' },
+  );
+  // Context change keeps the intersection with availability.
+  assert.deepEqual(
+    reconcileTraderSelection({
+      previousSelectedIds: ['tang', 'vordin'],
+      availableTraderIds: ['vordin'],
+      contextChanged: true,
+    }),
+    { selectedTraderIds: ['vordin'], focusedTraderId: '' },
+  );
+  // Context change with an empty intersection re-selects all available traders.
+  assert.deepEqual(
+    reconcileTraderSelection({
+      previousSelectedIds: ['tang'],
+      availableTraderIds: ['vordin'],
+      contextChanged: true,
+    }).selectedTraderIds,
+    ['vordin'],
+  );
+  // Within the same context an intentional empty selection stays empty.
+  assert.deepEqual(
+    reconcileTraderSelection({
+      previousSelectedIds: [],
+      availableTraderIds: ['tang', 'vordin'],
+      contextChanged: false,
+    }).selectedTraderIds,
+    [],
+  );
+  // An unavailable focused trader is always cleared; an available one survives.
+  assert.equal(
+    reconcileTraderSelection({
+      previousSelectedIds: ['tang'],
+      previousFocusedId: 'tang',
+      availableTraderIds: ['vordin'],
+      contextChanged: true,
+    }).focusedTraderId,
+    '',
+  );
+  assert.equal(
+    reconcileTraderSelection({
+      previousSelectedIds: ['vordin'],
+      previousFocusedId: 'vordin',
+      availableTraderIds: ['vordin'],
+      contextChanged: true,
+    }).focusedTraderId,
+    'vordin',
+  );
+  // Context change into an empty-availability day selects nothing and focuses nothing.
+  assert.deepEqual(
+    reconcileTraderSelection({
+      previousSelectedIds: ['tang'],
+      previousFocusedId: 'tang',
+      availableTraderIds: [],
+      contextChanged: true,
+    }),
+    { selectedTraderIds: [], focusedTraderId: '' },
+  );
+});
+
+test('filter ticker/date may only mirror the resolved workspace context', () => {
+  const workspace = { ticker: 'QQQ', trade_date: '2026-07-17' };
+  const divergent = { ticker: 'SPY', tradeDate: '2026-06-15', traderIds: ['tang'] };
+  assert.equal(filtersMatchWorkspace(divergent, workspace), false);
+  const mirrored = mirrorWorkspaceContext(divergent, workspace);
+  assert.equal(mirrored.ticker, 'QQQ');
+  assert.equal(mirrored.tradeDate, '2026-07-17');
+  assert.deepEqual(mirrored.traderIds, ['tang']);
+  assert.equal(filtersMatchWorkspace(mirrored, workspace), true);
+});
+
+test('reconciled filters drive markers, lists, and exports from one resolved object', () => {
+  // Switch QQQ 2026-07-17 -> SPY 2026-07-17: availability drops vordin.
+  const spyPayload = FIXTURE_TRADE_PAYLOADS['spy-2026-07-17'];
+  const { availableTraderIds } = deriveAvailableTraders(spyPayload, FIXTURE_TRADERS);
+  const reconciled = reconcileTraderSelection({
+    previousSelectedIds: ['vordin'],
+    previousFocusedId: 'vordin',
+    availableTraderIds,
+    contextChanged: true,
+  });
+  assert.deepEqual(reconciled.selectedTraderIds, ['tang']);
+  assert.equal(reconciled.focusedTraderId, '');
+  const filters = mirrorWorkspaceContext({
+    ...initialTradeRecordFilters(FIXTURE_TRADERS),
+    traderIds: reconciled.selectedTraderIds,
+    focusedTraderId: reconciled.focusedTraderId,
+  }, { ticker: 'SPY', trade_date: '2026-07-17' });
+  assert.equal(filtersMatchWorkspace(filters, { ticker: 'SPY', trade_date: '2026-07-17' }), true);
+  const selection = exportSelectionFromFilters(payload, filters);
+  assert.deepEqual(selection.trader_ids, ['tang']);
+  // The resolved filter object never carries the stale vordin selection.
+  const displayed = displayableTradeGroups(spyPayload, filters)
+    .filter((group) => filters.traderIds.includes(group.trader_id));
+  assert.deepEqual(displayed.map((group) => group.trade_group_id), ['tg_20260717_tang_spy_001']);
+});
+
+test('trader filter component pins readonly mirrors, availability, and aria states', () => {
+  const source = readFileSync(new URL('./TraderFilters.jsx', import.meta.url), 'utf8');
+  // Readonly workspace mirror branch (no editable ticker/date authority).
+  assert.match(source, /context \? \(/);
+  assert.match(source, /className="trade-context-mirror" aria-label="当前复盘上下文"/);
+  assert.match(source, /aria-readonly="true"/);
+  // Availability-driven rendering plus one neutral empty state.
+  assert.match(source, /availableTraderIds\.includes\(trader\.trader_id\)/);
+  assert.match(source, /className="trade-trader-empty" role="status"/);
+  // Focus exposes a programmatic selected state.
+  assert.match(source, /aria-pressed=\{filters\.focusedTraderId === trader\.trader_id\}/);
+});
+
+// --- Trader point editor candidate contract (plan §3.4) -----------------------
+
+test('new group factory pins every schema-required field with a stable next id', () => {
+  assert.equal(
+    nextGroupId(FIXTURE_MULTI_TICKER_DAY, { tradeDate: '2026-07-17', traderId: 'vordin', underlying: 'QQQ' }),
+    'tg_20260717_vordin_qqq_003',
+  );
+  assert.equal(
+    nextGroupId(FIXTURE_MULTI_TICKER_DAY, { tradeDate: '2026-07-17', traderId: 'tang', underlying: 'SPY' }),
+    'tg_20260717_tang_spy_002',
+  );
+  const group = buildNewGroup(FIXTURE_MULTI_TICKER_DAY, {
+    tradeDate: '2026-07-17',
+    traderId: 'vordin',
+    underlying: 'QQQ',
+  });
+  assert.equal(group.trade_group_id, 'tg_20260717_vordin_qqq_003');
+  assert.equal(group.review_status, 'pending');
+  assert.equal(group.legs.length, 1);
+  assert.equal(group.legs[0].option_type, group.direction);
+  assert.equal(group.legs[0].events[0].action, 'buy_open');
+  // The normalization block is explicit, never implicit (review-003 foldback).
+  assert.deepEqual(group.normalization, {
+    method: 'manual_normalization',
+    source: 'manual_entry',
+    source_path: null,
+    source_index: null,
+    review_flags: [],
+  });
+  assert.deepEqual(validateGroupForm(group), {});
+});
+
+test('full-day merge preserves every untouched group, leg, event, and context', () => {
+  const base = FIXTURE_PRESERVATION_CASE.document;
+  const targetId = FIXTURE_PRESERVATION_CASE.scopedEditTargetGroupId;
+  const edited = structuredClone(base);
+  const target = edited.trade_groups.find((group) => group.trade_group_id === targetId);
+  target.notes.push({ text: 'Edited note.', provenance: 'user_provided' });
+  const editedTarget = target;
+  const candidate = mergeGroupIntoDay(base, editedTarget);
+  const diff = preservationDiff(base, candidate, { targetGroupId: targetId });
+  assert.equal(diff.ok, true);
+  assert.equal(diff.countDelta, 0);
+  assert.deepEqual(diff.addedGroupIds, []);
+  assert.deepEqual(diff.untouchedGroupIds, FIXTURE_PRESERVATION_CASE.expectedUntouchedGroupIds);
+  // Untouched records are carried by reference (byte-equivalent at the boundary).
+  for (const id of FIXTURE_PRESERVATION_CASE.expectedUntouchedGroupIds) {
+    const before = base.trade_groups.find((group) => group.trade_group_id === id);
+    const after = candidate.trade_groups.find((group) => group.trade_group_id === id);
+    assert.equal(after, before);
+  }
+  assert.equal(candidate.note_contexts, base.note_contexts);
+
+  const added = buildNewGroup(base, { tradeDate: '2026-07-17', traderId: 'vordin', underlying: 'QQQ' });
+  const addedCandidate = mergeGroupIntoDay(base, added);
+  const addDiff = preservationDiff(base, addedCandidate, { targetGroupId: added.trade_group_id });
+  assert.equal(addDiff.ok, true);
+  assert.equal(addDiff.countDelta, 1);
+  assert.deepEqual(addDiff.addedGroupIds, ['tg_20260717_vordin_qqq_003']);
+});
+
+test('preservation diff fails closed on any out-of-scope change', () => {
+  const base = FIXTURE_PRESERVATION_CASE.document;
+  const targetId = FIXTURE_PRESERVATION_CASE.scopedEditTargetGroupId;
+
+  const tampered = mergeGroupIntoDay(base, (() => {
+    const copy = structuredClone(base.trade_groups.find((group) => group.trade_group_id === 'tg_20260717_tang_spy_001'));
+    copy.notes.push({ text: 'Tampered.', provenance: 'user_provided' });
+    return copy;
+  })());
+  const tamperDiff = preservationDiff(base, tampered, { targetGroupId: targetId });
+  assert.equal(tamperDiff.ok, false);
+  assert.match(tamperDiff.problems.join('\n'), /untouched group changed: tg_20260717_tang_spy_001/);
+
+  const removed = { ...base, trade_groups: base.trade_groups.slice(1) };
+  const removeDiff = preservationDiff(base, removed, { targetGroupId: targetId });
+  assert.equal(removeDiff.ok, false);
+  assert.match(removeDiff.problems.join('\n'), /group removed: tg_20260717_tang_spy_001/);
+
+  const contextChanged = { ...base, note_contexts: [] };
+  const contextDiff = preservationDiff(base, contextChanged, { targetGroupId: targetId });
+  assert.equal(contextDiff.ok, false);
+  assert.match(contextDiff.problems.join('\n'), /note_contexts changed/);
+
+  const twoAdds = [buildNewGroup(base, { tradeDate: '2026-07-17', traderId: 'vordin', underlying: 'QQQ' })];
+  const doc1 = mergeGroupIntoDay(base, twoAdds[0]);
+  const doc2 = mergeGroupIntoDay(doc1, buildNewGroup(doc1, { tradeDate: '2026-07-17', traderId: 'tang', underlying: 'SPY' }));
+  const twoAddDiff = preservationDiff(base, doc2, { targetGroupId: twoAdds[0].trade_group_id });
+  assert.equal(twoAddDiff.ok, false);
+  assert.match(twoAddDiff.problems.join('\n'), /unexpected groups added/);
+});
+
+test('group form validation flags contract violations with field paths', () => {
+  const valid = buildNewGroup(FIXTURE_MULTI_TICKER_DAY, { tradeDate: '2026-07-17', traderId: 'tang', underlying: 'SPY' });
+
+  const voidedEligible = { ...valid, status: 'voided' };
+  assert.match(validateGroupForm(voidedEligible).status, /eligibility/);
+
+  const reportedNoOutcome = { ...valid, reported_stats_eligible: true };
+  assert.match(validateGroupForm(reportedNoOutcome)['reported_outcome'], /reported outcome/);
+
+  const wrongOptionType = structuredClone(valid);
+  wrongOptionType.direction = 'PUT';
+  assert.match(validateGroupForm(wrongOptionType)['leg.option_type'], /match direction/);
+
+  const secondBuyOpen = structuredClone(valid);
+  secondBuyOpen.legs[0].events.push({ ...buildNewEvent('tg_20260717_tang_spy_002_l1_e2', 2), action: 'buy_open' });
+  assert.match(validateGroupForm(secondBuyOpen)['leg.events[1].action'], /buy_open/);
+
+  const noOffset = structuredClone(valid);
+  noOffset.legs[0].events[0].occurred_at = '2026-07-17T10:00';
+  assert.match(validateGroupForm(noOffset)['leg.events[0].occurred_at'], /offset/);
+
+  const knownButIncomplete = structuredClone(valid);
+  knownButIncomplete.legs[0].events[0].occurred_at = '2026-07-17T10:00-04:00';
+  assert.match(validateGroupForm(knownButIncomplete)['leg.events[0].time_incomplete'], /must be false/);
+  assert.match(validateGroupForm(knownButIncomplete)['leg.events[0].time_precision'], /known timestamp/);
+
+  const missingButComplete = structuredClone(valid);
+  missingButComplete.legs[0].events[0].time_incomplete = false;
+  assert.match(validateGroupForm(missingButComplete)['leg.events[0]'], /missing occurred_at/);
+
+  const badProvenance = structuredClone(valid);
+  badProvenance.legs[0].events[0].fact_provenance.premium = 'guessed';
+  assert.match(validateGroupForm(badProvenance)['leg.events[0].fact_provenance'], /provenance/);
+
+  const noSource = structuredClone(valid);
+  noSource.normalization.source = '';
+  assert.match(validateGroupForm(noSource)['normalization.source'], /source required/);
+
+  const dupFlags = structuredClone(valid);
+  dupFlags.normalization.review_flags = ['a', 'a'];
+  assert.match(validateGroupForm(dupFlags)['normalization.review_flags'], /unique/);
+});
+
+test('occurred-at edits atomically reconcile timestamp completeness and provenance', () => {
+  const initial = buildNewEvent('tg_20260717_vordin_qqq_003_l1_e1', 1);
+  const known = applyOccurredAt(initial, ' 2026-07-17T09:42-04:00 ');
+  assert.equal(known.occurred_at, '2026-07-17T09:42-04:00');
+  assert.equal(known.time_precision, 'minute');
+  assert.equal(known.time_incomplete, false);
+  assert.equal(known.fact_provenance.occurred_at, 'user_provided');
+
+  const cleared = applyOccurredAt({ ...known, time_precision: 'exact' }, '');
+  assert.equal(cleared.occurred_at, null);
+  assert.equal(cleared.time_precision, null);
+  assert.equal(cleared.time_incomplete, true);
+  assert.equal(cleared.fact_provenance.occurred_at, 'unknown');
 });

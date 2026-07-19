@@ -42,12 +42,11 @@ export function Layout({ active, onNavigate, children }) {
             </button>
           ))}
         </nav>
-        {role === 'admin' && (
-          <button className="secondary" onClick={() => onNavigate('admin')} title="Trader records">
-            <RefreshCcw size={18} />
-            <span className="nav-label">Traders</span>
-          </button>
-        )}
+        <button className="secondary" onClick={() => onNavigate('admin')} title={role === 'admin' ? '交易记录 / 点位管理（管理员可编辑）' : '交易记录 / 点位管理（只读检查，编辑需要管理员）'}>
+          <RefreshCcw size={18} />
+          <span className="nav-label">交易记录 / 点位管理</span>
+          <span className={`nav-role-badge ${role === 'admin' ? 'admin' : 'readonly'}`}>{role === 'admin' ? 'admin 可编辑' : '只读'}</span>
+        </button>
         <button className="logout" onClick={() => { clearSession(); window.location.reload(); }} title="Logout">
           <LogOut size={18} />
           <span className="nav-label">Logout</span>

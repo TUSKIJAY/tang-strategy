@@ -19,8 +19,10 @@ from app.services.trade_records import (
     TradeAuthorizationError,
     assert_no_raw_evidence_fields,
     build_trade_records_payload,
+    handle_trade_day_admin_read,
     handle_trade_day_admin_write,
     handle_trade_records_read,
+    handle_trader_registry_admin_read,
     handle_trader_registry_admin_write,
     occurred_at_from_local_time,
     validate_trade_day,
@@ -295,12 +297,91 @@ class TradeRecordValidationTests(unittest.TestCase):
             "/api/admin/traders",
             "/api/admin/trade-records",
         }.issubset(paths))
+        method_paths = {
+            (method, route.path)
+            for route in app.routes
+            for method in getattr(route, "methods", set())
+        }
+        # Exactly the two pinned verbs per admin path: canonical admin GET reads
+        # plus the existing authoritative PUT writes; no other verbs or twins.
+        self.assertEqual(
+            {(method, path) for method, path in method_paths if path == "/api/admin/traders"},
+            {("GET", "/api/admin/traders"), ("PUT", "/api/admin/traders")},
+        )
+        self.assertEqual(
+            {(method, path) for method, path in method_paths if path == "/api/admin/trade-records"},
+            {("GET", "/api/admin/trade-records"), ("PUT", "/api/admin/trade-records")},
+        )
+        self.assertIn(("GET", "/api/trade-records"), method_paths)
         self.assertFalse(any("tang-trade" in path for path in paths))
         importer_source = (
             Path(__file__).resolve().parents[1] / "app" / "services" / "importer.py"
         ).read_text(encoding="utf-8")
         self.assertIn("replace_trade_repository(settings.db_path", importer_source)
         self.assertNotIn("project_trade_repository(settings.db_path", importer_source)
+
+    def test_admin_canonical_reads_are_admin_only_and_write_valid(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        content = root / "content"
+        registry = handle_trader_registry_admin_read("admin", content)
+        self.assertEqual(registry["schema_version"], "traders-v1")
+        self.assertEqual([t["trader_id"] for t in registry["traders"]], ["tang", "vordin"])
+
+        day = handle_trade_day_admin_read("admin", content, "2026-07-17")
+        self.assertEqual(day["schema_version"], "trades-day-v1")
+        self.assertEqual(set(day.keys()), DAY_FIELDS)
+        self.assertEqual(len(day["trade_groups"]), 3)
+        self.assertEqual(len(day["note_contexts"]), 1)
+        # The canonical day is multi-ticker and carries full normalization blocks.
+        self.assertEqual({group["underlying"] for group in day["trade_groups"]}, {"SPY", "QQQ"})
+        self.assertIn("review_flags", day["trade_groups"][1]["normalization"])
+        self.assertIn("source_path", day["trade_groups"][1]["normalization"])
+        # Round-trip stable through the authoritative write-path validation.
+        self.assertEqual(validate_trade_day(day, registry), day)
+
+        with self.assertRaises(TradeAuthorizationError):
+            handle_trader_registry_admin_read("readonly", content)
+        with self.assertRaises(TradeAuthorizationError):
+            handle_trade_day_admin_read("readonly", content, "2026-07-17")
+        with self.assertRaises(TradeAuthorizationError):
+            handle_trade_day_admin_read("anonymous", content, "2026-07-17")
+        # Missing day: no fabricated default; the route maps this to 404.
+        with self.assertRaises(FileNotFoundError):
+            handle_trade_day_admin_read("admin", content, "1999-01-01")
+        with self.assertRaises(TradeValidationError):
+            handle_trade_day_admin_read("admin", content, "not-a-date")
+
+    def test_public_projection_is_not_a_write_valid_canonical_base(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        content = root / "content"
+        registry = handle_trader_registry_admin_read("admin", content)
+        public = handle_trade_records_read("readonly", content, "SPY", trade_date="2026-07-17")
+        self.assertEqual(len(public), 1)
+        projection = public[0]
+        self.assertEqual(projection["schema_version"], "trade-records-v1")
+        # The projection envelope itself is not a canonical day document.
+        with self.assertRaises(TradeValidationError):
+            validate_trade_day(projection, registry)
+        # Re-wrapping the projected groups as a day still fails closed:
+        # `normalization_method` is not canonical and the normalization block is lost.
+        pseudo_day = {
+            "schema_version": "trades-day-v1",
+            "trade_date": projection["trade_date"],
+            "timezone": "America/New_York",
+            "trade_groups": projection["trade_groups"],
+            "note_contexts": projection["note_contexts"],
+        }
+        with self.assertRaises(TradeValidationError):
+            validate_trade_day(pseudo_day, registry)
+        # The SPY projection cannot represent the multi-ticker day at all.
+        canonical = handle_trade_day_admin_read("admin", content, "2026-07-17")
+        public_ids = {group["trade_group_id"] for group in projection["trade_groups"]}
+        canonical_ids = {group["trade_group_id"] for group in canonical["trade_groups"]}
+        self.assertLess(public_ids, canonical_ids)
+        self.assertEqual(
+            canonical_ids - public_ids,
+            {"tg_20260717_vordin_qqq_001", "tg_20260717_vordin_qqq_002"},
+        )
 
     def test_machine_readable_schemas_are_valid_json_and_freeze_top_level(self) -> None:
         root = Path(__file__).resolve().parents[2]

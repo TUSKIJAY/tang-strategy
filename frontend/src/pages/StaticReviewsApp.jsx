@@ -2,16 +2,25 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../features/review/scanner.js';
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
 import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
+import { ReviewContextPanel } from '../features/review/ReviewContextPanel.jsx';
 import { ReviewSignalList } from '../features/review/ReviewSignalList.jsx';
 import { TradeExportControls } from '../features/review/TradeExportControls.jsx';
 import { TraderFilters } from '../features/review/TraderFilters.jsx';
 import { TraderTradeList } from '../features/review/TraderTradeList.jsx';
 import {
-  buildTradeAvailability,
   buildTradeRecordAnnotations,
+  deriveAvailableTraders,
   filterTradeGroups,
   initialTradeRecordFilters,
+  reconcileTraderSelection,
 } from '../features/review/tradeRecords.js';
+import {
+  findDayByKey,
+  normalizeStaticDays,
+  resolveInitialWorkspace,
+  selectWorkspaceDay,
+  switchTicker,
+} from '../features/review/reviewWorkspace.js';
 import {
   buildBarIndexMap,
   preferredActivationWickStrategy,
@@ -190,6 +199,7 @@ export function StaticReviewsApp() {
   const engineRef = useRef(null);
   const [manifest, setManifest] = useState(null);
   const [selectedDaySlug, setSelectedDaySlug] = useState(() => window.location.hash.replace(/^#\/?/, ''));
+  const [routeNotice, setRouteNotice] = useState('');
   const [selectedStrategySlug, setSelectedStrategySlug] = useState('');
   const [review, setReview] = useState(null);
   const [strategyPayload, setStrategyPayload] = useState(null);
@@ -221,10 +231,6 @@ export function StaticReviewsApp() {
       })
       .then((data) => {
         setManifest(data);
-        if (!selectedDaySlug && data.reviews?.[0]?.slug) {
-          window.location.hash = data.reviews[0].slug;
-          setSelectedDaySlug(data.reviews[0].slug);
-        }
         if (!selectedStrategySlug && data.strategies?.length) {
           setSelectedStrategySlug(preferredActivationWickStrategy(data.strategies)?.slug || data.strategies[0].slug);
         }
@@ -232,18 +238,43 @@ export function StaticReviewsApp() {
       .catch((err) => setError(err.message));
   }, []);
 
+  const workspaceDays = useMemo(() => normalizeStaticDays(manifest?.reviews), [manifest?.reviews]);
+
   useEffect(() => {
-    const onHash = () => setSelectedDaySlug(window.location.hash.replace(/^#\/?/, ''));
+    if (!workspaceDays.length) return undefined;
+    const onHash = () => {
+      const next = resolveInitialWorkspace({ days: workspaceDays, hash: window.location.hash });
+      if (!next.day) return;
+      setSelectedDaySlug(next.key);
+      setRouteNotice(next.resolution.kind === 'fallback'
+        ? `链接未匹配本地静态数据（${next.resolution.reason}），已回到 ${next.ticker} ${next.trade_date}。`
+        : '');
+      const canonicalHash = `#${next.key}`;
+      if (window.location.hash !== canonicalHash) {
+        window.history.replaceState(null, '', canonicalHash);
+      }
+    };
+    onHash();
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
-  }, []);
+  }, [workspaceDays]);
 
-  const selectedItem = manifest?.reviews?.find((item) => item.slug === selectedDaySlug) || manifest?.reviews?.[0] || null;
+  const selectedWorkspaceDay = useMemo(
+    () => findDayByKey(workspaceDays, selectedDaySlug),
+    [workspaceDays, selectedDaySlug],
+  );
+  const workspace = selectedWorkspaceDay ? {
+    ticker: selectedWorkspaceDay.ticker,
+    trade_date: selectedWorkspaceDay.trade_date,
+    session_mode: selectedWorkspaceDay.session_mode,
+  } : { ticker: '', trade_date: '', session_mode: '' };
+  const selectedItem = selectedWorkspaceDay?.ref || null;
   const selectedStrategy = manifest?.strategies?.find((item) => item.slug === selectedStrategySlug) || manifest?.strategies?.[0] || null;
 
   useEffect(() => {
     if (!selectedItem) return;
     setError('');
+    setReview(null);
     setActiveSignalId('');
     setActiveTradeGroupId('');
     fetch(assetPath(`reviews/${selectedItem.file}`, manifest?.generated_at || Date.now()), { cache: 'no-store' })
@@ -255,11 +286,24 @@ export function StaticReviewsApp() {
         setReview(payload);
         const records = payload.trade_records;
         if (records) {
-          setTradeFilters({
-            ...initialTradeRecordFilters(records.traders),
-            ticker: records.ticker,
-            tradeDate: records.trade_date,
+          const { availableTraderIds } = deriveAvailableTraders(records, records.traders);
+          setTradeFilters((previous) => {
+            const reconciled = reconcileTraderSelection({
+              previousSelectedIds: previous?.traderIds ?? null,
+              previousFocusedId: previous?.focusedTraderId || '',
+              availableTraderIds,
+              contextChanged: true,
+            });
+            return {
+              ...initialTradeRecordFilters(records.traders),
+              ticker: records.ticker,
+              tradeDate: records.trade_date,
+              traderIds: reconciled.selectedTraderIds,
+              focusedTraderId: reconciled.focusedTraderId,
+            };
           });
+        } else {
+          setTradeFilters(initialTradeRecordFilters());
         }
       })
       .catch((err) => setError(err.message));
@@ -314,10 +358,27 @@ export function StaticReviewsApp() {
     [displayComputed.annotations1m],
   );
   const tradeRecords = displayReview?.trade_records || null;
-  const tradeAvailability = useMemo(
-    () => buildTradeAvailability(tradeRecords ? [tradeRecords] : []),
-    [tradeRecords],
+  const traderAvailability = useMemo(
+    () => (tradeRecords
+      ? deriveAvailableTraders(tradeRecords, tradeRecords.traders, tradeFilters)
+      : { availableTraderIds: [], displayableGroups: [] }),
+    [tradeRecords, tradeFilters],
   );
+  useEffect(() => {
+    setTradeFilters((previous) => {
+      if (!previous) return previous;
+      const reconciled = reconcileTraderSelection({
+        previousSelectedIds: previous.traderIds,
+        previousFocusedId: previous.focusedTraderId || '',
+        availableTraderIds: traderAvailability.availableTraderIds,
+        contextChanged: false,
+      });
+      const sameSelection = reconciled.selectedTraderIds.join(',') === (previous.traderIds || []).join(',');
+      const sameFocus = reconciled.focusedTraderId === (previous.focusedTraderId || '');
+      if (sameSelection && sameFocus) return previous;
+      return { ...previous, traderIds: reconciled.selectedTraderIds, focusedTraderId: reconciled.focusedTraderId };
+    });
+  }, [tradeRecords, traderAvailability.availableTraderIds]);
   const filteredTradeGroups = useMemo(
     () => filterTradeGroups(tradeRecords, tradeFilters),
     [tradeRecords, tradeFilters],
@@ -337,9 +398,24 @@ export function StaticReviewsApp() {
   const activeSignal = allAnnotations.find((annotation) => annotation.id === activeSignalId) || displayComputed.annotations1m[0] || displayComputed.annotations5m[0];
   const meta = displayReview?.meta || {};
 
-  function chooseReview(item) {
-    window.location.hash = item.slug;
-    setSelectedDaySlug(item.slug);
+  function commitWorkspace(next) {
+    if (!next?.day) return;
+    setSelectedDaySlug(next.key);
+    setRouteNotice('');
+    const nextHash = `#${next.key}`;
+    if (window.location.hash !== nextHash) window.location.hash = next.key;
+  }
+
+  function chooseTicker(ticker) {
+    commitWorkspace(switchTicker(workspaceDays, { day: selectedWorkspaceDay }, ticker));
+  }
+
+  function chooseDate(tradeDate) {
+    commitWorkspace(selectWorkspaceDay(
+      workspaceDays,
+      { day: selectedWorkspaceDay },
+      { ticker: workspace.ticker, tradeDate },
+    ));
   }
 
   function chooseStrategy(event) {
@@ -403,12 +479,6 @@ export function StaticReviewsApp() {
     });
   }
 
-  function overview() {
-    setActiveSignalId('');
-    setActiveTradeGroupId('');
-    engineRef.current?.overview();
-  }
-
   const enginePayload = useMemo(() => {
     if (!displayReview || !strategyPayload) return null;
     return {
@@ -435,7 +505,7 @@ export function StaticReviewsApp() {
   return (
     <div className="static-review-root">
       <section className="dr-shell">
-        <div className="dr-app">
+        <div className="dr-app dr-app--no-upload">
           <header className="dr-topbar">
             <div className="dr-title">Static Daily Review</div>
             <div className="dr-divider" />
@@ -451,34 +521,47 @@ export function StaticReviewsApp() {
           </header>
 
           <aside className="dr-sidebar">
-            <div className="static-day-list">
-              {(manifest?.reviews || []).map((item) => (
-                <button key={item.slug} type="button" className={item.slug === selectedItem?.slug ? 'active' : ''} onClick={() => chooseReview(item)}>
-                  <strong>{item.ticker} {item.trade_date}</strong>
-                  <span>{item.bars_1m} / {item.bars_5m} bars</span>
+            <ReviewContextPanel
+              days={workspaceDays}
+              workspace={workspace}
+              onSwitchTicker={chooseTicker}
+              onSelectDate={chooseDate}
+            >
+              <div className="review-context-actions">
+                <label className="review-context-field">
+                  Strategy
+                  <select value={selectedStrategy?.slug || ''} onChange={chooseStrategy}>
+                    {(manifest?.strategies || []).map((item) => (
+                      <option key={item.slug} value={item.slug}>{item.name} v{item.version}</option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
+                  role="switch"
+                  aria-checked={showExtendedKBars}
+                  onClick={() => setShowExtendedKBars((value) => !value)}
+                  disabled={!review}
+                  title="Toggle 09:00-16:30 extended K bars"
+                >
+                  Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
                 </button>
-              ))}
-            </div>
-            <div className="static-strategy-picker">
-              <label>Strategy</label>
-              <select value={selectedStrategy?.slug || ''} onChange={chooseStrategy}>
-                {(manifest?.strategies || []).map((item) => (
-                  <option key={item.slug} value={item.slug}>{item.name} v{item.version}</option>
-                ))}
-              </select>
-            </div>
+                {routeNotice && <p className="static-route-notice" role="status">{routeNotice}</p>}
+              </div>
+            </ReviewContextPanel>
             <div className="dr-sidebar-header">
               <span>提示 {summary.setups || summary.expired ? `(${summary.total} 进场 · ${summary.setups} 启动 / ${summary.expired} 过期)` : `(${allAnnotations.length})`}</span>
-              <button type="button" onClick={overview}>总览</button>
             </div>
             <div className="dr-signal-list">
               {tradeRecords && (
                 <>
                   <TraderFilters
                     traders={tradeRecords.traders}
-                    availability={tradeAvailability}
                     value={tradeFilters}
                     onChange={setTradeFilters}
+                    context={{ ticker: tradeRecords.ticker, tradeDate: tradeRecords.trade_date }}
+                    availableTraderIds={traderAvailability.availableTraderIds}
                   />
                   <TradeExportControls payload={tradeRecords} groups={filteredTradeGroups} filters={tradeFilters} />
                 </>
@@ -504,8 +587,8 @@ export function StaticReviewsApp() {
           </aside>
 
           <main className="dr-chart-area">
-            {error && <div className="dr-error">{error}</div>}
-            {!error && !enginePayload && <div className="dr-loading">正在加载静态复盘...</div>}
+            {error && <div className="dr-error" role="alert">{error}</div>}
+            {!error && !enginePayload && <div className="dr-loading" role="status" aria-live="polite">正在加载静态复盘...</div>}
             {enginePayload && (
               <UnifiedKlineEngine
                 ref={engineRef}
@@ -526,28 +609,6 @@ export function StaticReviewsApp() {
             )}
           </main>
 
-          <footer className="dr-upload-bar">
-            <div className="dr-action-group">
-              <button
-                type="button"
-                className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
-                role="switch"
-                aria-checked={showExtendedKBars}
-                onClick={() => setShowExtendedKBars((value) => !value)}
-                disabled={!review}
-                title="Toggle 09:00-16:30 extended K bars"
-              >
-                Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
-              </button>
-              <button type="button" onClick={() => engineRef.current?.setTimeframe('1m')} disabled={!review}>1m</button>
-              <button type="button" onClick={() => engineRef.current?.setTimeframe('5m')} disabled={!review}>5m</button>
-              <button type="button" onClick={() => engineRef.current?.stepBack()} disabled={!review}>Back</button>
-              <button type="button" onClick={() => engineRef.current?.stepForward()} disabled={!review}>Step</button>
-              <button type="button" onClick={() => engineRef.current?.togglePlayback()} disabled={!review}>Play/Pause</button>
-              <button type="button" onClick={overview} disabled={!review}>Overview</button>
-            </div>
-            <span className="dr-storage-status" data-tone={error ? 'error' : 'ok'}>{error || `Generated ${manifest?.generated_at || ''}`}</span>
-          </footer>
         </div>
       </section>
     </div>

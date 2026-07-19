@@ -325,3 +325,90 @@ export function buildTradeRecordDownloads(
     'trade_events.csv': csv(eventColumns, events),
   };
 }
+
+// --- Availability-driven trader contract (plan §3.3) --------------------------
+// Availability is computed from the resolved payload BEFORE trader selection:
+// 1. match the resolved ticker/date (the payload is the resolved context);
+// 2. keep groups allowed by the current status/review-status/eligibility contract;
+// 3. derive ordered available trader IDs from those groups and the registry order;
+// 4. a registry entry without a displayable group is never a visible option.
+
+const ELIGIBILITY_FIELDS = {
+  display: 'display_eligible',
+  reported: 'reported_stats_eligible',
+  calculated: 'calculated_stats_eligible',
+};
+
+export function displayableTradeGroups(payload, filters = {}) {
+  const statuses = new Set(array(filters.statuses).length ? filters.statuses : ['active']);
+  const reviewStatuses = new Set(
+    array(filters.reviewStatuses).length ? filters.reviewStatuses : ['verified'],
+  );
+  const eligibilityField = ELIGIBILITY_FIELDS[filters.eligibility || 'display'];
+  return array(payload?.trade_groups).filter((group) => (
+    (!payload?.ticker || group.underlying === payload.ticker)
+    && (!payload?.trade_date || group.trade_date === payload.trade_date)
+    && statuses.has(group.status)
+    && reviewStatuses.has(group.review_status)
+    && (!eligibilityField || Boolean(group[eligibilityField]))
+  ));
+}
+
+export function deriveAvailableTraders(payload, registryTraders = null, filters = {}) {
+  const displayableGroups = displayableTradeGroups(payload, filters);
+  const withGroups = new Set(displayableGroups.map((group) => group.trader_id));
+  const registry = array(registryTraders ?? payload?.traders);
+  const ordered = [...registry]
+    .sort((a, b) => (
+      (Number(a.sort_order) - Number(b.sort_order))
+      || String(a.trader_id).localeCompare(String(b.trader_id))
+    ))
+    .filter((trader) => withGroups.has(trader.trader_id))
+    .map((trader) => trader.trader_id);
+  // Defensive: groups referencing a trader missing from the registry keep a
+  // deterministic tail order instead of disappearing silently.
+  const extras = [...withGroups].filter((id) => !ordered.includes(id)).sort();
+  return { availableTraderIds: [...ordered, ...extras], displayableGroups };
+}
+
+// Steps 5-6: reconcile a previous selection against availability. A real context
+// change with an empty intersection selects all available traders; within the
+// same context an intentional empty selection stays empty; an unavailable
+// focused trader is always cleared.
+export function reconcileTraderSelection({
+  previousSelectedIds = null,
+  previousFocusedId = '',
+  availableTraderIds = [],
+  contextChanged = false,
+} = {}) {
+  const available = array(availableTraderIds);
+  const availableSet = new Set(available);
+  if (previousSelectedIds === null || previousSelectedIds === undefined) {
+    return { selectedTraderIds: [...available], focusedTraderId: '' };
+  }
+  const intersection = array(previousSelectedIds).filter((id) => availableSet.has(id));
+  const focusedTraderId = availableSet.has(previousFocusedId) ? previousFocusedId : '';
+  if (contextChanged && intersection.length === 0) {
+    return { selectedTraderIds: [...available], focusedTraderId: '' };
+  }
+  return { selectedTraderIds: intersection, focusedTraderId };
+}
+
+// Trader filter ticker/date may only mirror the resolved workspace context
+// (plan §3.1); child filters can never diverge from the resolved market day.
+export function mirrorWorkspaceContext(filters = {}, workspace = {}) {
+  const workspaceDate = workspace.trade_date || workspace.tradeDate || '';
+  return {
+    ...filters,
+    ticker: workspace.ticker || filters.ticker || '',
+    tradeDate: workspaceDate || filters.tradeDate || '',
+  };
+}
+
+export function filtersMatchWorkspace(filters = {}, workspace = {}) {
+  const mirrored = mirrorWorkspaceContext(filters, workspace);
+  return (
+    mirrored.ticker === String(filters.ticker || '')
+    && mirrored.tradeDate === String(filters.tradeDate || '')
+  );
+}

@@ -90,7 +90,6 @@ export function TeachingPage({ state }) {
         <button disabled={!payload} onClick={() => step(-1)}>Back one bar</button>
         <button disabled={!payload} onClick={() => step(1)}>Advance one bar</button>
         <button disabled={!payload} onClick={revealAll}>Reveal full day</button>
-        <button disabled={!payload} onClick={() => engineRef.current?.togglePlayback()}>Play/Pause</button>
         <span className="engine-note">Cutoff #{effectiveCutoff} {currentBar ? `· ${currentBar.t} · C ${currentBar.C}` : ''}</span>
       </div>
       <div className="engine-grid teaching-grid">

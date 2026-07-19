@@ -1,11 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Api, getRole } from '../api/client.js';
 import { preferredActivationWickStrategy } from '../features/review/session.js';
+import { ReviewContextPanel } from '../features/review/ReviewContextPanel.jsx';
+import {
+  findDay,
+  normalizeInteractiveDays,
+  resolveInitialWorkspace,
+  switchTicker,
+} from '../features/review/reviewWorkspace.js';
 
-export function DashboardPage({ state, setState }) {
+export function DashboardPage({ state, setState, onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [importResult, setImportResult] = useState(null);
+  const workspaceDays = useMemo(() => normalizeInteractiveDays(state.marketDays), [state.marketDays]);
+  const workspace = useMemo(() => {
+    const explicit = state.marketDays.find((day) => day.id === Number(state.selectedDayId));
+    if (explicit) return { ticker: explicit.ticker, trade_date: explicit.trade_date, key: String(explicit.id) };
+    const resolved = resolveInitialWorkspace({ days: workspaceDays });
+    return resolved.day
+      ? { ticker: resolved.ticker, trade_date: resolved.trade_date, key: resolved.key }
+      : { ticker: '', trade_date: '', key: '' };
+  }, [state.marketDays, state.selectedDayId, workspaceDays]);
+
+  function handleSwitchTicker(ticker) {
+    const current = findDay(workspaceDays, { ticker: workspace.ticker, tradeDate: workspace.trade_date });
+    const next = switchTicker(workspaceDays, { day: current }, ticker);
+    if (next.day?.ref) setState((prev) => ({ ...prev, selectedDayId: next.day.ref.id }));
+  }
+
+  function openReviewDay(tradeDate) {
+    const day = findDay(workspaceDays, { ticker: workspace.ticker, tradeDate });
+    if (!day?.ref) return;
+    setState((prev) => ({ ...prev, selectedDayId: day.ref.id }));
+    onNavigate?.('review');
+  }
 
   async function load() {
     setLoading(true);
@@ -60,16 +89,13 @@ export function DashboardPage({ state, setState }) {
         </div>
       )}
       <div className="panel">
-        <h3>Recent market days</h3>
-        <div className="table">
-          {state.marketDays.slice(0, 20).map((day) => (
-            <button key={day.id} onClick={() => setState((prev) => ({ ...prev, selectedDayId: day.id }))}>
-              <span>{day.ticker}</span>
-              <span>{day.trade_date}</span>
-              <span>{day.bar_count_1m} x 1m</span>
-            </button>
-          ))}
-        </div>
+        <h3>Market days</h3>
+        <ReviewContextPanel
+          days={workspaceDays}
+          workspace={workspace}
+          onSwitchTicker={handleSwitchTicker}
+          onSelectDate={openReviewDay}
+        />
       </div>
     </section>
   );

@@ -37,6 +37,16 @@ pre { white-space: pre-wrap; overflow: auto; background: #1e1c18; color: #f8ead1
 .sidebar button { background: transparent; color: #f8ead1; display: flex; align-items: center; gap: 10px; text-align: left; }
 .sidebar button.active, .sidebar button:hover { background: rgba(255,255,255,.1); }
 .sidebar .secondary { margin-top: auto; background: rgba(166, 83, 42, .9); }
+.sidebar .secondary .nav-role-badge {
+  margin-left: auto;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .18);
+  white-space: nowrap;
+}
+.sidebar .secondary .nav-role-badge.readonly { background: rgba(255, 255, 255, .10); }
 .sidebar .logout { background: transparent; color: #c8bda8; }
 .nav-collapsed .sidebar { padding: 14px 10px; align-items: center; }
 .nav-collapsed .brand { flex-direction: column; gap: 8px; margin-bottom: 10px; }
@@ -93,6 +103,102 @@ main { padding: 36px; overflow: auto; }
     "upload upload";
   overflow: hidden;
 }
+
+/* Review workspace: business context lives in the sidebar panel; the engine
+   owns the generic chart toolbar, so there is no bottom control bar. */
+.dr-app--no-upload {
+  grid-template-rows: 48px 1fr;
+  grid-template-areas:
+    "topbar topbar"
+    "sidebar chart";
+}
+
+.review-context-panel { display: flex; flex-direction: column; gap: 10px; }
+
+.ticker-tabs { display: flex; gap: 4px; }
+.ticker-tabs button {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ticker-tabs button.active { color: #fff; background: #8B9A6D; border-color: #8B9A6D; }
+
+.date-rail { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; }
+.date-rail-month-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; opacity: .6; }
+.date-rail-dates { display: flex; flex-wrap: wrap; gap: 4px; }
+.date-rail-dates button {
+  padding: 3px 7px;
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.date-rail-dates button.active { border-color: #8B9A6D; background: rgba(139, 154, 109, .18); }
+
+.dr-sidebar .review-context-panel {
+  padding: 10px 12px;
+  border-bottom: 1px solid #333331;
+  background: #1E1E1D;
+  color: #E8E7E3;
+}
+.dr-sidebar .ticker-tabs button { background: #282827; border-color: transparent; color: #8A8A85; }
+.dr-sidebar .ticker-tabs button.active { color: #0F0F0E; background: #8B9A6D; }
+.dr-sidebar .date-rail-dates button { background: #282827; border-color: transparent; color: #C9C8C2; }
+.dr-sidebar .date-rail-dates button.active { color: #E8E7E3; border-color: #8B9A6D; background: rgba(139, 154, 109, .18); }
+
+.review-context-actions { display: flex; flex-direction: column; gap: 8px; }
+.review-context-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: #8A8A85;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.review-context-field select {
+  padding: 5px 8px;
+  font-size: 12px;
+  color: #E8E7E3;
+  background: #282827;
+  border: 1px solid #333331;
+  border-radius: 6px;
+}
+.review-context-field select option { background: #1E1E1D; }
+.review-context-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+.review-context-buttons button {
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #E8E7E3;
+  background: #282827;
+  border: 1px solid #333331;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.review-context-buttons button:hover:not(:disabled) { border-color: #8B9A6D; }
+.review-context-buttons button:disabled { opacity: .5; }
+
+.review-context-actions > .dr-toggle-switch {
+  width: 100%;
+  justify-content: center;
+  padding: 6px 10px;
+  color: #C9C8C2;
+  background: #282827;
+  border: 1px solid #333331;
+  border-radius: 6px;
+}
+.review-context-actions > .dr-toggle-switch.active { color: #E8E7E3; border-color: #8B9A6D; }
+.static-route-notice { margin: 0; color: #C9A45C; font-size: 11px; line-height: 1.4; }
 
 .dr-topbar {
   grid-area: topbar;
@@ -1016,6 +1122,21 @@ main { padding: 36px; overflow: auto; }
   color: var(--muted);
 }
 
+.trade-context-mirror {
+  display: flex;
+  flex: 1 1 100%;
+  gap: 8px;
+}
+
+.trade-context-mirror-item {
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.trade-trader-empty { margin: 0; color: var(--muted); font-size: 12px; }
+
 .trade-trader-options {
   display: flex;
   flex: 1 1 100%;
@@ -1035,6 +1156,33 @@ main { padding: 36px; overflow: auto; }
 .trade-trader-option label { display: flex; align-items: center; gap: 5px; }
 .trade-trader-option button { padding: 4px 7px; }
 .trade-trader-option button.active { background: var(--trader-color); color: white; }
+
+/* Review sidebars are dark; keep the shared filter/list components readable
+   there while preserving the light Admin workspace defaults above. */
+.dr-sidebar .trade-filter-panel,
+.dr-sidebar .trade-group-card {
+  color: #E8E7E3;
+  background: #282827;
+  border-color: #3B3B38;
+}
+.dr-sidebar .trade-filter-panel > label,
+.dr-sidebar .trade-trader-empty,
+.dr-sidebar .trade-group-summary small { color: #A7A69F; }
+.dr-sidebar .trade-context-mirror-item { color: #E8E7E3; border-color: #4A4A46; }
+.dr-sidebar .trade-trader-option {
+  color: #E8E7E3;
+  background: color-mix(in srgb, var(--trader-color) 18%, #282827);
+}
+.dr-sidebar .trade-trader-option button,
+.dr-sidebar .trade-export-button {
+  color: #E8E7E3;
+  background: #141413;
+  border-color: #4A4A46;
+}
+.dr-sidebar .trade-group-summary { color: #E8E7E3; }
+.dr-sidebar .trade-drilldown-toggle { color: #C9C8C2; }
+.dr-sidebar .trade-leg { color: #E8E7E3; background: #141413; }
+.dr-sidebar .trade-event { color: #A7A69F; }
 
 .trade-record-list { display: grid; gap: 10px; }
 .trade-record-empty { padding: 24px; color: var(--muted); border: 1px dashed var(--line); }
@@ -1114,3 +1262,44 @@ main { padding: 36px; overflow: auto; }
   .trade-admin-editors { display: grid; grid-template-columns: 1fr; }
   .trade-event { grid-template-columns: 50px 1fr; }
 }
+
+/* Trader point editor (admin workspace) */
+.tp-editor { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--line); background: var(--panel); border-radius: 12px; }
+.tp-editor h3, .tp-preview h4, .tp-registry h3 { margin: 0; }
+.tp-field { display: grid; gap: 5px; font-size: 12px; color: var(--muted); min-width: 140px; }
+.tp-field input, .tp-field select, .tp-field textarea {
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: inherit;
+}
+.tp-field.tp-inline { display: flex; align-items: center; gap: 6px; align-self: end; }
+.tp-field.tp-readonly { align-self: end; font-weight: 600; color: inherit; }
+.tp-form { display: grid; gap: 12px; }
+.tp-form-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.tp-group-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.tp-group-picker button { padding: 5px 10px; font-size: 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); cursor: pointer; }
+.tp-group-picker button.active { border-color: #8B9A6D; background: rgba(139, 154, 109, .16); }
+.tp-events { display: grid; gap: 10px; }
+.tp-events-header { display: flex; align-items: center; gap: 10px; }
+.tp-event { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 8px; }
+.tp-event legend { font-size: 11px; color: var(--muted); padding: 0 4px; }
+.tp-normalization { border: 1px dashed var(--line); border-radius: 8px; padding: 8px 10px; }
+.tp-eligibility { display: flex; gap: 10px; border: none; padding: 0; align-self: end; }
+.tp-eligibility label { display: flex; gap: 4px; align-items: center; font-size: 12px; }
+.tp-error { color: #A33; font-size: 12px; margin: 0; }
+ul.tp-error { padding-left: 18px; display: grid; gap: 2px; }
+.tp-success { color: #4CAF50; font-size: 12px; }
+.tp-diff-badge { margin: 0; padding: 6px 10px; border-radius: 6px; font-size: 12px; }
+.tp-diff-badge.ok { background: rgba(76, 175, 80, .12); color: #2E7D32; }
+.tp-diff-badge.fail { background: rgba(201, 64, 64, .12); color: #A33; }
+.tp-save-row { display: flex; align-items: center; gap: 10px; }
+.tp-save-row button { padding: 8px 16px; font-size: 13px; font-weight: 600; border: 1px solid #8B9A6D; border-radius: 6px; background: #8B9A6D; color: #fff; cursor: pointer; }
+.tp-save-row button:disabled { opacity: .45; cursor: default; }
+.tp-missing-day { display: flex; align-items: center; gap: 12px; }
+.tp-missing-day button { padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); cursor: pointer; }
+.tp-preview { display: grid; gap: 8px; }
+.tp-preview .unified-kline-engine { min-height: 420px; }
+.tp-registry { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); background: var(--panel); border-radius: 12px; }

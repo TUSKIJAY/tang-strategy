@@ -1,0 +1,146 @@
+[
+  {
+    "step": 1,
+    "assertion": "Data page ticker tabs visible (SPY/QQQ)",
+    "status": "PASS",
+    "details": "tabs=[\"QQQ\",\"SPY\"]"
+  },
+  {
+    "step": 1,
+    "assertion": "SPY tab active by default",
+    "status": "PASS",
+    "details": "active=SPY"
+  },
+  {
+    "step": 1,
+    "assertion": "Date rail shows only SPY dates",
+    "status": "PASS",
+    "details": "46 dates, first=SPY 2026-07-17, last=SPY 2026-05-12"
+  },
+  {
+    "step": 2,
+    "assertion": "QQQ tab shows only QQQ dates 2026-07-10/14/17",
+    "status": "PASS",
+    "details": "dates=[\"2026-07-10\",\"2026-07-14\",\"2026-07-17\"]"
+  },
+  {
+    "step": 3,
+    "assertion": "Data rail click navigates to Review with QQQ 2026-07-14 resolved",
+    "status": "PASS",
+    "details": "topbar日期=2026-07-14, meta=\"QQQ 2026-07-14 Full Day | 2026-07-14 | tf=1m\""
+  },
+  {
+    "step": 4,
+    "assertion": "Fresh Review defaults to SPY 2026-07-17",
+    "status": "PASS",
+    "details": "topbar日期=2026-07-17, meta=\"SPY 2026-07-17 Full Day | 2026-07-17 | tf=1m\""
+  },
+  {
+    "step": 4,
+    "assertion": "No .dr-upload-bar element exists",
+    "status": "PASS",
+    "details": "count=0"
+  },
+  {
+    "step": 4,
+    "assertion": "Engine toolbar contains button[data-action=\"overview\"]",
+    "status": "PASS",
+    "details": "count=1, visible=true"
+  },
+  {
+    "step": 5,
+    "assertion": "QQQ tab switch preserves date → QQQ 2026-07-17",
+    "status": "PASS",
+    "details": "topbar日期=2026-07-17, meta=\"QQQ 2026-07-17 Full Day | 2026-07-17 | tf=1m\""
+  },
+  {
+    "step": 6,
+    "assertion": "Trader filter shows readonly ticker/date mirrors (QQQ 2026-07-17)",
+    "status": "PASS",
+    "details": "mirror=QQQ/2026-07-17"
+  },
+  {
+    "step": 6,
+    "assertion": "Only 沃德哥 renders with checkbox/Focus",
+    "status": "PASS",
+    "details": "options=[\"沃德哥\"], checkbox=true, focus=true"
+  },
+  {
+    "step": 6,
+    "assertion": "Tang does not appear in trader filter",
+    "status": "PASS",
+    "details": "panelContainsTang=false"
+  },
+  {
+    "step": 7,
+    "assertion": "SPY 2026-05-29 shows neutral empty trader state, no checkboxes/Focus",
+    "status": "PASS",
+    "details": "meta=\"SPY 2026-05-29 Full Day | 2026-05-29 | tf=1m\", empty=\"当前 ticker/date 没有可显示的交易者点位。\", options=0, checkboxes=0"
+  },
+  {
+    "step": 8,
+    "assertion": "Rescan recomputes in place (no navigation, engine reloads)",
+    "status": "PASS",
+    "details": "loadData 5→6, stillReview=true, 日期=2026-07-17"
+  },
+  {
+    "step": 8,
+    "assertion": "Backtest button navigates to Backtest page",
+    "status": "PASS",
+    "details": "h2=\"Run strategy across imported days\""
+  },
+  {
+    "step": 9,
+    "assertion": "Backtest results render engine bars",
+    "status": "PASS",
+    "details": "results=10, meta=\"QQQ 2026-07-17 Backtest | 2026-07-17 | tf=1m\", viewport={\"base\":61,\"count\":61,\"minCount\":10,\"maxCount\":390,\"start\":0,\"end\":0,\"maxStart\":0}"
+  },
+  {
+    "step": 9,
+    "assertion": "No page-level Back/Step/Play/Overview duplicates on Backtest",
+    "status": "PASS",
+    "details": "pageToolbar=[\"Run latest 10 days\"]"
+  },
+  {
+    "step": 9,
+    "assertion": "Engine toolbar owns play/step/overview controls",
+    "status": "PASS",
+    "details": "engineActions=[\"timeframe\",\"step-back\",\"play\",\"step-forward\",\"speed\",\"zoom-out\",\"zoom-in\",\"follow\",\"overview\",\"toggle-ma\",\"candle-type\",\"candle-fill\",\"theme\"]"
+  },
+  {
+    "step": 10,
+    "assertion": "Advance one bar twice moves cutoff by 2",
+    "status": "PASS",
+    "details": "note \"Cutoff #30 · 04:30 · C 691.56\" → \"Cutoff #32 · 04:32 · C 691.02\""
+  },
+  {
+    "step": 10,
+    "assertion": "Reveal full day jumps cutoff to last bar and chart updates",
+    "status": "PASS",
+    "details": "note \"Cutoff #914 · 19:59 · C 693.66\", canvasChanged=true"
+  },
+  {
+    "step": 10,
+    "assertion": "No page-level Play/Pause button on Teaching",
+    "status": "PASS",
+    "details": "pageToolbar=[\"Back one bar\",\"Advance one bar\",\"Reveal full day\"]"
+  },
+  {
+    "step": 11,
+    "assertion": "Signal click zooms chart to a range",
+    "status": "PASS",
+    "details": "viewport {\"base\":72,\"count\":72,\"minCount\":10,\"maxCount\":390,\"start\":318,\"end\":389,\"maxStart\":318} → {\"base\":72,\"count\":36,\"minCount\":10,\"maxCount\":390,\"start\":0,\"end\":35,\"maxStart\":354}, canvasChanged=true"
+  },
+  {
+    "step": 11,
+    "assertion": "Engine Overview resets view to full day",
+    "status": "PASS",
+    "details": "viewport {\"base\":72,\"count\":72,\"minCount\":10,\"maxCount\":390,\"start\":318,\"end\":389,\"maxStart\":318} vs initial {\"base\":72,\"count\":72,\"minCount\":10,\"maxCount\":390,\"start\":318,\"end\":389,\"maxStart\":318}, canvasByteEqual=true"
+  },
+  {
+    "step": 12,
+    "assertion": "No browser console errors on any page",
+    "status": "PASS",
+    "details": "0 entries total"
+  }
+]

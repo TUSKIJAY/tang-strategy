@@ -1,0 +1,11 @@
+faea0f2ed64e20cb2805ef5bf45b98dd915bf11fcbc907854f1854b96592a25e  output/phase-2-acceptance-20260719/01-data-spy.png
+615bcb4c55e6605e918b03fb43ce15c16d6194ff5e607942046b41e2b4a80938  output/phase-2-acceptance-20260719/02-data-qqq.png
+3db7fc3e14a7bde88e594871f2798a6b442074a5df008f44d5903fb48ef6ad9f  output/phase-2-acceptance-20260719/03-data-to-review-qqq-0714.png
+f2c50e17fc2313c146b311bca0c9a476a2dada85a8e20828de2089e94d01994c  output/phase-2-acceptance-20260719/04-review-spy-default.png
+5d623648bb1e77fbde98144f31efbe6bc506a97dc193730c1e3e30e032535ac7  output/phase-2-acceptance-20260719/05-review-qqq-same-date.png
+5d623648bb1e77fbde98144f31efbe6bc506a97dc193730c1e3e30e032535ac7  output/phase-2-acceptance-20260719/06-review-qqq-trader-availability.png
+fef59bd9a2fcfea9f3c36c743f420de249e4a585812ace6367abbe71c3a9f780  output/phase-2-acceptance-20260719/07-review-spy-0529-empty-traders.png
+510caee2b17a2ea768c585b93957cc4f88df099ffa125a6d36a1cb17ab71dda6  output/phase-2-acceptance-20260719/08-backtest-page.png
+5b94fd31e8284b9602cfe9246cf24efdf2c257efb154e1a74bd4724ca1d0a929  output/phase-2-acceptance-20260719/09-backtest-results.png
+07648074a5c2b032821dfa45898a6921368d0689e1573a68bc374b24489971f4  output/phase-2-acceptance-20260719/10-teaching.png
+ca8753b25a5e0b65e098e6100b20bf33868b46abbef970eae8479eb519183f03  output/phase-2-acceptance-20260719/11-engine-overview.png

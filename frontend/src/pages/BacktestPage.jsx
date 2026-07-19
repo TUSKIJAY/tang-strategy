@@ -120,10 +120,6 @@ export function BacktestPage({ state }) {
       {error && <div className="error">{error}</div>}
       <div className="engine-toolbar">
         <button disabled={running || !state.strategies.length || !state.marketDays.length} onClick={run}>{running ? 'Running...' : 'Run latest 10 days'}</button>
-        <button disabled={!payload} onClick={() => engineRef.current?.stepBack()}>Back</button>
-        <button disabled={!payload} onClick={() => engineRef.current?.stepForward()}>Step</button>
-        <button disabled={!payload} onClick={() => engineRef.current?.togglePlayback()}>Play/Pause</button>
-        <button disabled={!payload} onClick={() => engineRef.current?.overview()}>Overview</button>
         <div className="metric inline"><span>Total signals</span><strong>{total}</strong></div>
       </div>
       <div className="engine-grid">

@@ -43,14 +43,15 @@ function App() {
 
   return (
     <Layout active={active} onNavigate={setActive}>
-      {active === 'dashboard' && <DashboardPage state={state} setState={setState} />}
-      {active === 'review' && <ReviewPage state={state} setState={setState} />}
+      {active === 'dashboard' && <DashboardPage state={state} setState={setState} onNavigate={setActive} />}
+      {active === 'review' && <ReviewPage state={state} setState={setState} onNavigate={setActive} />}
       {active === 'backtest' && <BacktestPage state={state} setState={setState} />}
       {active === 'teaching' && <TeachingPage state={state} setState={setState} />}
       {active === 'admin' && (
         <AdminTradersPage
           role={getRole()}
           payloads={tradeRecordPayloads}
+          marketDays={state.marketDays}
           onSaveRegistry={saveTraders}
           onSaveDay={saveTradeDay}
         />

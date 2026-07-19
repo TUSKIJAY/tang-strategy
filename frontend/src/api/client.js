@@ -44,7 +44,9 @@ export async function api(path, options = {}) {
   }
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(detail || `Request failed: ${response.status}`);
+    const error = new Error(detail || `Request failed: ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }
@@ -58,6 +60,8 @@ export const Api = {
   strategy: (id) => api(`/strategies/${id}`),
   teaching: (type) => api(`/teaching/${type}`),
   tradeRecords: (params = {}) => api(`/trade-records?${new URLSearchParams(params)}`),
+  adminTraders: () => api('/admin/traders'),
+  adminTradeDay: (tradeDate) => api(`/admin/trade-records?${new URLSearchParams({ trade_date: tradeDate })}`),
   saveTraders: (payload) => api('/admin/traders', { method: 'PUT', body: JSON.stringify(payload) }),
   saveTradeRecords: (payload) => api('/admin/trade-records', { method: 'PUT', body: JSON.stringify(payload) }),
   importSeed: () => api('/admin/import/seed', { method: 'POST' }),

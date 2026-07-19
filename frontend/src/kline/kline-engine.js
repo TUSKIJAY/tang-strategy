@@ -120,7 +120,7 @@
         const style = document.createElement('style');
         style.setAttribute(STYLE_ATTR, 'true');
         style.textContent = `
-          :root {
+          .kline-engine {
             color-scheme: dark;
             --kline-bg: #1a1a1a;
             --kline-chart: #1e1e1e;
@@ -193,20 +193,15 @@
             --kline-swatch-ring: rgba(26, 26, 25, 0.08);
           }
 
-          html, body {
-            margin: 0;
-            min-height: 100%;
+          #demo-page {
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
             background:
               radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 35%),
               linear-gradient(180deg, #101215 0%, #171a1f 100%);
             color: var(--kline-text);
             font: 13px/1.4 "Aptos", "Segoe UI", "PingFang SC", sans-serif;
-          }
-
-          #demo-page {
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
           }
 
           #demo-engine {
@@ -1037,6 +1032,7 @@
               <button class="kline-engine__button" data-action="zoom-out">- Zoom</button>
               <button class="kline-engine__button" data-action="zoom-in">+ Zoom</button>
               <button class="kline-engine__button" data-action="follow">Follow</button>
+              <button class="kline-engine__button" data-action="overview" title="Fit the full day into view" aria-label="Fit chart to full day overview">Overview</button>
               ${maButtons}
               <button class="kline-engine__button" data-action="candle-type" title="Toggle Heikin-Ashi / normal candles">HA</button>
               <button class="kline-engine__button" data-action="candle-fill" title="Toggle filled / hollow candles">Solid</button>
@@ -1151,6 +1147,11 @@
               this.viewportManager.setFollowMode(!this.viewportManager.followMode);
               this.emit('viewport:changed', this._getViewportPayload());
               this.scheduleRender();
+              return;
+            }
+
+            if (action === 'overview') {
+              this.overview();
               return;
             }
 
@@ -2660,6 +2661,20 @@
             end: Math.min(bars.length - 1, this.viewportManager.viewStart + clampedCount - 1),
             count: clampedCount,
           };
+        }
+
+        overview() {
+          // Engine-owned fit/overview action: reveal everything, clear teaching
+          // cutoffs and highlights, then reset the viewport (zoom/follow) and
+          // return to the latest bar at the default window — the same view a
+          // fresh data load produces.
+          this.setReplayReveal(false);
+          this.setRevealCutoff(null);
+          this.setHighlightRanges(null);
+          const bars = this.dataManager.getBars(this.currentTimeframe);
+          if (!bars.length) return this.currentIndex;
+          this.viewportManager.reset();
+          return this.setCurrentIndex(bars.length - 1, { follow: true });
         }
 
         setCurrentIndex(nextIndex, { follow = true } = {}) {

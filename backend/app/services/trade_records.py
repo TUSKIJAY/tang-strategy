@@ -475,6 +475,31 @@ def handle_trade_records_read(
     return payloads
 
 
+def handle_trader_registry_admin_read(role: str, content_dir: Path) -> dict[str, Any]:
+    """Admin-only canonical registry read: the write-valid document accepted by
+    `handle_trader_registry_admin_write`. Never served publicly or statically."""
+
+    _require_admin_role(role)
+    root = content_dir.expanduser().resolve()
+    return load_trader_registry(root / "traders" / "index.json")
+
+
+def handle_trade_day_admin_read(role: str, content_dir: Path, trade_date: str) -> dict[str, Any]:
+    """Admin-only canonical day read: the complete write-valid `trades-day-v1`
+    document (all underlyings, traders, groups, note contexts, full
+    normalization blocks). Missing dates fail with FileNotFoundError; no
+    default or synthetic day is fabricated."""
+
+    _require_admin_role(role)
+    root = content_dir.expanduser().resolve()
+    day_date = _require_date(trade_date, "trade_date").isoformat()
+    registry = load_trader_registry(root / "traders" / "index.json")
+    path = root / "trades" / f"{day_date}.json"
+    if not path.is_file():
+        raise FileNotFoundError(f"trade day {day_date} not found")
+    return load_trade_day(path, registry)
+
+
 def handle_trade_day_admin_write(
     role: str,
     content_dir: Path,

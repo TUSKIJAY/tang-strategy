@@ -26,10 +26,11 @@ Rebuild never deletes the current DB before candidate validation. Default replac
 - bars: `GET /api/market-days/{market_day_id}/bars?timeframe=1m|5m`;
 - assembled review: `GET /api/reviews/assemble?market_day_id=<id>&strategy_id=<id>`;
 - normalized trade reads: `GET /api/trade-records`;
+- admin canonical reads: `GET /api/admin/traders` and `GET /api/admin/trade-records?trade_date=<date>`;
 - teaching assets: `GET /api/teaching/{asset_type}`;
 - controlled writes: atomic admin trader/day endpoints plus the existing import endpoints.
 
-Readonly/admin endpoints use bearer auth. Admin canonical writes are validation-, candidate-, drift-, and rollback-protected; there is no unrestricted rebuild endpoint.
+Readonly/admin endpoints use bearer auth. The public trade-record response is a ticker/date projection for inspection and export; it is intentionally not a canonical write base. Admin canonical reads return the write-valid registry or complete multi-ticker day document without reading the runtime DB. Admin canonical writes remain validation-, candidate-, drift-, and rollback-protected; there is no unrestricted rebuild endpoint.
 
 ## Static Pages Flow
 
@@ -40,15 +41,26 @@ Readonly/admin endpoints use bearer auth. Admin canonical writes are validation-
 3. build with `VITE_STATIC_REVIEWS=true` into `frontend/dist`;
 4. replace the remote `gh-pages` branch with that build.
 
-The current static format is a Vite SPA plus generated review/strategy JSON. It is not the retired collection of standalone per-day HTML under `docs/`.
+The current static format is a Vite SPA plus generated review/strategy JSON. `StaticReviewsApp` consumes the existing flat manifest client-side through the same pure ticker/date workspace contract as interactive Review. Canonical deep links remain `#<ticker>-<date>-<session>`; legacy `#/` hashes resolve to the same real manifest item, and invalid links fall back deterministically with an announcement. Static Review never exposes login, Admin reads, editing, Backtest, Teaching, or mutation actions. It is not the retired collection of standalone per-day HTML under `docs/`.
 
 ## Frontend Modules
 
-- Data/Dashboard loads tickers, days, strategies, and admin import controls.
-- Review requests one assembled payload and runs browser scanner/lifecycle rendering.
+- `reviewWorkspace.js` owns pure interactive/static day normalization, ticker/date grouping, hash resolution, and deterministic transitions. `ReviewContextPanel` renders the shared ticker tabs and ticker-scoped date rail; child filters may mirror but never override that resolved context.
+- Data/Dashboard loads tickers, days, strategies, and admin import controls. Its day selection reconciles Review to the same real ticker/day rather than a mixed flat list.
+- Review requests one assembled payload, runs browser scanner/lifecycle rendering, derives visible traders from displayable groups before selection, and reconciles stale selected/focused traders after every context/filter change.
+- The authenticated `交易记录 / 点位管理` workspace is one navigation action away for both roles. Readonly users inspect/export the public projection. Admin users load the canonical registry and complete day, edit a scoped group/event through `TraderPointEditor`, preview the complete candidate in one reused chart, and explicitly save through the existing atomic PUT.
+- Static Review shares workspace, availability, reconciliation, presentation, and engine-ownership rules while retaining the static capability boundary described above.
 - Backtest loads bars for recent days, runs the browser-side backtest, and renders results through the shared engine.
 - Teaching loads structured content and uses the same chart/replay surface.
 - `frontend/src/kline/` owns the shared chart engine; new consumers must not create a page-specific replacement.
+
+## Review State And Control Ownership
+
+Ticker/date is one parent workspace identity. A real explicit selection or static hash wins; otherwise the newest SPY day is preferred when SPY exists. Switching ticker retains the date only when the target ticker owns it, otherwise it selects that ticker's newest real day. No layer fabricates a missing ticker/date.
+
+Review/Data/Static own business context: ticker/date, strategy, session window, trader availability/focus, eligibility, Rescan, Backtest navigation, export, edit entry, and assembly status. The K-line engine alone renders chart-generic timeframe, replay, speed, zoom, follow, Overview/fit, indicators, candle rendering, and theme controls. Backtest run/result selection and Teaching cutoff/reveal remain page-specific business actions.
+
+Trade mutation is full-document and fail-closed. The editor starts from the complete canonical date document, applies one scoped group edit, verifies every untouched group/leg/event/outcome/context and the intended count delta, then sends the complete day. Timestamp fields are an atomic tuple: known `occurred_at` requires a precision, `time_incomplete=false`, and appropriate provenance; clearing it restores the unknown-time tuple. Client validation blocks known contradictions, while backend validation remains authoritative and failures retain unsaved state.
 
 ## Ownership Boundaries
 

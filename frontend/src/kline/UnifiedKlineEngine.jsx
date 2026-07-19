@@ -92,15 +92,7 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
       engine._updateToolbarState?.();
       engine.scheduleRender?.();
     },
-    overview: () => {
-      const engine = engineRef.current;
-      if (!engine) return;
-      const bars = engine.dataManager?.getBars?.(engine.getTimeframe?.()) || [];
-      engine.setReplayReveal?.(false);
-      engine.setRevealCutoff?.(null);
-      engine.setHighlightRanges?.(null);
-      if (bars.length) engine.setCurrentIndex?.(bars.length - 1, { follow: false });
-    },
+    overview: () => engineRef.current?.overview?.(),
   }), []);
 
   return <div className="unified-kline-engine" ref={containerRef} />;
