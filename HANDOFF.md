@@ -29,8 +29,8 @@
 - Completed operating-modes plan reviews: `review-001.md` (revise@v1), `review-002.md` (revise@v1), `review-003.md` (approve@v2)
 - Data: tracked DB SHA-256 is `125fcc9d...8d23` with 49 active datasets (46 SPY + first 3 QQQ days 2026-07-10/14/17), 52 total datasets (3 superseded), and 2/33/33/46/7/5 normalized trade rows (traders/groups/legs/events/outcomes/contexts) including `vordin`; the local data/content checkpoint is already at `772b945`, while push/Pages remain unauthorized
 - Implementation boundary: implementation-review-002 accepted stable multi-trader implementation commit `b9dc84d00ff6a61ca6b6063352d8ed2ad6d31055`; lifecycle reconciliation is recorded at `6e57f18f7644d2956c81795fed3b3838158497e6`
-- Local Git boundary: Review Workspaces frozen implementation and accepted evidence are committed at `ab655568d50d20c2a97e970658ec9fa3b41719b7`; lifecycle reconciliation and metadata commits are bounded to this completed plan
-- Remote boundary: one exact current `codex/project-harness` branch push is authorized by `user-instruction:2026-07-20-commit-and-push`; PR, merge, Pages publish, branch protection, environment, hosted verification, IB, and every other remote change remain unauthorized
+- Local Git boundary: Review Workspaces frozen implementation and accepted evidence are committed at `ab655568d50d20c2a97e970658ec9fa3b41719b7`; lifecycle reconciliation is committed at `65fd15dd3a3b7030bc3d15fc0590ea26a048490c`; the final metadata commit records those immutable IDs
+- Remote boundary: `user-instruction:2026-07-20-commit-and-push` is single-use authority for the exact current `codex/project-harness` commit chain through metadata reconciliation; it is not reusable. PR, merge, Pages publish, branch protection, environment, hosted verification, IB, and every other remote change remain unauthorized
 
 ## Resume Checklist
 
@@ -48,7 +48,7 @@
 | Check | Result |
 | --- | --- |
 | Current Review Workspaces revision | `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`; packet `implementation-review-packet-001.md`; `implementation-review-001: accept/high`, no findings, Grok session `019f7bdd-3f80-7361-be62-f7be49f24147` |
-| Current Review Workspaces closeout | pass: direct operating-modes, governed/auto harness and links, 146/146 lifecycle fixtures, startup budget, launcher syntax, frozen-digest recomputation, protected hashes, staging, and `git diff --check`; lifecycle `Completed`, next gate `closed` |
+| Current Review Workspaces closeout | pass: implementation `ab655568d50d20c2a97e970658ec9fa3b41719b7`, lifecycle reconciliation `65fd15dd3a3b7030bc3d15fc0590ea26a048490c`, direct operating-modes, governed/auto harness and links, 146/146 lifecycle fixtures, startup budget, launcher syntax, frozen-digest recomputation, protected hashes, and `git diff --check`; lifecycle `Completed`, next gate `closed` |
 | Current Review Workspaces verification | pass: 78/78 backend, 38/38 frontend, 146/146 lifecycle fixtures, compileall, normal/static builds, governed/auto/operating/budget, SQLite integrity/FK, diff/scope checks |
 | Current Review Workspaces browser | pass: fresh Chromium desktop `1672x941` and narrow `820x1180` interactive/static/Admin/readonly/Backtest/Teaching matrices; Phase 3/4/5 screenshot sets and behavior/console receipts preserved |
 | Current Review Workspaces boundaries | tracked DB `125fcc9d...8d23`, registry `cf6f3122...2716c`, 2026-07-17 day `0d292b43...88fc`, workflow/exporter unchanged; implementation commit `ab655568d50d20c2a97e970658ec9fa3b41719b7`; no canonical write, provider/broker, PR, merge, or publication action |
