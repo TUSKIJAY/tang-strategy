@@ -40,11 +40,11 @@ v1 through implementation review and closeout.
 
 ## Active Plans
 
-None.
+- [Tang Strategy Review Date Navigation And Trader Filter Fusion](./active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) — Active; canonical details: [active index](./active/index.md)
 
 ## Proposed Plans
 
-- [Tang Strategy Review Date Navigation And Trader Filter Fusion](./proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
+None.
 
 ## Completed Plans
 

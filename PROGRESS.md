@@ -4,13 +4,13 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation-recording`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
 
-2026-07-21: Review plan 的 `proposal-revision` checkpoint `52498ad` 已通过；v2 `review-002: approve/high` 现绑定该祖先并形成唯一 `design-review` checkpoint，v1 `review-001` 保持 append-only。next gate `activation-recording`；不含实施、数据或远端动作。
+2026-07-21: Review plan checkpoint 链通过：`proposal-revision=52498ad`，`design-review=3a6a5ae`。已按用户指令迁移到 `Active/phase-0:not-started`，当前形成 `activation-recording`；next gate `phase-0-start`。未启动实施，不含数据或远端动作。
 
 2026-07-20: `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` 已由 exact implementation/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`、紧邻 boundary-metadata commit 及其最终 `codex/project-harness` push 消费；不授权进一步 commit/push、PR、merge、Pages、canonical data、provider/broker 或其他远端动作。
 

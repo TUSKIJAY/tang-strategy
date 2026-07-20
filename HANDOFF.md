@@ -4,16 +4,16 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation-recording`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current proposal: `docs/exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Proposed`, next gate `activation-recording`. `proposal-revision` checkpoint `52498ad` passed; `review-002: approve/high` targets it and is being recorded as the unique v2 `design-review` checkpoint. Only chain repair plus lifecycle activation is authorized.
+- Current plan: `docs/exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Active`, phase `phase-0:not-started`, next gate `phase-0-start`. The repaired `proposal-revision=52498ad` / `design-review=3a6a5ae` chain passed before activation. Implementation remains unauthorized.
 - Latest optimization intake: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/` is promoted to the current review-only proposal. User locks and mockup remain proposal evidence, not implementation evidence. Prior completed visual batch: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
 - Latest completed plan (focus): `docs/exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, lifecycle schema `operating-modes-v1`, status `Completed`, exact packet 002, `implementation-review-002: accept/high`, next gate `closed`.
@@ -48,7 +48,7 @@
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve unrelated changes and read `docs/operating-modes.md`, the current proposed Review Date Navigation plan, its source optimization/mockup, the completed Terminal UI plan, both Terminal UI implementation reviews, and the lifecycle indexes.
-4. Verify the `design-review` checkpoint and full audit; only then may the already-authorized activation move the plan to `active/phase-0:not-started`. Implementation still requires a later separate start instruction.
+4. The current plan is Active at `phase-0:not-started`. Do not start Phase 0 without a later separate implementation-start instruction.
 5. Terminal UI is Completed after remediation-1 and `implementation-review-002: accept/high`. Do not resume a prior phase or reuse consumed authority. Later commits, push/PR/merge, canonical data/provider/broker, publication, and remote actions require new authority.
 6. The multi-trader, operating-modes, and Review Workspaces plans are Completed; their prior authorities cannot be reused for this proposal.
 7. The transfer, Phase 6, and one-time 2026-07-20 commit/push instructions are consumed. Every further commit, push, and remote/publication action requires new authority.
@@ -134,7 +134,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-No exec plan is Active. The current Review Date Navigation And Trader Filter Fusion plan is Proposed with an audited `proposal-revision` ancestor and matching `review-002`; next gate is `activation-recording`. The user authorized repair-through-activation only. Implementation-start, push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
+Review Date Navigation And Trader Filter Fusion is Active at `phase-0:not-started`; next gate is `phase-0-start`. The user's repair-through-activation authority is consumed at the activation checkpoint. Implementation-start, push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
 
 ## Handoff Boundary
 
