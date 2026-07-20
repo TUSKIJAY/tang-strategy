@@ -6,9 +6,11 @@
 - Current plan: `2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan`
 - Lifecycle status: `Active`
 - Current phase: `phase-6`
-- Phase state: `in-progress`
-- Next gate: `implementation-review-packet`
+- Phase state: `complete`
+- Next gate: `implementation-review`
 <!-- operating-modes-state:end -->
+
+2026-07-20: Durable Checkpoint governance Phase 6 implementation 已冻结：治理矩阵通过 governed harness、direct operating checker、171/171 operating fixtures、38/38 checkpoint fixtures、startup budget 与 diff check；frontend 38/38 Node tests、normal/static builds 通过；Terminal UI plan/reviews、四个既有 Completed plans、tracked DB/content、Pages publisher 与 daily runbook 相对 `ff4d309` byte-exact，runtime/data diff 为零。审查前复核补齐 v2 review checkpoint 唯一承载、target kind/subject/revision 与 strict ancestry audit，提交为 `b5c5142`。Windows backend 全测的 78 项中 77 项通过，唯一 error 是既有 SQLite 临时文件 teardown 锁，Python 3.14 与隔离 Python 3.12 均复现；该 runtime/test 无本 plan diff，作为非阻断环境观察写入 packet。当前 `phase-6:complete`，等待独立 implementation review；未 push/PR/merge/数据或远端操作。
 
 2026-07-20: 用户通过 `/goal` 授权完整执行 Durable Checkpoint governance plan，并进一步授权先按归属 checkpoint 既有治理成果、再对本 plan 全生命周期使用 standing scoped local commit authority；实施证据分别记录为 `user-instruction:2026-07-20-execute-durable-checkpoint-governance-plan` 与 `user-instruction:2026-07-20-standing-durable-checkpoint-plan-local-commits`。既有成果已在 `ff4d309` 精确 checkpoint；Phase 0–4 已分别形成本地提交并通过各自 gate。Phase 5 兼容/迁移策略现已落地，当前进入 `phase-6:in-progress`，next gate `implementation-review-packet`。未 push/PR/merge/Pages/provider/broker/远端操作，tracked DB 与 canonical data 未改。
 

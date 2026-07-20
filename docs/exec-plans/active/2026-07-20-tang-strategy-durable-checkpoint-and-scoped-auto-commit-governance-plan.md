@@ -10,9 +10,9 @@
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-20-activate-durable-checkpoint-governance`
 - Current phase: phase-6
-- Phase state: in-progress
+- Phase state: complete
 - Phase entry gate: `phase-5-exit`
-- Next gate: `implementation-review-packet`
+- Next gate: `implementation-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
