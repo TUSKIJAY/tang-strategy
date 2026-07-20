@@ -265,6 +265,46 @@ test('context panel exposes programmatic tabs, rail, and selected states', () =>
   assert.match(panelSource, /groupDatesByMonth\(days, ticker\)/);
 });
 
+test('shared terminal tokens and all five peer destinations own the application chrome', () => {
+  const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
+  const layout = readFileSync(new URL('../../components/Layout.jsx', import.meta.url), 'utf8');
+  const tokens = {
+    'surface-app': '#141413',
+    'surface-panel': '#1E1E1D',
+    'surface-control': '#282827',
+    'surface-raised': '#333331',
+    'border-subtle': '#3B3B38',
+    'border-control': '#74746E',
+    'text-primary': '#E8E7E3',
+    'text-secondary': '#C9C8C2',
+    'text-muted': '#A7A69F',
+    accent: '#8B9A6D',
+    'accent-ink': '#0F0F0E',
+    'status-success': '#4CAF50',
+    'status-danger': '#E06B66',
+    'status-warning': '#C9A45C',
+    'brand-warm': '#A6532A',
+  };
+
+  for (const [name, value] of Object.entries(tokens)) {
+    assert.match(styles, new RegExp(`--${name}: ${value};`));
+  }
+  assert.doesNotMatch(styles, /--(?:ink|muted|paper|panel|line):/);
+  assert.doesNotMatch(styles, /#f7f1e6|#fffaf0|#fffdf7|#fff7db|#eadcc6/i);
+  assert.equal(styles.match(/var\(--brand-warm\)/g)?.length, 1);
+  assert.match(styles, /\.brand-mark \{[^}]*background: var\(--brand-warm\);/);
+
+  assert.match(layout, /function NavItem\(/);
+  assert.match(layout, /aria-current=\{active === id \? 'page' : undefined\}/);
+  assert.match(layout, /<nav aria-label="Primary navigation">/);
+  assert.match(layout, /className="nav-bottom-stack"/);
+  assert.match(layout, /Icon=\{UsersRound\}/);
+  assert.match(layout, /只读检查，编辑需要管理员/);
+  assert.doesNotMatch(layout, /RefreshCcw|className="secondary"/);
+  assert.equal([...layout.matchAll(/<NavItem\b/g)].length, 2);
+  assert.equal([...layout.matchAll(/id: '(dashboard|review|backtest|teaching)'/g)].length, 4);
+});
+
 test('static Review consumes shared workspace and trader contracts with one engine control owner', () => {
   const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
   assert.match(staticSource, /normalizeStaticDays\(manifest\?\.reviews\)/);
@@ -285,8 +325,13 @@ test('static Review consumes shared workspace and trader contracts with one engi
   assert.doesNotMatch(staticSource, />Overview</);
   assert.doesNotMatch(staticSource, /AdminTradersPage|\/api\/admin|编辑交易者点位/);
   const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
-  assert.match(styles, /\.dr-sidebar \.trade-filter-panel,/);
-  assert.match(styles, /\.dr-sidebar \.trade-context-mirror-item \{ color: #E8E7E3;/);
+  assert.match(styles, /\.trade-filter-panel \{[^}]*background: var\(--surface-panel\);/);
+  assert.match(styles, /\.dr-sidebar \.trade-filter-panel \{ padding: 10px 12px; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-record-list \{ gap: 8px; \}/);
+  assert.doesNotMatch(styles, /\.dr-sidebar \.trade-filter-panel,\s*\.dr-sidebar \.trade-group-card/);
+  assert.doesNotMatch(styles, /\.dr-sidebar \.trade-context-mirror-item|\.dr-sidebar \.trade-leg/);
+  assert.match(styles, /\.review-context-field select \{[^}]*background: var\(--surface-control\);[^}]*border: 1px solid var\(--border-control\);/);
+  assert.match(styles, /\.dr-control-group select \{[^}]*background: var\(--surface-control\);[^}]*border: 1px solid var\(--border-control\);/);
 });
 
 test('interactive, static, and editor async states expose announcements', () => {

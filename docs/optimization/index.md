@@ -6,7 +6,7 @@
 
 | Batch | Scope | Status | Lifecycle links |
 | --- | --- | --- | --- |
-| [`2026-07-20-trader-workspace-nav-and-registry`](./2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md) | Nav fusion + Review trade-panel fusion + app color unification + add-trader | active-plan | [active plan](../exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) |
+| [`2026-07-20-trader-workspace-nav-and-registry`](./2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md) | Nav fusion + Review trade-panel fusion + app color unification + add-trader | completed-plan | [completed plan](../exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) |
 | [`2026-07-20-data-coverage-presentation`](./2026-07-20-data-coverage-presentation/2026-07-20-data-coverage-presentation.md) | Earlier Data coverage draft (market-day rail density) | superseded | none; replaced by trader-workspace batch above |
 | [`2026-07-19-review-ui-and-trader-editing`](./2026-07-19-review-ui-and-trader-editing/2026-07-19-review-ui-and-trader-editing.md) | Review/K-line control ownership, SPY/QQQ workspaces, static parity, and trader-point editor discoverability | completed | [completed plan](../exec-plans/completed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) |
 | [`2026-07-18-repository-audit-followups`](./2026-07-18-repository-audit-followups/2026-07-18-repository-audit-followups.md) | Strategy/backend/frontend/security/ops follow-ups excluded from the active recovery plan | recorded | none; record-only |

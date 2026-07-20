@@ -3,14 +3,24 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-1`
-- Phase state: `not-started`
-- Next gate: `phase-1-start`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
 
-2026-07-20: Terminal UI/Trader Registry Phase 0 已完成并迁移到 `operating-modes-v2`：从 clean baseline `3f589a0` 冻结精确 Add/Modify/Remove manifest、15-token terminal contract、registry exact-regex/error-body fixtures、protected DB/content/backend/schema/publisher/exporter/runbook hashes/counts，以及 16 张 Playwright before-state PNG（desktop/narrow、expanded/collapsed、interactive/static）。38/38 frontend、两种 build、171/171 lifecycle fixtures、governed/auto/direct checks、startup budget、SQLite integrity/FK 与 diff check 通过；backend registry baseline 21 项中 20 项通过，唯一 error 是既有 Windows/Python 3.14 临时 SQLite teardown 锁，发生在产品断言后且在任何前端源码修改前，按 environment failure 记录而非冒充 pass。Phase 0 exit gate 满足，进入 `phase-1:not-started` / `phase-1-start`；首个 v2 `phase-exit` checkpoint 使用一次性 `user-instruction:2026-07-20-commit-activation-with-next-phase`，未授权后续 phase commit 或任何远端/data/provider/publisher 动作。
+2026-07-20: 用户通过 `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` 授权将已验收的 Terminal UI/Trader Registry 完整实现与 lifecycle closeout 按精确路径形成 local commit，并 push 当前 `codex/project-harness` branch；不授权 PR、merge、Pages、canonical data、provider/broker 或其他远端动作。
+
+2026-07-20: Terminal UI/Trader Registry is Completed. Exact packet 002 received independent `implementation-review-002=accept/high`; both remediation findings are closed and final lifecycle checks pass. Verified/lifecycle commits remain `none`; implementation stays uncommitted, canonical data and remote state unchanged. Next gate: none.
+
+2026-07-20: Terminal UI `implementation-review-001=revise/high`. Remediation-1 fixes lifecycle receipts; direct/governed/auto/diff pass. Awaiting packet 002 review; see `evidence/remediation-1-lifecycle-reconciliation.md`.
+
+2026-07-20: Terminal UI Phases 1–5 complete: terminal skin/nav, fused Review panel, and isolated admin create-trader acceptance pass. Frontend 46/46, lifecycle 171/171, builds/browser/protected-state checks pass; backend remains 77/78 on the unchanged Windows SQLite teardown lock. Canonical data and remote state are unchanged. Full matrix: `evidence/phase-5-integrated-acceptance.md`.
+
+2026-07-20: Terminal UI Phase 1 started after the verified Phase 0 exit; no later local commit or remote/data authority was granted.
+
+2026-07-20: Terminal UI/Trader Registry Phase 0 已完成：从 clean baseline `3f589a0` 冻结精确 Add/Modify/Remove manifest、15-token terminal contract、registry exact-regex/error-body fixtures、protected DB/content/backend/schema/publisher/exporter/runbook hashes/counts，以及 16 张 Playwright before-state PNG（desktop/narrow、expanded/collapsed、interactive/static）。38/38 frontend、两种 build、171/171 lifecycle fixtures、governed/auto/direct checks、startup budget、SQLite integrity/FK 与 diff check 通过；backend registry baseline 21 项中 20 项通过，唯一 error 是既有 Windows/Python 3.14 临时 SQLite teardown 锁，发生在产品断言后且在任何前端源码修改前，按 environment failure 记录。授权的 Phase 0 commit `3d9a67c` 通过 exact request postflight；随后 audit 暴露现有 durable checker 与 §10 v1-review compatibility 冲突（错误要求 append-only v1 design reviews 具备 v2 checkpoint ancestry，且不能解析其合法 repo-relative paths）。checker 不在本 UI plan 冻结范围内，因此不扩 scope、不改历史 review，plan 保持 `operating-modes-v1`，进入 `phase-1:not-started` / `phase-1-start`。未授权后续 phase commit 或任何远端/data/provider/publisher 动作。
 
 2026-07-20: 用户通过 `/goal 这个plan交给你全权负责执行` 为 Terminal UI/Trader Registry exact revision `v2-review-foldback-2026-07-20` 发出独立 implementation-start 指令，记录为 `user-instruction:2026-07-20-execute-terminal-ui-registry-plan`。Phase 0 已进入 `in-progress`，当前冻结 live baseline、精确 manifest、token/registry contracts 与受保护边界；本地实现、验证、必要 remediation、独立 implementation review、lifecycle closeout 及隔离临时 content/SQLite 验收获授权。用户随后允许现有 activation 变更随下一 phase 提交；由于 v2 durable checkpoint 禁止把两个生命周期产品塞进同一 checkpoint，pre-dirty activation 已作为 v1-compatible scoped commit `3f589a027d3c1351672660ab8f4e9157a792821e` 独立固化，`user-instruction:2026-07-20-commit-activation-with-next-phase` 保留为一次 Phase 0 `phase-exit` checkpoint 权限。未授权 canonical content/tracked DB、push/PR/merge、Pages/hosted、provider/broker 或其他远端动作。
 
@@ -119,7 +129,7 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
-| Current active plan | `docs/exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md` |
+| Latest completed plan | `docs/exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md` |
 | Completed durable checkpoint plan | `docs/exec-plans/completed/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md` |
 | Completed Review UI plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` |
 | Review-ready packet | `docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/implementation-review-packet-001.md` |

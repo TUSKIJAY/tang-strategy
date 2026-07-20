@@ -1,13 +1,32 @@
 import { useState } from 'react';
-import { BarChart3, BookOpen, Database, LineChart, LogOut, PanelLeftClose, PanelLeftOpen, RefreshCcw } from 'lucide-react';
+import { BarChart3, BookOpen, Database, LineChart, LogOut, PanelLeftClose, PanelLeftOpen, UsersRound } from 'lucide-react';
 import { clearSession, getRole } from '../api/client.js';
 
-const nav = [
-  ['dashboard', Database, 'Data'],
-  ['review', LineChart, 'Review'],
-  ['backtest', BarChart3, 'Backtest'],
-  ['teaching', BookOpen, 'Teaching'],
+const NAV_ITEMS = [
+  { id: 'dashboard', Icon: Database, label: 'Data' },
+  { id: 'review', Icon: LineChart, label: 'Review' },
+  { id: 'backtest', Icon: BarChart3, label: 'Backtest' },
+  { id: 'teaching', Icon: BookOpen, label: 'Teaching' },
 ];
+
+function NavItem({ active, capability, Icon, id, label, onNavigate }) {
+  const accessibleName = capability ? `${label}（${capability}）` : label;
+
+  return (
+    <button
+      type="button"
+      className="nav-item"
+      aria-current={active === id ? 'page' : undefined}
+      aria-label={accessibleName}
+      onClick={() => onNavigate(id)}
+      title={accessibleName}
+    >
+      <Icon size={18} aria-hidden="true" />
+      <span className="nav-label">{label}</span>
+      {capability ? <span className="nav-role-badge">{capability}</span> : null}
+    </button>
+  );
+}
 
 export function Layout({ active, onNavigate, children }) {
   const role = getRole();
@@ -34,21 +53,25 @@ export function Layout({ active, onNavigate, children }) {
             {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
           </button>
         </div>
-        <nav>
-          {nav.map(([id, Icon, label]) => (
-            <button key={id} className={active === id ? 'active' : ''} onClick={() => onNavigate(id)} title={label}>
-              <Icon size={18} />
-              <span className="nav-label">{label}</span>
-            </button>
-          ))}
+        <nav aria-label="Primary navigation">
+          <div className="nav-primary-stack">
+            {NAV_ITEMS.map((item) => (
+              <NavItem key={item.id} {...item} active={active} onNavigate={onNavigate} />
+            ))}
+          </div>
+          <div className="nav-bottom-stack">
+            <NavItem
+              id="admin"
+              Icon={UsersRound}
+              label="交易记录 / 点位管理"
+              capability={role === 'admin' ? '管理员可编辑' : '只读检查，编辑需要管理员'}
+              active={active}
+              onNavigate={onNavigate}
+            />
+          </div>
         </nav>
-        <button className="secondary" onClick={() => onNavigate('admin')} title={role === 'admin' ? '交易记录 / 点位管理（管理员可编辑）' : '交易记录 / 点位管理（只读检查，编辑需要管理员）'}>
-          <RefreshCcw size={18} />
-          <span className="nav-label">交易记录 / 点位管理</span>
-          <span className={`nav-role-badge ${role === 'admin' ? 'admin' : 'readonly'}`}>{role === 'admin' ? 'admin 可编辑' : '只读'}</span>
-        </button>
-        <button className="logout" onClick={() => { clearSession(); window.location.reload(); }} title="Logout">
-          <LogOut size={18} />
+        <button className="logout" type="button" onClick={() => { clearSession(); window.location.reload(); }} title="Logout">
+          <LogOut size={18} aria-hidden="true" />
           <span className="nav-label">Logout</span>
         </button>
       </aside>

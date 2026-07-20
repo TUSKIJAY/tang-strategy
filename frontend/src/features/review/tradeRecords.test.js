@@ -166,6 +166,14 @@ test('admin workspace pins capability labels, no raw JSON, and form editor gate'
   assert.match(pageSource, /availableTraderIds=\{traderAvailability\.availableTraderIds\}/);
   assert.match(pageSource, /\{isAdmin && \(\s*<TraderPointEditor/);
   assert.match(pageSource, /保存注册表/);
+  assert.match(pageSource, /createTraderDraft\(registryDraft\)/);
+  assert.match(pageSource, /appendTraderDraft\(registryDraft, createDraft\)/);
+  assert.match(pageSource, />\s*新增交易者\s*</);
+  assert.match(pageSource, />添加到草稿</);
+  assert.match(pageSource, /isUnsaved && \(\s*<div className="tp-unsaved-actions">/);
+  assert.match(pageSource, /await onSaveRegistry\(candidate\);\s*const reloaded = await Api\.adminTraders\(\);/);
+  assert.match(pageSource, /associateRegistryServerError\(err\.message/);
+  assert.doesNotMatch(pageSource, /删除交易者|deleteTrader|Api\.delete/);
 
   const editorSource = readFileSync(new URL('./TraderPointEditor.jsx', import.meta.url), 'utf8');
   // Canonical admin reads are the only write base; pure candidate contract used.
@@ -190,8 +198,13 @@ test('admin workspace pins capability labels, no raw JSON, and form editor gate'
   assert.match(editorSource, /if \(!isAdmin\) return null;/);
 
   const styleSource = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
-  assert.match(styleSource, /\.tp-group-picker button \{[^}]*background: #fff; color: var\(--ink\);/);
-  assert.match(styleSource, /\.tp-missing-day button \{[^}]*background: #fff; color: var\(--ink\);/);
+  assert.match(styleSource, /\.tp-group-picker button \{[^}]*background: var\(--surface-control\); color: var\(--text-primary\);/);
+  assert.match(styleSource, /\.tp-missing-day button \{[^}]*background: var\(--surface-control\); color: var\(--text-primary\);/);
+  assert.match(styleSource, /\.tp-field input, \.tp-field select, \.tp-field textarea \{[^}]*background: var\(--surface-control\);[^}]*color: var\(--text-primary\);/);
+  assert.match(styleSource, /\.tp-form-grid \{[^}]*grid-template-columns: repeat\(auto-fit, minmax\(min\(160px, 100%\), 1fr\)\);/);
+  assert.match(styleSource, /\.tp-error \{ color: var\(--status-danger\);/);
+  assert.match(styleSource, /\.tp-success \{ color: var\(--status-success\);/);
+  assert.doesNotMatch(styleSource, /background:\s*(?:#fff\b|white\b)/i);
 });
 
 test('only admin role can enable frozen-contract editors', () => {

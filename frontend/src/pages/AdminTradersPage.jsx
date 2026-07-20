@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Api } from '../api/client.js';
 import { ReviewContextPanel } from '../features/review/ReviewContextPanel.jsx';
 import { TradeExportControls } from '../features/review/TradeExportControls.jsx';
@@ -20,6 +20,12 @@ import {
   selectWorkspaceDay,
   switchTicker,
 } from '../features/review/reviewWorkspace.js';
+import {
+  appendTraderDraft,
+  associateRegistryServerError,
+  createTraderDraft,
+  removeUnsavedTrader,
+} from '../features/review/traderRegistry.js';
 
 // Authenticated trader workspace (plan §3.4): every role can inspect and
 // export; only admins see the form-driven point editor and registry metadata
@@ -35,6 +41,11 @@ export function AdminTradersPage({ role = 'readonly', payloads = [], marketDays 
   const [registryDoc, setRegistryDoc] = useState(null);
   const [registryDraft, setRegistryDraft] = useState(null);
   const [registryState, setRegistryState] = useState({ saving: false, error: '', success: '' });
+  const [createDraft, setCreateDraft] = useState(null);
+  const [createErrors, setCreateErrors] = useState({});
+  const [stagedTraderIndex, setStagedTraderIndex] = useState(null);
+  const [registryFieldErrors, setRegistryFieldErrors] = useState({});
+  const registryControlRefs = useRef(new Map());
 
   const payload = useMemo(
     () => payloads.find((item) => (
@@ -104,26 +115,110 @@ export function AdminTradersPage({ role = 'readonly', payloads = [], marketDays 
     if (next.day) setWorkspace({ ticker: next.ticker, trade_date: next.trade_date, key: next.key });
   }
 
-  function updateRegistryTrader(traderId, patch) {
+  function updateRegistryTrader(index, field, value) {
     setRegistryDraft((previous) => ({
       ...previous,
-      traders: previous.traders.map((trader) => (
-        trader.trader_id === traderId ? { ...trader, ...patch } : trader
+      traders: previous.traders.map((trader, traderIndex) => (
+        traderIndex === index ? { ...trader, [field]: value } : trader
       )),
     }));
+    setRegistryFieldErrors((previous) => {
+      const next = { ...previous };
+      delete next[`${index}.${field}`];
+      return next;
+    });
+    setRegistryState((previous) => ({ ...previous, error: '', success: '' }));
+  }
+
+  function setRegistryControlRef(index, field, node) {
+    const key = `${index}.${field}`;
+    if (node) registryControlRefs.current.set(key, node);
+    else registryControlRefs.current.delete(key);
+  }
+
+  function focusRegistryControl(fieldPath) {
+    window.requestAnimationFrame(() => registryControlRefs.current.get(fieldPath)?.focus());
+  }
+
+  function openCreateTrader() {
+    setCreateDraft(createTraderDraft(registryDraft));
+    setCreateErrors({});
+    setRegistryState({ saving: false, error: '', success: '' });
+  }
+
+  function updateCreateTrader(field, value) {
+    setCreateDraft((previous) => ({ ...previous, [field]: value }));
+    setCreateErrors((previous) => {
+      const next = { ...previous };
+      delete next[field];
+      return next;
+    });
+  }
+
+  function addCreateTraderToDraft() {
+    const result = appendTraderDraft(registryDraft, createDraft);
+    if (Object.keys(result.fieldErrors).length) {
+      setCreateErrors(result.fieldErrors);
+      const firstField = Object.keys(result.fieldErrors)[0];
+      window.requestAnimationFrame(() => document.getElementById(`create-trader-${firstField}`)?.focus());
+      return;
+    }
+    const nextIndex = result.registry.traders.length - 1;
+    setRegistryDraft(result.registry);
+    setStagedTraderIndex(nextIndex);
+    setCreateDraft(null);
+    setCreateErrors({});
+    setRegistryState({ saving: false, error: '', success: '已添加到完整注册表草稿，尚未保存。' });
+  }
+
+  function removeStagedTrader() {
+    if (stagedTraderIndex == null) return;
+    setRegistryDraft((previous) => removeUnsavedTrader(previous, stagedTraderIndex));
+    setStagedTraderIndex(null);
+    setRegistryFieldErrors({});
+    setRegistryState({ saving: false, error: '', success: '未保存的交易者已移除。' });
   }
 
   async function saveRegistry() {
     if (!isAdmin || !registryDirty) return;
+    let candidate = registryDraft;
+    if (stagedTraderIndex != null) {
+      const base = removeUnsavedTrader(registryDraft, stagedTraderIndex);
+      const appended = appendTraderDraft(base, registryDraft.traders[stagedTraderIndex]);
+      if (Object.keys(appended.fieldErrors).length) {
+        const mapped = Object.fromEntries(
+          Object.entries(appended.fieldErrors).map(([field, message]) => [`${stagedTraderIndex}.${field}`, message]),
+        );
+        setRegistryFieldErrors(mapped);
+        setRegistryState({ saving: false, error: '请先修正新增交易者字段。', success: '' });
+        const firstField = Object.keys(appended.fieldErrors)[0];
+        focusRegistryControl(`${stagedTraderIndex}.${firstField}`);
+        return;
+      }
+      candidate = appended.registry;
+    }
     setRegistryState({ saving: true, error: '', success: '' });
+    setRegistryFieldErrors({});
     try {
-      await onSaveRegistry(registryDraft);
+      await onSaveRegistry(candidate);
       const reloaded = await Api.adminTraders();
       setRegistryDoc(reloaded);
       setRegistryDraft(structuredClone(reloaded));
+      setCreateDraft(null);
+      setCreateErrors({});
+      setStagedTraderIndex(null);
+      setRegistryFieldErrors({});
       setRegistryState({ saving: false, error: '', success: '注册表已保存。' });
     } catch (err) {
-      setRegistryState({ saving: false, error: err.message, success: '' });
+      const associated = associateRegistryServerError(err.message, {
+        rowCount: registryDraft.traders.length,
+        controlPaths: new Set(registryControlRefs.current.keys()),
+      });
+      if (associated.fieldPath) {
+        setRegistryFieldErrors({ [associated.fieldPath]: associated.message });
+        focusRegistryControl(associated.fieldPath);
+      }
+      setRegistryState({ saving: false, error: associated.message, success: '' });
     }
   }
 
@@ -164,27 +259,165 @@ export function AdminTradersPage({ role = 'readonly', payloads = [], marketDays 
       )}
       {isAdmin && registryDraft && (
         <section className="tp-registry" aria-label="交易者注册表">
-          <h3>交易者注册表（trader_id 不可变）</h3>
-          {registryDraft.traders.map((trader) => (
-            <div className="tp-form-grid" key={trader.trader_id}>
-              <span className="tp-field tp-readonly">{trader.trader_id}</span>
+          <div className="tp-registry-header">
+            <div>
+              <h3>交易者注册表</h3>
+              <p>已保存的 trader_id 不可变；新增交易者先加入完整草稿，再统一保存。</p>
+            </div>
+            <button
+              className="tp-add-trader-button"
+              type="button"
+              aria-expanded={Boolean(createDraft)}
+              disabled={Boolean(createDraft) || stagedTraderIndex != null || registryState.saving}
+              onClick={openCreateTrader}
+            >
+              新增交易者
+            </button>
+          </div>
+
+          {createDraft && (
+            <div className="tp-create-card" aria-label="新增交易者草稿">
+              <div className="tp-create-card-header">
+                <strong>新增交易者</strong>
+                <span className="tp-unsaved-badge">未加入草稿</span>
+              </div>
+              <div className="tp-form-grid">
+                <label className="tp-field">
+                  trader_id
+                  <input
+                    id="create-trader-trader_id"
+                    value={createDraft.trader_id}
+                    onChange={(event) => updateCreateTrader('trader_id', event.target.value)}
+                    aria-invalid={Boolean(createErrors.trader_id)}
+                    aria-describedby={createErrors.trader_id ? 'create-error-trader_id' : undefined}
+                    autoFocus
+                  />
+                  {createErrors.trader_id && <span id="create-error-trader_id" className="tp-error" role="alert">{createErrors.trader_id}</span>}
+                </label>
+                <label className="tp-field">
+                  Display name
+                  <input
+                    id="create-trader-display_name"
+                    value={createDraft.display_name}
+                    onChange={(event) => updateCreateTrader('display_name', event.target.value)}
+                    aria-invalid={Boolean(createErrors.display_name)}
+                    aria-describedby={createErrors.display_name ? 'create-error-display_name' : undefined}
+                  />
+                  {createErrors.display_name && <span id="create-error-display_name" className="tp-error" role="alert">{createErrors.display_name}</span>}
+                </label>
+                <label className="tp-field">
+                  Color
+                  <input
+                    id="create-trader-color"
+                    value={createDraft.color}
+                    onChange={(event) => updateCreateTrader('color', event.target.value)}
+                    placeholder="#3366CC"
+                    aria-invalid={Boolean(createErrors.color)}
+                    aria-describedby={createErrors.color ? 'create-error-color' : undefined}
+                  />
+                  {createErrors.color && <span id="create-error-color" className="tp-error" role="alert">{createErrors.color}</span>}
+                </label>
+                <label className="tp-field tp-inline">
+                  <input
+                    id="create-trader-active"
+                    type="checkbox"
+                    checked={Boolean(createDraft.active)}
+                    onChange={(event) => updateCreateTrader('active', event.target.checked)}
+                  /> active
+                </label>
+                <label className="tp-field">
+                  Sort order
+                  <input
+                    id="create-trader-sort_order"
+                    inputMode="numeric"
+                    value={createDraft.sort_order}
+                    onChange={(event) => updateCreateTrader('sort_order', event.target.value)}
+                    aria-invalid={Boolean(createErrors.sort_order)}
+                    aria-describedby={createErrors.sort_order ? 'create-error-sort_order' : undefined}
+                  />
+                  {createErrors.sort_order && <span id="create-error-sort_order" className="tp-error" role="alert">{createErrors.sort_order}</span>}
+                </label>
+              </div>
+              <div className="tp-create-actions">
+                <button type="button" onClick={addCreateTraderToDraft}>添加到草稿</button>
+                <button type="button" className="tp-button-muted" onClick={() => { setCreateDraft(null); setCreateErrors({}); }}>取消</button>
+              </div>
+            </div>
+          )}
+
+          {registryDraft.traders.map((trader, index) => {
+            const isUnsaved = index === stagedTraderIndex;
+            const errorId = (field) => `registry-error-${index}-${field}`;
+            return (
+            <div className={`tp-form-grid tp-registry-row ${isUnsaved ? 'is-unsaved' : ''}`} key={`registry-row-${index}`}>
+              {isUnsaved ? (
+                <label className="tp-field">
+                  trader_id
+                  <input
+                    ref={(node) => setRegistryControlRef(index, 'trader_id', node)}
+                    value={trader.trader_id}
+                    onChange={(event) => updateRegistryTrader(index, 'trader_id', event.target.value)}
+                    aria-invalid={Boolean(registryFieldErrors[`${index}.trader_id`])}
+                    aria-describedby={registryFieldErrors[`${index}.trader_id`] ? errorId('trader_id') : undefined}
+                  />
+                  {registryFieldErrors[`${index}.trader_id`] && <span id={errorId('trader_id')} className="tp-error" role="alert">{registryFieldErrors[`${index}.trader_id`]}</span>}
+                </label>
+              ) : <span className="tp-field tp-readonly">{trader.trader_id}</span>}
               <label className="tp-field">
                 Display name
-                <input value={trader.display_name} onChange={(event) => updateRegistryTrader(trader.trader_id, { display_name: event.target.value })} />
+                <input
+                  ref={(node) => setRegistryControlRef(index, 'display_name', node)}
+                  value={trader.display_name}
+                  onChange={(event) => updateRegistryTrader(index, 'display_name', event.target.value)}
+                  aria-invalid={Boolean(registryFieldErrors[`${index}.display_name`])}
+                  aria-describedby={registryFieldErrors[`${index}.display_name`] ? errorId('display_name') : undefined}
+                />
+                {registryFieldErrors[`${index}.display_name`] && <span id={errorId('display_name')} className="tp-error" role="alert">{registryFieldErrors[`${index}.display_name`]}</span>}
               </label>
               <label className="tp-field">
                 Color
-                <input value={trader.color} onChange={(event) => updateRegistryTrader(trader.trader_id, { color: event.target.value })} placeholder="#4E79A7" />
+                <input
+                  ref={(node) => setRegistryControlRef(index, 'color', node)}
+                  value={trader.color}
+                  onChange={(event) => updateRegistryTrader(index, 'color', event.target.value)}
+                  placeholder="#4E79A7"
+                  aria-invalid={Boolean(registryFieldErrors[`${index}.color`])}
+                  aria-describedby={registryFieldErrors[`${index}.color`] ? errorId('color') : undefined}
+                />
+                {registryFieldErrors[`${index}.color`] && <span id={errorId('color')} className="tp-error" role="alert">{registryFieldErrors[`${index}.color`]}</span>}
               </label>
               <label className="tp-field tp-inline">
-                <input type="checkbox" checked={Boolean(trader.active)} onChange={(event) => updateRegistryTrader(trader.trader_id, { active: event.target.checked })} /> active
+                <input
+                  ref={(node) => setRegistryControlRef(index, 'active', node)}
+                  type="checkbox"
+                  checked={Boolean(trader.active)}
+                  onChange={(event) => updateRegistryTrader(index, 'active', event.target.checked)}
+                  aria-invalid={Boolean(registryFieldErrors[`${index}.active`])}
+                  aria-describedby={registryFieldErrors[`${index}.active`] ? errorId('active') : undefined}
+                /> active
+                {registryFieldErrors[`${index}.active`] && <span id={errorId('active')} className="tp-error" role="alert">{registryFieldErrors[`${index}.active`]}</span>}
               </label>
               <label className="tp-field">
                 Sort order
-                <input value={trader.sort_order} onChange={(event) => updateRegistryTrader(trader.trader_id, { sort_order: Number(event.target.value) || 0 })} />
+                <input
+                  ref={(node) => setRegistryControlRef(index, 'sort_order', node)}
+                  inputMode="numeric"
+                  value={trader.sort_order}
+                  onChange={(event) => updateRegistryTrader(index, 'sort_order', isUnsaved ? event.target.value : Number(event.target.value) || 0)}
+                  aria-invalid={Boolean(registryFieldErrors[`${index}.sort_order`])}
+                  aria-describedby={registryFieldErrors[`${index}.sort_order`] ? errorId('sort_order') : undefined}
+                />
+                {registryFieldErrors[`${index}.sort_order`] && <span id={errorId('sort_order')} className="tp-error" role="alert">{registryFieldErrors[`${index}.sort_order`]}</span>}
               </label>
+              {isUnsaved && (
+                <div className="tp-unsaved-actions">
+                  <span className="tp-unsaved-badge">未保存</span>
+                  <button type="button" className="tp-button-muted" onClick={removeStagedTrader}>移除未保存项</button>
+                </div>
+              )}
             </div>
-          ))}
+            );
+          })}
           <div className="tp-save-row">
             <button type="button" disabled={!registryDirty || registryState.saving} onClick={saveRegistry}>
               {registryState.saving ? '保存中…' : '保存注册表'}

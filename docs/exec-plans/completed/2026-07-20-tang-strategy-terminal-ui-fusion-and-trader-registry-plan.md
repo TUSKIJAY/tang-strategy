@@ -1,7 +1,7 @@
 # Tang Strategy Terminal UI Fusion And Trader Registry
 
-- Lifecycle schema: `operating-modes-v2`
-- Status: Active
+- Lifecycle schema: `operating-modes-v1`
+- Status: Completed
 - Plan slug: `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`
 - Revision: `v2-review-foldback-2026-07-20`
 - Plan author ID: `codex-plan-author-2026-07-20-terminal-ui-registry`
@@ -9,28 +9,18 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`
-- Current phase: phase-1
-- Phase state: not-started
-- Phase entry gate: `phase-0-exit`
-- Next gate: `phase-1-start`
-- Implementation review: none
-- Final disposition: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: `../reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/implementation-review-002.md@accept`
+- Final disposition: Completed
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
-- Implementation start evidence: `user-instruction:2026-07-20-execute-terminal-ui-registry-plan`
-- Current work unit: none
-- Work state: none
-- Blocker evidence: none
-- Implementation reviews: none
-- Latest implementation verdict: none
-- Checkpoint authority: `user-instruction:2026-07-20-commit-activation-with-next-phase`
-- Checkpoint authority mode: one-shot
-- Checkpoint authority kinds: phase-exit
-- Expected checkpoint kind: phase-exit
 - Owner: Codex
 - Created: 2026-07-20
 - Optimization source: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md`
-- Scope authority: `user-instruction:2026-07-20-execute-terminal-ui-registry-plan` authorizes local Phase 0-6 implementation, verification, remediation, lifecycle closeout, and isolated temporary-copy acceptance for this exact plan; `user-instruction:2026-07-20-commit-activation-with-next-phase` authorizes the next Phase 0 scoped local commit. Canonical data writes, push, PR, merge, Pages publication, provider/broker access, hosted verification, and remote administration remain unauthorized
+- Scope authority: `user-instruction:2026-07-20-execute-terminal-ui-registry-plan` authorized local Phase 0-6 implementation, verification, remediation, lifecycle closeout, and isolated temporary-copy acceptance; `user-instruction:2026-07-20-commit-activation-with-next-phase` authorized the consumed Phase 0 scoped commit; `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` authorizes exact-path local commits for the completed implementation/lifecycle scope and a push of the current `codex/project-harness` branch. Canonical data writes, PR, merge, Pages publication, provider/broker access, hosted verification, and remote administration remain unauthorized
 
 ## 1. Context And Evidence
 
@@ -88,11 +78,49 @@ The user instruction `user-instruction:2026-07-20-execute-terminal-ui-registry-p
 
 The follow-up `user-instruction:2026-07-20-commit-activation-with-next-phase` authorizes one scoped Phase 0 local checkpoint after its exit gate. This authority includes isolated temporary-content/SQLite acceptance needed by the plan, but it does not authorize canonical content or tracked-DB writes, push, PR, merge, Pages publication, hosted verification, provider/broker access, or remote administration.
 
-### 1.8 Phase 0 exit and v2 migration
+### 1.8 Phase 0 exit and schema compatibility decision
 
 Phase 0 completed against clean baseline `3f589a027d3c1351672660ab8f4e9157a792821e`. The exact manifest, terminal token/contrast table, registry fixtures, protected hashes/counts, 16-image before-state browser matrix, and pass/fail classification are frozen in `evidence/phase-0-baseline-and-scope-freeze.md`. No backend, route, schema, data, publisher, exporter, API-client, K-line, or excluded page-component change is required.
 
-This Active v1 subject therefore uses its first legal phase transition to migrate to the strict-superset `operating-modes-v2` schema. The first v2 checkpoint is the authorized Phase 0 `phase-exit`; after it forms, Phase 1 is ready but not started.
+The authorized Phase 0 commit `3d9a67cede36496d787bf4f2b34e16f69b3ca78d` passed its exact request postflight. A first-transition v2 migration was attempted in that commit, but the live repository audit then exposed a pre-existing checker incompatibility: `scripts/check-durable-checkpoint.py` applies v2 checkpoint ancestry to the append-only v1 design reviews and cannot resolve their accepted repository-relative paths. This contradicts `docs/operating-modes.md` §10's explicit v1-review compatibility rule.
+
+The governance checker is outside this frontend plan's frozen scope. Rather than expand scope or rewrite historical reviews, the current plan remains `operating-modes-v1` for implementation and closeout. The scoped local Phase 0 commit remains real evidence; it is not represented as a currently claimed v2 checkpoint. Phase 1 is ready but not started.
+
+### 1.9 Phase 1 start
+
+Phase 1 started under the standing local implementation authority `user-instruction:2026-07-20-execute-terminal-ui-registry-plan` after the Phase 0 exit evidence and commit were verified. Its exact source scope is `frontend/src/styles.css`, `frontend/src/components/Layout.jsx`, and the existing source-contract test carriers; it may not enter Phase 2 page-specific or Phase 4 registry-create behavior.
+
+### 1.10 Phases 1–3 visual exits
+
+Phases 1–3 completed in order under the same local implementation authority. Phase 1 established the exact 15-token root contract and one five-destination peer navigation renderer with brand-warm restricted to `.brand-mark`. Phase 2 migrated Login, Data, Backtest, Teaching, and Admin chrome without changing their page components or behavior. Phase 3 removed the shared-light-plus-Review-patch palette duplication, leaving only Review density overrides while preserving interactive/static workspace, availability, export, hash, and mutation-free contracts.
+
+The deterministic carriers, both Vite builds, computed browser styles, focus/current behavior, desktop/narrow overflow, SPY↔QQQ transitions, empty state, drilldown, and Static current/legacy hashes passed. Exact receipts are frozen in `evidence/phase-1-terminal-tokens-and-navigation.md`, `evidence/phase-2-page-chrome-migration.md`, and `evidence/phase-3-review-panel-fusion.md`.
+
+### 1.11 Phase 4 create-trader exit
+
+Phase 4 added the pure `traderRegistry.js` contract and admin-only inline create draft while reusing the existing complete-document registry PUT. The isolated browser matrix covered exact client boundaries, staged removal, real JSON-`detail` rejection, raw recognized rejection, unmapped form fallback, successful reload, immutable persisted IDs, readonly denial, and interactive/static no-group visibility. The isolated accepted copy contains `codex_demo` with zero groups/legs/events/outcomes; canonical tracked registry, content, and DB remain Phase 0 byte-exact. Evidence is `evidence/phase-4-create-trader-flow.md`.
+
+### 1.12 Phase 5 integrated acceptance exit
+
+Phase 5 resolved OPT-001 through OPT-004 against the six durable source screenshots and completed the fresh expanded/collapsed admin/readonly, desktop/narrow, Login/Data/Review/Static/Backtest/Teaching/Admin matrix. Review export produced the expected JSON plus three CSV files, Backtest returned 10 rows/44 signals, Teaching advanced and revealed the full day, Static normalized the legacy QQQ hash without any admin API, and every probed layout had zero horizontal overflow.
+
+Frontend 46/46, lifecycle 171/171, governed/auto/direct harness checks, compileall, both 1,755-module builds, SQLite integrity/FK, protected hashes/counts, stale-paper scan, and `git diff --check` pass. The full backend suite remains 77/78 because the exact Phase 0 Windows SQLite temporary-file teardown lock occurs after product assertions; it reproduces under isolated Python 3.12 with the full pinned TV runtime and no backend source diff. This unchanged baseline environment failure is retained truthfully in `evidence/phase-5-integrated-acceptance.md` and does not expand the frozen frontend/docs scope.
+
+### 1.13 Phase 6 start
+
+Phase 6 started after the verified Phase 5 exit. `docs/architecture.md` now records the shared terminal/navigation and registry-create ownership contracts. The next gate is a frozen implementation/evidence packet followed by an independently authored implementation review of that exact target. No later phase commit, canonical data write, push, PR, Pages publication, provider/broker access, or remote action is authorized.
+
+### 1.14 Implementation review 001 and remediation-1
+
+Independent `implementation-review-001` returned `revise/high` against exact frozen target `terminal-ui-registry-v1:3c73a671ab10d315dac42c0d923192638b1c1bfffa25bd6ece2cb8313a282440@3d9a67cede36496d787bf4f2b34e16f69b3ca78d`. It found no implementation-source defect and independently matched all 19 manifest hashes, the aggregate, frontend 46/46, protected data/source boundaries, and authority claims. Closeout remained blocked by two lifecycle-receipt findings: active index Evidence linked Phase 5 rather than the latest direct review, and three HANDOFF surfaces still instructed a Phase 1/v2-schema resume.
+
+Remediation-1 changed only lifecycle/evidence surfaces. The active index now resolves to `implementation-review-001`, the reviews index includes that artifact with `revise`, HANDOFF consistently names `phase-6:in-progress` under `operating-modes-v1`, and the Phase 5 evidence explicitly retracts checker claims invalidated by the later index mutation. Fresh direct operating, governed, auto, and diff checks pass. Exact receipts are in `evidence/remediation-1-lifecycle-reconciliation.md`; a new non-self-referential target must receive follow-up independent `accept` before closeout.
+
+### 1.15 Implementation review 002 acceptance and closeout
+
+Independent `implementation-review-002` returned `accept/high` with no findings against exact target `terminal-ui-registry-v1-remediation-1:606b9434b80e32da99e68cbf51cab5a9cd6b8bd208ee9feee98325dabe2a4ae8@3d9a67cede36496d787bf4f2b34e16f69b3ca78d`. It independently matched all 23 manifest hashes and the aggregate, confirmed the packet-001 frontend subset remained byte-identical, closed both prior findings, and reran direct/governed/auto plus 46/46 frontend checks. Protected data/source and the empty Git index also passed.
+
+All Phase 0–6 exit gates are satisfied. This plan is Completed with next gate `closed`. The later explicit instruction `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` now authorizes exact-path local commits for this completed scope and a push of the current branch. Commit values remain `none` until those commits actually form; PR, merge, Pages, canonical-data, provider/broker, hosted, and other remote authority remain absent.
 
 ## 2. Objective And Success Criteria
 
@@ -367,11 +395,11 @@ Use the repository's pinned backend environment when the default interpreter lac
 
 ## 8. Commit, Remote, Data, And Publication Boundaries
 
-- This activation authorizes only the local lifecycle/documentation edits required to move the approved plan from Proposed to Active and record `phase-0:not-started`.
-- No stage or commit is authorized. If future commit authority is granted, stage only the exact frozen plan paths and keep unrelated worktree changes excluded.
-- Activation does not authorize implementation. Implementation requires a later explicit start/execute instruction after lifecycle activation records `phase-0:not-started`.
+- Activation and implementation authorities are consumed; the accepted implementation and lifecycle closeout are complete.
+- `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` authorizes exact-path staging and local commits for the current completed-plan scope, followed by a push of `codex/project-harness`. Unrelated worktree paths remain excluded.
+- This Git authority does not authorize amend/reset/stash, PR, merge, Pages publication, hosted verification, provider/broker access, or remote administration.
 - Registry-create acceptance must use isolated temporary content/DB copies. It does not authorize a new canonical trader in the tracked repository.
-- Provider/broker access, market-data fetch, tracked DB/content writes, daily publication, push, PR, merge, Pages, hosted verification, branch protection, environments, and remote administration remain separately unauthorized.
+- Provider/broker access, market-data fetch, tracked DB/content writes, daily publication, PR, merge, Pages, hosted verification, branch protection, environments, and remote administration remain separately unauthorized.
 
 ## 9. Design Review And Activation Gate
 
