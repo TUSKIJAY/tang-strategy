@@ -149,6 +149,7 @@ def build_governed_fixture(root: Path) -> None:
         "verification_commands": [
             "python3 scripts/check-project-harness.py --root . --profile governed",
             "python3 -m unittest scripts.tests.test_operating_modes",
+            "python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated",
         ],
         "github": {
             "workflow": ".github/workflows/project-harness.yml",
@@ -160,7 +161,7 @@ def build_governed_fixture(root: Path) -> None:
     write(
         root,
         ".github/workflows/project-harness.yml",
-        "name: Test\n\non:\n  pull_request:\n    branches:\n      - main\n  workflow_dispatch:\n\njobs:\n  harness:\n    name: Harness structure\n    runs-on: ubuntu-latest\n    steps:\n      - run: python3 scripts/check-project-harness.py --root . --profile governed\n      - run: python3 -m unittest scripts.tests.test_operating_modes\n",
+        "name: Test\n\non:\n  pull_request:\n    branches:\n      - main\n  workflow_dispatch:\n\njobs:\n  harness:\n    name: Harness structure\n    runs-on: ubuntu-latest\n    steps:\n      - run: python3 scripts/check-project-harness.py --root . --profile governed\n      - run: python3 -m unittest scripts.tests.test_operating_modes\n      - run: python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated\n",
     )
     write(root, ".github/pull_request_template.md", "# PR\n")
     write(
@@ -170,6 +171,7 @@ def build_governed_fixture(root: Path) -> None:
     )
     write(root, "scripts/check-project-harness.py", "# fixture path\n")
     write(root, "scripts/check-operating-modes.py", "# fixture path\n")
+    write(root, "scripts/check-durable-checkpoint.py", "# fixture path\n")
     write(root, "scripts/check-startup-doc-budget.py", "# fixture path\n")
 
     for relative in (
@@ -1791,6 +1793,24 @@ None.
         path.write_text(json.dumps(config), encoding="utf-8")
         self.assert_error("canonical harness command must precede fixture tests")
 
+    def test_config_requires_durable_audit_immediately_after_operating_fixtures(self) -> None:
+        path = self.root / ".harness/config.json"
+        config = json.loads(path.read_text(encoding="utf-8"))
+        durable = "python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated"
+        config["verification_commands"].remove(durable)
+        path.write_text(json.dumps(config), encoding="utf-8")
+        self.assert_error("missing required command: python3 scripts/check-durable-checkpoint.py")
+
+    def test_config_rejects_nonadjacent_durable_audit(self) -> None:
+        path = self.root / ".harness/config.json"
+        config = json.loads(path.read_text(encoding="utf-8"))
+        durable = "python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated"
+        config["verification_commands"].remove(durable)
+        config["verification_commands"].append("python3 scripts/check-startup-doc-budget.py")
+        config["verification_commands"].append(durable)
+        path.write_text(json.dumps(config), encoding="utf-8")
+        self.assert_error("durable audit must immediately follow operating fixtures")
+
     def test_workflow_requires_fixture_command(self) -> None:
         self.replace(
             ".github/workflows/project-harness.yml",
@@ -1798,6 +1818,23 @@ None.
             "run: echo missing-fixture-command",
         )
         self.assert_error("verification workflow: missing required command")
+
+    def test_workflow_requires_durable_audit_command(self) -> None:
+        self.replace(
+            ".github/workflows/project-harness.yml",
+            "run: python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated",
+            "run: echo missing-durable-command",
+        )
+        self.assert_error("missing required command: python3 scripts/check-durable-checkpoint.py")
+
+    def test_workflow_rejects_nonadjacent_durable_audit(self) -> None:
+        path = self.root / ".github/workflows/project-harness.yml"
+        text = path.read_text(encoding="utf-8")
+        operating = "      - run: python3 -m unittest scripts.tests.test_operating_modes\n"
+        durable = "      - run: python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated\n"
+        text = text.replace(operating + durable, durable + operating)
+        path.write_text(text, encoding="utf-8")
+        self.assert_error("durable audit must immediately follow operating fixtures")
 
     def test_workflow_requires_pull_request_main_trigger(self) -> None:
         self.replace(

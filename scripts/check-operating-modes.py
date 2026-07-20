@@ -2023,6 +2023,7 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
             errors.append(f"review template: missing constrained keys: {', '.join(missing)}")
     canonical_command = "python3 scripts/check-project-harness.py --root . --profile governed"
     fixture_command = "python3 -m unittest scripts.tests.test_operating_modes"
+    durable_command = "python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated"
     config_path = root / ".harness" / "config.json"
     if config_path.is_file():
         try:
@@ -2034,19 +2035,22 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
             if not isinstance(commands, list):
                 errors.append("verification config: verification_commands must be a list")
             else:
-                for command in (canonical_command, fixture_command):
+                for command in (canonical_command, fixture_command, durable_command):
                     if command not in commands:
                         errors.append(f"verification config: missing required command: {command}")
                 if canonical_command in commands and fixture_command in commands:
                     if commands.index(canonical_command) > commands.index(fixture_command):
                         errors.append("verification config: canonical harness command must precede fixture tests")
+                if fixture_command in commands and durable_command in commands:
+                    if commands.index(durable_command) != commands.index(fixture_command) + 1:
+                        errors.append("verification config: durable audit must immediately follow operating fixtures")
     workflow_path = root / ".github" / "workflows" / "project-harness.yml"
     if workflow_path.is_file():
         workflow = read_text(workflow_path, "verification workflow", errors)
         if not workflow_has_pull_request_main(workflow):
             errors.append("verification workflow: missing required pull_request trigger for main")
         workflow_sequences = workflow_job_command_sequences(workflow)
-        for command in (canonical_command, fixture_command):
+        for command in (canonical_command, fixture_command, durable_command):
             if not any(command in sequence for sequence in workflow_sequences):
                 errors.append(f"verification workflow: missing required command: {command}")
         ordered_sequence = any(
@@ -2061,6 +2065,17 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
             errors.append(
                 "verification workflow: canonical harness command and fixture tests must appear "
                 "in order in the same qualifying job"
+            )
+        durable_ordered = any(
+            fixture_command in sequence
+            and durable_command in sequence
+            and sequence.index(durable_command) == sequence.index(fixture_command) + 1
+            for sequence in workflow_sequences
+        )
+        if not durable_ordered:
+            errors.append(
+                "verification workflow: durable audit must immediately follow operating fixtures "
+                "in the same qualifying job"
             )
     return files
 

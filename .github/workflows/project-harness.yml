@@ -32,6 +32,9 @@ jobs:
       - name: Test operating modes fixtures
         run: python3 -m unittest scripts.tests.test_operating_modes
 
+      - name: Audit durable checkpoints
+        run: python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated
+
       - name: Check local acceptance launcher syntax
         run: bash -n scripts/start-local-acceptance.sh
 
