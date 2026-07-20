@@ -15,13 +15,13 @@
 - Next gate: closed
 - Implementation review: ../reviews/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan/implementation-review-001.md@accept
 - Final disposition: Completed
-- Verified implementation commit: 064550c1c22ae78911ea20c348bf2e476dd788ca
+- Verified implementation commit: b09e08156ea3efeeebc4fc9c21d53a72fac297c6
 - Lifecycle reconciliation commit: none
 - Implementation start evidence: `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`
 - Current work unit: none
 - Work state: none
 - Blocker evidence: none
-- Implementation reviews: ../reviews/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan/implementation-review-001.md@accept@064550c1c22ae78911ea20c348bf2e476dd788ca
+- Implementation reviews: ../reviews/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan/implementation-review-001.md@accept@b09e08156ea3efeeebc4fc9c21d53a72fac297c6
 - Latest implementation verdict: accept
 - Checkpoint authority: `user-instruction:2026-07-21-repair-review-date-filter-checkpoints-and-activate`
 - Checkpoint authority mode: standing

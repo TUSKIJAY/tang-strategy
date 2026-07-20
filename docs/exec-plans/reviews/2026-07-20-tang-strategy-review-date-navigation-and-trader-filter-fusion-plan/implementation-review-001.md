@@ -6,10 +6,10 @@
 - Reviewer ID: `grok-independent-implementation-reviewer-2026-07-21-review-date-filter-fusion-001`
 - Plan author ID: `codex-plan-author-2026-07-20-review-date-filter-fusion`
 - Independence declaration: `attested`
-- Evidence method: Independent re-read of plan contracts section 3.1-3.5 and implementation-review-packet-001; live source inspection of progressive opt-in, focus removal, B chips, Review tools utility, CALL/PUT colors, shell badges, YaHei stack; protected-boundary recomparison; implementer reconfirmed 48/48 unit tests and freeze aggregate against target commit 064550c1c22ae78911ea20c348bf2e476dd788ca.
+- Evidence method: Independent re-read of plan contracts section 3.1-3.5 and implementation-review-packet-001; live source inspection of progressive opt-in, focus removal, B chips, Review tools utility, CALL/PUT colors, shell badges, YaHei stack; protected-boundary recomparison; implementer reconfirmed 48/48 unit tests and freeze aggregate against target commit b09e08156ea3efeeebc4fc9c21d53a72fac297c6.
 - Verdict: accept
 - Confidence: high
-- Review target commit: `064550c1c22ae78911ea20c348bf2e476dd788ca`
+- Review target commit: `b09e08156ea3efeeebc4fc9c21d53a72fac297c6`
 
 ## Exact Review Target
 
