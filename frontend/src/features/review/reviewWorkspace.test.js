@@ -19,6 +19,13 @@ import {
   resolveInitialWorkspace,
   selectWorkspaceDay,
   switchTicker,
+  PROGRESSIVE_RECENT_LIMIT,
+  enterMonthBrowseMode,
+  enterRecentBrowseMode,
+  initializeProgressiveBrowseState,
+  projectProgressiveDateRail,
+  recentDatesForTicker,
+  stepBrowsedMonth,
 } from './reviewWorkspace.js';
 import { reviewHashRoute } from './tradeRecords.js';
 import {
@@ -233,12 +240,14 @@ test('pages render no visible duplicates of engine-generic controls', () => {
   assert.doesNotMatch(reviewSource, /stepBack\(\)/);
   assert.doesNotMatch(reviewSource, /stepForward\(\)/);
   assert.doesNotMatch(reviewSource, /togglePlayback\(\)/);
-  // Rescan recomputes in place; Backtest is a distinct navigation action.
+  // Rescan remains; Backtest is global navigation only (not left column / utility).
   assert.match(reviewSource, /function rescan\(\)/);
-  assert.match(reviewSource, /function openBacktest\(\)/);
-  assert.match(reviewSource, /onNavigate\?\.\('backtest'\)/);
+  assert.doesNotMatch(reviewSource, /function openBacktest\(\)/);
   assert.doesNotMatch(reviewSource, /onClick=\{runBacktest\}/);
-  // The workspace panel owns ticker/date; trader filters mirror it.
+  assert.doesNotMatch(reviewSource, />Backtest</);
+  assert.match(reviewSource, /Review 工具/);
+  assert.match(reviewSource, /dateNavigation="progressive"/);
+  // The workspace panel owns ticker/date; trader filters omit context mirror.
   assert.match(reviewSource, /<ReviewContextPanel/);
   assert.match(reviewSource, /context=\{\{ ticker: tradeRecords\.ticker, tradeDate: tradeRecords\.trade_date \}\}/);
   assert.match(reviewSource, /availableTraderIds=\{traderAvailability\.availableTraderIds\}/);
@@ -263,6 +272,9 @@ test('context panel exposes programmatic tabs, rail, and selected states', () =>
   assert.match(panelSource, /aria-selected=\{ticker === value\}/);
   assert.match(panelSource, /aria-pressed=\{date === value\}/);
   assert.match(panelSource, /groupDatesByMonth\(days, ticker\)/);
+  assert.match(panelSource, /dateNavigation = 'exhaustive'/);
+  assert.match(panelSource, /dateNavigation === 'progressive'/);
+  assert.doesNotMatch(panelSource, /跳转/);
 });
 
 test('shared terminal tokens and all five peer destinations own the application chrome', () => {
@@ -300,6 +312,8 @@ test('shared terminal tokens and all five peer destinations own the application 
   assert.match(layout, /className="nav-bottom-stack"/);
   assert.match(layout, /Icon=\{UsersRound\}/);
   assert.match(layout, /只读检查，编辑需要管理员/);
+  assert.match(layout, /capabilityVisible=\{role === 'admin' \? '可编辑' : '只读'\}/);
+  assert.match(layout, /管理员可编辑/);
   assert.doesNotMatch(layout, /RefreshCcw|className="secondary"/);
   assert.equal([...layout.matchAll(/<NavItem\b/g)].length, 2);
   assert.equal([...layout.matchAll(/id: '(dashboard|review|backtest|teaching)'/g)].length, 4);
@@ -330,6 +344,14 @@ test('static Review consumes shared workspace and trader contracts with one engi
   assert.match(styles, /\.dr-sidebar \.trade-record-list \{ gap: 8px; \}/);
   assert.doesNotMatch(styles, /\.dr-sidebar \.trade-filter-panel,\s*\.dr-sidebar \.trade-group-card/);
   assert.doesNotMatch(styles, /\.dr-sidebar \.trade-context-mirror-item|\.dr-sidebar \.trade-leg/);
+  assert.match(styles, /--font-ui: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Noto Sans SC", sans-serif;/);
+  assert.match(styles, /--direction-call: #6F9F7A;/);
+  assert.match(styles, /--direction-put: #E06B66;/);
+  assert.doesNotMatch(styles, /Space Grotesk|Newsreader|--trader-color/);
+  assert.match(staticSource, /Review 工具/);
+  assert.doesNotMatch(staticSource, /dateNavigation=/);
+  assert.doesNotMatch(staticSource, />Rescan</);
+  assert.doesNotMatch(staticSource, />Backtest</);
   assert.match(styles, /\.review-context-field select \{[^}]*background: var\(--surface-control\);[^}]*border: 1px solid var\(--border-control\);/);
   assert.match(styles, /\.dr-control-group select \{[^}]*background: var\(--surface-control\);[^}]*border: 1px solid var\(--border-control\);/);
 });
@@ -344,4 +366,119 @@ test('interactive, static, and editor async states expose announcements', () => 
   assert.match(staticSource, /className="dr-error" role="alert"/);
   assert.match(staticSource, /className="dr-loading" role="status" aria-live="polite"/);
   assert.match(editorSource, /dayState === 'loading'.*role="status" aria-live="polite"/s);
+});
+
+test('progressive date navigation projects recent and month modes without fabricating dates', () => {
+  const days = [];
+  for (let i = 1; i <= 15; i += 1) {
+    const day = String(i).padStart(2, '0');
+    days.push({
+      key: `spy-2026-06-${day}`,
+      ticker: 'SPY',
+      trade_date: `2026-06-${day}`,
+      session_mode: 'extended',
+      ref: {},
+    });
+  }
+  for (let i = 1; i <= 10; i += 1) {
+    const day = String(i).padStart(2, '0');
+    days.push({
+      key: `spy-2026-07-${day}`,
+      ticker: 'SPY',
+      trade_date: `2026-07-${day}`,
+      session_mode: 'extended',
+      ref: {},
+    });
+  }
+  // Also include QQQ so ticker filtering is exercised.
+  days.push({
+    key: 'qqq-2026-07-10',
+    ticker: 'QQQ',
+    trade_date: '2026-07-10',
+    session_mode: 'extended',
+    ref: {},
+  });
+
+  assert.equal(PROGRESSIVE_RECENT_LIMIT, 12);
+  const recent = recentDatesForTicker(days, 'SPY');
+  assert.equal(recent.length, 12);
+  assert.equal(recent[0], '2026-07-10');
+  assert.equal(recent[11], '2026-06-14');
+
+  // 0 / 1 day edge cases
+  assert.deepEqual(recentDatesForTicker([], 'SPY'), []);
+  assert.deepEqual(recentDatesForTicker(days.filter((d) => d.trade_date === '2026-07-10' && d.ticker === 'SPY'), 'SPY'), ['2026-07-10']);
+
+  // Newest selected day opens recent mode.
+  const recentInit = initializeProgressiveBrowseState(days, 'SPY', '2026-07-10');
+  assert.equal(recentInit.browseMode, 'recent');
+  const recentProj = projectProgressiveDateRail({
+    days, ticker: 'SPY', selectedDate: '2026-07-10', ...recentInit,
+  });
+  assert.equal(recentProj.browseMode, 'recent');
+  assert.equal(recentProj.monthBar, null);
+  assert.equal(recentProj.pressedDate, '2026-07-10');
+  assert.equal(recentProj.chipLabels['2026-07-10'], '07-10');
+  assert.match(recentProj.meta, /显示最近 12 · 全库 SPY 25/);
+
+  // Old selected day opens owning month.
+  const oldInit = initializeProgressiveBrowseState(days, 'SPY', '2026-06-03');
+  assert.equal(oldInit.browseMode, 'month');
+  assert.equal(oldInit.browsedMonth, '2026-06');
+  const monthProj = projectProgressiveDateRail({
+    days, ticker: 'SPY', selectedDate: '2026-06-03', ...oldInit,
+  });
+  assert.equal(monthProj.browseMode, 'month');
+  assert.equal(monthProj.monthBar.month, '2026-06');
+  assert.equal(monthProj.chipLabels['2026-06-03'], '03');
+  assert.equal(monthProj.pressedDate, '2026-06-03');
+  assert.match(monthProj.meta, /本月交易日 15 · 全库 SPY 25/);
+
+  // Enter month always resets to selected owning month.
+  const entered = enterMonthBrowseMode(days, 'SPY', '2026-07-05');
+  assert.deepEqual(entered, { browseMode: 'month', browsedMonth: '2026-07' });
+
+  // Month older/newer never mutates selected day; no-pressed is valid.
+  const stepped = stepBrowsedMonth(days, 'SPY', '2026-07', 'older');
+  assert.equal(stepped.browsedMonth, '2026-06');
+  assert.equal(stepBrowsedMonth(days, 'SPY', '2026-06', 'newer').browsedMonth, '2026-07');
+  const noPressed = projectProgressiveDateRail({
+    days,
+    ticker: 'SPY',
+    selectedDate: '2026-07-10',
+    browseMode: 'month',
+    browsedMonth: '2026-06',
+  });
+  assert.equal(noPressed.pressedDate, '');
+  assert.equal(noPressed.monthBar.month, '2026-06');
+
+  // Enter recent with older selection keeps day, no pressed chip in recent window.
+  const enterRecent = enterRecentBrowseMode(days, 'SPY', '2026-06-03', '2026-06');
+  assert.equal(enterRecent.browseMode, 'recent');
+  const recentNoPress = projectProgressiveDateRail({
+    days,
+    ticker: 'SPY',
+    selectedDate: '2026-06-03',
+    ...enterRecent,
+  });
+  assert.equal(recentNoPress.pressedDate, '');
+
+  // Missing ticker yields empty projection, never fabricated dates.
+  const missing = projectProgressiveDateRail({
+    days, ticker: 'IWM', selectedDate: '', browseMode: 'recent', browsedMonth: '',
+  });
+  assert.deepEqual(missing.dates, []);
+  assert.match(missing.meta, /全库 IWM 0/);
+
+  // Only ReviewPage opts into progressive.
+  const reviewSource = readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8');
+  const dashboardSource = readFileSync(new URL('../../pages/DashboardPage.jsx', import.meta.url), 'utf8');
+  const adminSource = readFileSync(new URL('../../pages/AdminTradersPage.jsx', import.meta.url), 'utf8');
+  const editorSource = readFileSync(new URL('./TraderPointEditor.jsx', import.meta.url), 'utf8');
+  const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
+  assert.match(reviewSource, /dateNavigation="progressive"/);
+  for (const source of [dashboardSource, adminSource, editorSource, staticSource]) {
+    assert.doesNotMatch(source, /dateNavigation=/);
+  }
+  assert.doesNotMatch(reviewSource + dashboardSource + staticSource, /跳转/);
 });

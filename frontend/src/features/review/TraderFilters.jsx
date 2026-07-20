@@ -1,14 +1,17 @@
-import { initialTradeRecordFilters, resolveTradeDate } from './tradeRecords.js';
+import { useId, useMemo, useState } from 'react';
+import {
+  initialTradeRecordFilters,
+  resolveTradeDate,
+  traderSelectionSummary,
+  TRADER_CHIP_INLINE_MAX,
+} from './tradeRecords.js';
 
-// Trader filter contract (plan §3.1/§3.3):
-// - When `context` is provided, ticker/date render only as readonly mirrors of
-//   the resolved workspace; this component never owns editable ticker/date
-//   authority in that mode.
-// - When `availableTraderIds` is provided, only traders with a displayable
-//   group in the resolved context render; an empty availability set shows one
-//   neutral message instead of the global registry.
-// The legacy select-based branch remains only until the Review/Static/Admin
-// pages are rewired to the shared workspace in Phases 2-3.
+// B Chip trader visibility (plan §3.2):
+// - traderIds is the only visibility authority.
+// - When `context` is supplied, resolved-context mirror is omitted; workspace owns day.
+// - availableTraderIds drives chips; empty availability shows one neutral message.
+// - <=6 chips inline; >=7 summary + 编辑 drawer with search/全选/清空.
+
 export function TraderFilters({
   traders = [],
   availability = {},
@@ -25,6 +28,10 @@ export function TraderFilters({
   const visibleTraders = availableTraderIds
     ? traders.filter((trader) => availableTraderIds.includes(trader.trader_id))
     : traders;
+  const drawerId = useId();
+  const searchId = useId();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   function update(patch) {
     onChange?.({ ...filters, ...patch });
@@ -34,21 +41,64 @@ export function TraderFilters({
     const selected = new Set(filters.traderIds || []);
     if (selected.has(traderId)) selected.delete(traderId);
     else selected.add(traderId);
-    update({ traderIds: [...selected], focusedTraderId: '' });
+    // Keep UI order stable: availability/registry order of visible traders.
+    const ordered = visibleTraders
+      .map((trader) => trader.trader_id)
+      .filter((id) => selected.has(id));
+    update({ traderIds: ordered });
+  }
+
+  function selectAll() {
+    update({ traderIds: visibleTraders.map((trader) => trader.trader_id) });
+  }
+
+  function clearAll() {
+    update({ traderIds: [] });
+  }
+
+  const selectedSet = useMemo(
+    () => new Set(filters.traderIds || []),
+    [filters.traderIds],
+  );
+  const summary = useMemo(
+    () => traderSelectionSummary(visibleTraders, filters.traderIds || []),
+    [visibleTraders, filters.traderIds],
+  );
+  const useDrawer = visibleTraders.length > TRADER_CHIP_INLINE_MAX;
+  const query = search.trim().toLowerCase();
+  const displayedTraders = useMemo(() => {
+    if (!query) return visibleTraders;
+    return visibleTraders.filter((trader) => {
+      const name = String(trader.display_name || '').toLowerCase();
+      const id = String(trader.trader_id || '').toLowerCase();
+      return name.includes(query) || id.includes(query);
+    });
+  }, [visibleTraders, query]);
+
+  function renderChips(list) {
+    return (
+      <div className="trade-trader-chips" role="group" aria-label="交易者可见性">
+        {list.map((trader) => {
+          const pressed = selectedSet.has(trader.trader_id);
+          return (
+            <button
+              key={trader.trader_id}
+              type="button"
+              className={`trade-trader-chip ${pressed ? 'active' : ''}`}
+              aria-pressed={pressed}
+              onClick={() => toggleTrader(trader.trader_id)}
+            >
+              {trader.display_name || trader.trader_id}
+            </button>
+          );
+        })}
+      </div>
+    );
   }
 
   return (
     <section className="trade-filter-panel" aria-label="Trade record filters">
-      {context ? (
-        <div className="trade-context-mirror" aria-label="当前复盘上下文">
-          <span className="trade-context-mirror-item" aria-label="Ticker" aria-readonly="true">
-            {context.ticker}
-          </span>
-          <span className="trade-context-mirror-item" aria-label="Date" aria-readonly="true">
-            {context.tradeDate}
-          </span>
-        </div>
-      ) : (
+      {!context && (
         <>
           <label>
             Ticker
@@ -80,31 +130,44 @@ export function TraderFilters({
       </label>
       {availableTraderIds && visibleTraders.length === 0 ? (
         <p className="trade-trader-empty" role="status">{emptyMessage}</p>
-      ) : (
-        <div className="trade-trader-options">
-          {visibleTraders.map((trader) => (
-            <div key={trader.trader_id} className="trade-trader-option" style={{ '--trader-color': trader.color }}>
-              <label>
+      ) : useDrawer ? (
+        <div className="trade-trader-summary-row">
+          <span className="trade-trader-summary" aria-live="polite">{summary.label}</span>
+          <button
+            type="button"
+            className="trade-trader-edit"
+            aria-expanded={drawerOpen}
+            aria-controls={drawerId}
+            onClick={() => setDrawerOpen((open) => !open)}
+          >
+            编辑
+          </button>
+          {drawerOpen && (
+            <div className="trade-trader-drawer" id={drawerId}>
+              <label className="trade-trader-search" htmlFor={searchId}>
+                搜索交易者
                 <input
-                  type="checkbox"
-                  checked={(filters.traderIds || []).includes(trader.trader_id)}
-                  onChange={() => toggleTrader(trader.trader_id)}
+                  id={searchId}
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="名称或 ID"
                 />
-                <span>{trader.display_name}</span>
               </label>
-              <button
-                type="button"
-                className={filters.focusedTraderId === trader.trader_id ? 'active' : ''}
-                aria-pressed={filters.focusedTraderId === trader.trader_id}
-                onClick={() => update({
-                  focusedTraderId: filters.focusedTraderId === trader.trader_id ? '' : trader.trader_id,
-                })}
-              >
-                Focus
-              </button>
+              <div className="trade-trader-drawer-actions">
+                <button type="button" onClick={selectAll}>全选</button>
+                <button type="button" onClick={clearAll}>清空</button>
+              </div>
+              {displayedTraders.length === 0 ? (
+                <p className="trade-trader-empty" role="status">无匹配交易者</p>
+              ) : (
+                renderChips(displayedTraders)
+              )}
             </div>
-          ))}
+          )}
         </div>
+      ) : (
+        renderChips(visibleTraders)
       )}
     </section>
   );

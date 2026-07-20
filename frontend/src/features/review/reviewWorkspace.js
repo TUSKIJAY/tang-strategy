@@ -79,6 +79,150 @@ export function groupDatesByMonth(days = [], ticker = '') {
   return months;
 }
 
+// --- Progressive date navigation (plan §3.1) ---------------------------------
+// Presentation-only projection over real normalized inventory. Never fabricates
+// dates and never mutates workspace selection by itself.
+
+export const PROGRESSIVE_RECENT_LIMIT = 12;
+
+export function recentDatesForTicker(days = [], ticker = '', limit = PROGRESSIVE_RECENT_LIMIT) {
+  return datesForTicker(days, ticker).slice(0, Math.max(0, Number(limit) || 0));
+}
+
+export function listMonthsForTicker(days = [], ticker = '') {
+  return groupDatesByMonth(days, ticker).map((entry) => entry.month);
+}
+
+export function datesInMonth(days = [], ticker = '', month = '') {
+  const wanted = cleanText(month);
+  if (!wanted) return [];
+  return datesForTicker(days, ticker).filter((date) => date.slice(0, 7) === wanted);
+}
+
+export function owningMonth(tradeDate = '') {
+  const text = cleanText(tradeDate);
+  return text.length >= 7 ? text.slice(0, 7) : '';
+}
+
+/** Initialize progressive browse presentation from a selected workspace day. */
+export function initializeProgressiveBrowseState(days = [], ticker = '', selectedDate = '') {
+  const recent = recentDatesForTicker(days, ticker);
+  const months = listMonthsForTicker(days, ticker);
+  const selected = cleanText(selectedDate);
+  if (selected && recent.includes(selected)) {
+    return {
+      browseMode: 'recent',
+      browsedMonth: owningMonth(selected) || months[0] || '',
+    };
+  }
+  if (selected && datesForTicker(days, ticker).includes(selected)) {
+    return {
+      browseMode: 'month',
+      browsedMonth: owningMonth(selected) || months[0] || '',
+    };
+  }
+  return {
+    browseMode: 'recent',
+    browsedMonth: months[0] || '',
+  };
+}
+
+/**
+ * Project progressive date rail chips and metadata.
+ * Returns pure data for DateRail progressive rendering.
+ */
+export function projectProgressiveDateRail({
+  days = [],
+  ticker = '',
+  selectedDate = '',
+  browseMode = 'recent',
+  browsedMonth = '',
+  recentLimit = PROGRESSIVE_RECENT_LIMIT,
+} = {}) {
+  const allDates = datesForTicker(days, ticker);
+  const total = allDates.length;
+  const months = listMonthsForTicker(days, ticker);
+  const mode = browseMode === 'month' ? 'month' : 'recent';
+  const selected = cleanText(selectedDate);
+
+  if (mode === 'recent') {
+    const dates = allDates.slice(0, Math.max(0, Number(recentLimit) || 0));
+    return {
+      browseMode: 'recent',
+      browsedMonth: browsedMonth || owningMonth(selected) || months[0] || '',
+      months,
+      dates,
+      chipLabels: Object.fromEntries(dates.map((date) => [date, date.slice(5)])),
+      monthBar: null,
+      meta: `显示最近 ${dates.length} · 全库 ${cleanText(ticker).toUpperCase() || '--'} ${total}`,
+      pressedDate: dates.includes(selected) ? selected : '',
+    };
+  }
+
+  const month = months.includes(browsedMonth)
+    ? browsedMonth
+    : (owningMonth(selected) && months.includes(owningMonth(selected))
+      ? owningMonth(selected)
+      : (months[0] || ''));
+  const dates = datesInMonth(days, ticker, month);
+  const monthIndex = months.indexOf(month);
+  return {
+    browseMode: 'month',
+    browsedMonth: month,
+    months,
+    dates,
+    chipLabels: Object.fromEntries(dates.map((date) => [date, date.slice(8)])),
+    monthBar: {
+      month,
+      // newest-first inventory: older = higher index, newer = lower index
+      canOlder: monthIndex >= 0 && monthIndex < months.length - 1,
+      canNewer: monthIndex > 0,
+      olderMonth: monthIndex >= 0 && monthIndex < months.length - 1 ? months[monthIndex + 1] : '',
+      newerMonth: monthIndex > 0 ? months[monthIndex - 1] : '',
+    },
+    meta: `本月交易日 ${dates.length} · 全库 ${cleanText(ticker).toUpperCase() || '--'} ${total}`,
+    pressedDate: dates.includes(selected) ? selected : '',
+  };
+}
+
+/** Explicit transition into 按月: reset browsedMonth to selected owning month. */
+export function enterMonthBrowseMode(days = [], ticker = '', selectedDate = '') {
+  const months = listMonthsForTicker(days, ticker);
+  const selected = cleanText(selectedDate);
+  const month = (selected && months.includes(owningMonth(selected)))
+    ? owningMonth(selected)
+    : (months[0] || '');
+  return { browseMode: 'month', browsedMonth: month };
+}
+
+/** Explicit transition into 最近: keep browsedMonth latent only. */
+export function enterRecentBrowseMode(days = [], ticker = '', selectedDate = '', previousMonth = '') {
+  const months = listMonthsForTicker(days, ticker);
+  return {
+    browseMode: 'recent',
+    browsedMonth: previousMonth && months.includes(previousMonth)
+      ? previousMonth
+      : (owningMonth(selectedDate) || months[0] || ''),
+  };
+}
+
+/**
+ * Month navigation changes only browsedMonth; never mutates selected day.
+ * Months are ordered newest-first. direction: 'older' | 'newer'.
+ */
+export function stepBrowsedMonth(days = [], ticker = '', browsedMonth = '', direction = 'older') {
+  const months = listMonthsForTicker(days, ticker);
+  if (!months.length) return { browseMode: 'month', browsedMonth: '' };
+  const current = months.includes(browsedMonth) ? browsedMonth : months[0];
+  const index = months.indexOf(current);
+  if (direction === 'newer') {
+    const newer = index > 0 ? months[index - 1] : current;
+    return { browseMode: 'month', browsedMonth: newer };
+  }
+  const older = index < months.length - 1 ? months[index + 1] : current;
+  return { browseMode: 'month', browsedMonth: older };
+}
+
 export function findDay(days = [], { ticker = '', tradeDate = '' } = {}) {
   const wantedTicker = cleanText(ticker).toUpperCase();
   const wantedDate = cleanText(tradeDate);

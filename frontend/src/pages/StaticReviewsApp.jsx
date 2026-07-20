@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../features/review/scanner.js';
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
 import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
@@ -197,6 +197,9 @@ function chartAnnotation(annotation) {
 
 export function StaticReviewsApp() {
   const engineRef = useRef(null);
+  const utilityPanelId = useId();
+  const utilityTriggerRef = useRef(null);
+  const [utilityOpen, setUtilityOpen] = useState(false);
   const [manifest, setManifest] = useState(null);
   const [selectedDaySlug, setSelectedDaySlug] = useState(() => window.location.hash.replace(/^#\/?/, ''));
   const [routeNotice, setRouteNotice] = useState('');
@@ -290,7 +293,6 @@ export function StaticReviewsApp() {
           setTradeFilters((previous) => {
             const reconciled = reconcileTraderSelection({
               previousSelectedIds: previous?.traderIds ?? null,
-              previousFocusedId: previous?.focusedTraderId || '',
               availableTraderIds,
               contextChanged: true,
             });
@@ -299,7 +301,6 @@ export function StaticReviewsApp() {
               ticker: records.ticker,
               tradeDate: records.trade_date,
               traderIds: reconciled.selectedTraderIds,
-              focusedTraderId: reconciled.focusedTraderId,
             };
           });
         } else {
@@ -369,14 +370,12 @@ export function StaticReviewsApp() {
       if (!previous) return previous;
       const reconciled = reconcileTraderSelection({
         previousSelectedIds: previous.traderIds,
-        previousFocusedId: previous.focusedTraderId || '',
         availableTraderIds: traderAvailability.availableTraderIds,
         contextChanged: false,
       });
       const sameSelection = reconciled.selectedTraderIds.join(',') === (previous.traderIds || []).join(',');
-      const sameFocus = reconciled.focusedTraderId === (previous.focusedTraderId || '');
-      if (sameSelection && sameFocus) return previous;
-      return { ...previous, traderIds: reconciled.selectedTraderIds, focusedTraderId: reconciled.focusedTraderId };
+      if (sameSelection) return previous;
+      return { ...previous, traderIds: reconciled.selectedTraderIds };
     });
   }, [tradeRecords, traderAvailability.availableTraderIds]);
   const filteredTradeGroups = useMemo(
@@ -518,6 +517,43 @@ export function StaticReviewsApp() {
             <Stat label="MFE中位" value={setupSummary.medianMfePct == null ? '--' : formatPct(setupSummary.medianMfePct, { ratio: true })} tone="green" />
             <Stat label="MAE中位" value={setupSummary.medianMaePct == null ? '--' : formatPct(setupSummary.medianMaePct, { ratio: true, negativeSign: true })} tone="red" />
             <div className="dr-strategy-badge">{strategyPayload ? `${strategyPayload.name} v${strategyPayload.version}` : '静态导出'}</div>
+            <div className="dr-review-utility">
+              <button
+                ref={utilityTriggerRef}
+                type="button"
+                className="dr-review-utility-trigger"
+                aria-expanded={utilityOpen}
+                aria-controls={utilityPanelId}
+                onClick={() => setUtilityOpen((open) => !open)}
+              >
+                Review 工具
+              </button>
+              {utilityOpen && (
+                <div
+                  className="dr-review-utility-panel"
+                  id={utilityPanelId}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') {
+                      event.stopPropagation();
+                      setUtilityOpen(false);
+                      utilityTriggerRef.current?.focus();
+                    }
+                  }}
+                >
+                  <button
+                    type="button"
+                    className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
+                    role="switch"
+                    aria-checked={showExtendedKBars}
+                    onClick={() => setShowExtendedKBars((value) => !value)}
+                    disabled={!review}
+                    title="Toggle 09:00-16:30 extended K bars"
+                  >
+                    Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </header>
 
           <aside className="dr-sidebar">
@@ -536,17 +572,6 @@ export function StaticReviewsApp() {
                     ))}
                   </select>
                 </label>
-                <button
-                  type="button"
-                  className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
-                  role="switch"
-                  aria-checked={showExtendedKBars}
-                  onClick={() => setShowExtendedKBars((value) => !value)}
-                  disabled={!review}
-                  title="Toggle 09:00-16:30 extended K bars"
-                >
-                  Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
-                </button>
                 {routeNotice && <p className="static-route-notice" role="status">{routeNotice}</p>}
               </div>
             </ReviewContextPanel>

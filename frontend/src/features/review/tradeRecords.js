@@ -59,12 +59,22 @@ function assertPublicExport(value, path = 'root') {
   });
 }
 
+export const DIRECTION_CALL_COLOR = '#6F9F7A';
+export const DIRECTION_PUT_COLOR = '#E06B66';
+export const TRADER_CHIP_INLINE_MAX = 6;
+export const TRADER_CHIP_SUMMARY_MIN = 7;
+
+export function directionColor(direction) {
+  return String(direction || '').toUpperCase() === 'PUT'
+    ? DIRECTION_PUT_COLOR
+    : DIRECTION_CALL_COLOR;
+}
+
 export function initialTradeRecordFilters(traders = []) {
   return {
     ticker: 'SPY',
     tradeDate: '',
     traderIds: array(traders).filter((trader) => trader.active).map((trader) => trader.trader_id),
-    focusedTraderId: '',
     statuses: ['active'],
     reviewStatuses: ['verified'],
     eligibility: 'display',
@@ -76,8 +86,7 @@ export function canEditTradeRecords(role) {
 }
 
 export function exportSelectionFromFilters(payload, filters = {}) {
-  const focusedTrader = String(filters.focusedTraderId || '');
-  const traderIds = focusedTrader ? [focusedTrader] : array(filters.traderIds);
+  const traderIds = array(filters.traderIds);
   return {
     ticker: String(filters.ticker || payload?.ticker || '').toUpperCase(),
     trade_date: String(filters.tradeDate || payload?.trade_date || ''),
@@ -85,6 +94,29 @@ export function exportSelectionFromFilters(payload, filters = {}) {
     statuses: [...new Set(array(filters.statuses).map(String))].sort(),
     review_statuses: [...new Set(array(filters.reviewStatuses).map(String))].sort(),
     display_only: filters.eligibility === 'display',
+  };
+}
+
+/** Canonical set-membership equality for list / markers / export consumers. */
+export function sameTraderIdSet(a = [], b = []) {
+  const left = [...new Set(array(a).map(String))].sort();
+  const right = [...new Set(array(b).map(String))].sort();
+  return left.length === right.length && left.every((id, index) => id === right[index]);
+}
+
+export function traderSelectionSummary(traders = [], selectedIds = [], maxNames = 3) {
+  const selected = new Set(array(selectedIds).map(String));
+  const ordered = array(traders).filter((trader) => selected.has(String(trader.trader_id)));
+  const names = ordered.map((trader) => trader.display_name || trader.trader_id);
+  const shown = names.slice(0, maxNames);
+  const overflow = Math.max(0, names.length - shown.length);
+  return {
+    selectedCount: ordered.length,
+    names: shown,
+    overflow,
+    label: ordered.length === 0
+      ? '未选择交易者'
+      : `${ordered.length} 已选 · ${shown.join('、')}${overflow ? ` 等${overflow}人` : ''}`,
   };
 }
 
@@ -127,7 +159,6 @@ export function filterTradeGroups(payload, filters = {}) {
     (!filters.ticker || group.underlying === filters.ticker) &&
     (!filters.tradeDate || group.trade_date === filters.tradeDate) &&
     (!hasTraderSelection || traderIds.has(group.trader_id)) &&
-    (!filters.focusedTraderId || group.trader_id === filters.focusedTraderId) &&
     statuses.has(group.status) &&
     reviewStatuses.has(group.review_status) &&
     (!eligibilityField || Boolean(group[eligibilityField]))
@@ -163,7 +194,8 @@ export function summarizeTradeGroups(groups = []) {
 }
 
 export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []) {
-  const colors = new Map(array(traders).map((trader) => [trader.trader_id, trader.color]));
+  // Direction owns marker hue; registry color is intentionally unused here.
+  void traders;
   const markers = [];
   array(groups).forEach((group) => {
     array(group.legs).forEach((leg) => {
@@ -178,7 +210,7 @@ export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []
           trader_id: group.trader_id,
           direction,
           marker_shape: direction === 'PUT' ? 'triangle_down' : 'triangle_up',
-          marker_color: colors.get(group.trader_id) || '#8B9A6D',
+          marker_color: directionColor(direction),
           anchor_side: direction === 'PUT' ? 'top' : 'bottom',
           bar_index: barIndexForEvent(event, bars),
           t: timePart(event.occurred_at),
@@ -371,27 +403,25 @@ export function deriveAvailableTraders(payload, registryTraders = null, filters 
   return { availableTraderIds: [...ordered, ...extras], displayableGroups };
 }
 
-// Steps 5-6: reconcile a previous selection against availability. A real context
-// change with an empty intersection selects all available traders; within the
-// same context an intentional empty selection stays empty; an unavailable
-// focused trader is always cleared.
+// Reconcile previous selection against availability. A real context change with
+// an empty intersection selects all available traders; within the same context
+// an intentional empty selection stays empty. traderIds is the sole visibility
+// authority — no focus override remains.
 export function reconcileTraderSelection({
   previousSelectedIds = null,
-  previousFocusedId = '',
   availableTraderIds = [],
   contextChanged = false,
 } = {}) {
   const available = array(availableTraderIds);
   const availableSet = new Set(available);
   if (previousSelectedIds === null || previousSelectedIds === undefined) {
-    return { selectedTraderIds: [...available], focusedTraderId: '' };
+    return { selectedTraderIds: [...available] };
   }
   const intersection = array(previousSelectedIds).filter((id) => availableSet.has(id));
-  const focusedTraderId = availableSet.has(previousFocusedId) ? previousFocusedId : '';
   if (contextChanged && intersection.length === 0) {
-    return { selectedTraderIds: [...available], focusedTraderId: '' };
+    return { selectedTraderIds: [...available] };
   }
-  return { selectedTraderIds: intersection, focusedTraderId };
+  return { selectedTraderIds: intersection };
 }
 
 // Trader filter ticker/date may only mirror the resolved workspace context

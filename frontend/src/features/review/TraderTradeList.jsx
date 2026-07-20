@@ -18,16 +18,20 @@ export function TraderTradeList({ groups = [], traders = [], activeGroupId = '',
       {groups.map((group) => {
         const trader = registry.get(group.trader_id) || {};
         const isExpanded = Boolean(expanded[group.trade_group_id]);
+        const direction = String(group.direction || '').toUpperCase() === 'PUT' ? 'PUT' : 'CALL';
+        const directionClass = direction.toLowerCase();
         return (
           <article
             key={group.trade_group_id}
             className={`trade-group-card ${activeGroupId === group.trade_group_id ? 'active' : ''}`}
-            style={{ '--trader-color': trader.color || '#8B9A6D' }}
           >
             <button type="button" className="trade-group-summary" onClick={() => onSelect?.(group)}>
-              <span className={`trade-direction-shape ${group.direction.toLowerCase()}`} aria-hidden="true" />
+              <span className={`trade-direction-shape ${directionClass}`} aria-hidden="true" />
               <span>
-                <strong>{trader.display_name || group.trader_id} · {group.direction}</strong>
+                <span className="trade-group-title">
+                  <strong className="trade-trader-name">{trader.display_name || group.trader_id}</strong>
+                  <span className={`trade-direction-word ${directionClass}`}>{direction}</span>
+                </span>
                 <small>{group.underlying} {group.trade_date} · {outcomeLabel(group)}</small>
               </span>
               <span className={`trade-review-badge ${group.review_status}`}>{group.review_status}</span>

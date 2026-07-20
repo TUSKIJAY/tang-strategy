@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Api } from '../api/client.js';
 import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../features/review/scanner.js';
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
@@ -201,8 +201,11 @@ function chartAnnotation(annotation) {
   return annotation;
 }
 
-export function ReviewPage({ state, setState, onNavigate }) {
+export function ReviewPage({ state, setState }) {
   const engineRef = useRef(null);
+  const utilityPanelId = useId();
+  const utilityTriggerRef = useRef(null);
+  const [utilityOpen, setUtilityOpen] = useState(false);
   const [review, setReview] = useState(null);
   const [activeSignalId, setActiveSignalId] = useState('');
   const [activeTradeGroupId, setActiveTradeGroupId] = useState('');
@@ -267,7 +270,6 @@ export function ReviewPage({ state, setState, onNavigate }) {
           setTradeFilters((previous) => {
             const reconciled = reconcileTraderSelection({
               previousSelectedIds: previous ? previous.traderIds : null,
-              previousFocusedId: previous?.focusedTraderId || '',
               availableTraderIds,
               contextChanged: true,
             });
@@ -276,7 +278,6 @@ export function ReviewPage({ state, setState, onNavigate }) {
               ticker: records.ticker,
               tradeDate: records.trade_date,
               traderIds: reconciled.selectedTraderIds,
-              focusedTraderId: reconciled.focusedTraderId,
             };
           });
         }
@@ -330,21 +331,18 @@ export function ReviewPage({ state, setState, onNavigate }) {
     [tradeRecords, tradeFilters],
   );
   // Same-context reconciliation: intersect the current selection with
-  // availability without reviving an intentional empty selection, and always
-  // clear an unavailable focused trader.
+  // availability without reviving an intentional empty selection.
   useEffect(() => {
     setTradeFilters((previous) => {
       if (!previous) return previous;
       const reconciled = reconcileTraderSelection({
         previousSelectedIds: previous.traderIds,
-        previousFocusedId: previous.focusedTraderId || '',
         availableTraderIds: traderAvailability.availableTraderIds,
         contextChanged: false,
       });
       const sameSelection = reconciled.selectedTraderIds.join(',') === (previous.traderIds || []).join(',');
-      const sameFocus = reconciled.focusedTraderId === (previous.focusedTraderId || '');
-      if (sameSelection && sameFocus) return previous;
-      return { ...previous, traderIds: reconciled.selectedTraderIds, focusedTraderId: reconciled.focusedTraderId };
+      if (sameSelection) return previous;
+      return { ...previous, traderIds: reconciled.selectedTraderIds };
     });
   }, [tradeRecords, traderAvailability.availableTraderIds]);
   const filteredTradeGroups = useMemo(
@@ -431,10 +429,6 @@ export function ReviewPage({ state, setState, onNavigate }) {
     setActiveTradeGroupId('');
   }
 
-  function openBacktest() {
-    onNavigate?.('backtest');
-  }
-
   const enginePayload = useMemo(() => {
     if (!displayReview) return null;
     return {
@@ -468,23 +462,29 @@ export function ReviewPage({ state, setState, onNavigate }) {
           <Stat label="持续中位" value={setupSummary.medianDuration == null ? '--' : `${setupSummary.medianDuration}m`} />
           <Stat label="MAE中位" value={setupSummary.medianMaePct == null ? '--' : formatPct(setupSummary.medianMaePct, { ratio: true, negativeSign: true })} tone="red" />
           <div className="dr-strategy-badge">{review?.strategy ? `${review.strategy.name} v${review.strategy.version}` : '未选择策略'}</div>
-        </header>
-
-        <aside className="dr-sidebar">
-          <ReviewContextPanel
-            days={workspaceDays}
-            workspace={workspace}
-            onSwitchTicker={handleSwitchTicker}
-            onSelectDate={handleSelectDate}
-          >
-            <div className="review-context-actions">
-              <label className="review-context-field">
-                Strategy
-                <select value={selectedStrategy?.id || ''} onChange={(event) => setState((prev) => ({ ...prev, selectedStrategyId: event.target.value }))}>
-                  {state.strategies.map((item) => <option key={item.id} value={item.id}>{item.name} v{item.version}</option>)}
-                </select>
-              </label>
-              <div className="review-context-buttons">
+          <div className="dr-review-utility">
+            <button
+              ref={utilityTriggerRef}
+              type="button"
+              className="dr-review-utility-trigger"
+              aria-expanded={utilityOpen}
+              aria-controls={utilityPanelId}
+              onClick={() => setUtilityOpen((open) => !open)}
+            >
+              Review 工具
+            </button>
+            {utilityOpen && (
+              <div
+                className="dr-review-utility-panel"
+                id={utilityPanelId}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') {
+                    event.stopPropagation();
+                    setUtilityOpen(false);
+                    utilityTriggerRef.current?.focus();
+                  }
+                }}
+              >
                 <button
                   type="button"
                   className={`dr-toggle-switch ${showExtendedKBars ? 'active' : ''}`}
@@ -497,8 +497,26 @@ export function ReviewPage({ state, setState, onNavigate }) {
                   Ext K <span>{showExtendedKBars ? '09:00-16:30' : 'RTH'}</span>
                 </button>
                 <button type="button" onClick={rescan} disabled={!review || loading}>Rescan</button>
-                <button type="button" onClick={openBacktest}>Backtest</button>
               </div>
+            )}
+          </div>
+        </header>
+
+        <aside className="dr-sidebar">
+          <ReviewContextPanel
+            days={workspaceDays}
+            workspace={workspace}
+            onSwitchTicker={handleSwitchTicker}
+            onSelectDate={handleSelectDate}
+            dateNavigation="progressive"
+          >
+            <div className="review-context-actions">
+              <label className="review-context-field">
+                Strategy
+                <select value={selectedStrategy?.id || ''} onChange={(event) => setState((prev) => ({ ...prev, selectedStrategyId: event.target.value }))}>
+                  {state.strategies.map((item) => <option key={item.id} value={item.id}>{item.name} v{item.version}</option>)}
+                </select>
+              </label>
               <span className="dr-storage-status" data-tone={error ? 'error' : 'ok'} role="status" aria-live="polite">{error ? 'Assembly failed' : 'SQLite review assembled automatically'}</span>
             </div>
           </ReviewContextPanel>

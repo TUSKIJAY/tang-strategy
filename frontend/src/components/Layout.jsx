@@ -9,8 +9,10 @@ const NAV_ITEMS = [
   { id: 'teaching', Icon: BookOpen, label: 'Teaching' },
 ];
 
-function NavItem({ active, capability, Icon, id, label, onNavigate }) {
+function NavItem({ active, capability, capabilityVisible, Icon, id, label, onNavigate }) {
+  // Visible badge is short (可编辑/只读); accessible name keeps the full sentence.
   const accessibleName = capability ? `${label}（${capability}）` : label;
+  const visibleBadge = capabilityVisible || capability;
 
   return (
     <button
@@ -23,7 +25,7 @@ function NavItem({ active, capability, Icon, id, label, onNavigate }) {
     >
       <Icon size={18} aria-hidden="true" />
       <span className="nav-label">{label}</span>
-      {capability ? <span className="nav-role-badge">{capability}</span> : null}
+      {visibleBadge ? <span className="nav-role-badge" aria-hidden="true">{visibleBadge}</span> : null}
     </button>
   );
 }
@@ -65,6 +67,7 @@ export function Layout({ active, onNavigate, children }) {
               Icon={UsersRound}
               label="交易记录 / 点位管理"
               capability={role === 'admin' ? '管理员可编辑' : '只读检查，编辑需要管理员'}
+              capabilityVisible={role === 'admin' ? '可编辑' : '只读'}
               active={active}
               onNavigate={onNavigate}
             />

@@ -8,6 +8,8 @@ import {
   buildTradeRecordDownloads,
   canEditTradeRecords,
   deriveAvailableTraders,
+  DIRECTION_CALL_COLOR,
+  DIRECTION_PUT_COLOR,
   displayableTradeGroups,
   exportSelectionFromFilters,
   filtersMatchWorkspace,
@@ -18,7 +20,11 @@ import {
   reconcileTraderSelection,
   resolveTradeDate,
   reviewHashRoute,
+  sameTraderIdSet,
   summarizeTradeGroups,
+  traderSelectionSummary,
+  TRADER_CHIP_INLINE_MAX,
+  TRADER_CHIP_SUMMARY_MIN,
 } from './tradeRecords.js';
 import {
   FIXTURE_PRESERVATION_CASE,
@@ -150,7 +156,7 @@ test('reload defaults select all active traders without persisted filter state',
   first.traderIds.pop();
   const reloaded = initialTradeRecordFilters(traders);
   assert.deepEqual(reloaded.traderIds, ['alice', 'bob']);
-  assert.equal(reloaded.focusedTraderId, '');
+  assert.equal('focusedTraderId' in reloaded, false);
   assert.equal(reloaded.ticker, 'SPY');
 });
 
@@ -229,18 +235,20 @@ test('asymmetric ticker history controls date availability and preserves hash ro
   assert.equal(reviewHashRoute('QQQ', '2026-07-17', 'extended'), '#qqq-2026-07-17-extended');
 });
 
-test('multi-select, focus, status, review, and eligibility filter at group level', () => {
+test('multi-select, status, review, and eligibility filter at group level without focus override', () => {
   const selected = filterTradeGroups(payload, {
     ticker: 'SPY',
     tradeDate: '2026-07-17',
-    traderIds: ['alice', 'bob'],
-    focusedTraderId: 'alice',
+    traderIds: ['alice'],
     statuses: ['active'],
     reviewStatuses: ['verified'],
     eligibility: 'reported',
   });
   assert.deepEqual(selected.map((item) => item.trade_group_id), ['tg_20260717_alice_spy_001']);
   assert.deepEqual(filterTradeGroups(payload, { traderIds: [] }), []);
+  // Subset selection is pure set membership — no hidden focus override.
+  const both = filterTradeGroups(payload, { traderIds: ['alice', 'bob'] });
+  assert.deepEqual(both.map((item) => item.trader_id).sort(), ['alice', 'bob']);
 });
 
 test('group-first statistics never blend reported and calculated series', () => {
@@ -262,11 +270,12 @@ test('group-first statistics never blend reported and calculated series', () => 
   });
 });
 
-test('marker color is trader-owned while CALL and PUT shapes stay independent', () => {
+test('marker color is direction-owned while CALL and PUT shapes stay independent', () => {
   const bars = [{ t: '10:00' }, { t: '10:01' }];
   const markers = buildTradeRecordAnnotations(groups, traders, bars);
   assert.equal(markers.length, 2);
-  assert.equal(markers[0].marker_color, '#3366CC');
+  assert.equal(markers[0].marker_color, DIRECTION_CALL_COLOR);
+  assert.equal(markers[0].marker_color, '#6F9F7A');
   assert.equal(markers[0].marker_shape, 'triangle_up');
   assert.equal(markers[0].grouped_marker_count, 2);
   assert.equal(markers[0].marker_label, 'alice CALL ×2');
@@ -274,8 +283,17 @@ test('marker color is trader-owned while CALL and PUT shapes stay independent', 
     'tg_20260717_alice_spy_001_l1_e1',
     'tg_20260717_alice_spy_001_l1_e2',
   ]);
-  assert.equal(markers[1].marker_color, '#DC3912');
+  assert.equal(markers[1].marker_color, DIRECTION_PUT_COLOR);
+  assert.equal(markers[1].marker_color, '#E06B66');
   assert.equal(markers[1].marker_shape, 'triangle_down');
+  // Same trader CALL+PUT would differ only by direction color, not registry hue.
+  const sameTrader = [
+    groups[0],
+    { ...groups[1], trader_id: 'alice', trade_group_id: 'tg_20260717_alice_spy_put' },
+  ];
+  const sameMarkers = buildTradeRecordAnnotations(sameTrader, traders, bars);
+  assert.equal(sameMarkers[0].marker_color, DIRECTION_CALL_COLOR);
+  assert.equal(sameMarkers[1].marker_color, DIRECTION_PUT_COLOR);
 });
 
 test('kline renderer exposes only normalized trade color and shape hooks', () => {
@@ -330,8 +348,7 @@ test('downloads synchronize current filters, groups, contexts, counts, and selec
   const filters = {
     ticker: 'SPY',
     tradeDate: '2026-07-17',
-    traderIds: ['alice', 'bob'],
-    focusedTraderId: 'alice',
+    traderIds: ['alice'],
     statuses: ['active'],
     reviewStatuses: ['verified'],
     eligibility: 'display',
@@ -353,6 +370,13 @@ test('downloads synchronize current filters, groups, contexts, counts, and selec
   assert.equal(exported.counts.trade_groups_total, 1);
   assert.equal(exported.counts.note_contexts_total, 1);
   assert.equal(downloads['trade_groups.csv'].trim().split('\n').length - 1, 1);
+  // Export order remains alphabetical even when UI selection order differs.
+  const reversed = exportSelectionFromFilters(payloadWithContexts, {
+    ...filters,
+    traderIds: ['bob', 'alice'],
+  });
+  assert.deepEqual(reversed.trader_ids, ['alice', 'bob']);
+  assert.equal(sameTraderIdSet(['bob', 'alice'], reversed.trader_ids), true);
 });
 
 // --- Availability-driven trader contract (plan §3.3) -------------------------
@@ -405,11 +429,11 @@ test('pending-only and empty days expose no visible trader option', () => {
   );
 });
 
-test('selection reconciliation honors context change, intentional empty, and focus', () => {
+test('selection reconciliation honors context change and intentional empty without focus', () => {
   // Initial load selects every available trader.
   assert.deepEqual(
     reconcileTraderSelection({ previousSelectedIds: null, availableTraderIds: ['tang', 'vordin'] }),
-    { selectedTraderIds: ['tang', 'vordin'], focusedTraderId: '' },
+    { selectedTraderIds: ['tang', 'vordin'] },
   );
   // Context change keeps the intersection with availability.
   assert.deepEqual(
@@ -418,7 +442,7 @@ test('selection reconciliation honors context change, intentional empty, and foc
       availableTraderIds: ['vordin'],
       contextChanged: true,
     }),
-    { selectedTraderIds: ['vordin'], focusedTraderId: '' },
+    { selectedTraderIds: ['vordin'] },
   );
   // Context change with an empty intersection re-selects all available traders.
   assert.deepEqual(
@@ -438,34 +462,14 @@ test('selection reconciliation honors context change, intentional empty, and foc
     }).selectedTraderIds,
     [],
   );
-  // An unavailable focused trader is always cleared; an available one survives.
-  assert.equal(
-    reconcileTraderSelection({
-      previousSelectedIds: ['tang'],
-      previousFocusedId: 'tang',
-      availableTraderIds: ['vordin'],
-      contextChanged: true,
-    }).focusedTraderId,
-    '',
-  );
-  assert.equal(
-    reconcileTraderSelection({
-      previousSelectedIds: ['vordin'],
-      previousFocusedId: 'vordin',
-      availableTraderIds: ['vordin'],
-      contextChanged: true,
-    }).focusedTraderId,
-    'vordin',
-  );
-  // Context change into an empty-availability day selects nothing and focuses nothing.
+  // Context change into an empty-availability day selects nothing.
   assert.deepEqual(
     reconcileTraderSelection({
       previousSelectedIds: ['tang'],
-      previousFocusedId: 'tang',
       availableTraderIds: [],
       contextChanged: true,
     }),
-    { selectedTraderIds: [], focusedTraderId: '' },
+    { selectedTraderIds: [] },
   );
 });
 
@@ -486,37 +490,85 @@ test('reconciled filters drive markers, lists, and exports from one resolved obj
   const { availableTraderIds } = deriveAvailableTraders(spyPayload, FIXTURE_TRADERS);
   const reconciled = reconcileTraderSelection({
     previousSelectedIds: ['vordin'],
-    previousFocusedId: 'vordin',
     availableTraderIds,
     contextChanged: true,
   });
   assert.deepEqual(reconciled.selectedTraderIds, ['tang']);
-  assert.equal(reconciled.focusedTraderId, '');
+  assert.equal('focusedTraderId' in reconciled, false);
   const filters = mirrorWorkspaceContext({
     ...initialTradeRecordFilters(FIXTURE_TRADERS),
     traderIds: reconciled.selectedTraderIds,
-    focusedTraderId: reconciled.focusedTraderId,
   }, { ticker: 'SPY', trade_date: '2026-07-17' });
   assert.equal(filtersMatchWorkspace(filters, { ticker: 'SPY', trade_date: '2026-07-17' }), true);
-  const selection = exportSelectionFromFilters(payload, filters);
+  const selection = exportSelectionFromFilters(spyPayload, filters);
   assert.deepEqual(selection.trader_ids, ['tang']);
-  // The resolved filter object never carries the stale vordin selection.
-  const displayed = displayableTradeGroups(spyPayload, filters)
-    .filter((group) => filters.traderIds.includes(group.trader_id));
-  assert.deepEqual(displayed.map((group) => group.trade_group_id), ['tg_20260717_tang_spy_001']);
+  // List / export share the same canonical trader-ID set membership.
+  const filtered = filterTradeGroups(spyPayload, filters);
+  const listIds = filtered.map((group) => group.trader_id);
+  assert.equal(sameTraderIdSet(listIds, selection.trader_ids), true);
+  assert.deepEqual(listIds, ['tang']);
+  // Markers consume the same membership set when groups have timed events.
+  const subsetFilters = {
+    ticker: 'SPY',
+    tradeDate: '2026-07-17',
+    traderIds: ['alice'],
+    statuses: ['active'],
+    reviewStatuses: ['verified'],
+    eligibility: 'display',
+  };
+  const subsetGroups = filterTradeGroups(payload, subsetFilters);
+  const subsetExport = exportSelectionFromFilters(payload, subsetFilters);
+  const subsetMarkers = buildTradeRecordAnnotations(subsetGroups, traders, [{ t: '10:00' }, { t: '10:01' }]);
+  assert.ok(subsetMarkers.length > 0);
+  assert.equal(sameTraderIdSet(
+    subsetGroups.map((group) => group.trader_id),
+    subsetExport.trader_ids,
+  ), true);
+  assert.equal(sameTraderIdSet(
+    subsetMarkers.map((marker) => marker.trader_id),
+    subsetExport.trader_ids,
+  ), true);
 });
 
-test('trader filter component pins readonly mirrors, availability, and aria states', () => {
+test('trader filter component pins B chips, availability, and no focus override', () => {
   const source = readFileSync(new URL('./TraderFilters.jsx', import.meta.url), 'utf8');
-  // Readonly workspace mirror branch (no editable ticker/date authority).
-  assert.match(source, /context \? \(/);
-  assert.match(source, /className="trade-context-mirror" aria-label="当前复盘上下文"/);
-  assert.match(source, /aria-readonly="true"/);
+  // Resolved context omits ticker/date mirror; workspace owns day authority.
+  assert.match(source, /!context && \(/);
+  assert.doesNotMatch(source, /trade-context-mirror/);
+  assert.doesNotMatch(source, /focusedTraderId/);
+  assert.doesNotMatch(source, />Focus</);
   // Availability-driven rendering plus one neutral empty state.
   assert.match(source, /availableTraderIds\.includes\(trader\.trader_id\)/);
   assert.match(source, /className="trade-trader-empty" role="status"/);
-  // Focus exposes a programmatic selected state.
-  assert.match(source, /aria-pressed=\{filters\.focusedTraderId === trader\.trader_id\}/);
+  // B chips use aria-pressed; drawer thresholds follow frozen constants.
+  assert.match(source, /aria-pressed=\{pressed\}/);
+  assert.match(source, /className=\{\`trade-trader-chip \$\{pressed \? 'active' : ''\}\`\}/);
+  assert.match(source, /TRADER_CHIP_INLINE_MAX/);
+  assert.match(source, />\s*编辑\s*</);
+  assert.match(source, />\s*全选\s*</);
+  assert.match(source, />\s*清空\s*</);
+  assert.equal(TRADER_CHIP_INLINE_MAX, 6);
+  assert.equal(TRADER_CHIP_SUMMARY_MIN, 7);
+  const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(styles, /--trader-color/);
+  assert.match(styles, /--direction-call: #6F9F7A;/);
+  assert.match(styles, /--direction-put: #E06B66;/);
+  const listSource = readFileSync(new URL('./TraderTradeList.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(listSource, /--trader-color|focusedTraderId/);
+  assert.match(listSource, /trade-trader-name/);
+  assert.match(listSource, /trade-direction-word/);
+  const summary = traderSelectionSummary(
+    [
+      { trader_id: 'a', display_name: 'Alice' },
+      { trader_id: 'b', display_name: 'Bob' },
+      { trader_id: 'c', display_name: 'Cara' },
+      { trader_id: 'd', display_name: 'Dan' },
+    ],
+    ['a', 'b', 'c', 'd'],
+  );
+  assert.equal(summary.selectedCount, 4);
+  assert.deepEqual(summary.names, ['Alice', 'Bob', 'Cara']);
+  assert.equal(summary.overflow, 1);
 });
 
 // --- Trader point editor candidate contract (plan §3.4) -----------------------
@@ -667,4 +719,27 @@ test('occurred-at edits atomically reconcile timestamp completeness and provenan
   assert.equal(cleared.time_precision, null);
   assert.equal(cleared.time_incomplete, true);
   assert.equal(cleared.fact_provenance.occurred_at, 'unknown');
+});
+
+test('no live focusedTraderId or shared registry-hue chip/card binding remains', () => {
+  const roots = [
+    './tradeRecords.js',
+    './TraderFilters.jsx',
+    './TraderTradeList.jsx',
+    '../../pages/ReviewPage.jsx',
+    '../../pages/StaticReviewsApp.jsx',
+    '../../pages/AdminTradersPage.jsx',
+    '../../styles.css',
+  ];
+  for (const rel of roots) {
+    const source = readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.doesNotMatch(source, /focusedTraderId/);
+    if (rel.endsWith('styles.css') || rel.includes('Trader')) {
+      assert.doesNotMatch(source, /--trader-color/);
+    }
+  }
+  assert.doesNotMatch(
+    readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8'),
+    />Focus</,
+  );
 });

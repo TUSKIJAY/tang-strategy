@@ -67,7 +67,6 @@ export function AdminTradersPage({ role = 'readonly', payloads = [], marketDays 
     setFilters((previous) => {
       const reconciled = reconcileTraderSelection({
         previousSelectedIds: previous ? previous.traderIds : null,
-        previousFocusedId: previous?.focusedTraderId || '',
         availableTraderIds: traderAvailability.availableTraderIds,
         contextChanged: true,
       });
@@ -76,7 +75,6 @@ export function AdminTradersPage({ role = 'readonly', payloads = [], marketDays 
         ticker: workspace.ticker,
         tradeDate: workspace.trade_date,
         traderIds: reconciled.selectedTraderIds,
-        focusedTraderId: reconciled.focusedTraderId,
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
