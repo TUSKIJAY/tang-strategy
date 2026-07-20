@@ -3,12 +3,40 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan`
-- Lifecycle status: `Completed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `closed`
+- Current plan: `2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
+
+2026-07-20: 用户以“把该计划转移到 active”明确授权 Durable Checkpoint governance exact revision `v2-review-foldback-2026-07-20` 的 lifecycle activation。已记录 `user-instruction:2026-07-20-activate-durable-checkpoint-governance`，将且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap 与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。本次 activation 不启动 Phase 0、不授权实现、Git stage/commit/push、Terminal UI activation、数据/provider/broker/Pages/远端动作；Phase 0 entry 仍须另行 implementation-start 指令并满足 shared dirty lifecycle paths 的 clean/absent gate。
+
+2026-07-20: 独立 design review `review-002` 对 Durable Checkpoint governance exact revision `v2-review-foldback-2026-07-20`（plan SHA-256 `46e6b3fb...0702`）返回 `approve/high`。已逐项关闭 `review-001` 的全部 blocking/medium/non-blocking findings，并再核对 live OPT 参考图 1,688,940 bytes / SHA-256 `57c34ea7...d3c5`、operating-modes §8 后追加 §§9–10、space-separated v1 key superset、legacy-tolerated CI 命令与三 job 不变。当前仍为第二条 Proposed/review-only；matching-revision approve 不构成 activation 或实施授权；next gate `activation-recording`。Terminal UI 仍是 current focus/`activation-recording`。未 activation、未实施、未 stage/commit/push、未写 canonical content/DB、未远端/provider/broker。
+
+2026-07-20: 已根据独立 `review-001: revise/high` 将 Durable Checkpoint governance 折回为 stable revision `v2-review-foldback-2026-07-20`（plan SHA-256 `46e6b3fb...0702`），并将产品名中的 operative `Auto-Commit` 改为 `Scoped Local Commit`（历史 filename/slug 保留以维持链接稳定）。v2 已逐项钉死：human/agent 单一 commit actor + read-only checker、`Tang-Authority`/standing grant 精确语法与 `checkpoint-request-v1` 输入、actual 1,688,940-byte OPT PNG 的 kind-aware per-file/aggregate size gate、pre-v2 `--legacy-tolerated` CI 退出语义、现有 §8 后追加 §§9–10、live space-separated v1 keys 的 literal strict superset、11 kind 真实 lifecycle reconciliation/optional path sets、primary phase/remediation 状态机、clean-entry/full-post-image same-file 算法、v2 expected-checkpoint hard gate、精确 secret deny/heuristic 规则，以及本 plan 全生命周期无条件 v1 bootstrap。当前仍为第二条 Proposed/review-only，`review-001` 只针对 v1，next gate `design-review`；Terminal UI 仍是 current focus/`activation-recording`。未 activation、未实施、未 stage/commit/push、未写 canonical content/DB、未远端/provider/broker。
+
+2026-07-20: 独立 design review `review-001` 对 Durable Checkpoint governance exact revision `v1-proposal-2026-07-20`（plan SHA-256 `0e93eaab...d62e`）返回 `revise/high`。阻断项：auto-commit 执行主体/权限语法未钉死且与只读 checker 非目标冲突；1MB 体积门与 live OPT 截图（含 1.69MB reference PNG）不兼容；CI audit 对 pre-v2 无 trailer 历史的 fail 语义未钉死。中等项：operating-modes §8 编号碰撞、v2 constrained key 与 live `PLAN_KEYS` 不一致、checkpoint 文件清单相对真实 lifecycle 偏窄、work-unit/phase 状态机与 same-file 算法未可判定。focus 仍为 Terminal UI Proposed/`activation-recording`；本 plan 仍为第二条 Proposed，next gate `plan-revision`。未 activation、未实施、未 stage/commit/push、未写 canonical content/DB、未远端/provider/broker。
+
+2026-07-20: 独立 design review `review-002` 对 exact revision `v2-review-foldback-2026-07-20`（plan SHA-256 `40afdcfd...d12e`）返回 `approve/high`。已逐项关闭 `review-001` 的 blocking/medium/non-blocking findings，并再核对 live slug/color 正则、admin PUT 无后端扩边界、Layout 置底 secondary 结构、`test:trade-records` carrier、保护哈希与 token 对比度。当前仍为 Proposed/review-only；matching-revision approve 不构成 activation 或实施授权；next gate `activation-recording`。未 activation、未实施、未 stage/commit/push、未写 canonical content/DB、未执行远端/provider/broker/发布动作。
+
+2026-07-20: 已根据独立 `review-001: revise/high` 将当前 proposal 折回为 stable revision `v2-review-foldback-2026-07-20`（plan SHA-256 `40afdcfd...d12e`）。v2 已逐项修正/钉死：`trader_id` exact regex `^[a-z][a-z0-9_]{1,63}$` 与 2/64 字符边界、color exact regex `^#[0-9A-Fa-f]{6}$`、FastAPI JSON `detail` / raw `response.text()` 字段路径关联及 form-level fallback；同时冻结 trader workspace 保持左下置底但复用同一 peer-nav renderer/classes/state，并明确仅扩展现有 `test:trade-records` script 的 test file list。`review-001` 仅针对 v1，不能批准 v2；当前仍为 Proposed/review-only，next gate `design-review`。未 activation、未实施、未 stage/commit/push、未写 canonical content/DB、未执行远端/provider/broker/发布动作。
+
+2026-07-20: 独立 design review `review-001` 对 exact revision `v1-proposal-2026-07-20`（plan SHA-256 `c2c20927...a923f`）返回 `revise/high`。已独立核对 optimization 截图哈希、Layout/Admin/Review 现况、DB/registry/publisher/exporter 保护哈希、token 对比度，以及 admin PUT 无后端扩合同边界；blocking finding 是 §1.2 把 `trader_id` 写成 `^[a-z][a-z0-9_]{2,191}$`，而 live validator 与 schema 均为 `^[a-z][a-z0-9_]{1,63}$`。中等项：颜色须钉死 `^#[0-9A-Fa-f]{6}$`，服务端字段路径关联须覆盖 FastAPI JSON `detail`/client `response.text()` 形态。非阻断观察：peer-nav 置底 vs 入栈、以及 `package.json` 清单理由。当前仍为 Proposed/review-only；next gate `plan-revision`。未 activation、未实施、未 stage/commit/push/数据写入/远端动作。
+
+2026-07-20: 用户明确点名 `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/` 并要求转换为 proposed plan。已创建 review-only `Tang Strategy Terminal UI Fusion And Trader Registry` revision `v1-proposal-2026-07-20`，单计划覆盖 OPT-001..004，并以 phase 分隔 terminal-first 全站 token/peer nav、非 Review 页面迁移、Review/Static trade-panel 融合、admin inline create-trader、集成验收与独立 implementation review。规划决策已锁定：warm orange 仅 brand mark、`trader_id` 由 admin 输入 stable lowercase slug 且首次保存后不可变、复用现有完整 registry PUT/原子 projection、不新增 backend/API/schema/DB/data/publisher 合同。optimization 与四个 lifecycle 派生面已同步为 `promoted-to-proposed` / `Proposed`；当前 next gate 为独立 `design-review`，未 review、未 activation、未实施、未 stage/commit/push/发布或执行任何远端/数据/provider/broker 动作。
+
+2026-07-20: 用户以 admin 交易者工作区截图纠正同日 optimization 意图。新建当时为 record-only 的 `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md`（当时 `needs-review`）：OPT-001 左侧 `交易记录 / 点位管理` 使用 `.secondary` 橙色按钮与 Data/Review 主导航风格不一致（`Layout.jsx` + sidebar CSS）；OPT-002 注册表仅能改 `tang`/`vordin` 元数据，UI 无新增交易者入口（`AdminTradersPage` 只有 `updateRegistryTrader`）。截图现归档于同批 `screenshots/2026-07-20-trader-workspace-admin-registry.png`。先前 Data coverage 草稿 `docs/optimization/2026-07-20-data-coverage-presentation/2026-07-20-data-coverage-presentation.md` 标为 `superseded`。该时点未改前端、未生成 plan、未获实施或 Git/remote 权限；当前 promotion 以本文件上方最新记录为准。
+
+2026-07-20: 用户补充两张 Review 截图并明确 OPT-001 方向——「左下角需要跟上面 UI 融合度更好一些」。锁定 peer-nav 融合（去掉橙色 CTA 实心块，与上方 Data/Review 图标栈同材质/同折叠行为）；证据现归档于该 optimization 批次的 `screenshots/2026-07-20-sidebar-trader-nav-mismatch-review.png` 与 `screenshots/2026-07-20-sidebar-trader-nav-overlap-detail.png`。该时点仍为 record-only，未实施。
+
+2026-07-20: 用户再圈 Review 左侧粉框并问「这部分呢」。记为 OPT-003：粉框是 `TraderFilters` + `TradeExportControls` + `TraderTradeList`（Eligibility / Focus / Download / group cards），不是外壳导航；与上方 ticker/date/strategy 终端控件两套材质，共享组件靠 `.dr-sidebar` 暗色补丁。与 OPT-001（外壳橙钮）相邻但分项。截图现归档于该 optimization 批次的 `screenshots/2026-07-20-review-trade-filter-panel.png`。该时点仍 record-only。
+
+2026-07-20: 用户明确「Review 界面颜色和其他页面不同，需要统一」。记为 OPT-004：根因是双皮肤——默认 paper 暖色（Data/Admin/Backtest/Teaching + `:root` tokens）vs Review `.dr-shell` 全页炭黑/橄榄终端，外壳侧栏还是第三套暖棕。截图现归档于该 optimization 批次的 `screenshots/2026-07-20-review-color-vs-shell.png` 等。候选 A 终端优先 / B paper 优先 / C 统一壳+图表区保持深色；OPT-001/003 应落在选定统一色板内。该时点仍 record-only，未实施。
+
+2026-07-20: 用户锁定 OPT-004 方向 **A terminal-first**——以 Review 炭黑/橄榄终端族为全站产品皮肤（shell + Data/Review/Backtest/Teaching/Admin）；cream paper 不再作为默认 chrome；K 线保持高对比深色但是同一皮肤的密区。OPT-001 peer-nav / OPT-003 交易筛选融合均在此色板内实施。仍 record-only，未生成 plan、未改前端。
+
+2026-07-20: 用户要求 opt 截图与文档同批归档，不再放 `design/references/`。布局改为 `docs/optimization/<slug>/<slug>.md` + `screenshots/`；已迁移全部既有批次（含今日 6 张图与 07-19 视觉基准），更新 `SOP.md` / `record-template.md` / `index.md` 与完成计划中的回链。仍 record-only。
 
 2026-07-20: Phase 6 真实收口完成：external Grok Build `implementation-review-001` 对 frozen `workspace-review-v1:3d24de3...d06717cd@d7350213...23ecc` 独立返回 `accept/high`，无 findings，并直接 vision-inspect 19 张必需 PNG。收口前重算 27 个实现文件、tracked patch、6 个 additions、63 个 accepted evidence 与 composite digest，均与评审冻结值一致；plan 已迁移为 `Completed`，final disposition `Completed`，next gate `closed`。direct operating-modes、governed/auto harness 与 link scan、146/146 lifecycle fixtures、startup budget、launcher syntax、diff/whitespace/staging 检查均通过。用户后续明确授权 `commit and push`；冻结实现与 accepted evidence 已作为 `ab655568d50d20c2a97e970658ec9fa3b41719b7`，lifecycle reconciliation 已作为 `65fd15dd3a3b7030bc3d15fc0590ea26a048490c`，commit-boundary metadata 已作为 `02fc3e524ec47f3f8bf3ddf17768969ca1fd6a59`。exact commit chain 已 push 至 `origin/codex/project-harness`，单次权限已消耗；未 PR/merge/Pages/provider/broker，tracked DB 与 canonical content 未变。
 
@@ -36,9 +64,9 @@
 
 2026-07-19: 用户通过 `user-instruction:2026-07-19-dual-review-loop-through-active` 授权 Kimi/Grok 对同一冻结 revision 独立双审、两份输出落盘后再折回、重复至 matching-revision 双 `approve`、随后 lifecycle-only activation 并做一次本地范围 commit。plan 先做 authority-only refresh 到 `v2-review-loop-baseline-2026-07-19`；当前授权范围不含实现或远端动作。
 
-2026-07-19: 用户明确要求将 `docs/optimization/2026-07-19-review-ui-and-trader-editing.md` 转为 proposed plan，并另行授权完成后做一次本地 commit。`Tang Strategy Review Workspaces And Trader Point Editing` initial revision `v1-proposal-2026-07-19` 已建立于 `docs/exec-plans/proposed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`，统一覆盖 OPT-001 至 OPT-004：ticker/date workspace、K-line/页面控制权、availability-driven trader、表单式点位预览/编辑、interactive/static parity 和 accessibility。该 initial proposal 未激活、未实现、未改 DB/API/data/publisher、未 push/PR/merge/Pages/hosted/provider/broker。
+2026-07-19: 用户明确要求将现归档于 `docs/optimization/2026-07-19-review-ui-and-trader-editing/2026-07-19-review-ui-and-trader-editing.md` 的批次转为 proposed plan，并另行授权完成后做一次本地 commit。`Tang Strategy Review Workspaces And Trader Point Editing` initial revision `v1-proposal-2026-07-19` 已建立于当时的 proposed 路径，统一覆盖 OPT-001 至 OPT-004：ticker/date workspace、K-line/页面控制权、availability-driven trader、表单式点位预览/编辑、interactive/static parity 和 accessibility。该 initial proposal 未激活、未实现、未改 DB/API/data/publisher、未 push/PR/merge/Pages/hosted/provider/broker；其当前 canonical plan 已在 `completed/`。
 
-2026-07-19: 用户此前在优化记录模式中确认四项 Data/Review/Admin/Static UI 摩擦。OPT-001 是控制权问题：K 线引擎内置 toolbar 与 Review 历史外层 toolbar 同时存在，后续边界为通用图表操作归引擎、业务上下文归 Review。OPT-002 记录 admin-only 折叠图标和 raw JSON editor 导致交易者点位编辑不可发现。OPT-003 记录 Data 与 Review 的 SPY/QQQ 默认列表/选择器必须按 ticker workspace 隔离，避免 market days 混排；候选分类为 ticker tabs + date rail（当前优先）、collapsible groups、workspace landing，并新增 availability-driven trader 硬规则：当前 ticker/date 无实际点位的交易者不得显示名字/checkbox/Focus，切换上下文必须清理 stale selection。OPT-004 记录 StaticReviewsApp 不是完整本地应用而是独立 Review，并同样存在 ticker 混排和外层控制重复；未来交互版/静态版必须共享控制权、ticker 分区与 unavailable-trader suppression 契约。用户确认的最终示意图保存在 `design/references/2026-07-19-review-ui-reference-v1.png`，作为后续生成/规划默认视觉基准。当前 `/tmp` rehearsal 已成功导出/build 49 days（46 SPY + 3 QQQ）/9 strategies，未发布或验证 hosted Pages。该记录现已按后续明确指令提升为上述 review-only Proposed plan。
+2026-07-19: 用户此前在优化记录模式中确认四项 Data/Review/Admin/Static UI 摩擦。OPT-001 是控制权问题：K 线引擎内置 toolbar 与 Review 历史外层 toolbar 同时存在，后续边界为通用图表操作归引擎、业务上下文归 Review。OPT-002 记录 admin-only 折叠图标和 raw JSON editor 导致交易者点位编辑不可发现。OPT-003 记录 Data 与 Review 的 SPY/QQQ 默认列表/选择器必须按 ticker workspace 隔离，避免 market days 混排；候选分类为 ticker tabs + date rail（当前优先）、collapsible groups、workspace landing，并新增 availability-driven trader 硬规则：当前 ticker/date 无实际点位的交易者不得显示名字/checkbox/Focus，切换上下文必须清理 stale selection。OPT-004 记录 StaticReviewsApp 不是完整本地应用而是独立 Review，并同样存在 ticker 混排和外层控制重复；未来交互版/静态版必须共享控制权、ticker 分区与 unavailable-trader suppression 契约。用户确认的最终示意图现归档于 `docs/optimization/2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png`，作为后续生成/规划默认视觉基准。当前 `/tmp` rehearsal 已成功导出/build 49 days（46 SPY + 3 QQQ）/9 strategies，未发布或验证 hosted Pages。该记录现已按后续明确指令完成对应 plan lifecycle。
 
 2026-07-19: 添加第二位 trader `vordin`（沃德哥）：registry + 2026-07-10/07-14/07-17 三个 canonical QQQ day files（6 groups / 3 contexts，逐字段 fact_provenance，07-14 无截图保持 `pending`，不进 static export）。为满足 trade 投影的 market-day 完整性约束，补齐首批 QQQ 市场日：07-14/07-17 走 TradingView 匿名源（历史窗口需 `--bar-count 5000`），07-10 因 TV 匿名历史不足触发 QQQ RTH 317/390 hard gate 后走 IBKR；同日期 SPY 按 same-provider pair 合约一并重导入，46 -> 49 market days / 52 datasets（3 superseded）。同时修复 fetch 脚本在 dataset-ownership schema 下失效的 `fetch_prior_closes` join（改用 `bar_market_day_join`）。验收计数更新为 22 days / 33 groups / 5 contexts；76/76 backend tests、compileall、harness、QQQ static export 探针通过。全部改动未 commit、未 push、未发布 Pages。
 
@@ -79,6 +107,8 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
+| Current active plan | `docs/exec-plans/active/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md` |
+| Secondary proposed plan | `docs/exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md` |
 | Completed Review UI plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` |
 | Review-ready packet | `docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/implementation-review-packet-001.md` |
 | Completed multi-trader plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md` |
@@ -96,7 +126,9 @@
 
 ## To Do
 
-- [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups.md`; they are not approved work.
+- [ ] Obtain an explicit user activation instruction for approved exact revision `v2-review-foldback-2026-07-20`; activation recording must stop at `phase-0:not-started`, and implementation still requires a later explicit start instruction.
+- [ ] Obtain a separate explicit implementation-start instruction for active Durable Checkpoint governance before Phase 0; activation alone grants no implementation or Git authority, and Phase 0 must first satisfy its shared-path clean/absent entry gate.
+- [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups/`; they are not approved work.
 
 ## Completed
 

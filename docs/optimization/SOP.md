@@ -10,11 +10,34 @@
 4. proposed 计划完成 review 并获得用户明确批准后，才能移动到 active。
 5. 实施、验证与收尾完成后，计划进入 completed，并回链原记录。
 
+## Batch Layout (required)
+
+Each optimization batch is a **folder**, not a lone file at the directory root:
+
+```text
+docs/optimization/
+  index.md
+  SOP.md
+  record-template.md
+  <YYYY-MM-DD-batch-slug>/
+    <YYYY-MM-DD-batch-slug>.md    # the record
+    screenshots/                  # evidence images for this batch only
+      <descriptive-name>.png
+```
+
+Rules:
+
+- Put the record markdown and its screenshots **together** under the batch folder.
+- Do **not** store optimization evidence screenshots under `design/references/` or other global design trees.
+- `screenshots/` may be empty for text-only batches; keep the directory (optional `.gitkeep`).
+- Link images with paths relative to the record file, e.g. `[label](./screenshots/foo.png)`.
+- Root-level files in `docs/optimization/` are limited to `index.md`, `SOP.md`, and `record-template.md`.
+
 ## Record-Only Boundary
 
 允许：
 
-- 新增或更新优化记录；
+- 新增或更新优化记录（按上列 batch 文件夹布局）；
 - 更新本目录索引；
 - 按仓库规则更新 `PROGRESS.md` 与 `HANDOFF.md`。
 

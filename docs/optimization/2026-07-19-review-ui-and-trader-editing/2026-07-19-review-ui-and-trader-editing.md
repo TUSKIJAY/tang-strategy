@@ -11,7 +11,7 @@
 
 ## Visual Reference
 
-- Canonical mockup: [Review UI reference v1](../../design/references/2026-07-19-review-ui-reference-v1.png)
+- Canonical mockup: [Review UI reference v1](./screenshots/2026-07-19-review-ui-reference-v1.png)
 - Role: default visual and layout reference for later design generation or an explicitly authorized implementation plan covering OPT-001 through OPT-004.
 - Locked direction: dark compact trading-terminal style; `QQQ`/`SPY` ticker workspace tabs with ticker-scoped date rail; Review-owned business controls in the left panel; chart-generic controls owned only by `KLINE ENGINE V2`; availability-driven trader visibility; discoverable but secondary `编辑交易者点位` action; no duplicate bottom control bar.
 - Evidence identity: user-confirmed 2026-07-19 PNG, `1672 x 941`, SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`.

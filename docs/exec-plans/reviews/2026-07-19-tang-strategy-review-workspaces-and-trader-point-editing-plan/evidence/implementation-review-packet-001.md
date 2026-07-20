@@ -121,7 +121,7 @@ Phase receipts:
 Accepted multimodal/evidence inputs included in the evidence digest (the eight phase files are explicit so this packet remains excluded):
 
 ```text
-design/references/2026-07-19-review-ui-reference-v1.png
+docs/optimization/2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png
 docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/review-001.md
 docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/review-002.md
 docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/review-003.md

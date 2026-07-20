@@ -31,11 +31,11 @@
 
 ## Active Plans
 
-当前无 active 计划。以 [`active/index.md`](./active/index.md) 为当前索引。
+- [Tang Strategy Durable Checkpoint And Scoped Local Commit Governance](./active/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md) — Active; canonical details: [active index](./active/index.md)
 
 ## Proposed Plans
 
-当前无 proposed 计划。以 [`proposed/index.md`](./proposed/index.md) 为当前索引。
+- [Tang Strategy Terminal UI Fusion And Trader Registry](./proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
 
 ## Completed Plans
 
