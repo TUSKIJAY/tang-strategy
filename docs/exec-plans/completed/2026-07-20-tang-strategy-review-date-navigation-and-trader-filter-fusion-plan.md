@@ -23,9 +23,9 @@
 - Blocker evidence: none
 - Implementation reviews: ../reviews/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan/implementation-review-001.md@accept@064550c1c22ae78911ea20c348bf2e476dd788ca
 - Latest implementation verdict: accept
-- Checkpoint authority: `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`
+- Checkpoint authority: `user-instruction:2026-07-21-repair-review-date-filter-checkpoints-and-activate`
 - Checkpoint authority mode: standing
-- Checkpoint authority kinds: implementation-start,phase-exit,implementation-review,completed-migration
+- Checkpoint authority kinds: design-review,proposal-revision,activation-recording,implementation-start,phase-exit,implementation-review,completed-migration
 - Expected checkpoint kind: completed-migration
 - Owner: Codex
 - Created: 2026-07-20
