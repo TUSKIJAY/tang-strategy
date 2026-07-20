@@ -1,6 +1,6 @@
 # Tang Strategy Operating Modes
 
-- Contract schema: `operating-modes-v1`
+- Contract schema: `operating-modes-v2`
 - Status: Accepted
 - Authority source: `docs/decisions/2026-07-19-operating-modes-and-lifecycle-source.md`
 
@@ -234,6 +234,8 @@ The focused checker does not infer business behavior from unconstrained AGENTS p
 
 No fixture or offline inspection may claim a real provider fetch, broker connection, tracked-DB update, push, Pages publication, or hosted verification passed.
 
+For lifecycle subjects declaring `operating-modes-v2`, the same focused checker also enforces the strict-superset metadata, review-target commit, authority fields, and work-unit state machine in §10. V1 and legacy-v1 subjects retain their existing acceptance contract.
+
 ## 8. Data Update Verification Carrier Map
 
 This map binds the Data Update cases to current repository evidence without turning offline inspection into a real daily-run receipt.
@@ -350,3 +352,77 @@ python3 scripts/check-durable-checkpoint.py --root . --mode preflight --step sta
 python3 scripts/check-durable-checkpoint.py --root . --mode postflight --request <request.json> --baseline-receipt <receipt.json> --commit HEAD
 python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated
 ```
+
+## 10. operating-modes-v2 Schema And Work-Unit State Machine
+
+V2 is a literal strict key superset of the live v1 plan format. Schema selection is exact from `Lifecycle schema`; no key alias or hyphenated replacement is accepted. Every v2 plan uses these constrained keys in this order:
+
+```text
+- Lifecycle schema: `operating-modes-v2`
+- Status: Proposed|Active|Completed
+- Plan slug: `<unique-slug>`
+- Revision: `<stable-revision-id>`
+- Plan author ID: `<non-empty-id>`
+- Design reviews: none|`<review-path>@<approve|revise|reject>@<target-revision>`[, ...]
+- Latest design verdict: none|approve|revise|reject
+- Review independence: none|legacy-unattested|attested
+- Activation evidence: none|`user-instruction:<token>`
+- Current phase: none|phase-0|phase-1|phase-2|phase-3|phase-4|phase-5|phase-6
+- Phase state: none|not-started|in-progress|blocked|complete
+- Phase entry gate: none|`<gate-token>`
+- Next gate: `<gate-token>`
+- Implementation review: none|`<accepted-review-path>@accept`
+- Final disposition: none|Completed|Terminated|Rejected|Superseded|Archived
+- Verified implementation commit: none|`<40-hex-commit>`
+- Lifecycle reconciliation commit: none
+- Implementation start evidence: none|`user-instruction:<token>`
+- Current work unit: none|phase-0|phase-1|phase-2|phase-3|phase-4|phase-5|phase-6|remediation-1|remediation-2|...
+- Work state: none|not-started|in-progress|blocked|complete
+- Blocker evidence: none|`<repository-relative-evidence-path>`
+- Implementation reviews: none|`<review-path>@<accept|revise|reject>@<40-hex-target-commit>`[, ...]
+- Latest implementation verdict: none|accept|revise|reject
+- Checkpoint authority: none|`user-instruction:<token>`
+- Checkpoint authority mode: none|one-shot|standing
+- Checkpoint authority kinds: none|`<ordered-kind-list>`
+- Expected checkpoint kind: none|opt-record|plan-proposal|design-review|proposal-revision|activation-recording|implementation-start|phase-exit|phase-blocked|implementation-review|remediation-complete|completed-migration
+```
+
+`Implementation review` remains the v1 compatibility pointer. It is `none` through revise/reject rounds and becomes the final accepted review path plus `@accept` only when the latest verdict is `accept`. `Implementation reviews` records every round and target commit. `Verified implementation commit` equals the accepted review target. `Lifecycle reconciliation commit` is always `none`; the completed-migration trailer is non-circular evidence.
+
+A v2 review retains the nine v1 review keys in their exact order and appends exactly one final constrained key:
+
+```text
+- Review target commit: `<40-hex-commit>`
+```
+
+Design reviews target the preceding `plan-proposal` or `proposal-revision` checkpoint. Implementation reviews target the preceding `phase-exit` or `remediation-complete` checkpoint. The target is an ancestor of the review checkpoint and must carry matching subject, revision, and kind trailers.
+
+### Primary and remediation state
+
+`Current phase` and `Phase state` remain authoritative for active-index and state-block derivation. `Current work unit` and `Work state` describe the executable unit; remediation may run while primary phase remains `phase-6`.
+
+| Lifecycle point | Current phase / Phase state | Current work unit / Work state | Evidence and next gate |
+| --- | --- | --- | --- |
+| Proposed | `none / none` | `none / none` | implementation-start, blocker, and implementation-review fields are `none`; Proposed gate prefixes remain unchanged |
+| Activated, not started | `phase-0 / not-started` | `none / none` | implementation start `none`; `phase-0-start` |
+| Primary phase ready | `phase-N / not-started` | `none / none` | implementation start present; `phase-N-start` |
+| Primary phase running | `phase-N / in-progress` | `phase-N / in-progress` | blocker `none`; `phase-N-exit` |
+| Primary phase blocked | `phase-N / blocked` | `phase-N / blocked` | blocker present; `phase-N-recovery` |
+| Prior exit recorded, next phase ready | `phase-(N+1) / not-started` | `none / none` | expected checkpoint `phase-exit`; `phase-(N+1)-start` |
+| Awaiting implementation review | `phase-6 / complete` | `none / none` | blocker `none`; `implementation-review` |
+| Review revise, remediation ready | `phase-6 / in-progress` | `remediation-N / not-started` | latest verdict `revise`; `remediation-N-start` |
+| Remediation running or blocked | `phase-6 / in-progress|blocked` | `remediation-N / in-progress|blocked` | blocked requires evidence; `remediation-N-exit|remediation-N-recovery` |
+| Remediation complete, awaiting review | `phase-6 / in-progress` | `remediation-N / complete` | expected checkpoint `remediation-complete`; `implementation-review` |
+| Accepted, awaiting closeout | `phase-6 / complete` | `none / none` | latest verdict `accept`; `completed-migration` |
+
+`phase-exit` applies only to a primary `phase-N`; `remediation-complete` only to a `remediation-N`. Remediation numbers begin at 1 and increment without gaps after each structured `revise`. `Blocker evidence` is non-`none` if and only if either authoritative state is blocked. State blocks and fixed active-index rows remain v1-shaped and derive only from primary phase fields.
+
+`Phase entry gate` stays fixed for its admitted unit: activation uses `activation:user-instruction:<token>`; Phase 0 start uses the implementation-start reference; later primary phases use `phase-(N-1)-exit`; remediation uses `remediation-N:user-instruction:<token>` after the immediately preceding structured `revise`. A verdict alone never creates remediation authority.
+
+### Compatibility and migration
+
+- V1 and legacy-v1 subjects remain valid under their existing exact formats.
+- V1 Completed plans are frozen; no review metadata or checkpoint history is backfilled.
+- A Proposed v1 plan may migrate at its next revision or activation. An Active v1 plan may migrate at its next phase transition.
+- Migration retains every v1 key, adds every v2 key, derives state from the table above, and defaults authority fields to `none` unless a matching explicit user instruction exists.
+- The Durable Checkpoint governance plan that introduces this contract remains v1 for its entire proposal, review, activation, phase, implementation-review, and closeout lifecycle. The new rules are not applied retroactively to bootstrap themselves.

@@ -33,6 +33,19 @@ PLAN_KEYS = (
     "Lifecycle reconciliation commit",
 )
 
+V2_PLAN_KEYS = PLAN_KEYS + (
+    "Implementation start evidence",
+    "Current work unit",
+    "Work state",
+    "Blocker evidence",
+    "Implementation reviews",
+    "Latest implementation verdict",
+    "Checkpoint authority",
+    "Checkpoint authority mode",
+    "Checkpoint authority kinds",
+    "Expected checkpoint kind",
+)
+
 REVIEW_KEYS = (
     "Review target",
     "Review target revision",
@@ -44,6 +57,8 @@ REVIEW_KEYS = (
     "Verdict",
     "Confidence",
 )
+
+V2_REVIEW_KEYS = REVIEW_KEYS + ("Review target commit",)
 
 
 def write(root: Path, relative: str, text: str) -> None:
@@ -194,6 +209,11 @@ def build_governed_fixture(root: Path) -> None:
     )
     write(
         root,
+        "docs/decisions/2026-07-20-durable-checkpoint-governance.md",
+        "# Decision\n\n- Status: Accepted\n",
+    )
+    write(
+        root,
         "docs/README.md",
         """# Docs
 
@@ -300,6 +320,134 @@ class OperatingModesCheckerTests(unittest.TestCase):
     def replace(self, relative: str, old: str, new: str) -> None:
         path = self.root / relative
         path.write_text(path.read_text(encoding="utf-8").replace(old, new), encoding="utf-8")
+
+    def make_v2_active(self) -> str:
+        target_commit = run(["git", "rev-parse", "HEAD"], self.root).stdout.strip()
+        plan_path = "docs/exec-plans/active/demo-plan.md"
+        self.replace(plan_path, "- Lifecycle schema: `operating-modes-v1`", "- Lifecycle schema: `operating-modes-v2`")
+        self.replace(plan_path, "- Current phase: phase-1", "- Current phase: phase-2")
+        self.replace(plan_path, "- Phase state: complete", "- Phase state: not-started")
+        self.replace(plan_path, "- Phase entry gate: `phase-0-complete`", "- Phase entry gate: `phase-1-exit`")
+        self.replace(plan_path, "- Next gate: phase-2-start", "- Next gate: phase-2-start")
+        additions = (
+            "- Lifecycle reconciliation commit: none\n"
+            "- Implementation start evidence: `user-instruction:fixture-start`\n"
+            "- Current work unit: none\n"
+            "- Work state: none\n"
+            "- Blocker evidence: none\n"
+            "- Implementation reviews: none\n"
+            "- Latest implementation verdict: none\n"
+            "- Checkpoint authority: `user-instruction:fixture-checkpoint`\n"
+            "- Checkpoint authority mode: standing\n"
+            "- Checkpoint authority kinds: phase-exit,implementation-review,remediation-complete,completed-migration\n"
+            "- Expected checkpoint kind: phase-exit"
+        )
+        self.replace(plan_path, "- Lifecycle reconciliation commit: none", additions)
+        self.replace(
+            "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "- Confidence: high",
+            f"- Confidence: high\n- Review target commit: `{target_commit}`",
+        )
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "| [Demo](./demo-plan.md) | phase-1:complete |",
+            "| [Demo](./demo-plan.md) | phase-2:not-started |",
+        )
+        block = state_block("Active", "phase-2", "not-started", "phase-2-start")
+        write(self.root, "PROGRESS.md", f"# Progress\n\n{block}")
+        write(self.root, "HANDOFF.md", f"# Handoff\n\n{block}")
+        return target_commit
+
+    def set_v2_primary_state(
+        self,
+        *,
+        phase: str,
+        phase_state: str,
+        entry_gate: str,
+        next_gate: str,
+        work_unit: str,
+        work_state: str,
+        blocker: str = "none",
+        expected_kind: str,
+    ) -> None:
+        plan_path = "docs/exec-plans/active/demo-plan.md"
+        replacements = {
+            "- Current phase: phase-2": f"- Current phase: {phase}",
+            "- Phase state: not-started": f"- Phase state: {phase_state}",
+            "- Phase entry gate: `phase-1-exit`": f"- Phase entry gate: `{entry_gate}`",
+            "- Next gate: phase-2-start": f"- Next gate: {next_gate}",
+            "- Current work unit: none": f"- Current work unit: {work_unit}",
+            "- Work state: none": f"- Work state: {work_state}",
+            "- Blocker evidence: none": f"- Blocker evidence: {blocker}",
+            "- Expected checkpoint kind: phase-exit": f"- Expected checkpoint kind: {expected_kind}",
+        }
+        for old, new in replacements.items():
+            self.replace(plan_path, old, new)
+        write(
+            self.root,
+            "docs/exec-plans/active/index.md",
+            "# Active\n\n| Plan | Current phase | Evidence | Next gate |\n| --- | --- | --- | --- |\n"
+            f"| [Demo](./demo-plan.md) | {phase}:{phase_state} | [review-001](../reviews/demo-plan/review-001.md) | {next_gate} |\n",
+        )
+        block = state_block("Active", phase, phase_state, next_gate)
+        write(self.root, "PROGRESS.md", f"# Progress\n\n{block}")
+        write(self.root, "HANDOFF.md", f"# Handoff\n\n{block}")
+
+    def add_v2_implementation_review(self, verdict: str) -> tuple[str, str]:
+        target_commit = run(["git", "rev-parse", "HEAD"], self.root).stdout.strip()
+        relative = "docs/exec-plans/reviews/demo-plan/implementation-review-001.md"
+        write(
+            self.root,
+            relative,
+            f"""# Implementation Review 001
+
+- Review target: `docs/exec-plans/active/demo-plan.md`
+- Review target revision: `r1`
+- Review type: implementation
+- Reviewer ID: `reviewer-2`
+- Plan author ID: `author-1`
+- Independence declaration: `attested`
+- Evidence method: independent v2 fixture inspection
+- Verdict: {verdict}
+- Confidence: high
+- Review target commit: `{target_commit}`
+
+## Findings
+
+Fixture.
+""",
+        )
+        plan_path = "docs/exec-plans/active/demo-plan.md"
+        declared_path = "../reviews/demo-plan/implementation-review-001.md"
+        self.replace(
+            plan_path,
+            "- Implementation reviews: none",
+            f"- Implementation reviews: {declared_path}@{verdict}@{target_commit}",
+        )
+        self.replace(
+            plan_path,
+            "- Latest implementation verdict: none",
+            f"- Latest implementation verdict: {verdict}",
+        )
+        if verdict == "accept":
+            self.replace(
+                plan_path,
+                "- Implementation review: none",
+                f"- Implementation review: {declared_path}@accept",
+            )
+            self.replace(
+                plan_path,
+                "- Verified implementation commit: none",
+                f"- Verified implementation commit: `{target_commit}`",
+            )
+        write(
+            self.root,
+            "docs/exec-plans/reviews/index.md",
+            "# Reviews\n\n| Plan | Reviews | Latest verdict | Lifecycle state |\n| --- | --- | --- | --- |\n"
+            f"| [Demo](./demo-plan/) | [review-001](./demo-plan/review-001.md), "
+            f"[implementation-review-001](./demo-plan/implementation-review-001.md) | {verdict} | Active |\n",
+        )
+        return relative, target_commit
 
     def make_proposed(self) -> None:
         source = self.root / "docs/exec-plans/active/demo-plan.md"
@@ -500,6 +648,373 @@ None.
         completed, payload = self.check()
         self.assertEqual(completed.returncode, 0, payload["errors"])
         self.assertTrue(payload["passed"])
+
+    def test_valid_v2_primary_ready_fixture_passes(self) -> None:
+        self.make_v2_active()
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_valid_v2_activated_not_started_fixture_passes(self) -> None:
+        self.make_v2_active()
+        plan_path = "docs/exec-plans/active/demo-plan.md"
+        replacements = {
+            "- Current phase: phase-2": "- Current phase: phase-0",
+            "- Phase entry gate: `phase-1-exit`": "- Phase entry gate: `activation:user-instruction:fixture-activation`",
+            "- Next gate: phase-2-start": "- Next gate: phase-0-start",
+            "- Implementation start evidence: `user-instruction:fixture-start`": "- Implementation start evidence: none",
+            "- Expected checkpoint kind: phase-exit": "- Expected checkpoint kind: activation-recording",
+        }
+        for old, new in replacements.items():
+            self.replace(plan_path, old, new)
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "phase-2:not-started",
+            "phase-0:not-started",
+        )
+        self.replace("docs/exec-plans/active/index.md", "phase-2-start", "phase-0-start")
+        block = state_block("Active", "phase-0", "not-started", "phase-0-start")
+        write(self.root, "PROGRESS.md", f"# Progress\n\n{block}")
+        write(self.root, "HANDOFF.md", f"# Handoff\n\n{block}")
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_valid_v2_proposed_fixture_passes(self) -> None:
+        self.make_v2_active()
+        source = self.root / "docs/exec-plans/active/demo-plan.md"
+        target = self.root / "docs/exec-plans/proposed/demo-plan.md"
+        source.rename(target)
+        text = target.read_text(encoding="utf-8")
+        replacements = {
+            "- Status: Active": "- Status: Proposed",
+            "- Activation evidence: `user-instruction:fixture-activation`": "- Activation evidence: none",
+            "- Current phase: phase-2": "- Current phase: none",
+            "- Phase state: not-started": "- Phase state: none",
+            "- Phase entry gate: `phase-1-exit`": "- Phase entry gate: none",
+            "- Next gate: phase-2-start": "- Next gate: activation-recording",
+            "- Implementation start evidence: `user-instruction:fixture-start`": "- Implementation start evidence: none",
+            "- Expected checkpoint kind: phase-exit": "- Expected checkpoint kind: design-review",
+        }
+        for old, new in replacements.items():
+            text = text.replace(old, new)
+        target.write_text(text, encoding="utf-8")
+        write(
+            self.root,
+            "docs/exec-plans/active/index.md",
+            "# Active\n\n| Plan | Current phase | Evidence | Next gate |\n| --- | --- | --- | --- |\n| None | — | — | none |\n",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/proposed/index.md",
+            "# Proposed\n\n| Plan | Status | Review | Next gate |\n| --- | --- | --- | --- |\n"
+            "| [Demo](./demo-plan.md) | Proposed | [review-001](../reviews/demo-plan/review-001.md): approve | activation-recording |\n",
+        )
+        self.replace("docs/exec-plans/reviews/index.md", "| approve | Active |", "| approve | Proposed |")
+        write(
+            self.root,
+            "docs/exec-plans/roadmap.md",
+            "# Roadmap\n\n[Proposed](./proposed/index.md) [Active](./active/index.md) "
+            "[Completed](./completed/index.md) [Reviews](./reviews/index.md)\n\n"
+            "## Active Plans\n\nNone.\n\n## Proposed Plans\n\n"
+            "- [Demo](./proposed/demo-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)\n\n"
+            "## Completed Plans\n\nNone.\n",
+        )
+        block = state_block("Proposed", "none", "none", "activation-recording")
+        write(self.root, "PROGRESS.md", f"# Progress\n\n{block}")
+        write(self.root, "HANDOFF.md", f"# Handoff\n\n{block}")
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_v2_requires_every_strict_superset_key(self) -> None:
+        self.make_v2_active()
+        self.replace(
+            "docs/exec-plans/active/demo-plan.md",
+            "- Current work unit: none\n",
+            "",
+        )
+        self.assert_error("missing required keys: Current work unit")
+
+    def test_v2_rejects_hyphenated_key_alias(self) -> None:
+        self.make_v2_active()
+        self.replace(
+            "docs/exec-plans/active/demo-plan.md",
+            "- Current work unit: none",
+            "- Current-work-unit: none",
+        )
+        self.assert_error("missing required keys: Current work unit")
+
+    def test_v2_requires_exact_key_order(self) -> None:
+        self.make_v2_active()
+        self.replace(
+            "docs/exec-plans/active/demo-plan.md",
+            "- Current work unit: none\n- Work state: none",
+            "- Work state: none\n- Current work unit: none",
+        )
+        self.assert_error("exact required order")
+
+    def test_v2_review_requires_target_commit(self) -> None:
+        self.make_v2_active()
+        path = "docs/exec-plans/reviews/demo-plan/review-001.md"
+        text = (self.root / path).read_text(encoding="utf-8")
+        text = "\n".join(line for line in text.splitlines() if not line.startswith("- Review target commit:")) + "\n"
+        write(self.root, path, text)
+        self.assert_error("Review target commit")
+
+    def test_v2_rejects_malformed_review_target_commit(self) -> None:
+        self.make_v2_active()
+        path = "docs/exec-plans/reviews/demo-plan/review-001.md"
+        text = (self.root / path).read_text(encoding="utf-8")
+        text = re_sub = text.replace(
+            next(line for line in text.splitlines() if line.startswith("- Review target commit:")),
+            "- Review target commit: `not-a-commit`",
+        )
+        write(self.root, path, re_sub)
+        self.assert_error("invalid Review target commit")
+
+    def test_v2_authority_triplet_fails_closed(self) -> None:
+        self.make_v2_active()
+        self.replace(
+            "docs/exec-plans/active/demo-plan.md",
+            "- Checkpoint authority: `user-instruction:fixture-checkpoint`",
+            "- Checkpoint authority: none",
+        )
+        self.assert_error("none authority requires none mode and kinds")
+
+    def test_valid_v2_primary_running_fixture_passes(self) -> None:
+        self.make_v2_active()
+        self.set_v2_primary_state(
+            phase="phase-2",
+            phase_state="in-progress",
+            entry_gate="phase-1-exit",
+            next_gate="phase-2-exit",
+            work_unit="phase-2",
+            work_state="in-progress",
+            expected_kind="phase-exit",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_v2_blocked_state_requires_blocker_evidence(self) -> None:
+        self.make_v2_active()
+        self.set_v2_primary_state(
+            phase="phase-2",
+            phase_state="blocked",
+            entry_gate="phase-1-exit",
+            next_gate="phase-2-recovery",
+            work_unit="phase-2",
+            work_state="blocked",
+            expected_kind="phase-blocked",
+        )
+        self.assert_error("Blocker evidence must be non-none")
+
+    def test_valid_v2_blocked_state_passes_with_evidence(self) -> None:
+        self.make_v2_active()
+        write(self.root, "docs/exec-plans/reviews/demo-plan/evidence/blocker.md", "# Blocker\n")
+        self.set_v2_primary_state(
+            phase="phase-2",
+            phase_state="blocked",
+            entry_gate="phase-1-exit",
+            next_gate="phase-2-recovery",
+            work_unit="phase-2",
+            work_state="blocked",
+            blocker="docs/exec-plans/reviews/demo-plan/evidence/blocker.md",
+            expected_kind="phase-blocked",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_v2_rejects_invalid_phase_work_cross_product(self) -> None:
+        self.make_v2_active()
+        self.set_v2_primary_state(
+            phase="phase-2",
+            phase_state="in-progress",
+            entry_gate="phase-1-exit",
+            next_gate="phase-2-exit",
+            work_unit="phase-3",
+            work_state="in-progress",
+            expected_kind="phase-exit",
+        )
+        self.assert_error("invalid operating-modes-v2 work-unit state combination")
+
+    def test_valid_v2_awaiting_implementation_review_passes(self) -> None:
+        self.make_v2_active()
+        self.set_v2_primary_state(
+            phase="phase-6",
+            phase_state="complete",
+            entry_gate="phase-5-exit",
+            next_gate="implementation-review",
+            work_unit="none",
+            work_state="none",
+            expected_kind="phase-exit",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_valid_v2_remediation_ready_fixture_passes(self) -> None:
+        self.make_v2_active()
+        self.add_v2_implementation_review("revise")
+        self.set_v2_primary_state(
+            phase="phase-6",
+            phase_state="in-progress",
+            entry_gate="remediation-1:user-instruction:fixture-remediation",
+            next_gate="remediation-1-start",
+            work_unit="remediation-1",
+            work_state="not-started",
+            expected_kind="implementation-review",
+        )
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "[review-001](../reviews/demo-plan/review-001.md)",
+            "[implementation-review-001](../reviews/demo-plan/implementation-review-001.md)",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_valid_v2_remediation_running_fixture_passes(self) -> None:
+        self.make_v2_active()
+        self.add_v2_implementation_review("revise")
+        self.set_v2_primary_state(
+            phase="phase-6",
+            phase_state="in-progress",
+            entry_gate="remediation-1:user-instruction:fixture-remediation",
+            next_gate="remediation-1-exit",
+            work_unit="remediation-1",
+            work_state="in-progress",
+            expected_kind="implementation-review",
+        )
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "[review-001](../reviews/demo-plan/review-001.md)",
+            "[implementation-review-001](../reviews/demo-plan/implementation-review-001.md)",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_valid_v2_remediation_blocked_fixture_passes(self) -> None:
+        self.make_v2_active()
+        self.add_v2_implementation_review("revise")
+        write(self.root, "docs/exec-plans/reviews/demo-plan/evidence/remediation-blocker.md", "# Blocker\n")
+        self.set_v2_primary_state(
+            phase="phase-6",
+            phase_state="blocked",
+            entry_gate="remediation-1:user-instruction:fixture-remediation",
+            next_gate="remediation-1-recovery",
+            work_unit="remediation-1",
+            work_state="blocked",
+            blocker="docs/exec-plans/reviews/demo-plan/evidence/remediation-blocker.md",
+            expected_kind="phase-blocked",
+        )
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "[review-001](../reviews/demo-plan/review-001.md)",
+            "[implementation-review-001](../reviews/demo-plan/implementation-review-001.md)",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_valid_v2_remediation_complete_fixture_passes(self) -> None:
+        self.make_v2_active()
+        self.add_v2_implementation_review("revise")
+        self.set_v2_primary_state(
+            phase="phase-6",
+            phase_state="in-progress",
+            entry_gate="remediation-1:user-instruction:fixture-remediation",
+            next_gate="implementation-review",
+            work_unit="remediation-1",
+            work_state="complete",
+            expected_kind="remediation-complete",
+        )
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "[review-001](../reviews/demo-plan/review-001.md)",
+            "[implementation-review-001](../reviews/demo-plan/implementation-review-001.md)",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_v2_remediation_number_must_follow_revise_count(self) -> None:
+        self.make_v2_active()
+        self.add_v2_implementation_review("revise")
+        self.set_v2_primary_state(
+            phase="phase-6",
+            phase_state="in-progress",
+            entry_gate="remediation-2:user-instruction:fixture-remediation",
+            next_gate="remediation-2-start",
+            work_unit="remediation-2",
+            work_state="not-started",
+            expected_kind="implementation-review",
+        )
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "[review-001](../reviews/demo-plan/review-001.md)",
+            "[implementation-review-001](../reviews/demo-plan/implementation-review-001.md)",
+        )
+        self.assert_error("remediation numbering/verdict is not sequential")
+
+    def test_valid_v2_accepted_active_fixture_passes(self) -> None:
+        self.make_v2_active()
+        self.add_v2_implementation_review("accept")
+        self.set_v2_primary_state(
+            phase="phase-6",
+            phase_state="complete",
+            entry_gate="phase-5-exit",
+            next_gate="completed-migration",
+            work_unit="none",
+            work_state="none",
+            expected_kind="implementation-review",
+        )
+        self.replace(
+            "docs/exec-plans/active/index.md",
+            "[review-001](../reviews/demo-plan/review-001.md)",
+            "[implementation-review-001](../reviews/demo-plan/implementation-review-001.md)",
+        )
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
+
+    def test_valid_v2_completed_fixture_passes(self) -> None:
+        self.make_v2_active()
+        _review, target_commit = self.add_v2_implementation_review("accept")
+        source = self.root / "docs/exec-plans/active/demo-plan.md"
+        target = self.root / "docs/exec-plans/completed/demo-plan.md"
+        source.rename(target)
+        replacements = {
+            "- Status: Active": "- Status: Completed",
+            "- Current phase: phase-2": "- Current phase: none",
+            "- Phase state: not-started": "- Phase state: none",
+            "- Phase entry gate: `phase-1-exit`": "- Phase entry gate: none",
+            "- Next gate: phase-2-start": "- Next gate: closed",
+            "- Final disposition: none": "- Final disposition: Completed",
+            "- Expected checkpoint kind: phase-exit": "- Expected checkpoint kind: completed-migration",
+        }
+        text = target.read_text(encoding="utf-8")
+        for old, new in replacements.items():
+            text = text.replace(old, new)
+        target.write_text(text, encoding="utf-8")
+        write(
+            self.root,
+            "docs/exec-plans/active/index.md",
+            "# Active\n\n| Plan | Current phase | Evidence | Next gate |\n| --- | --- | --- | --- |\n| None | — | — | none |\n",
+        )
+        write(
+            self.root,
+            "docs/exec-plans/completed/index.md",
+            "# Completed\n\n| Plan | Disposition | Verification | Final commit |\n| --- | --- | --- | --- |\n"
+            f"| [Demo](./demo-plan.md) | Completed | [implementation-review-001](../reviews/demo-plan/implementation-review-001.md) | {target_commit} |\n",
+        )
+        self.replace("docs/exec-plans/reviews/index.md", "| Active |", "| Completed |")
+        write(
+            self.root,
+            "docs/exec-plans/roadmap.md",
+            "# Roadmap\n\n[Proposed](./proposed/index.md) [Active](./active/index.md) "
+            "[Completed](./completed/index.md) [Reviews](./reviews/index.md)\n\n"
+            "## Active Plans\n\nNone.\n\n## Proposed Plans\n\nNone.\n\n## Completed Plans\n\n"
+            "- [Demo](./completed/demo-plan.md) — Completed; canonical details: "
+            "[completed index](./completed/index.md)\n",
+        )
+        block = state_block("Completed", "none", "none", "closed")
+        write(self.root, "PROGRESS.md", f"# Progress\n\n{block}")
+        write(self.root, "HANDOFF.md", f"# Handoff\n\n{block}")
+        completed, payload = self.check()
+        self.assertEqual(completed.returncode, 0, payload["errors"])
 
     def test_duplicate_slug_across_directories_fails(self) -> None:
         shutil.copy2(

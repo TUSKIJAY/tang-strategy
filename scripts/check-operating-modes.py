@@ -39,6 +39,19 @@ PLAN_KEYS = (
     "Lifecycle reconciliation commit",
 )
 
+V2_PLAN_KEYS = PLAN_KEYS + (
+    "Implementation start evidence",
+    "Current work unit",
+    "Work state",
+    "Blocker evidence",
+    "Implementation reviews",
+    "Latest implementation verdict",
+    "Checkpoint authority",
+    "Checkpoint authority mode",
+    "Checkpoint authority kinds",
+    "Expected checkpoint kind",
+)
+
 REVIEW_KEYS = (
     "Review target",
     "Review target revision",
@@ -49,6 +62,22 @@ REVIEW_KEYS = (
     "Evidence method",
     "Verdict",
     "Confidence",
+)
+
+V2_REVIEW_KEYS = REVIEW_KEYS + ("Review target commit",)
+
+CHECKPOINT_KINDS = (
+    "opt-record",
+    "plan-proposal",
+    "design-review",
+    "proposal-revision",
+    "activation-recording",
+    "implementation-start",
+    "phase-exit",
+    "phase-blocked",
+    "implementation-review",
+    "remediation-complete",
+    "completed-migration",
 )
 
 STATE_BLOCK_KEYS = (
@@ -69,6 +98,7 @@ REQUIRED_PATHS = (
     "docs/README.md",
     "docs/operating-modes.md",
     "docs/decisions/2026-07-19-operating-modes-and-lifecycle-source.md",
+    "docs/decisions/2026-07-20-durable-checkpoint-governance.md",
     "docs/exec-plans/plan-template.md",
     "docs/exec-plans/proposed/index.md",
     "docs/exec-plans/active/index.md",
@@ -83,6 +113,8 @@ REQUIRED_PATHS = (
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 GATE_RE = re.compile(r"^[A-Za-z0-9._:@/-]+$")
 ACTIVATION_RE = re.compile(r"^user-instruction:[A-Za-z0-9][A-Za-z0-9._:@/-]*$")
+DURABLE_AUTHORITY_RE = re.compile(r"^user-instruction:[a-z0-9][a-z0-9._/-]{0,127}$")
+WORK_UNIT_RE = re.compile(r"(?:phase-[0-6]|remediation-[1-9][0-9]*)$")
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 LINK_RE = re.compile(r"\[([^]]+)\]\(([^)]+)\)")
 LEGACY_GIT_KEY_RE = re.compile(
@@ -962,10 +994,16 @@ def discover_plans(root: Path, errors: list[str]) -> list[Plan]:
             )
             plan = Plan(path=path, directory_state=directory, metadata=metadata)
             plans.append(plan)
-            missing = [key for key in PLAN_KEYS if key not in metadata]
+            required_keys = V2_PLAN_KEYS if plan.schema == "operating-modes-v2" else PLAN_KEYS
+            missing = [key for key in required_keys if key not in metadata]
             if missing:
                 errors.append(
                     f"plan metadata: {path.relative_to(root)} missing required keys: {', '.join(missing)}"
+                )
+            present_required = [key for key in metadata if key in required_keys]
+            if plan.schema == "operating-modes-v2" and present_required != list(required_keys):
+                errors.append(
+                    f"plan metadata: {path.relative_to(root)} v2 constrained keys must use the exact required order"
                 )
             if plan.status and plan.status != expected_status:
                 errors.append(
@@ -992,7 +1030,7 @@ def discover_plans(root: Path, errors: list[str]) -> list[Plan]:
 def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
     meta = {key: clean_value(value) for key, value in plan.metadata.items()}
     relative = plan.path.relative_to(root)
-    if plan.schema not in {"operating-modes-v1", "operating-modes-legacy-v1"}:
+    if plan.schema not in {"operating-modes-v1", "operating-modes-v2", "operating-modes-legacy-v1"}:
         errors.append(f"plan schema: {relative} unsupported Lifecycle schema={plan.schema!r}")
     if plan.schema == "operating-modes-legacy-v1" and plan.directory_state != "completed":
         errors.append(f"plan schema: {relative} legacy schema is allowed only in completed/")
@@ -1042,7 +1080,7 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
                 f"plan reviews: {relative} Design reviews=none requires Latest design verdict=none "
                 "and Review independence=none"
             )
-    elif plan.schema == "operating-modes-v1" and independence != "attested":
+    elif plan.schema in {"operating-modes-v1", "operating-modes-v2"} and independence != "attested":
         errors.append(
             f"plan reviews: {relative} new-schema plans with design reviews require "
             "Review independence=attested"
@@ -1104,7 +1142,7 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
             errors.append(f"plan state: {relative} Active plan lacks phase, phase state, or phase entry gate")
         if meta.get("Next gate") == "none":
             errors.append(f"plan state: {relative} Active plan Next gate must be non-none")
-        if disposition != "none" or implementation != "none":
+        if disposition != "none" or (implementation != "none" and plan.schema != "operating-modes-v2"):
             errors.append(f"plan state: {relative} Active plan must not have final disposition or implementation review")
     elif plan.directory_state == "completed":
         if disposition == "none":
@@ -1116,6 +1154,224 @@ def validate_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
         )
         if implemented:
             validate_implementation_review(root, plan, implementation, errors)
+
+    if plan.schema == "operating-modes-v2":
+        validate_v2_plan_metadata(plan, root, errors)
+
+
+def parse_implementation_reviews(
+    value: str, relative: Path, errors: list[str]
+) -> list[tuple[str, str, str]]:
+    cleaned = clean_value(value)
+    if cleaned == "none" or not cleaned:
+        return []
+    results: list[tuple[str, str, str]] = []
+    for raw_item in cleaned.split(","):
+        item = clean_value(raw_item)
+        parts = item.rsplit("@", 2)
+        if (
+            len(parts) != 3
+            or parts[1] not in {"accept", "revise", "reject"}
+            or not parts[0]
+            or not COMMIT_RE.fullmatch(parts[2])
+        ):
+            errors.append(f"plan reviews: {relative} invalid Implementation reviews entry={item!r}")
+            continue
+        results.append((parts[0], parts[1], parts[2]))
+    return results
+
+
+def validate_v2_plan_metadata(plan: Plan, root: Path, errors: list[str]) -> None:
+    meta = {key: clean_value(value) for key, value in plan.metadata.items()}
+    relative = plan.path.relative_to(root)
+
+    implementation_start = meta.get("Implementation start evidence", "")
+    if implementation_start != "none" and not ACTIVATION_RE.fullmatch(implementation_start):
+        errors.append(
+            f"plan metadata: {relative} Implementation start evidence must be none or user-instruction"
+        )
+
+    work_unit = meta.get("Current work unit", "")
+    if work_unit != "none" and not WORK_UNIT_RE.fullmatch(work_unit):
+        errors.append(f"plan metadata: {relative} invalid Current work unit={work_unit!r}")
+    work_state = meta.get("Work state", "")
+    if work_state not in {"none", "not-started", "in-progress", "blocked", "complete"}:
+        errors.append(f"plan metadata: {relative} invalid Work state={work_state!r}")
+
+    blocker = meta.get("Blocker evidence", "")
+    blocked = meta.get("Phase state") == "blocked" or work_state == "blocked"
+    if blocked != (blocker != "none"):
+        errors.append(f"plan state: {relative} Blocker evidence must be non-none iff a state is blocked")
+    if blocker != "none":
+        blocker_path = resolve_inside(root, plan.path.parent, blocker, "blocker evidence", errors)
+        if blocker_path is None or not blocker_path.is_file():
+            errors.append(f"blocker evidence: {relative} referenced evidence does not exist: {blocker}")
+
+    reviews = parse_implementation_reviews(meta.get("Implementation reviews", ""), relative, errors)
+    latest = meta.get("Latest implementation verdict", "")
+    if latest not in {"none", "accept", "revise", "reject"}:
+        errors.append(f"plan metadata: {relative} invalid Latest implementation verdict={latest!r}")
+    if reviews:
+        if latest != reviews[-1][1]:
+            errors.append(
+                f"plan reviews: {relative} Latest implementation verdict={latest!r} does not match "
+                f"final structured review verdict={reviews[-1][1]!r}"
+            )
+    elif meta.get("Implementation reviews") != "none" or latest != "none":
+        errors.append(
+            f"plan reviews: {relative} no structured implementation reviews requires both fields none"
+        )
+
+    for raw_path, verdict, target_commit in reviews:
+        review_path = resolve_inside(root, plan.path.parent, raw_path, "implementation review", errors)
+        if review_path is None or not review_path.is_file():
+            errors.append(f"implementation review: {relative} referenced review does not exist: {raw_path}")
+            continue
+        validate_review(
+            root,
+            plan,
+            review_path,
+            verdict,
+            plan.revision,
+            errors,
+            expected_type="implementation",
+            allow_legacy=False,
+        )
+        review_meta = {
+            key: clean_value(value)
+            for key, value in parse_header_bullets(read_text(review_path, "review", errors)).items()
+        }
+        if review_meta.get("Review target commit") != target_commit:
+            errors.append(
+                f"review target commit: {review_path.relative_to(root)} metadata does not match plan declaration"
+            )
+
+    compatibility_review = meta.get("Implementation review", "")
+    verified_commit = meta.get("Verified implementation commit", "")
+    if latest == "accept" and reviews:
+        expected_pointer = f"{reviews[-1][0]}@accept"
+        if compatibility_review != expected_pointer:
+            errors.append(
+                f"plan reviews: {relative} accepted v2 plan requires Implementation review={expected_pointer!r}"
+            )
+        if verified_commit != reviews[-1][2]:
+            errors.append(
+                f"plan reviews: {relative} Verified implementation commit must equal accepted review target"
+            )
+    else:
+        if compatibility_review != "none":
+            errors.append(f"plan reviews: {relative} non-accepted v2 plan requires Implementation review=none")
+        if verified_commit != "none":
+            errors.append(f"plan reviews: {relative} non-accepted v2 plan requires Verified implementation commit=none")
+    if meta.get("Lifecycle reconciliation commit") != "none":
+        errors.append(f"plan metadata: {relative} v2 Lifecycle reconciliation commit must be none")
+
+    authority = meta.get("Checkpoint authority", "")
+    authority_mode = meta.get("Checkpoint authority mode", "")
+    raw_kinds = meta.get("Checkpoint authority kinds", "")
+    if authority == "none":
+        if authority_mode != "none" or raw_kinds != "none":
+            errors.append(f"plan authority: {relative} none authority requires none mode and kinds")
+    else:
+        if not DURABLE_AUTHORITY_RE.fullmatch(authority):
+            errors.append(f"plan authority: {relative} invalid Checkpoint authority={authority!r}")
+        if authority_mode not in {"one-shot", "standing"}:
+            errors.append(f"plan authority: {relative} invalid Checkpoint authority mode={authority_mode!r}")
+        kinds = raw_kinds.split(",") if raw_kinds else []
+        ordered = [kind for kind in CHECKPOINT_KINDS if kind in kinds]
+        if not kinds or kinds != ordered or len(kinds) != len(set(kinds)):
+            errors.append(
+                f"plan authority: {relative} Checkpoint authority kinds must be ordered, valid, and unique"
+            )
+
+    expected_kind = meta.get("Expected checkpoint kind", "")
+    if expected_kind not in {"none", *CHECKPOINT_KINDS}:
+        errors.append(f"plan metadata: {relative} invalid Expected checkpoint kind={expected_kind!r}")
+
+    phase = meta.get("Current phase", "")
+    phase_state = meta.get("Phase state", "")
+    next_gate = meta.get("Next gate", "")
+    entry_gate = meta.get("Phase entry gate", "")
+    if plan.directory_state == "proposed":
+        if any(
+            value != "none"
+            for value in (implementation_start, work_unit, work_state, blocker, meta.get("Implementation reviews"), latest)
+        ):
+            errors.append(f"plan state: {relative} Proposed v2 plan has implementation/work state")
+        return
+
+    if plan.directory_state == "completed":
+        if phase != "none" or phase_state != "none" or work_unit != "none" or work_state != "none":
+            errors.append(f"plan state: {relative} Completed v2 plan requires no current phase/work unit")
+        if meta.get("Final disposition") == "Completed":
+            if implementation_start == "none" or latest != "accept":
+                errors.append(f"plan state: {relative} implemented Completed v2 plan requires start and accept")
+            if expected_kind != "completed-migration" or next_gate != "closed":
+                errors.append(
+                    f"plan state: {relative} implemented Completed v2 plan requires completed-migration/closed"
+                )
+        return
+
+    legal = False
+    expected_entry: str | None = None
+    if (
+        phase == "phase-0"
+        and phase_state == "not-started"
+        and implementation_start == "none"
+        and work_unit == "none"
+        and work_state == "none"
+        and next_gate == "phase-0-start"
+    ):
+        legal = True
+        if not entry_gate.startswith("activation:user-instruction:"):
+            errors.append(f"plan state: {relative} activated v2 plan requires activation entry gate")
+        if expected_kind != "activation-recording":
+            errors.append(f"plan state: {relative} activated v2 plan requires activation-recording checkpoint")
+    elif phase_state == "not-started" and work_unit == "none" and work_state == "none":
+        legal = implementation_start != "none" and next_gate == f"{phase}-start"
+        phase_number = int(phase.rsplit("-", 1)[1]) if re.fullmatch(r"phase-[0-6]", phase) else -1
+        expected_entry = implementation_start if phase_number == 0 else f"phase-{phase_number - 1}-exit"
+        if expected_kind != ("implementation-start" if phase_number == 0 else "phase-exit"):
+            errors.append(f"plan state: {relative} primary ready state has wrong Expected checkpoint kind")
+    elif work_unit == phase and work_state == phase_state and phase_state in {"in-progress", "blocked"}:
+        legal = implementation_start != "none"
+        suffix = "recovery" if phase_state == "blocked" else "exit"
+        legal = legal and next_gate == f"{phase}-{suffix}"
+        phase_number = int(phase.rsplit("-", 1)[1]) if re.fullmatch(r"phase-[0-6]", phase) else -1
+        expected_entry = implementation_start if phase_number == 0 else f"phase-{phase_number - 1}-exit"
+        expected_for_state = "phase-blocked" if phase_state == "blocked" else (
+            "implementation-start" if phase_number == 0 else "phase-exit"
+        )
+        if expected_kind != expected_for_state:
+            errors.append(f"plan state: {relative} primary active state has wrong Expected checkpoint kind")
+    elif phase == "phase-6" and phase_state == "complete" and work_unit == "none" and work_state == "none":
+        legal = next_gate in {"implementation-review", "completed-migration"}
+        if latest == "accept":
+            legal = legal and next_gate == "completed-migration" and expected_kind == "implementation-review"
+        else:
+            legal = legal and next_gate == "implementation-review" and expected_kind == "phase-exit"
+    elif phase == "phase-6" and work_unit.startswith("remediation-"):
+        remediation_number = int(work_unit.rsplit("-", 1)[1])
+        revise_count = sum(1 for _, verdict, _ in reviews if verdict == "revise")
+        if not re.fullmatch(rf"{re.escape(work_unit)}:user-instruction:[A-Za-z0-9][A-Za-z0-9._:@/-]*", entry_gate):
+            errors.append(f"plan state: {relative} remediation requires a dedicated user-instruction entry gate")
+        if remediation_number != revise_count or latest != "revise":
+            errors.append(f"plan state: {relative} remediation numbering/verdict is not sequential")
+        if work_state == "not-started" and phase_state == "in-progress":
+            legal = next_gate == f"{work_unit}-start" and expected_kind == "implementation-review"
+        elif work_state in {"in-progress", "blocked"} and phase_state in {"in-progress", "blocked"}:
+            suffix = "recovery" if work_state == "blocked" else "exit"
+            legal = next_gate == f"{work_unit}-{suffix}"
+            legal = legal and expected_kind == ("phase-blocked" if work_state == "blocked" else "implementation-review")
+        elif work_state == "complete" and phase_state == "in-progress":
+            legal = next_gate == "implementation-review" and expected_kind == "remediation-complete"
+
+    if expected_entry is not None and entry_gate != expected_entry:
+        errors.append(
+            f"plan state: {relative} Phase entry gate={entry_gate!r} expected {expected_entry!r}"
+        )
+    if not legal:
+        errors.append(f"plan state: {relative} invalid operating-modes-v2 work-unit state combination")
 
 
 def parse_design_reviews(value: str, relative: Path, errors: list[str]) -> list[tuple[str, str, str]]:
@@ -1160,12 +1416,13 @@ def validate_review(
             f"review path: {relative} must be a direct Markdown artifact under "
             f"docs/exec-plans/reviews/{plan.slug}/"
         )
-    present = [key for key in REVIEW_KEYS if key in metadata]
+    required_review_keys = V2_REVIEW_KEYS if plan.schema == "operating-modes-v2" else REVIEW_KEYS
+    present = [key for key in required_review_keys if key in metadata]
     if not present:
         if not allow_legacy:
             errors.append(f"review metadata: {relative} lacks constrained reviewer fields")
         return False
-    missing = [key for key in REVIEW_KEYS if key not in metadata]
+    missing = [key for key in required_review_keys if key not in metadata]
     if missing:
         if not allow_legacy:
             errors.append(f"review metadata: {relative} missing required keys: {', '.join(missing)}")
@@ -1209,6 +1466,13 @@ def validate_review(
             f"review author: {relative} Plan author ID={metadata['Plan author ID']!r} "
             f"does not match plan={plan_author!r}"
         )
+    if plan.schema == "operating-modes-v2":
+        ordered = [key for key in metadata if key in required_review_keys]
+        if ordered != list(required_review_keys):
+            errors.append(f"review metadata: {relative} v2 constrained keys must use the exact required order")
+        target_commit = metadata.get("Review target commit", "")
+        if not COMMIT_RE.fullmatch(target_commit):
+            errors.append(f"review metadata: {relative} invalid Review target commit={target_commit!r}")
     return not missing
 
 
@@ -1729,9 +1993,9 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
     contract_path = root / "docs" / "operating-modes.md"
     if contract_path.is_file():
         contract_text = operative_markdown_text(read_text(contract_path, "contract route", errors))
-        if "operating-modes-v1" not in contract_text:
+        if "operating-modes-v1" not in contract_text and "operating-modes-v2" not in contract_text:
             errors.append(
-                "contract route: docs/operating-modes.md does not declare operating-modes-v1 "
+                "contract route: docs/operating-modes.md does not declare a supported operating-modes schema "
                 "outside comments or fenced examples"
             )
     plan_template = root / "docs" / "exec-plans" / "plan-template.md"
@@ -1741,7 +2005,9 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
             duplicate_errors=errors,
             label="plan template",
         )
-        missing = [key for key in PLAN_KEYS if key not in metadata]
+        template_schema = clean_value(metadata.get("Lifecycle schema", ""))
+        template_keys = V2_PLAN_KEYS if template_schema == "operating-modes-v2" else PLAN_KEYS
+        missing = [key for key in template_keys if key not in metadata]
         if missing:
             errors.append(f"plan template: missing constrained keys: {', '.join(missing)}")
     review_template = root / "docs" / "exec-plans" / "reviews" / "review-template.md"
@@ -1751,7 +2017,8 @@ def check_required_contract(root: Path, errors: list[str]) -> list[dict[str, Any
             duplicate_errors=errors,
             label="review template",
         )
-        missing = [key for key in REVIEW_KEYS if key not in metadata]
+        template_keys = V2_REVIEW_KEYS if "Review target commit" in metadata else REVIEW_KEYS
+        missing = [key for key in template_keys if key not in metadata]
         if missing:
             errors.append(f"review template: missing constrained keys: {', '.join(missing)}")
     canonical_command = "python3 scripts/check-project-harness.py --root . --profile governed"
