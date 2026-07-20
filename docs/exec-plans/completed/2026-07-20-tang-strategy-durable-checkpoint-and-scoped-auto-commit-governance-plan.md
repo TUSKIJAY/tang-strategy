@@ -16,11 +16,11 @@
 - Implementation review: ../reviews/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan/implementation-review-001.md@accept
 - Final disposition: Completed
 - Verified implementation commit: 61ea580f0b284d835c79cd47130104b90a04d2f2
-- Lifecycle reconciliation commit: none
+- Lifecycle reconciliation commit: 96166a51561ea75f4a6bcad9de9f97fdb7ff2e1d
 - Owner: Codex
 - Created: 2026-07-20
 - Activated: 2026-07-20
-- Scope authority: implementation and accepted lifecycle closeout completed under the named instructions; standing plan-scoped local commit authority remains valid only for the final v1 reconciliation-boundary recording, with no push, PR, merge, Pages publication, provider/broker access, tracked data write, hosted verification, or remote administration authority
+- Scope authority: implementation and accepted lifecycle closeout completed under the named instructions; the standing plan-scoped local commit authority is consumed after recording reconciliation boundary `96166a51561ea75f4a6bcad9de9f97fdb7ff2e1d`; no push, PR, merge, Pages publication, provider/broker access, tracked data write, hosted verification, or remote administration authority
 
 ## 1. Context And Evidence
 
