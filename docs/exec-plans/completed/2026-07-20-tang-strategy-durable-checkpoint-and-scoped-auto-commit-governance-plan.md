@@ -1,7 +1,7 @@
 # Tang Strategy Durable Checkpoint And Scoped Local Commit Governance
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan`
 - Revision: `v2-review-foldback-2026-07-20`
 - Plan author ID: `codex-plan-author-2026-07-20-durable-checkpoint`
@@ -9,18 +9,18 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-20-activate-durable-checkpoint-governance`
-- Current phase: phase-6
-- Phase state: complete
-- Phase entry gate: `phase-5-exit`
-- Next gate: `implementation-review`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: `closed`
+- Implementation review: ../reviews/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: 61ea580f0b284d835c79cd47130104b90a04d2f2
 - Lifecycle reconciliation commit: none
 - Owner: Codex
 - Created: 2026-07-20
 - Activated: 2026-07-20
-- Scope authority: full implementation and lifecycle closeout under `user-instruction:2026-07-20-execute-durable-checkpoint-governance-plan`, with standing plan-scoped local commit authority under `user-instruction:2026-07-20-standing-durable-checkpoint-plan-local-commits`; no push, PR, merge, Pages publication, provider/broker access, tracked data write, hosted verification, or remote administration authority
+- Scope authority: implementation and accepted lifecycle closeout completed under the named instructions; standing plan-scoped local commit authority remains valid only for the final v1 reconciliation-boundary recording, with no push, PR, merge, Pages publication, provider/broker access, tracked data write, hosted verification, or remote administration authority
 
 ## 1. Context And Evidence
 

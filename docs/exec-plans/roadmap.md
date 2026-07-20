@@ -40,7 +40,7 @@ v1 through implementation review and closeout.
 
 ## Active Plans
 
-- [Tang Strategy Durable Checkpoint And Scoped Local Commit Governance](./active/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md) — Active; canonical details: [active index](./active/index.md)
+None.
 
 ## Proposed Plans
 
@@ -52,3 +52,4 @@ v1 through implementation review and closeout.
 - [2026-07-19 Tang Strategy Coding And Data Update Modes](./completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [2026-07-19 Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor](./completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Review Workspaces And Trader Point Editing](./completed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
+- [Tang Strategy Durable Checkpoint And Scoped Local Commit Governance](./completed/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
