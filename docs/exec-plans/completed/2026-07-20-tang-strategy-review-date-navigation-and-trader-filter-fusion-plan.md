@@ -25,7 +25,7 @@
 - Latest implementation verdict: accept
 - Checkpoint authority: `user-instruction:2026-07-21-repair-review-date-filter-checkpoints-and-activate`
 - Checkpoint authority mode: standing
-- Checkpoint authority kinds: design-review,proposal-revision,activation-recording,implementation-start,phase-exit,implementation-review,completed-migration
+- Checkpoint authority kinds: design-review,proposal-revision,activation-recording,implementation-start,phase-exit,implementation-review,remediation-complete,completed-migration
 - Expected checkpoint kind: completed-migration
 - Owner: Codex
 - Created: 2026-07-20
