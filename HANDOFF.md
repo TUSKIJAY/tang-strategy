@@ -5,9 +5,9 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Current phase: `phase-6`
+- Phase state: `in-progress`
+- Next gate: `implementation-review-packet`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-20
@@ -15,8 +15,8 @@
 - Harness profile: `governed`
 - Latest optimization intake: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/` (record + `screenshots/`) is `promoted-to-proposed`. OPT-004 remains **user-locked A terminal-first**; OPT-001 peer nav and OPT-003 trade-panel fusion use that palette; OPT-002 resolves to an inline admin create draft with user-entered stable lowercase `trader_id`. Evidence remains under the batch's `screenshots/`.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
-- Current active plan (focus): `docs/exec-plans/active/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md`, title `Tang Strategy Durable Checkpoint And Scoped Local Commit Governance`, revision `v2-review-foldback-2026-07-20` (reviewed SHA-256 `46e6b3fb2276c9838d289b6b070fa9d3d426a478fd65e71888f2ae0690050702`), status `Active`, `review-001@revise/high`@v1 append-only, matching-revision `review-002@approve/high`@v2, activation evidence `user-instruction:2026-07-20-activate-durable-checkpoint-governance`, phase `phase-0:not-started`, next gate `phase-0-start`.
-- Durable governance authority: activation recording is complete and consumed. It did not start Phase 0 and grants no implementation, local Git, push/PR/merge, data/provider/broker, Pages/hosted, or remote authority. Phase 0 needs a separate explicit implementation-start instruction and must first prove every shared lifecycle/governance manifest path clean or absent; current Terminal UI/optimization dirt may require owner resolution before that gate can pass.
+- Current active plan (focus): `docs/exec-plans/active/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md`, title `Tang Strategy Durable Checkpoint And Scoped Local Commit Governance`, revision `v2-review-foldback-2026-07-20`, status `Active`, phase `phase-6:in-progress`, next gate `implementation-review-packet`; Phase 0–4 are locally committed and Phase 5 compatibility policy is delivered.
+- Durable governance authority: implementation runs under `user-instruction:2026-07-20-execute-durable-checkpoint-governance-plan`; plan-scoped standing local commits run under `user-instruction:2026-07-20-standing-durable-checkpoint-plan-local-commits`. No push/PR/merge, Pages/hosted, provider/broker, tracked data, or other remote authority was granted.
 - Secondary proposed plan: `docs/exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Proposed`, latest design review `review-002@approve/high`, next gate `activation-recording`. It remains independent and was not activated by this instruction.
 - Terminal UI design reviews: `review-001` revise/high on v1 (SHA-256 `c2c20927...a923f`, append-only); `review-002` approve/high on v2 (SHA-256 `40afdcfd1eb98594a8f4816ad652411ca8957c371cfc8a315b975bcaf3dad12e`). All `review-001` findings are closed in v2: live slug `^[a-z][a-z0-9_]{1,63}$`, color `^#[0-9A-Fa-f]{6}$`, JSON `detail`/raw error association, bottom-pinned peer-nav, name-stable `test:trade-records` file-list expansion.
 - Terminal UI proposal decisions retained: one exact terminal token table across shell/Data/Review/Backtest/Teaching/Admin/Login; warm orange brand-only; trader workspace stays bottom-pinned but uses the same peer-nav renderer/classes/state; shared Review/Static trade components use one palette plus density; add-trader mirrors exact slug/color contracts, parses JSON `detail` or raw API error text with a form-level fallback, reuses the existing full-registry admin PUT, and creates no fake point/day/group.
@@ -46,8 +46,8 @@
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve unrelated changes and read `docs/operating-modes.md`, the current active Durable Checkpoint plan, its `review-001`/`review-002`, and the active/proposed/reviews indexes. Treat Terminal UI as a separate approved Proposed plan.
-4. Durable Checkpoint v2 is Active at `phase-0:not-started`; the activation instruction is consumed. The next legal action is a separate explicit implementation-start instruction, after which Phase 0 must still prove all shared manifest paths clean/absent before work begins.
-5. Activation does not grant implementation or Git authority. Terminal UI activation, local commit authority, data/provider/broker, publication, and remote actions each remain separately gated.
+4. Durable Checkpoint governance is Active at `phase-6:in-progress`; prepare and freeze the implementation-review packet after the complete verification matrix, then request independent implementation review.
+5. Standing local commit authority is limited to this plan's full lifecycle. Terminal UI activation, push/PR/merge, data/provider/broker, publication, and remote actions remain separately gated.
 6. The multi-trader, operating-modes, and Review Workspaces plans are Completed; their prior authorities cannot be reused for this proposal.
 7. The transfer, Phase 6, and one-time 2026-07-20 commit/push instructions are consumed. Every further commit, push, and remote/publication action requires new authority.
 8. Keep existing completed-plan reviews append-only and preserve all current optimization screenshot moves and unrelated worktree paths.
@@ -56,7 +56,7 @@
 
 | Check | Result |
 | --- | --- |
-| Current Durable Checkpoint governance | Active revision `v2-review-foldback-2026-07-20` (reviewed SHA-256 `46e6b3fb...0702`); `review-001: revise/high`@v1 append-only; matching-revision `review-002: approve/high`@v2; activation `user-instruction:2026-07-20-activate-durable-checkpoint-governance`; `phase-0:not-started`; next gate `phase-0-start`; no implementation/Git/data/remote authority |
+| Current Durable Checkpoint governance | Active revision `v2-review-foldback-2026-07-20`; Phase 0–4 committed locally, Phase 5 compatibility delivered; `phase-6:in-progress`; next gate `implementation-review-packet`; standing local commits authorized only for this plan; no push/data/remote authority |
 | Current terminal UI/registry proposal | Proposed revision `v2-review-foldback-2026-07-20` (SHA-256 `40afdcfd...d12e`); `review-001: revise/high`@v1 append-only; matching-revision `review-002: approve/high`@v2 closes all prior findings; next gate `activation-recording`; no activation/implementation/Git/data/remote authority yet |
 | Current Review Workspaces revision | `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`; packet `implementation-review-packet-001.md`; `implementation-review-001: accept/high`, no findings, Grok session `019f7bdd-3f80-7361-be62-f7be49f24147` |
 | Current Review Workspaces closeout | pass: implementation `ab655568d50d20c2a97e970658ec9fa3b41719b7`, lifecycle reconciliation `65fd15dd3a3b7030bc3d15fc0590ea26a048490c`, direct operating-modes, governed/auto harness and links, 146/146 lifecycle fixtures, startup budget, launcher syntax, frozen-digest recomputation, protected hashes, and `git diff --check`; lifecycle `Completed`, next gate `closed` |
@@ -132,7 +132,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Obtain a separate explicit implementation-start instruction for `docs/exec-plans/active/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md` revision `v2-review-foldback-2026-07-20`. Activation is complete at `phase-0:not-started`, but Phase 0 has not begun and its entry gate also requires every shared lifecycle/governance manifest path to be clean or absent after owner-scoped resolution. Local Git, push/PR/merge, Terminal UI activation, Pages/hosted verification, provider/broker, tracked DB/canonical data, and every remote action remain separately unauthorized.
+Freeze the exact Phase 6 implementation-review packet after the complete verification matrix, then obtain an independent implementation verdict for the target commit. If accepted, reconcile this v1 bootstrap plan to Completed with local commits only. Push/PR/merge, Terminal UI activation, Pages/hosted verification, provider/broker, tracked DB/canonical data, and every remote action remain unauthorized.
 
 ## Handoff Boundary
 

@@ -423,6 +423,7 @@ Design reviews target the preceding `plan-proposal` or `proposal-revision` check
 
 - V1 and legacy-v1 subjects remain valid under their existing exact formats.
 - V1 Completed plans are frozen; no review metadata or checkpoint history is backfilled.
-- A Proposed v1 plan may migrate at its next revision or activation. An Active v1 plan may migrate at its next phase transition.
-- Migration retains every v1 key, adds every v2 key, derives state from the table above, and defaults authority fields to `none` unless a matching explicit user instruction exists.
-- The Durable Checkpoint governance plan that introduces this contract remains v1 for its entire proposal, review, activation, phase, implementation-review, and closeout lifecycle. The new rules are not applied retroactively to bootstrap themselves.
+- A Proposed v1 plan may migrate only at its next revision or activation. An Active v1 plan may migrate only at its next phase transition. No plan changes schema between those named boundaries.
+- Migration retains every v1 key in exact order, appends every v2 key, derives both primary and work-unit state from the table above, and defaults all authority fields to `none` unless a matching explicit user instruction exists.
+- Existing v1 design and implementation reviews remain append-only v1 artifacts. The first v2 review targets a prior eligible v2 checkpoint commit and cannot manufacture checkpoint ancestry for an earlier v1 review.
+- The Durable Checkpoint governance plan that introduces this contract remains v1 for its entire proposal, review, activation, phase, implementation-review, and closeout lifecycle. Its separately granted standing local commit authority remains a v1 bootstrap authority; no `Tang-*` trailer is added retroactively to its commits.

@@ -9,10 +9,10 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-20-activate-durable-checkpoint-governance`
-- Current phase: phase-0
-- Phase state: not-started
-- Phase entry gate: `activation:user-instruction:2026-07-20-activate-durable-checkpoint-governance`
-- Next gate: `phase-0-start`
+- Current phase: phase-6
+- Phase state: in-progress
+- Phase entry gate: `phase-5-exit`
+- Next gate: `implementation-review-packet`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -20,7 +20,7 @@
 - Owner: Codex
 - Created: 2026-07-20
 - Activated: 2026-07-20
-- Scope authority: lifecycle activation recording only under the named user instruction; Phase 0 implementation, data write, Git stage/commit/push, PR, merge, Pages publication, provider/broker access, hosted verification, and remote administration remain unauthorized
+- Scope authority: full implementation and lifecycle closeout under `user-instruction:2026-07-20-execute-durable-checkpoint-governance-plan`, with standing plan-scoped local commit authority under `user-instruction:2026-07-20-standing-durable-checkpoint-plan-local-commits`; no push, PR, merge, Pages publication, provider/broker access, tracked data write, hosted verification, or remote administration authority
 
 ## 1. Context And Evidence
 

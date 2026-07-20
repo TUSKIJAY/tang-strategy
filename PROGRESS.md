@@ -5,10 +5,12 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Current phase: `phase-6`
+- Phase state: `in-progress`
+- Next gate: `implementation-review-packet`
 <!-- operating-modes-state:end -->
+
+2026-07-20: 用户通过 `/goal` 授权完整执行 Durable Checkpoint governance plan，并进一步授权先按归属 checkpoint 既有治理成果、再对本 plan 全生命周期使用 standing scoped local commit authority；实施证据分别记录为 `user-instruction:2026-07-20-execute-durable-checkpoint-governance-plan` 与 `user-instruction:2026-07-20-standing-durable-checkpoint-plan-local-commits`。既有成果已在 `ff4d309` 精确 checkpoint；Phase 0–4 已分别形成本地提交并通过各自 gate。Phase 5 兼容/迁移策略现已落地，当前进入 `phase-6:in-progress`，next gate `implementation-review-packet`。未 push/PR/merge/Pages/provider/broker/远端操作，tracked DB 与 canonical data 未改。
 
 2026-07-20: 用户以“把该计划转移到 active”明确授权 Durable Checkpoint governance exact revision `v2-review-foldback-2026-07-20` 的 lifecycle activation。已记录 `user-instruction:2026-07-20-activate-durable-checkpoint-governance`，将且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap 与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。本次 activation 不启动 Phase 0、不授权实现、Git stage/commit/push、Terminal UI activation、数据/provider/broker/Pages/远端动作；Phase 0 entry 仍须另行 implementation-start 指令并满足 shared dirty lifecycle paths 的 clean/absent gate。
 
@@ -126,8 +128,8 @@
 
 ## To Do
 
-- [ ] Obtain an explicit user activation instruction for approved exact revision `v2-review-foldback-2026-07-20`; activation recording must stop at `phase-0:not-started`, and implementation still requires a later explicit start instruction.
-- [ ] Obtain a separate explicit implementation-start instruction for active Durable Checkpoint governance before Phase 0; activation alone grants no implementation or Git authority, and Phase 0 must first satisfy its shared-path clean/absent entry gate.
+- [x] Recorded the explicit activation instruction for exact revision `v2-review-foldback-2026-07-20` and kept activation distinct from implementation start.
+- [x] Recorded the separate implementation-start instruction and standing plan-scoped local commit authority; Phase 0 proved the shared-path clean/absent entry gate before implementation.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups/`; they are not approved work.
 
 ## Completed
