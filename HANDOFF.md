@@ -134,7 +134,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Review Date Navigation And Trader Filter Fusion is Active at `phase-0:not-started`; next gate is `phase-0-start`. The user's repair-through-activation authority is consumed at the activation checkpoint. Implementation-start, push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
+Review Date Navigation And Trader Filter Fusion is Active at `phase-0:not-started`; next gate is `phase-0-start`. The authorized repair-through-activation sequence is complete; no later action is inferred from it. Implementation-start, push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
 
 ## Handoff Boundary
 
