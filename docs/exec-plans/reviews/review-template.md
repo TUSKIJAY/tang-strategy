@@ -9,6 +9,7 @@
 - Evidence method: `<independent repository inspection summary>`
 - Verdict: approve|revise|reject|accept
 - Confidence: low|medium|high
+- Review target commit: `<40-hex-commit; required for operating-modes-v2 reviews>`
 
 ## Scope Checked
 

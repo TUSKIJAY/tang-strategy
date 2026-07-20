@@ -56,6 +56,8 @@ Use concise conventional commits (`feat:`, `fix:`, `docs:`, `chore:`). PRs shoul
 - Data-impacted files or directories.
 - How to verify (`rebuild`, day selection, screenshots or endpoint output).
 
+Lifecycle-product local commits follow the durable checkpoint contract in [`docs/operating-modes.md`](./docs/operating-modes.md#9-durable-checkpoint-contract). The checker is read-only; only a separately authorized human or agent may stage literal manifest paths and create the scoped local commit. Checkpoint authority never grants push, PR, merge, Pages, or other remote authority.
+
 GitHub integration:
 
 - Pull requests targeting `main` run `.github/workflows/project-harness.yml`: harness structure, backend tests/compile, and frontend build.

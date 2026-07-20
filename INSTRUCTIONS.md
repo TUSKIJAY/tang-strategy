@@ -81,6 +81,7 @@ The script resolves the repository root independently of the caller's current di
 - `python3 scripts/check-project-harness.py --root . --profile governed`
 - `python3 scripts/check-operating-modes.py --root .`
 - `python3 -m unittest scripts.tests.test_operating_modes`
+- `python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated`
 - `python3 scripts/check-startup-doc-budget.py`
 - `cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'`
 - `cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests`

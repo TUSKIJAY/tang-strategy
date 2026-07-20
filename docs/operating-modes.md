@@ -261,3 +261,92 @@ This map binds the Data Update cases to current repository evidence without turn
 | Commit/push/Pages/hosted sequence succeeds | future authorized run | No offline fixture, implementation phase, or green local check can satisfy this row. |
 
 Current evidence boundaries are explicit: IB readiness and quality still depend on runbook/human evidence, and each newly requested date needs its own real pair/provider, assemble, and local-acceptance receipt. Offline fixtures or prior platform receipts cannot satisfy that future Data Update run.
+
+## 9. Durable Checkpoint Contract
+
+A durable checkpoint is a manually executed, exact-path local Git commit for one completed lifecycle work product. The checker is read-only. It never stages, unstages, commits, amends, resets, stashes, switches branches, pushes, or modifies lifecycle files. Underlying work authority, lifecycle-transition authority, durable-checkpoint local Git authority, and remote/publication authority are independent; none implies another.
+
+### Authority and actor
+
+One authorized human or coding agent is the commit actor. A checkpoint permits one scoped `git add -- <literal files>` plus one normal `git commit` attempt after the work product is complete. It grants no lifecycle transition, push, PR, merge, Pages, provider/broker, hosted-verification, branch, or remote-settings authority. Design approval is not activation; activation is not implementation start; implementation-review `revise` is not remediation authority; `accept` is not Completed migration authority.
+
+`Tang-Authority` has exactly this form:
+
+```text
+user-instruction:<token>
+```
+
+The token matches `^[a-z0-9][a-z0-9._/-]{0,127}$`. Standing authority is valid only when the user explicitly names the subject and allowed checkpoint kinds. One-shot authority is consumed by one successful matching checkpoint. Standing authority ends when revoked or when the subject reaches Completed, Archived, Rejected, Terminated, or Superseded. A failed commit may be retried only after a fresh full preflight while authority remains unconsumed.
+
+### Checkpoint catalog and scope
+
+Every changed member of the minimum reconciliation set is staged. Only explicitly enumerated files in the allowed optional set may be added. Directory tokens below are documentation shorthand; requests expand them to literal files and never pass a directory or glob to Git.
+
+| Kind | Outcome | Trigger | Minimum reconciliation set | Allowed optional staged set |
+| --- | --- | --- | --- | --- |
+| `opt-record` | `complete` | Formal OPT record generated | OPT record and optimization index | Explicit sibling screenshots; state files when resume truth changes |
+| `plan-proposal` | `complete` | A request/OPT becomes Proposed | Proposed plan, proposed/reviews indexes, roadmap, promoted OPT record/index | State files and explicit proposal evidence |
+| `design-review` | `approve`, `revise`, or `reject` | Independent design review finalized | Review, plan metadata, proposed/reviews indexes | Roadmap/state files and explicit review evidence |
+| `proposal-revision` | `complete` | Stable revision folds back review | Revised plan, proposed/reviews indexes, roadmap | Source OPT/state files and explicit revision evidence |
+| `activation-recording` | `complete` | Explicit Proposed to Active transition | Plan delete/create pair, proposed/active/reviews indexes, roadmap, state files | Explicit activation evidence |
+| `implementation-start` | `complete` | Separate start instruction recorded | Active plan/index, roadmap, state files, baseline evidence | Explicit Phase 0 fixtures/evidence |
+| `phase-exit` | `complete` | One primary `phase-N` exit passes | Active plan/index, roadmap, state files, phase evidence and frozen deliverables | Phase-manifest fixtures/evidence |
+| `phase-blocked` | `blocked` | Primary/remediation work is formally blocked | Active plan/index, state files, blocker/recovery evidence | Roadmap and explicit diagnostics |
+| `implementation-review` | `accept`, `revise`, or `reject` | Independent implementation review finalized | Review, plan metadata, active/reviews indexes, state files | Review packet/evidence and roadmap |
+| `remediation-complete` | `complete` | One `remediation-N` exit passes | Active plan/index, roadmap, state files, remediation evidence/deliverables | Remediation-manifest fixtures/evidence |
+| `completed-migration` | `complete` | Accepted implementation moves Active to Completed | Plan delete/create pair, active/completed/reviews indexes, roadmap, state files | Final closeout evidence and accepted review packet |
+
+Renames list delete and create paths separately. Byte-identical reconciled files are recorded as inspected and are not forced into the commit. A changed required surface omitted from staging or any staged path outside the required/allowed scope fails closed.
+
+The following never qualify: mid-phase work; transient test failure; active retry/diagnostic state; draft OPT/plan/review; a state-file-only edit without a completed product; generated/runtime/cache output; and unclear or piggybacked scope ownership.
+
+### Request, baseline, and exact staging
+
+`checkpoint-request-v1` is a JSON object with exactly `schema_version`, `kind`, `subject`, `revision`, `work_unit`, `outcome`, `authority`, `expected_branch`, `baseline_head`, and `paths`. `paths` is lexically sorted and duplicate-free; each object has exactly `path`, `operation`, `baseline_blob`, and `post_sha256`. Operations are `create`, `modify`, or `delete`; creates use `baseline_blob: null`, deletes use `post_sha256: null`, other Git blobs are lowercase 40-hex and SHA-256 values lowercase 64-hex. Paths use repository-relative `/` separators and may not be absolute, contain `..`, name `.git`, use pathspec magic/globs, or name a directory.
+
+The actor follows one procedure:
+
+1. With an empty index, run baseline preflight before work. Every modify/delete path is clean and every create path absent. `post_sha256` is initially null. The JSON receipt is kept outside the repository.
+2. Complete separately authorized work, preserving immutable request metadata/baseline fields, and fill complete post-image hashes.
+3. Stage every request path literally with `git add -- <file>...`; never use `.`, `-A`, `--all`, a directory, glob, `-p`, hunk splitting, `commit -a`, or GUI implicit staging.
+4. Run staged preflight, then one normal commit with hooks enabled and all required trailers.
+5. Run postflight against the new commit. Failure stops lifecycle progression and never triggers automatic amend/reset/retry.
+
+At entry, a requested existing path must be clean in index and worktree and a create path absent. `baseline_blob` must equal `git rev-parse <baseline_head>:<path>`. Staged operation and full post-image must match the request. There is no pre-dirty override or partial-file adoption. Unrelated dirty paths may remain only when their status and content/absence tuples are unchanged from baseline through postflight.
+
+Baseline/staged/postflight abort on a non-empty pre-checkpoint index, detached HEAD, merge, rebase, cherry-pick, branch mismatch, or HEAD drift. `git commit --amend`, reset, stash, checkout/switch, rebase, merge, cherry-pick, push, and `--no-verify` are prohibited. If commit fails, the actor reports it, unstages only literal checkpoint paths with `git restore --staged -- <files>`, verifies an empty index, records no formed checkpoint, and stops.
+
+### Staged safety gates
+
+`git diff --cached --check` must pass. The staged path set must exactly equal the request. Generated paths `frontend/dist/`, `frontend/public/reviews/`, `node_modules/`, `__pycache__/`, and `*.pyc` are denied.
+
+UTF-8 governance text/source is limited to 1,048,576 bytes per file. For `opt-record` and `plan-proposal` only, PNG/JPG/JPEG/WebP files under the subject OPT's `screenshots/` are limited to 5,242,880 bytes each. Other binary files are denied. The total request is limited to 26,214,400 bytes. The repository fixture at `docs/optimization/2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png` is an allowed 1,688,940-byte OPT screenshot with SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`.
+
+Denied credential paths are basename `.env`; basename beginning `.env.` except `.env.example`; extensions `.key`, `.pem`, `.p12`, `.pfx`; any path under `.ssh/`; and basenames `credentials.json`, `secrets.json`, or `secrets.yaml`. Added text lines reject PEM private-key headers and non-placeholder assignments to case-insensitive `api_key`, `access_token`, `client_secret`, `password`, or `private_key`. Exact values consisting only of `${...}`, `<...>`, `example`, `placeholder`, or `redacted` are placeholders. A harmless filename containing `token` and governance prose such as `gate-token` are not secrets.
+
+### Commit evidence and self-reference
+
+Every v2 durable checkpoint commit contains exactly one of each trailer:
+
+```text
+Tang-Checkpoint: <checkpoint-kind>
+Tang-Subject: <plan-or-opt-slug>
+Tang-Revision: <revision-or-none>
+Tang-Work-Unit: <phase-N|remediation-N|none>
+Tang-Outcome: <complete|blocked|approve|revise|accept|reject>
+Tang-Authority: <user-instruction:token>
+Tang-Remote-Authority: none
+```
+
+The commit object and trailers are the current checkpoint evidence. A later review names its prior checkpoint SHA in `Review target commit`. Completed migration is found by its trailer, so no file embeds the SHA of the commit containing that file. V1 plans remain frozen and may retain their historical reconciliation-SHA pattern.
+
+Staged preflight and postflight are hard gates. Repository audit with `--legacy-tolerated` warns and exits zero for trailer-less history before a subject opts into v2, but fails for any partial, malformed, or duplicate `Tang-*` set; invalid one-shot/standing authority use; or a missing/mismatched latest checkpoint claimed by a v2 subject's `Expected checkpoint kind`. Historical completeness is not inferred from arbitrary commits.
+
+The read-only carriers are:
+
+```text
+python3 scripts/check-durable-checkpoint.py --root . --mode preflight --step baseline --request <request.json>
+python3 scripts/check-durable-checkpoint.py --root . --mode preflight --step staged --request <request.json> --baseline-receipt <receipt.json>
+python3 scripts/check-durable-checkpoint.py --root . --mode postflight --request <request.json> --baseline-receipt <receipt.json> --commit HEAD
+python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated
+```

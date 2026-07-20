@@ -1,6 +1,6 @@
 # <Plan Title>
 
-- Lifecycle schema: `operating-modes-v1`
+- Lifecycle schema: `operating-modes-v2`
 - Status: Proposed
 - Plan slug: `<unique-slug>`
 - Revision: `<stable-revision-id>`
@@ -17,6 +17,16 @@
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
+- Implementation start evidence: none
+- Current work unit: none
+- Work state: none
+- Blocker evidence: none
+- Implementation reviews: none
+- Latest implementation verdict: none
+- Checkpoint authority: none
+- Checkpoint authority mode: none
+- Checkpoint authority kinds: none
+- Expected checkpoint kind: none
 - Owner: <owner>
 - Created: YYYY-MM-DD
 - Scope authority: review-only; this template and proposed plan do not authorize implementation

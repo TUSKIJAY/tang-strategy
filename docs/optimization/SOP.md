@@ -10,6 +10,8 @@
 4. proposed 计划完成 review 并获得用户明确批准后，才能移动到 active。
 5. 实施、验证与收尾完成后，计划进入 completed，并回链原记录。
 
+形成正式、完整且范围清晰的 optimization record 后，若用户已单独授予本地 checkpoint authority，可按 [`docs/operating-modes.md` §9](../operating-modes.md#9-durable-checkpoint-contract) 使用 `opt-record` checkpoint。记录权限本身不授予 Git 操作；草稿、单独状态行和归属不清的改动不符合 checkpoint 条件。
+
 ## Batch Layout (required)
 
 Each optimization batch is a **folder**, not a lone file at the directory root:
