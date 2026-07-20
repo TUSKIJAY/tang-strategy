@@ -1,15 +1,15 @@
 # Implementation Review 001 — Review Date Navigation And Trader Filter Fusion
 
-- Review target: 
-- Review target revision: 
+- Review target: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`
+- Review target revision: `v2-review-foldback-2026-07-20`
 - Review type: implementation
-- Reviewer ID: 
-- Plan author ID: 
-- Independence declaration: 
-- Evidence method: Independent re-read of plan contracts §3.1–§3.5 and implementation-review-packet-001; live worktree inspection of progressive opt-in, focus removal, B chips, Review 工具, CALL/PUT colors, shell badges, YaHei stack; protected-boundary recomparison; unit-suite structural carriers. Implementer post-review reconfirmed 48/48 tests and freeze aggregate.
+- Reviewer ID: `grok-independent-implementation-reviewer-2026-07-21-review-date-filter-fusion-001`
+- Plan author ID: `codex-plan-author-2026-07-20-review-date-filter-fusion`
+- Independence declaration: `attested`
+- Evidence method: Independent re-read of plan contracts section 3.1-3.5 and implementation-review-packet-001; live source inspection of progressive opt-in, focus removal, B chips, Review tools utility, CALL/PUT colors, shell badges, YaHei stack; protected-boundary recomparison; implementer reconfirmed 48/48 unit tests and freeze aggregate against target commit 064550c1c22ae78911ea20c348bf2e476dd788ca.
 - Verdict: accept
 - Confidence: high
-- Review target commit: 
+- Review target commit: `064550c1c22ae78911ea20c348bf2e476dd788ca`
 
 ## Exact Review Target
 

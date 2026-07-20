@@ -5,15 +5,15 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
 - Lifecycle status: `Completed`
-- Current phase: `phase-5`
-- Phase state: `complete`
+- Current phase: `none`
+- Phase state: `none`
 - Next gate: `closed`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Completed`, phase `phase-5:complete`, next gate `closed`. Implementation start `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`. Independent `implementation-review-001: accept/high`. Worktree freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`. Frontend 48/48; builds/harness/protected hashes pass. Durable phase-exit commit deferred; push/PR/merge/Pages/data/remote unauthorized.
+- Current plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Completed`, phase `none`, next gate `closed`. Implementation start `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`. Independent `implementation-review-001: accept/high`. Verified implementation commit `064550c1c22ae78911ea20c348bf2e476dd788ca`; freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`. Frontend 48/48; builds/harness/protected hashes pass. Push/PR/merge/Pages/data/remote unauthorized.
 - Latest optimization intake: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/` is **implemented** under the completed plan above. Prior completed visual batch: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
 - Latest completed plan (focus): `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, `implementation-review-001: accept/high`, next gate `closed`.
