@@ -10,9 +10,9 @@
 - Next gate: `none`
 <!-- operating-modes-state:end -->
 
-2026-07-20: 用户通过 `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` 授权将已验收的 Terminal UI/Trader Registry 完整实现与 lifecycle closeout 按精确路径形成 local commit，并 push 当前 `codex/project-harness` branch；不授权 PR、merge、Pages、canonical data、provider/broker 或其他远端动作。
+2026-07-20: `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` 已由 exact implementation/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`、紧邻 boundary-metadata commit 及其最终 `codex/project-harness` push 消费；不授权进一步 commit/push、PR、merge、Pages、canonical data、provider/broker 或其他远端动作。
 
-2026-07-20: Terminal UI/Trader Registry is Completed. Exact packet 002 received independent `implementation-review-002=accept/high`; both remediation findings are closed and final lifecycle checks pass. Verified/lifecycle commits remain `none`; implementation stays uncommitted, canonical data and remote state unchanged. Next gate: none.
+2026-07-20: Terminal UI/Trader Registry is Completed. Exact packet 002 received independent `implementation-review-002=accept/high`; both remediation findings are closed and final lifecycle checks pass. Verified implementation and lifecycle reconciliation commit are `43b96ab9c8ffffad2e76191b0d31d45e277afddc`; canonical data remains unchanged. Next gate: none.
 
 2026-07-20: Terminal UI `implementation-review-001=revise/high`. Remediation-1 fixes lifecycle receipts; direct/governed/auto/diff pass. Awaiting packet 002 review; see `evidence/remediation-1-lifecycle-reconciliation.md`.
 

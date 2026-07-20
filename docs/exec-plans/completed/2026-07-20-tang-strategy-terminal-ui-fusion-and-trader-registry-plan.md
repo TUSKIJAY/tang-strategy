@@ -15,12 +15,12 @@
 - Next gate: closed
 - Implementation review: `../reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/implementation-review-002.md@accept`
 - Final disposition: Completed
-- Verified implementation commit: none
-- Lifecycle reconciliation commit: none
+- Verified implementation commit: `43b96ab9c8ffffad2e76191b0d31d45e277afddc`
+- Lifecycle reconciliation commit: `43b96ab9c8ffffad2e76191b0d31d45e277afddc`
 - Owner: Codex
 - Created: 2026-07-20
 - Optimization source: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md`
-- Scope authority: `user-instruction:2026-07-20-execute-terminal-ui-registry-plan` authorized local Phase 0-6 implementation, verification, remediation, lifecycle closeout, and isolated temporary-copy acceptance; `user-instruction:2026-07-20-commit-activation-with-next-phase` authorized the consumed Phase 0 scoped commit; `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` authorizes exact-path local commits for the completed implementation/lifecycle scope and a push of the current `codex/project-harness` branch. Canonical data writes, PR, merge, Pages publication, provider/broker access, hosted verification, and remote administration remain unauthorized
+- Scope authority: `user-instruction:2026-07-20-execute-terminal-ui-registry-plan` authorized local Phase 0-6 implementation, verification, remediation, lifecycle closeout, and isolated temporary-copy acceptance; `user-instruction:2026-07-20-commit-activation-with-next-phase` authorized the consumed Phase 0 scoped commit; `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` is consumed by implementation/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`, this boundary-metadata commit, and the final push of `codex/project-harness`. Canonical data writes, further push, PR, merge, Pages publication, provider/broker access, hosted verification, and remote administration remain unauthorized
 
 ## 1. Context And Evidence
 
@@ -120,7 +120,7 @@ Remediation-1 changed only lifecycle/evidence surfaces. The active index now res
 
 Independent `implementation-review-002` returned `accept/high` with no findings against exact target `terminal-ui-registry-v1-remediation-1:606b9434b80e32da99e68cbf51cab5a9cd6b8bd208ee9feee98325dabe2a4ae8@3d9a67cede36496d787bf4f2b34e16f69b3ca78d`. It independently matched all 23 manifest hashes and the aggregate, confirmed the packet-001 frontend subset remained byte-identical, closed both prior findings, and reran direct/governed/auto plus 46/46 frontend checks. Protected data/source and the empty Git index also passed.
 
-All Phase 0–6 exit gates are satisfied. This plan is Completed with next gate `closed`. The later explicit instruction `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` now authorizes exact-path local commits for this completed scope and a push of the current branch. Commit values remain `none` until those commits actually form; PR, merge, Pages, canonical-data, provider/broker, hosted, and other remote authority remain absent.
+All Phase 0–6 exit gates are satisfied. This plan is Completed with next gate `closed`. The accepted implementation and lifecycle closeout are committed at `43b96ab9c8ffffad2e76191b0d31d45e277afddc`; the separately authorized current-branch push includes the immediate boundary-metadata commit containing this record. No further commit/push, PR, merge, Pages, canonical-data, provider/broker, hosted, or other remote authority remains.
 
 ## 2. Objective And Success Criteria
 
@@ -396,7 +396,7 @@ Use the repository's pinned backend environment when the default interpreter lac
 ## 8. Commit, Remote, Data, And Publication Boundaries
 
 - Activation and implementation authorities are consumed; the accepted implementation and lifecycle closeout are complete.
-- `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` authorizes exact-path staging and local commits for the current completed-plan scope, followed by a push of `codex/project-harness`. Unrelated worktree paths remain excluded.
+- `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` is consumed by exact-path implementation/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`, the immediate boundary-metadata commit, and their final `codex/project-harness` push. Unrelated worktree paths remain excluded.
 - This Git authority does not authorize amend/reset/stash, PR, merge, Pages publication, hosted verification, provider/broker access, or remote administration.
 - Registry-create acceptance must use isolated temporary content/DB copies. It does not authorize a new canonical trader in the tracked repository.
 - Provider/broker access, market-data fetch, tracked DB/content writes, daily publication, PR, merge, Pages, hosted verification, branch protection, environments, and remote administration remain separately unauthorized.
