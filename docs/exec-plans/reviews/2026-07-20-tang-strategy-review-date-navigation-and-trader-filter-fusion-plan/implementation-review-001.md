@@ -13,7 +13,7 @@
 
 ## Exact Review Target
 
-Packet-001 freezes a local worktree implementation against Active plan revision `v2-review-foldback-2026-07-20`. There is no verified implementation commit. Authority remains local review/closeout only; push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote admin are unauthorized.
+Packet-001 freezes the implementation against plan revision `v2-review-foldback-2026-07-20`. Review target / verified phase-exit commit is `b09e08156ea3efeeebc4fc9c21d53a72fac297c6` (feat ship `064550c1c22ae78911ea20c348bf2e476dd788ca`). Push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote admin remain unauthorized.
 
 ## Checks
 
@@ -91,14 +91,14 @@ Packet-001 freezes a local worktree implementation against Active plan revision 
 
 1. Interactive desktop/narrow browser screenshots were not re-captured in the implementation session; unit fixtures + structural source assertions are the acceptance bar recorded in phase-4. That is consistent with the packet’s known observations and does not break the freeze contracts.
 2. PROGRESS soft archive budget was already over soft limit pre-implementation; not a hard-limit or plan-contract failure.
-3. Implementation remains uncommitted worktree-only under standing checkpoint kinds (design-review/proposal-revision/activation-recording only). No phase-exit durable commit authority was invented.
+3. Post-review durable closeout recorded phase-exit `b09e08156ea3efeeebc4fc9c21d53a72fac297c6` (this review target), implementation-review, and completed-migration checkpoints. Push/remote remain unauthorized.
 
 ## Authority Boundary
 
 - Local independent implementation review: authorized and executed (this file only).
 - Push, PR, merge, Pages, provider/broker, tracked DB write, canonical content mutation, remote admin: **unauthorized and unexecuted**.
-- Durable local commit: **not formed** by this review.
-- Implementation sources, plan body status, lifecycle indexes, PROGRESS, HANDOFF, and git state: **not modified** by this reviewer.
+- Durable local commit: **not formed by this review file’s authoring turn**; subsequent implementer closeout formed phase-exit / implementation-review / completed-migration under plan authority.
+- This review file was the sole write of the independent reviewer at accept time.
 
 ## Verdict
 

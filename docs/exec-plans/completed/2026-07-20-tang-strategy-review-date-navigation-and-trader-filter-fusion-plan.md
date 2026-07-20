@@ -407,8 +407,11 @@ The constrained metadata above is authoritative. Follow [`docs/operating-modes.m
 
 - Closed: 2026-07-20T17:09:47Z
 - Implementation start: `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`
-- Phases 0–5 complete on local worktree freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`
+- Feat ship commit: `064550c1c22ae78911ea20c348bf2e476dd788ca`
+- Verified implementation / phase-exit commit: `b09e08156ea3efeeebc4fc9c21d53a72fac297c6`
+- Implementation-review checkpoint: `8a85a7b` (review-001 accept against phase-exit)
+- Completed-migration checkpoint recorded (latest: `8363291`)
+- Freeze aggregate (pre-closeout 12-file ordered digest): `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`
 - Independent implementation-review-001: accept/high (reviewer `grok-independent-implementation-reviewer-2026-07-21-review-date-filter-fusion-001`)
-- Frontend unit tests 48/48; normal+static builds pass; governed/auto/operating/durable-audit/compileall/diff-check pass; protected hashes unchanged
+- Frontend unit tests 48/48 (post-remediation suite expands with preserve-mode / empty-selection carriers); normal+static builds pass; governed/auto/operating/durable-audit/compileall/diff-check pass; protected hashes unchanged
 - No push/PR/merge/Pages/provider/broker/DB/content mutation
-- Durable local commit deferred: standing checkpoint authority kinds do not include phase-exit/implementation

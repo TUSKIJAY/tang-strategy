@@ -49,7 +49,7 @@
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat historical HEAD evidence above as live worktree truth.
 3. Preserve unrelated dirty paths (`.playwright-cli/`, `output/`).
-4. Review Date Navigation And Trader Filter Fusion is **Completed** with `implementation-review-001: accept/high`. Implementation lives as a **local worktree freeze** (aggregate `ed19e6e7…`); no phase-exit durable commit was formed. A later exact-manifest checkpoint requires new authority.
+4. Review Date Navigation And Trader Filter Fusion is **Completed** with `implementation-review-001: accept/high`. Verified implementation / phase-exit commit is `b09e08156ea3efeeebc4fc9c21d53a72fac297c6` (feat ship `064550c1…`); completed-migration is recorded. Push/PR/merge/Pages/data/remote remain unauthorized.
 5. Do not push/PR/merge/Pages/provider/broker/mutate tracked DB or canonical content without new authority.
 6. Terminal UI, multi-trader, operating-modes, Review Workspaces, and Durable Checkpoint plans remain Completed; their authorities cannot be reused.
 7. Keep completed-plan reviews append-only.
@@ -58,7 +58,7 @@
 
 | Check | Result |
 | --- | --- |
-| Current Review Date Nav + Trader Filter Fusion | Completed revision `v2-review-foldback-2026-07-20`; verified implementation ; freeze `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`; `implementation-review-001: accept/high`; frontend 48/48; builds/harness/protected hashes pass; next gate `closed`; no phase-exit commit or push/data/remote authority |
+| Current Review Date Nav + Trader Filter Fusion | Completed revision `v2-review-foldback-2026-07-20`; verified implementation / phase-exit `b09e08156ea3efeeebc4fc9c21d53a72fac297c6`; freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`; `implementation-review-001: accept/high`; frontend 48/48; builds/harness/protected hashes pass; next gate `closed`; no push/data/remote authority |
 | Current Durable Checkpoint governance | Completed revision `v2-review-foldback-2026-07-20`; verified implementation `61ea580f...`; `implementation-review-001: accept/high`; 171 operating + 38 checkpoint fixtures pass; next gate `closed`; no push/data/remote authority |
 | Current terminal UI/registry plan | Completed revision `v2-review-foldback-2026-07-20`, lifecycle schema `operating-modes-v1`; packet 002 `implementation-review-002: accept/high`, no findings; all phases and lifecycle surfaces closed; verified/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`; no later commit/canonical-data/remote authority |
 | Current Review Workspaces revision | `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`; packet `implementation-review-packet-001.md`; `implementation-review-001: accept/high`, no findings, Grok session `019f7bdd-3f80-7361-be62-f7be49f24147` |

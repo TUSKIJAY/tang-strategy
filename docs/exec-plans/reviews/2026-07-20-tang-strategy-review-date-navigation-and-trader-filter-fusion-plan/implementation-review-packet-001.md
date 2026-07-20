@@ -1,13 +1,14 @@
 # Implementation Review Packet 001
 
-- Plan: `docs/exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`
+- Plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`
 - Revision: `v2-review-foldback-2026-07-20`
 - Packet ID: `review-date-filter-fusion-v1-worktree`
 - Recorded: 2026-07-20T17:02:18Z
 - Implementation start: `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan` (goal 全权执行active plan)
 - Baseline HEAD: `3d0f59f090d0bf37b8ec3fc947e70d1536a076f9`
-- Verified implementation commit: **none** (worktree freeze; phase-exit checkpoint authority not in standing kinds)
-- Worktree freeze aggregate SHA-256 (ordered path+digest of 12 frontend files): `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`
+- Feat ship commit: `064550c1c22ae78911ea20c348bf2e476dd788ca`
+- Verified implementation / phase-exit commit: `b09e08156ea3efeeebc4fc9c21d53a72fac297c6`
+- Freeze aggregate SHA-256 (ordered path+digest of 12 frontend files at packet freeze): `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`
 
 ## Exact implementation manifest (modify)
 
@@ -59,7 +60,7 @@
 
 - Local implementation, verification, independent implementation review, and lifecycle closeout: authorized by goal OBJECTIVE.
 - Push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote admin: **unauthorized and unexecuted**.
-- Durable local commit: **not formed** — standing checkpoint kinds remain design-review/proposal-revision/activation-recording only; do not invent phase-exit authority.
+- Durable local commits: formed under expanded standing kinds on the recovery authority (`phase-exit` / `implementation-review` / `completed-migration`). Push/remote remain unauthorized.
 
 ## Known observations
 

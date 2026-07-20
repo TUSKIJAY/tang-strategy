@@ -473,6 +473,27 @@ test('selection reconciliation honors context change and intentional empty witho
   );
 });
 
+test('Review and Static assemble derive contextChanged from ticker/date only', () => {
+  const reviewSource = readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8');
+  const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
+  for (const source of [reviewSource, staticSource]) {
+    assert.match(source, /const contextChanged = !previous/);
+    assert.match(source, /previous\.ticker !== records\.ticker/);
+    assert.match(source, /previous\.tradeDate !== records\.trade_date/);
+    // Must not hard-code contextChanged: true on the assemble reconcile path.
+    assert.doesNotMatch(source, /contextChanged:\s*true/);
+  }
+  // Same-context empty selection stays empty even if availability is full.
+  assert.deepEqual(
+    reconcileTraderSelection({
+      previousSelectedIds: [],
+      availableTraderIds: ['tang', 'vordin'],
+      contextChanged: false,
+    }).selectedTraderIds,
+    [],
+  );
+});
+
 test('filter ticker/date may only mirror the resolved workspace context', () => {
   const workspace = { ticker: 'QQQ', trade_date: '2026-07-17' };
   const divergent = { ticker: 'SPY', tradeDate: '2026-06-15', traderIds: ['tang'] };

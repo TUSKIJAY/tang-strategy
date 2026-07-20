@@ -268,10 +268,15 @@ export function ReviewPage({ state, setState }) {
         if (records) {
           const { availableTraderIds } = deriveAvailableTraders(records, records.traders);
           setTradeFilters((previous) => {
+            // Same ticker/date (e.g. strategy re-assemble) is not a context
+            // change: intentional empty traderIds must stay empty (SC7).
+            const contextChanged = !previous
+              || previous.ticker !== records.ticker
+              || previous.tradeDate !== records.trade_date;
             const reconciled = reconcileTraderSelection({
               previousSelectedIds: previous ? previous.traderIds : null,
               availableTraderIds,
-              contextChanged: true,
+              contextChanged,
             });
             return {
               ...initialTradeRecordFilters(records.traders),

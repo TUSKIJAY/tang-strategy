@@ -291,10 +291,13 @@ export function StaticReviewsApp() {
         if (records) {
           const { availableTraderIds } = deriveAvailableTraders(records, records.traders);
           setTradeFilters((previous) => {
+            const contextChanged = !previous
+              || previous.ticker !== records.ticker
+              || previous.tradeDate !== records.trade_date;
             const reconciled = reconcileTraderSelection({
               previousSelectedIds: previous?.traderIds ?? null,
               availableTraderIds,
-              contextChanged: true,
+              contextChanged,
             });
             return {
               ...initialTradeRecordFilters(records.traders),

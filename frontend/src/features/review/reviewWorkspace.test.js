@@ -481,4 +481,20 @@ test('progressive date navigation projects recent and month modes without fabric
     assert.doesNotMatch(source, /dateNavigation=/);
   }
   assert.doesNotMatch(reviewSource + dashboardSource + staticSource, /跳转/);
+
+  // Progressive DateRail must not reinit browseMode on value-only chip selects.
+  const panelSource = readFileSync(new URL('./ReviewContextPanel.jsx', import.meta.url), 'utf8');
+  assert.match(panelSource, /value intentionally omitted/);
+  assert.match(panelSource, /\[progressive, days, ticker\]/);
+  // Selecting a recent-window day while in month mode keeps month presentation.
+  const monthBrowse = projectProgressiveDateRail({
+    days,
+    ticker: 'SPY',
+    selectedDate: '2026-07-10',
+    browseMode: 'month',
+    browsedMonth: '2026-07',
+  });
+  assert.equal(monthBrowse.browseMode, 'month');
+  assert.equal(monthBrowse.pressedDate, '2026-07-10');
+  assert.equal(monthBrowse.chipLabels['2026-07-10'], '10');
 });

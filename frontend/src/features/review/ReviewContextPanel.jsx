@@ -47,11 +47,15 @@ export function DateRail({
       : { browseMode: 'recent', browsedMonth: '' }
   ));
 
-  // Reinitialize presentation when ticker or external selected day changes.
+  // Reinitialize presentation only when ticker or inventory changes.
+  // Day-chip selection must preserve browseMode (plan §3.1); value is not a
+  // reinit trigger — chip onClick already keeps month mode / browsedMonth.
   useEffect(() => {
     if (!progressive) return;
     setBrowseState(initializeProgressiveBrowseState(days, ticker, value));
-  }, [progressive, days, ticker, value]);
+    // value intentionally omitted: chip select must not reset browseMode.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reinit on ticker/inventory only
+  }, [progressive, days, ticker]);
 
   const projection = useMemo(() => {
     if (!progressive) return null;
