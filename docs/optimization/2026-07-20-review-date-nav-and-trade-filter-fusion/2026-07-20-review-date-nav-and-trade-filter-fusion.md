@@ -1,6 +1,6 @@
 # Optimization Batch · 2026-07-20 Review Date Navigation And Trade-Filter Fusion
 
-> Promoted by explicit user request to the review-only proposed plan [`Tang Strategy Review Date Navigation And Trader Filter Fusion`](../../exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md). This file and the proposed plan do not authorize implementation.
+> Promoted and lifecycle-only activated by explicit user request as [`Tang Strategy Review Date Navigation And Trader Filter Fusion`](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md). The active plan is at `phase-0:not-started` and does not authorize implementation without a separate start instruction.
 >
 > Place this file at:
 > `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md`
@@ -14,11 +14,11 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Replace Review exhaustive date-chip rail with progressive 最近 / 按月 navigation | Review left column / `DateRail` | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | User locked **scheme A**; only Review in v1 scope |
-| OPT-002 | Fuse Review trade-filter/list chrome with upper Review context controls | Review left column / trade panel | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Style consistency + date authority, not a light/dark color patch |
-| OPT-003 | Keep outer shell trader-nav label readable under capability badge | App shell / `Layout` nav | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Acceptance regression after terminal-ui plan: CJK label wraps vertically |
-| OPT-004 | Direction-only color on trade points (CALL vs PUT); uniform name text | Review trade list + chart markers | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Names never red; identity by full name text |
-| OPT-005 | Replace ☑+Focus with **B · Chip multi-select** trader filter | Review trade filter | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | **User locked 2026-07-20**; scale drawer+search when many |
+| OPT-001 | Replace Review exhaustive date-chip rail with progressive 最近 / 按月 navigation | Review left column / `DateRail` | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | User locked **scheme A**; only Review in v1 scope |
+| OPT-002 | Fuse Review trade-filter/list chrome with upper Review context controls | Review left column / trade panel | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Style consistency + date authority, not a light/dark color patch |
+| OPT-003 | Keep outer shell trader-nav label readable under capability badge | App shell / `Layout` nav | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Acceptance regression after terminal-ui plan: CJK label wraps vertically |
+| OPT-004 | Direction-only color on trade points (CALL vs PUT); uniform name text | Review trade list + chart markers | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Names never red; identity by full name text |
+| OPT-005 | Replace ☑+Focus with **B · Chip multi-select** trader filter | Review trade filter | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | **User locked 2026-07-20**; scale drawer+search when many |
 
 ## Relationship To Prior Work
 
@@ -114,7 +114,7 @@ What the evidence shows together:
   - no silent ticker substitution; no fabricated missing QQQ/SPY days;
   - Data / Admin / Static keep current `DateRail` unless scope is expanded by a new decision;
   - no provider/broker, DB schema, publication, or remote action from this item.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: promoted-to-active
 
 ## OPT-002 Fuse Review Trade-Filter/List With Upper Context Chrome
 
@@ -141,7 +141,7 @@ What the evidence shows together:
 - Boundary that must not change:
   - availability-driven trader visibility, filter reconciliation, export contents, normalized trade payload contracts;
   - no auth bypass; no data write from Review filters; no publication/provider changes.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: promoted-to-active
 
 ## OPT-003 Shell Trader-Nav Label / Capability Density
 
@@ -158,7 +158,7 @@ What the evidence shows together:
 - Boundary that must not change:
   - admin-only mutation, readonly inspection, route set, auth/session;
   - no return of orange filled CTA as destination chrome.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: promoted-to-active
 - Note: small local CSS/structure experiments may already exist in a dirty worktree from acceptance debugging; they do **not** change this record’s status and are not authorized as the completed implementation of this batch.
 
 ## OPT-004 Dual Color For Direction And Trader
@@ -187,7 +187,7 @@ What the evidence shows together:
 - Boundary that must not change:
   - registry color storage/schema may still exist for other uses; this item does not require name text to use registry hue;
   - availability/filter/export contracts; no fabricated outcomes.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: promoted-to-active
 - Evidence form: acceptance **screenshot** for current friction; direction-color **sample in mockup HTML** until plan-authorized implementation. Do not prototype this on live Review.
 
 ## OPT-005 Trader Filter · Locked B Chip Multi-Select
@@ -218,7 +218,7 @@ What the evidence shows together:
   - With 8 simulated available traders, UI remains usable via summary+drawer+search (mockup scale demo is the visual bar).
 - Boundary that must not change:
   - availability-driven visibility; eligibility modes; admin mutation gates; no live coding from this record alone.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: promoted-to-active
 - User lock timestamp: 2026-07-20 · `opt锁定B效果`
 
 ## How The Items Nest
@@ -249,4 +249,4 @@ Mockup is the free design surface for 001/002/004/005. Live Review must not be u
 
 ## Promotion Boundary
 
-This batch is **promoted-to-proposed** under the user's explicit 2026-07-20 request. The canonical review-only plan is [`2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`](../../exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md). A separately authorized eligible plan checkpoint, matching independent design review, explicit activation, and a later implementation-start instruction are still required before code can land as the authorized solution. Local mockups and screenshots remain proposal evidence, not proof of implementation.
+This batch is **promoted-to-active** under the user's explicit requests. The canonical plan is [`2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) at `phase-0:not-started`. Its repaired checkpoint ancestry, existing independent `review-002: approve/high`, and activation are recorded; a separate implementation-start instruction is still required before code can land. Local mockups and screenshots remain proposal evidence, not proof of implementation.
