@@ -40,7 +40,7 @@ v1 through implementation review and closeout.
 
 ## Active Plans
 
-- [Tang Strategy Review Date Navigation And Trader Filter Fusion](./active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) — Active; canonical details: [active index](./active/index.md)
+None.
 
 ## Proposed Plans
 
@@ -48,6 +48,7 @@ None.
 
 ## Completed Plans
 
+- [Tang Strategy Review Date Navigation And Trader Filter Fusion](./completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [2026-07-18 Tang Strategy governed harness and data safety recovery](./completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [2026-07-19 Tang Strategy Coding And Data Update Modes](./completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [2026-07-19 Tang Strategy Multi-Trader SPY/QQQ Trade Data Refactor](./completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md) — Completed; canonical details: [completed index](./completed/index.md)

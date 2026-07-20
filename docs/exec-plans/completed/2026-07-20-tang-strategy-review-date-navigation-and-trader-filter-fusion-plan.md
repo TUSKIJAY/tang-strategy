@@ -1,7 +1,7 @@
 # Tang Strategy Review Date Navigation And Trader Filter Fusion
 
 - Lifecycle schema: `operating-modes-v2`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
 - Revision: `v2-review-foldback-2026-07-20`
 - Plan author ID: `codex-plan-author-2026-07-20-review-date-filter-fusion`
@@ -9,29 +9,29 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-21-repair-review-date-filter-checkpoints-and-activate`
-- Current phase: phase-0
-- Phase state: not-started
-- Phase entry gate: `activation:user-instruction:2026-07-21-repair-review-date-filter-checkpoints-and-activate`
-- Next gate: `phase-0-start`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: 064550c1c22ae78911ea20c348bf2e476dd788ca
 - Lifecycle reconciliation commit: none
-- Implementation start evidence: none
+- Implementation start evidence: `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`
 - Current work unit: none
 - Work state: none
 - Blocker evidence: none
-- Implementation reviews: none
-- Latest implementation verdict: none
-- Checkpoint authority: `user-instruction:2026-07-21-repair-review-date-filter-checkpoints-and-activate`
+- Implementation reviews: ../reviews/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan/implementation-review-001.md@accept@064550c1c22ae78911ea20c348bf2e476dd788ca
+- Latest implementation verdict: accept
+- Checkpoint authority: `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`
 - Checkpoint authority mode: standing
-- Checkpoint authority kinds: design-review,proposal-revision,activation-recording
-- Expected checkpoint kind: activation-recording
+- Checkpoint authority kinds: implementation-start,phase-exit,implementation-review,completed-migration
+- Expected checkpoint kind: completed-migration
 - Owner: Codex
 - Created: 2026-07-20
 - Optimization source: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md`
 - Proposal baseline: `codex/project-harness@45ca9cb231ef459b7d03bad246d762ed1139bf86`
-- Scope authority: checkpoint-chain recovery and lifecycle-only activation under `user-instruction:2026-07-21-repair-review-date-filter-checkpoints-and-activate`; no implementation, push/PR/merge, canonical data or tracked DB write, provider/broker access, Pages publication, hosted verification, or remote administration authority
+- Scope authority: local implementation, verification, independent review, and completed-migration under `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan` (goal 全权执行active plan); push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote remain unauthorized
 
 ## 1. Context And Evidence
 
@@ -401,3 +401,14 @@ The full backend suite is required only if implementation evidence shows a backe
 - Implementation start requires a later explicit start/execute instruction and Phase 0 entry evidence.
 
 The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../../operating-modes.md) for lifecycle invariants, durable checkpoints, reviewer ancestry, transitions, authority boundaries, and closeout.
+
+
+## 10. Closeout Record
+
+- Closed: 2026-07-20T17:09:47Z
+- Implementation start: `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`
+- Phases 0–5 complete on local worktree freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`
+- Independent implementation-review-001: accept/high (reviewer `grok-independent-implementation-reviewer-2026-07-21-review-date-filter-fusion-001`)
+- Frontend unit tests 48/48; normal+static builds pass; governed/auto/operating/durable-audit/compileall/diff-check pass; protected hashes unchanged
+- No push/PR/merge/Pages/provider/broker/DB/content mutation
+- Durable local commit deferred: standing checkpoint authority kinds do not include phase-exit/implementation

@@ -1,6 +1,6 @@
 # Optimization Batch · 2026-07-20 Review Date Navigation And Trade-Filter Fusion
 
-> Promoted and lifecycle-only activated by explicit user request as [`Tang Strategy Review Date Navigation And Trader Filter Fusion`](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md). The active plan is at `phase-0:not-started` and does not authorize implementation without a separate start instruction.
+> Implemented and closed under [`Tang Strategy Review Date Navigation And Trader Filter Fusion`](../../exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md). Lifecycle `Completed`; independent `implementation-review-001: accept/high`.
 >
 > Place this file at:
 > `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md`
@@ -14,11 +14,11 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Replace Review exhaustive date-chip rail with progressive 最近 / 按月 navigation | Review left column / `DateRail` | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | User locked **scheme A**; only Review in v1 scope |
-| OPT-002 | Fuse Review trade-filter/list chrome with upper Review context controls | Review left column / trade panel | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Style consistency + date authority, not a light/dark color patch |
-| OPT-003 | Keep outer shell trader-nav label readable under capability badge | App shell / `Layout` nav | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Acceptance regression after terminal-ui plan: CJK label wraps vertically |
-| OPT-004 | Direction-only color on trade points (CALL vs PUT); uniform name text | Review trade list + chart markers | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Names never red; identity by full name text |
-| OPT-005 | Replace ☑+Focus with **B · Chip multi-select** trader filter | Review trade filter | promoted-to-active | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | **User locked 2026-07-20**; scale drawer+search when many |
+| OPT-001 | Replace Review exhaustive date-chip rail with progressive 最近 / 按月 navigation | Review left column / `DateRail` | completed | [completed plan](../../exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | User locked **scheme A**; only Review in v1 scope |
+| OPT-002 | Fuse Review trade-filter/list chrome with upper Review context controls | Review left column / trade panel | completed | [completed plan](../../exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Style consistency + date authority, not a light/dark color patch |
+| OPT-003 | Keep outer shell trader-nav label readable under capability badge | App shell / `Layout` nav | completed | [completed plan](../../exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Acceptance regression after terminal-ui plan: CJK label wraps vertically |
+| OPT-004 | Direction-only color on trade points (CALL vs PUT); uniform name text | Review trade list + chart markers | completed | [completed plan](../../exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | Names never red; identity by full name text |
+| OPT-005 | Replace ☑+Focus with **B · Chip multi-select** trader filter | Review trade filter | completed | [completed plan](../../exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) | **User locked 2026-07-20**; scale drawer+search when many |
 
 ## Relationship To Prior Work
 
@@ -249,4 +249,4 @@ Mockup is the free design surface for 001/002/004/005. Live Review must not be u
 
 ## Promotion Boundary
 
-This batch is **promoted-to-active** under the user's explicit requests. The canonical plan is [`2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`](../../exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) at `phase-0:not-started`. Its repaired checkpoint ancestry, existing independent `review-002: approve/high`, and activation are recorded; a separate implementation-start instruction is still required before code can land. Local mockups and screenshots remain proposal evidence, not proof of implementation.
+This batch is **completed** under the user's full-execute goal. The canonical plan is [`2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`](../../exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) with independent `implementation-review-001: accept/high`. Local mockups remain historical proposal evidence.

@@ -4,19 +4,20 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Lifecycle status: `Completed`
+- Current phase: `phase-5`
+- Phase state: `complete`
+- Next gate: `closed`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current plan: `docs/exec-plans/active/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Active`, phase `phase-0:not-started`, next gate `phase-0-start`. The repaired `proposal-revision=52498ad` / `design-review=3a6a5ae` chain passed before activation. Implementation remains unauthorized.
-- Latest optimization intake: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/` is promoted to the current review-only proposal. User locks and mockup remain proposal evidence, not implementation evidence. Prior completed visual batch: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
+- Current plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Completed`, phase `phase-5:complete`, next gate `closed`. Implementation start `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`. Independent `implementation-review-001: accept/high`. Worktree freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`. Frontend 48/48; builds/harness/protected hashes pass. Durable phase-exit commit deferred; push/PR/merge/Pages/data/remote unauthorized.
+- Latest optimization intake: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/` is **implemented** under the completed plan above. Prior completed visual batch: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
-- Latest completed plan (focus): `docs/exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, lifecycle schema `operating-modes-v1`, status `Completed`, exact packet 002, `implementation-review-002: accept/high`, next gate `closed`.
+- Latest completed plan (focus): `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, `implementation-review-001: accept/high`, next gate `closed`.
+- Previous completed plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, lifecycle schema `operating-modes-v1`, status `Completed`, exact packet 002, `implementation-review-002: accept/high`, next gate `closed`.
 - Durable governance authority: implementation and closeout completed under the named user instructions; verified implementation is `61ea580f0b284d835c79cd47130104b90a04d2f2`, v1 reconciliation boundary is `96166a51561ea75f4a6bcad9de9f97fdb7ff2e1d`, and standing local commit authority is consumed. No push/PR/merge, Pages/hosted, provider/broker, tracked data, or other remote authority was granted.
 - Previous completed governance plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md`, revision `v2-review-foldback-2026-07-20`, verified implementation `61ea580f0b284d835c79cd47130104b90a04d2f2`, `implementation-review-001: accept/high`, next gate `closed`.
 - Terminal UI design reviews: `review-001` revise/high on v1 (SHA-256 `c2c20927...a923f`, append-only); `review-002` approve/high on v2 (SHA-256 `40afdcfd1eb98594a8f4816ad652411ca8957c371cfc8a315b975bcaf3dad12e`). All `review-001` findings are closed in v2: live slug `^[a-z][a-z0-9_]{1,63}$`, color `^#[0-9A-Fa-f]{6}$`, JSON `detail`/raw error association, bottom-pinned peer-nav, name-stable `test:trade-records` file-list expansion.
@@ -46,18 +47,18 @@
 ## Resume Checklist
 
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
-3. Preserve unrelated changes and read `docs/operating-modes.md`, the current proposed Review Date Navigation plan, its source optimization/mockup, the completed Terminal UI plan, both Terminal UI implementation reviews, and the lifecycle indexes.
-4. The current plan is Active at `phase-0:not-started`. Do not start Phase 0 without a later separate implementation-start instruction.
-5. Terminal UI is Completed after remediation-1 and `implementation-review-002: accept/high`. Do not resume a prior phase or reuse consumed authority. Later commits, push/PR/merge, canonical data/provider/broker, publication, and remote actions require new authority.
-6. The multi-trader, operating-modes, and Review Workspaces plans are Completed; their prior authorities cannot be reused for this proposal.
-7. The transfer, Phase 6, and one-time 2026-07-20 commit/push instructions are consumed. Every further commit, push, and remote/publication action requires new authority.
-8. Keep existing completed-plan reviews append-only and preserve all current optimization screenshot moves and unrelated worktree paths.
+2. Run the full startup Git commands; do not treat historical HEAD evidence above as live worktree truth.
+3. Preserve unrelated dirty paths (`.playwright-cli/`, `output/`).
+4. Review Date Navigation And Trader Filter Fusion is **Completed** with `implementation-review-001: accept/high`. Implementation lives as a **local worktree freeze** (aggregate `ed19e6e7…`); no phase-exit durable commit was formed. A later exact-manifest checkpoint requires new authority.
+5. Do not push/PR/merge/Pages/provider/broker/mutate tracked DB or canonical content without new authority.
+6. Terminal UI, multi-trader, operating-modes, Review Workspaces, and Durable Checkpoint plans remain Completed; their authorities cannot be reused.
+7. Keep completed-plan reviews append-only.
 
 ## Verification Evidence
 
 | Check | Result |
 | --- | --- |
+| Current Review Date Nav + Trader Filter Fusion | Completed revision `v2-review-foldback-2026-07-20`; verified implementation ; freeze `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`; `implementation-review-001: accept/high`; frontend 48/48; builds/harness/protected hashes pass; next gate `closed`; no phase-exit commit or push/data/remote authority |
 | Current Durable Checkpoint governance | Completed revision `v2-review-foldback-2026-07-20`; verified implementation `61ea580f...`; `implementation-review-001: accept/high`; 171 operating + 38 checkpoint fixtures pass; next gate `closed`; no push/data/remote authority |
 | Current terminal UI/registry plan | Completed revision `v2-review-foldback-2026-07-20`, lifecycle schema `operating-modes-v1`; packet 002 `implementation-review-002: accept/high`, no findings; all phases and lifecycle surfaces closed; verified/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`; no later commit/canonical-data/remote authority |
 | Current Review Workspaces revision | `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`; packet `implementation-review-packet-001.md`; `implementation-review-001: accept/high`, no findings, Grok session `019f7bdd-3f80-7361-be62-f7be49f24147` |

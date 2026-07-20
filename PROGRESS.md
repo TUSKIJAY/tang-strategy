@@ -4,11 +4,13 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Lifecycle status: `Completed`
+- Current phase: `phase-5`
+- Phase state: `complete`
+- Next gate: `closed`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Review Date Navigation And Trader Filter Fusion is **Completed**. Goal OBJECTIVE `全权执行active plan` (`user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`) authorized implementation through closeout. Phases 0–5 landed on the local worktree: progressive Review date nav, B Chip set membership (no `focusedTraderId`), `Review 工具` utility, CALL/PUT `#6F9F7A`/`#E06B66`, shell `可编辑`/`只读`, YaHei typography. Frontend **48/48**, normal+static builds, governed/auto harness, 171/171 operating fixtures, durable-audit legacy-tolerated, compileall, protected hashes, and `git diff --check` pass. Independent `implementation-review-001: accept/high`. Worktree freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`. Durable phase-exit commit deferred (standing checkpoint kinds lack phase-exit). Push/PR/merge/Pages/provider/broker/DB/content remain unauthorized. Next gate: `closed`.
 
 2026-07-21: Review plan checkpoint 链通过：`proposal-revision=52498ad`，`design-review=3a6a5ae`。已按用户指令迁移到 `Active/phase-0:not-started`，当前形成 `activation-recording`；next gate `phase-0-start`。未启动实施，不含数据或远端动作。
 
