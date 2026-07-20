@@ -93,6 +93,59 @@ class DurableCheckpointTests(unittest.TestCase):
 """,
         )
 
+    def write_review_plan(self, *, design_reviews: str, kinds: str) -> None:
+        write(
+            self.root / "docs/exec-plans/active/demo-plan.md",
+            f"""# Demo
+
+- Lifecycle schema: `operating-modes-v2`
+- Plan slug: `demo-plan`
+- Revision: `r1`
+- Design reviews: {design_reviews}
+- Implementation reviews: none
+- Checkpoint authority: `{AUTHORITY}`
+- Checkpoint authority mode: standing
+- Checkpoint authority kinds: {kinds}
+- Expected checkpoint kind: none
+
+## Body
+""",
+        )
+
+    def create_design_review_chain(self, *, target_kind: str = "plan-proposal") -> tuple[str, str]:
+        kinds = f"{target_kind},design-review"
+        self.write_review_plan(design_reviews="none", kinds=kinds)
+        self.git("add", "--", "docs/exec-plans/active/demo-plan.md")
+        target_request = self.request("docs/exec-plans/active/demo-plan.md", kind=target_kind)
+        target_request["work_unit"] = "phase-1" if target_kind == "phase-exit" else "none"
+        target_request["outcome"] = "complete"
+        target = self.commit_checkpoint(target_request)
+
+        review_relative = "docs/exec-plans/reviews/demo-plan/review-001.md"
+        write(
+            self.root / review_relative,
+            f"""# Review
+
+- Review target commit: `{target}`
+
+## Findings
+""",
+        )
+        self.write_review_plan(
+            design_reviews="../reviews/demo-plan/review-001.md@approve@r1",
+            kinds=kinds,
+        )
+        self.git("add", "--", "docs/exec-plans/active/demo-plan.md", review_relative)
+        review_request = self.request(
+            review_relative,
+            operation="create",
+            kind="design-review",
+            outcome="approve",
+        )
+        review_request["work_unit"] = "none"
+        review = self.commit_checkpoint(review_request)
+        return target, review
+
     def request(
         self,
         path: str = "docs/work.md",
@@ -574,6 +627,30 @@ class DurableCheckpointTests(unittest.TestCase):
         self.git("commit", "-qm", "expected claim")
         completed, payload = self.checker("--mode", "audit", "--legacy-tolerated")
         self.assert_error(completed, payload, "missing expected v2 checkpoint")
+
+    def test_audit_accepts_review_target_checkpoint_ancestry(self) -> None:
+        self.create_design_review_chain()
+        completed, payload = self.checker("--mode", "audit", "--legacy-tolerated")
+        self.assertEqual(completed.returncode, 0, payload)
+
+    def test_audit_rejects_review_target_checkpoint_kind_mismatch(self) -> None:
+        self.create_design_review_chain(target_kind="phase-exit")
+        completed, payload = self.checker("--mode", "audit", "--legacy-tolerated")
+        self.assert_error(completed, payload, "target checkpoint kind/subject/revision mismatch")
+
+    def test_audit_rejects_review_without_checkpoint_commit(self) -> None:
+        self.write_review_plan(
+            design_reviews="../reviews/demo-plan/review-001.md@approve@r1",
+            kinds="plan-proposal,design-review",
+        )
+        write(
+            self.root / "docs/exec-plans/reviews/demo-plan/review-001.md",
+            "# Review\n\n- Review target commit: `" + self.git("rev-parse", "HEAD") + "`\n",
+        )
+        self.git("add", "--", "docs/exec-plans/active/demo-plan.md", "docs/exec-plans/reviews/demo-plan/review-001.md")
+        self.git("commit", "-qm", "uncheckpointed review")
+        completed, payload = self.checker("--mode", "audit", "--legacy-tolerated")
+        self.assert_error(completed, payload, "expected exactly one design-review checkpoint")
 
     def test_checker_is_read_only(self) -> None:
         request = self.request()

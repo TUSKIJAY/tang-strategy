@@ -612,6 +612,136 @@ def git_history(root: Path) -> list[tuple[str, str]]:
     return result
 
 
+def commit_paths(root: Path, commit: str) -> set[str]:
+    raw = bytes(
+        git(
+            root,
+            "diff-tree",
+            "--root",
+            "--no-commit-id",
+            "--name-only",
+            "-r",
+            "-z",
+            commit,
+            text=False,
+        )
+    )
+    return {
+        item.decode("utf-8", "surrogateescape")
+        for item in raw.split(b"\0")
+        if item
+    }
+
+
+def is_strict_ancestor(root: Path, ancestor: str, descendant: str) -> bool:
+    if ancestor == descendant:
+        return False
+    completed = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=root,
+        check=False,
+        capture_output=True,
+    )
+    if completed.returncode not in {0, 1}:
+        raise CheckFailure(
+            f"git merge-base --is-ancestor {ancestor} {descendant} failed: "
+            f"{completed.stderr.decode('utf-8', 'replace').strip()}"
+        )
+    return completed.returncode == 0
+
+
+def resolve_review_path(root: Path, plan_path: Path, raw_path: str) -> Path | None:
+    candidate = (plan_path.parent / raw_path).resolve()
+    try:
+        candidate.relative_to(root.resolve())
+    except ValueError:
+        return None
+    return candidate
+
+
+def audit_review_chain(
+    root: Path,
+    plan_path: Path,
+    metadata: dict[str, str],
+    checkpoints: list[dict[str, str]],
+    checkpoint_paths: dict[str, set[str]],
+    errors: list[str],
+) -> None:
+    subject = metadata.get("Plan slug", "")
+    revision = metadata.get("Revision", "")
+    by_commit = {item["commit"]: item for item in checkpoints}
+    declarations: list[tuple[str, str, str | None, str, str, set[str]]] = []
+
+    raw_design = metadata.get("Design reviews", "none")
+    if raw_design != "none":
+        for item in raw_design.split(", "):
+            parts = item.rsplit("@", 2)
+            if len(parts) == 3:
+                declarations.append(
+                    (parts[0], "design-review", None, parts[1], parts[2], {"plan-proposal", "proposal-revision"})
+                )
+
+    raw_implementation = metadata.get("Implementation reviews", "none")
+    if raw_implementation != "none":
+        for item in raw_implementation.split(", "):
+            parts = item.rsplit("@", 2)
+            if len(parts) == 3 and HEX40_RE.fullmatch(parts[2]):
+                declarations.append(
+                    (
+                        parts[0],
+                        "implementation-review",
+                        parts[2],
+                        parts[1],
+                        revision,
+                        {"phase-exit", "remediation-complete"},
+                    )
+                )
+
+    for raw_path, review_kind, declared_target, verdict, target_revision, target_kinds in declarations:
+        review_path = resolve_review_path(root, plan_path, raw_path)
+        if review_path is None or not review_path.is_file():
+            errors.append(f"{plan_path.relative_to(root)}: review path unavailable for checkpoint audit: {raw_path}")
+            continue
+        review_relative = review_path.relative_to(root).as_posix()
+        review_metadata = parse_metadata(review_path)
+        target = review_metadata.get("Review target commit", "")
+        if not HEX40_RE.fullmatch(target):
+            errors.append(f"{review_relative}: missing valid Review target commit")
+            continue
+        if declared_target is not None and target != declared_target:
+            errors.append(f"{review_relative}: Review target commit differs from plan declaration")
+
+        review_commits = [
+            item
+            for item in checkpoints
+            if item["Tang-Checkpoint"] == review_kind
+            and item["Tang-Subject"] == subject
+            and review_relative in checkpoint_paths[item["commit"]]
+        ]
+        if len(review_commits) != 1:
+            errors.append(
+                f"{review_relative}: expected exactly one {review_kind} checkpoint containing the review; "
+                f"found {len(review_commits)}"
+            )
+            continue
+        review_commit = review_commits[0]
+        if review_commit["Tang-Revision"] != target_revision or review_commit["Tang-Outcome"] != verdict:
+            errors.append(f"{review_relative}: review checkpoint subject/revision/outcome mismatch")
+
+        target_checkpoint = by_commit.get(target)
+        if target_checkpoint is None:
+            errors.append(f"{review_relative}: Review target commit is not a durable checkpoint")
+            continue
+        if (
+            target_checkpoint["Tang-Checkpoint"] not in target_kinds
+            or target_checkpoint["Tang-Subject"] != subject
+            or target_checkpoint["Tang-Revision"] != target_revision
+        ):
+            errors.append(f"{review_relative}: Review target checkpoint kind/subject/revision mismatch")
+        if not is_strict_ancestor(root, target, review_commit["commit"]):
+            errors.append(f"{review_relative}: Review target commit is not a strict ancestor of review checkpoint")
+
+
 def audit(root: Path, legacy_tolerated: bool) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -629,6 +759,7 @@ def audit(root: Path, legacy_tolerated: bool) -> dict[str, Any]:
         checkpoints.append({"commit": commit, **trailers})
 
     one_shot_uses: dict[tuple[str, str], list[str]] = {}
+    checkpoint_paths = {item["commit"]: commit_paths(root, item["commit"]) for item in checkpoints}
     for item in checkpoints:
         _path, metadata = subject_metadata(root, item["Tang-Subject"])
         if not metadata:
@@ -654,6 +785,7 @@ def audit(root: Path, legacy_tolerated: bool) -> dict[str, Any]:
             metadata = parse_metadata(path)
             if metadata.get("Lifecycle schema") != "operating-modes-v2":
                 continue
+            audit_review_chain(root, path, metadata, checkpoints, checkpoint_paths, errors)
             expected = metadata.get("Expected checkpoint kind", "none")
             if expected == "none":
                 continue
