@@ -7,10 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
 
-2026-07-21: Review Date Navigation plan recovery baseline 已通过；当前形成 v2 `proposal-revision` checkpoint，v1 `review-001` 保持 append-only，next gate `design-review`。授权仅覆盖修复链与 activation；不含实施、数据或远端动作。
+2026-07-21: Review plan 的 `proposal-revision` checkpoint `52498ad` 已通过；v2 `review-002: approve/high` 现绑定该祖先并形成唯一 `design-review` checkpoint，v1 `review-001` 保持 append-only。next gate `activation-recording`；不含实施、数据或远端动作。
 
 2026-07-20: `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` 已由 exact implementation/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`、紧邻 boundary-metadata commit 及其最终 `codex/project-harness` push 消费；不授权进一步 commit/push、PR、merge、Pages、canonical data、provider/broker 或其他远端动作。
 

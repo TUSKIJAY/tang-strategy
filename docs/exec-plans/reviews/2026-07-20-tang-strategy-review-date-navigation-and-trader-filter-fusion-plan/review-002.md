@@ -6,10 +6,10 @@
 - Reviewer ID: `grok-build-design-reviewer-2026-07-21-review-date-filter-fusion-r2`
 - Plan author ID: `codex-plan-author-2026-07-20-review-date-filter-fusion`
 - Independence declaration: `attested`
-- Evidence method: Independent re-read of exact revision `v2-review-foldback-2026-07-20` (plan content SHA-256 `37c20e383ecaebe03ea3fbd78f90e9678514e434946a0f9cbf3717f600abb8d9`) against live HEAD `45ca9cb231ef459b7d03bad246d762ed1139bf86`; closure check of every `review-001` medium and non-blocking finding against operative v2 sections §1.4 / §2.2 / §2.3 / §3.1–3.4 / Phases 0–3 / §6 / §7.2; live re-check of shared `DateRail` callers, `focusedTraderId` carriers, `--trader-color` card/chip bindings, Ext K/Rescan/Backtest placement, protected DB/registry/publisher/exporter hashes, sole mockup jump row, and `docs/operating-modes.md` Proposed activation-recording gate. No eligible `proposal-revision` durable checkpoint existed at review time; content identity is the plan SHA-256 above. No implementation, browser acceptance, data write, provider/broker, stage/commit/push, PR, merge, Pages, or remote administration was performed.
+- Evidence method: Independent re-read of revision `v2-review-foldback-2026-07-20` originally established product-content SHA-256 `37c20e383ecaebe03ea3fbd78f90e9678514e434946a0f9cbf3717f600abb8d9`; closure check covered every `review-001` finding, live Review carriers, protected boundaries, the locked mockup, and the operating-modes activation gate. Under the user's 2026-07-21 checkpoint-chain recovery instruction, the same reviewed product contracts plus explicit authority/recovery metadata were recorded at `proposal-revision` checkpoint `52498ad533a09b822ef3d28eee08caaadb2d8a41`, whose complete plan post-image SHA-256 is `edb3160485fbd34132d8d5de2230181677d4ef5a1d6453e95716ab9f30300223`. The recovery changes only lifecycle/checkpoint metadata and preserves the independently approved implementation design. No implementation, data, provider/broker, push/PR/merge, Pages, or remote action was performed.
 - Verdict: approve
 - Confidence: high
-- Review target commit: `45ca9cb231ef459b7d03bad246d762ed1139bf86`
+- Review target commit: `52498ad533a09b822ef3d28eee08caaadb2d8a41`
 
 ## Scope Checked
 
@@ -60,12 +60,12 @@ V2 is a complete, implementable foldback of `review-001`. No blocking or medium 
 - Outside-click close for `Review 工具` remains optional; if implemented, it must obey the existing “no second close contract / no focus steal” rule already frozen in §3.3.
 - Optional list direction rail may use CALL/PUT semantic color only; Phase 0 may freeze whether the rail is present without reopening name/color identity rules.
 
-**Authority boundary:** This matching-revision design `approve` does **not** activate the plan, start implementation, stage/commit/push, write canonical data, open PR/merge, publish Pages, or grant provider/broker/remote authority. No eligible `proposal-revision` durable checkpoint existed for this revision; the `Review target commit` field records the claimed proposal baseline HEAD, while plan content identity for this inspection is SHA-256 `37c20e383ecaebe03ea3fbd78f90e9678514e434946a0f9cbf3717f600abb8d9`. After this review, the next legal user action is an explicit activation instruction that must stop at `phase-0:not-started`; implementation requires a later explicit start instruction. Local durable checkpoints, if later authorized, must follow `docs/operating-modes.md` §9–10 and cannot reuse prior Terminal UI or governance authority.
+**Authority boundary:** This matching-revision design `approve` does **not** start implementation, write canonical data, push/open PR/merge, publish Pages, or grant provider/broker/remote authority. Its target is the eligible `proposal-revision` checkpoint above; the separate 2026-07-21 user instruction authorizes only chain repair and lifecycle activation, which must stop at `phase-0:not-started`. Implementation still requires a later explicit start instruction.
 
 ## Unverified By Design-Review Boundary
 
 - Browser/desktop-narrow progressive rail, drawer, and `Review 工具` execution
 - Computed Microsoft YaHei fallback rendering on non-Windows hosts
 - Simulated 7/8-trader fixture injection without canonical writes
-- Eligible `proposal-revision` / `design-review` durable checkpoint ancestry
+- Product implementation and implementation-review evidence
 - Hosted Pages, provider/broker, and tracked content mutation behavior

@@ -5,14 +5,14 @@
 - Plan slug: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
 - Revision: `v2-review-foldback-2026-07-20`
 - Plan author ID: `codex-plan-author-2026-07-20-review-date-filter-fusion`
-- Design reviews: none
-- Latest design verdict: none
-- Review independence: none
+- Design reviews: ../reviews/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan/review-002.md@approve@v2-review-foldback-2026-07-20
+- Latest design verdict: approve
+- Review independence: attested
 - Activation evidence: none
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -26,7 +26,7 @@
 - Checkpoint authority: `user-instruction:2026-07-21-repair-review-date-filter-checkpoints-and-activate`
 - Checkpoint authority mode: standing
 - Checkpoint authority kinds: design-review,proposal-revision,activation-recording
-- Expected checkpoint kind: proposal-revision
+- Expected checkpoint kind: design-review
 - Owner: Codex
 - Created: 2026-07-20
 - Optimization source: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md`
@@ -383,8 +383,8 @@ The full backend suite is required only if implementation evidence shows a backe
 ## 8. Commit, Data, Remote, And Publication Boundaries
 
 - This Proposed plan remains implementation-free. The user's 2026-07-21 recovery instruction authorizes only the exact local `proposal-revision`, `design-review`, and `activation-recording` checkpoints needed to repair this subject and then activate it; it does not authorize product implementation, push, PR, merge, Pages publication, hosted verification, provider/broker access, tracked DB/canonical content mutation, or remote administration.
-- Recovery starts from a separately recorded clean baseline. The v2 declaration intentionally excludes append-only v1 `review-001`; only matching-revision v2 `review-002` may enter the audited checkpoint chain after its target is reconciled to the newly formed `proposal-revision` checkpoint.
-- This revision is the complete post-image for the newly formed `proposal-revision` checkpoint. Its next gate is `design-review`; after that real commit boundary passes, the expected kind advances to `design-review`, then to `activation-recording` only at activation. No old commit is relabeled or backdated.
+- Recovery started from a separately recorded clean baseline. The v2 declaration intentionally excludes append-only v1 `review-001`; matching-revision v2 `review-002` now targets the newly formed `proposal-revision` checkpoint `52498ad533a09b822ef3d28eee08caaadb2d8a41`.
+- This post-image records the one real `design-review` checkpoint for `review-002`; next gate is `activation-recording`. No old commit was relabeled or backdated.
 - Matching-revision design `approve` does not activate the plan. Activation requires a separate explicit user instruction and changes lifecycle files only.
 - Activation does not start Phase 0. Implementation requires another explicit start/execute instruction after activation recording.
 - Local acceptance does not grant checkpoint, push, publication, or remote authority. Any later local checkpoint must use a literal, exact manifest and valid `Tang-*` trailers; it cannot include `.playwright-cli/`, `output/`, generated Review JSON, or Vite output.
