@@ -1,18 +1,18 @@
 # Tang Strategy Terminal UI Fusion And Trader Registry
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Proposed
+- Status: Active
 - Plan slug: `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`
 - Revision: `v2-review-foldback-2026-07-20`
 - Plan author ID: `codex-plan-author-2026-07-20-terminal-ui-registry`
 - Design reviews: docs/exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/review-001.md@revise@v1-proposal-2026-07-20, docs/exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/review-002.md@approve@v2-review-foldback-2026-07-20
 - Latest design verdict: approve
 - Review independence: attested
-- Activation evidence: none
-- Current phase: none
-- Phase state: none
-- Phase entry gate: none
-- Next gate: `activation-recording`
+- Activation evidence: `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`
+- Current phase: phase-0
+- Phase state: not-started
+- Phase entry gate: `activation:user-instruction:2026-07-20-activate-terminal-ui-trader-registry`
+- Next gate: `phase-0-start`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -20,7 +20,7 @@
 - Owner: Codex
 - Created: 2026-07-20
 - Optimization source: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md`
-- Scope authority: review-only proposal creation; no implementation, activation, data write, Git stage/commit/push, PR, merge, Pages publication, provider/broker access, hosted verification, or remote administration is authorized
+- Scope authority: lifecycle activation recording only; no implementation, Phase 0 start, data write, Git stage/commit/push, PR, merge, Pages publication, provider/broker access, hosted verification, or remote administration is authorized
 
 ## 1. Context And Evidence
 
@@ -64,7 +64,13 @@ At the v2 foldback freeze, the plan remained Proposed and review-only. `review-0
 
 Independent `review-002` returned `approve/high` with no findings against exact revision `v2-review-foldback-2026-07-20` at reviewed SHA-256 `40afdcfd1eb98594a8f4816ad652411ca8957c371cfc8a315b975bcaf3dad12e`. It rechecked every `review-001` closure, the live slug/color validators and schema, JSON-`detail`/raw error carrier, bottom-pinned navigation structure, name-stable test carrier, protected hashes, token contrast, phase gates, and authority boundaries. No design-contract or revision change is required from `review-002`.
 
-The plan remains Proposed and review-only after approval. The next gate is `activation-recording`, which requires a separate explicit user instruction and must stop at `phase-0:not-started`; implementation still requires a later explicit start instruction.
+The plan remained Proposed and review-only after approval until the separate activation instruction recorded below. Design approval did not itself grant activation or implementation authority.
+
+### 1.6 Activation recording
+
+The user instruction `user-instruction:2026-07-20-activate-terminal-ui-trader-registry` authorizes exactly the adjacent lifecycle move from Proposed to Active for revision `v2-review-foldback-2026-07-20`. The plan is now recorded at `phase-0:not-started` with next gate `phase-0-start`.
+
+This activation does not start Phase 0 or authorize implementation, Git stage/commit/push, canonical data writes, provider/broker access, Pages publication, hosted verification, or remote administration. A later explicit implementation-start instruction is still required.
 
 ## 2. Objective And Success Criteria
 
@@ -196,7 +202,7 @@ Phase 0 must freeze an exact Add/Modify/Remove manifest. If implementation needs
 
 ### Phase 0 — Baseline, Token Table, And Exact Scope Freeze
 
-- Entry gate: this exact revision has a qualifying independent design review with `approve`; the user separately authorizes lifecycle activation; activation is recorded at `phase-0:not-started`; and a later explicit implementation-start instruction opens `phase-0-start`.
+- Entry gate: matching-revision `review-002: approve/high` and activation evidence `user-instruction:2026-07-20-activate-terminal-ui-trader-registry` are satisfied; the plan is Active at `phase-0:not-started`. Phase 0 remains closed until a later explicit implementation-start instruction opens `phase-0-start`.
 - Work:
   - rerun the startup contract and inventory every pre-existing dirty path;
   - capture current HEAD/status, exact Add/Modify/Remove manifest, CSS token/color consumer map, page/root classes, nav semantics, frontend test carriers, and registry create/write boundaries;
@@ -339,7 +345,7 @@ Use the repository's pinned backend environment when the default interpreter lac
 
 ## 8. Commit, Remote, Data, And Publication Boundaries
 
-- This proposal authorizes only the local lifecycle/documentation edits required to create the Proposed plan.
+- This activation authorizes only the local lifecycle/documentation edits required to move the approved plan from Proposed to Active and record `phase-0:not-started`.
 - No stage or commit is authorized. If future commit authority is granted, stage only the exact frozen plan paths and keep unrelated worktree changes excluded.
 - Activation does not authorize implementation. Implementation requires a later explicit start/execute instruction after lifecycle activation records `phase-0:not-started`.
 - Registry-create acceptance must use isolated temporary content/DB copies. It does not authorize a new canonical trader in the tracked repository.
@@ -351,5 +357,5 @@ Use the repository's pinned backend environment when the default interpreter lac
 - Current review target revision: `v2-review-foldback-2026-07-20`; `review-001: revise/high` is retained as append-only v1 evidence, and `review-002: approve/high` qualifies exact v2 with no findings.
 - Required design verdict: satisfied by qualifying independent `review-002` for exact v2 after checking the token/accessibility contract, single-plan bundling, no-backend boundary, create-trader draft/save semantics, isolated data acceptance, and phase exit gates.
 - Any future design-contract change requires a new stable revision and matching-revision review; approval of an older revision never qualifies a changed contract.
-- After design approval, the user must separately instruct activation. Activation moves exactly this plan to `active/`, records durable activation evidence, and stops at `phase-0:not-started`.
+- Activation is satisfied by `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`; exactly this plan has moved to `active/` and stopped at `phase-0:not-started`.
 - Implementation start requires a later explicit start/execute instruction. Review, activation, and implementation authority do not grant Git, data, provider/broker, publication, or remote authority.

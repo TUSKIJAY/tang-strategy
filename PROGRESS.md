@@ -3,12 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan`
-- Lifecycle status: `Completed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `closed`
+- Current plan: `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
+
+2026-07-20: 用户以“把这个 prop plan 迁移到 active”明确授权 Terminal UI/Trader Registry exact revision `v2-review-foldback-2026-07-20` 的 lifecycle activation，记录为 `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`。已且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap、optimization 回链与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。本次 activation 不启动 Phase 0，不授权实现、Git stage/commit/push、canonical data/DB、provider/broker、Pages、hosted 或任何远端动作；durable checkpoint 本地提交权限未授予，因此 plan 保持兼容的 `operating-modes-v1`。
 
 2026-07-20: 独立 Antigravity reviewer（ID `agy-antigravity-implementation-reviewer-2026-07-20-durable-checkpoint`）对 exact target `61ea580f0b284d835c79cd47130104b90a04d2f2` 完成 read-only implementation review，独立重跑 209/209 governance fixtures 并返回 `accept/high`、Findings none。Reviewer 确认 checker 只读、request/receipt/trailer/authority 与 safety gates、same-file/unrelated-dirty、v1/v2 兼容、review strict ancestry、CI/Pages 边界和 v1 bootstrap 均满足。Plan 已迁移至 Completed，verified implementation commit 为 `61ea580f...`，v1 lifecycle reconciliation boundary 为 `96166a51561ea75f4a6bcad9de9f97fdb7ff2e1d`，next gate `closed`；standing local commit authority 已消耗完毕。未 push/PR/merge/Pages/data/provider/broker/远端操作。
 
@@ -113,14 +115,14 @@
 | Stable project rules | `INSTRUCTIONS.md` |
 | Current resume point | `HANDOFF.md` |
 | Harness configuration | `.harness/config.json` |
-| Current active plan | `docs/exec-plans/active/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md` |
-| Secondary proposed plan | `docs/exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md` |
+| Current active plan | `docs/exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md` |
+| Completed durable checkpoint plan | `docs/exec-plans/completed/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md` |
 | Completed Review UI plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md` |
 | Review-ready packet | `docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/evidence/implementation-review-packet-001.md` |
 | Completed multi-trader plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-multi-trader-spy-qqq-trade-data-refactor-plan.md` |
 | Completed operating-modes plan | `docs/exec-plans/completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md` |
 | Previous completed plan | `docs/exec-plans/completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md` |
-| Verification and reviews | `docs/exec-plans/reviews/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan/` |
+| Verification and reviews | `docs/exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/` |
 
 ## In Progress
 
@@ -132,8 +134,8 @@
 
 ## To Do
 
+- [ ] Await a separate implementation-start instruction before opening Terminal UI Phase 0.
 - [x] Recorded the explicit activation instruction for exact revision `v2-review-foldback-2026-07-20` and kept activation distinct from implementation start.
-- [x] Recorded the separate implementation-start instruction and standing plan-scoped local commit authority; Phase 0 proved the shared-path clean/absent entry gate before implementation.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups/`; they are not approved work.
 
 ## Completed

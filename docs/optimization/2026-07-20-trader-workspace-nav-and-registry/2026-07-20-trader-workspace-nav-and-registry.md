@@ -1,13 +1,13 @@
 # Optimization Batch · 2026-07-20 UI Fusion, Color Unification, And Trader Registry
 
-> Promoted by explicit user request to a review-only [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md), now at `v2-review-foldback-2026-07-20` after [`review-001: revise`](../../exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/review-001.md) was folded back and exact-v2 [`review-002: approve`](../../exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/review-002.md) closed the design gate with no findings. This record and its plan do not authorize implementation, activation, frontend change, Git, data write, provider/broker, Pages, or remote action.
+> Promoted by explicit user request to an [active plan](../../exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md), now at `v2-review-foldback-2026-07-20` after [`review-001: revise`](../../exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/review-001.md) was folded back and exact-v2 [`review-002: approve`](../../exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/review-002.md) closed the design gate with no findings. Activation evidence is `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`; the plan is stopped at `phase-0:not-started` and does not authorize implementation, frontend change, Git, data write, provider/broker, Pages, or remote action.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Fuse bottom-left trader-workspace entry with the primary sidebar nav | App shell / navigation | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) | User locked: peer chrome with upper nav; drop orange CTA |
-| OPT-002 | Make adding a new trader discoverable in the registry form | Admin trader registry | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) | Registry only edits existing rows; plan selects an inline create draft with user-entered stable slug |
-| OPT-003 | Fuse Review trade-filter/list block with upper Review context chrome | Review left column / trade panel | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) | Eligibility / Focus / Download / cards join the shared terminal tokens and Review density |
-| OPT-004 | Unify Review color system with the rest of the app | App-wide visual language | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) | User locked **A terminal-first**: promote Review charcoal/olive family app-wide |
+| OPT-001 | Fuse bottom-left trader-workspace entry with the primary sidebar nav | App shell / navigation | active-plan | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) | User locked: peer chrome with upper nav; drop orange CTA |
+| OPT-002 | Make adding a new trader discoverable in the registry form | Admin trader registry | active-plan | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) | Registry only edits existing rows; plan selects an inline create draft with user-entered stable slug |
+| OPT-003 | Fuse Review trade-filter/list block with upper Review context chrome | Review left column / trade panel | active-plan | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) | Eligibility / Focus / Download / cards join the shared terminal tokens and Review density |
+| OPT-004 | Unify Review color system with the rest of the app | App-wide visual language | active-plan | [active plan](../../exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) | User locked **A terminal-first**: promote Review charcoal/olive family app-wide |
 
 ## Visual Reference
 
@@ -77,7 +77,7 @@ It lives in `ReviewPage`’s left column under the workspace date rail and strat
 - Boundary that must not change:
   - admin-only mutation, readonly inspection, auth/session, route set;
   - no publication, provider/broker, DB schema, or remote action from a nav restyle.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: active-plan
 
 ## OPT-002 Discoverable Path To Add A New Trader
 
@@ -113,7 +113,7 @@ It lives in `ReviewPage`’s left column under the workspace date rail and strat
   - schema validation, atomic content replacement, candidate DB projection, and rollback coherence;
   - no fabrication of market days or trade points when only a trader identity is added;
   - no commit/push/publication authority from this record.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: active-plan
 
 ## OPT-003 Fuse Review Trade-Filter/List With Upper Review Chrome
 
@@ -149,7 +149,7 @@ It lives in `ReviewPage`’s left column under the workspace date rail and strat
   - OPT-003 = **inner Review column** trade-panel fusion with the controls above it.
   - OPT-004 = **page-level color system** so Review is not a different product skin from Data/Admin/etc.
   - Fixing only OPT-001 removes the orange bleed; fixing OPT-003 addresses the pink-boxed block; fixing OPT-004 decides the shared palette both of those restyles must join.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: active-plan
 
 ## OPT-004 Unify Review Color System With The Rest Of The App
 
@@ -195,7 +195,7 @@ It lives in `ReviewPage`’s left column under the workspace date rail and strat
   - no auth/data/provider/publisher change from a theme pass;
   - K-line engine behavior and review assembly contracts remain;
   - prior dark Review reference informs chart/workbench density but does not by itself authorize leaving the rest of the app on a permanent second brand without an explicit dual-theme decision.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: active-plan
 
 ## Relationship To Earlier Same-Day Draft
 
@@ -217,10 +217,10 @@ OPT-002  functional: discoverable add-trader (can ship with or after visual work
 3. OPT-003 keeps shared components, moves them to the same product tokens, and uses only an optional Review density rather than a second brand palette.
 4. OPT-002 uses an inline admin create draft. `trader_id` is user-entered, matches exact `^[a-z][a-z0-9_]{1,63}$`, is never silently generated, and becomes immutable after successful persistence; color matches exact `^#[0-9A-Fa-f]{6}$`, and server errors associate fields only from JSON `detail` or raw error-body paths with a form-level fallback.
 5. OPT-001 through OPT-004 are bundled into one plan with separate visual, Review, registry, and integrated-acceptance phases.
-6. The created plan remains Proposed and review-only. Exact-v2 design review is approved; activation, implementation start, Git, data, publication, provider/broker, and remote authority remain separate.
+6. The exact-v2 design review is approved and the plan is Active at `phase-0:not-started`. Activation is recorded; implementation start, Git, data, publication, provider/broker, and remote authority remain separate.
 
 ## Promotion Boundary
 
-This batch has been promoted by the user's explicit request to [`Tang Strategy Terminal UI Fusion And Trader Registry`](../../exec-plans/proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md). The batch layout remains this markdown file plus sibling `screenshots/` under `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
+This batch has been promoted by the user's explicit request to [`Tang Strategy Terminal UI Fusion And Trader Registry`](../../exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md). The batch layout remains this markdown file plus sibling `screenshots/` under `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
 
-Current path: optimization record → **Proposed v2, design-approved** → explicit activation instruction/recording (next) → separate implementation-start authority. `review-001` targets v1; `review-002` approves exact v2 but does not activate it. No runtime, Git, remote, data, provider/broker, or publication action is authorized by promotion or review approval.
+Current path: optimization record → Proposed v2/design approval → **Active at `phase-0:not-started`** → separate implementation-start authority (next). `review-001` targets v1; `review-002` approves exact v2; activation is recorded by `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`. No runtime, Git, remote, data, provider/broker, or publication action is authorized by activation.

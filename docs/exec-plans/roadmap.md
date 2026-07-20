@@ -40,11 +40,11 @@ v1 through implementation review and closeout.
 
 ## Active Plans
 
-None.
+- [Tang Strategy Terminal UI Fusion And Trader Registry](./active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) — Active; canonical details: [active index](./active/index.md)
 
 ## Proposed Plans
 
-- [Tang Strategy Terminal UI Fusion And Trader Registry](./proposed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
+None.
 
 ## Completed Plans
 
