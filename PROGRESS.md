@@ -5,10 +5,14 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-0`
+- Current phase: `phase-1`
 - Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Next gate: `phase-1-start`
 <!-- operating-modes-state:end -->
+
+2026-07-20: Terminal UI/Trader Registry Phase 0 已完成并迁移到 `operating-modes-v2`：从 clean baseline `3f589a0` 冻结精确 Add/Modify/Remove manifest、15-token terminal contract、registry exact-regex/error-body fixtures、protected DB/content/backend/schema/publisher/exporter/runbook hashes/counts，以及 16 张 Playwright before-state PNG（desktop/narrow、expanded/collapsed、interactive/static）。38/38 frontend、两种 build、171/171 lifecycle fixtures、governed/auto/direct checks、startup budget、SQLite integrity/FK 与 diff check 通过；backend registry baseline 21 项中 20 项通过，唯一 error 是既有 Windows/Python 3.14 临时 SQLite teardown 锁，发生在产品断言后且在任何前端源码修改前，按 environment failure 记录而非冒充 pass。Phase 0 exit gate 满足，进入 `phase-1:not-started` / `phase-1-start`；首个 v2 `phase-exit` checkpoint 使用一次性 `user-instruction:2026-07-20-commit-activation-with-next-phase`，未授权后续 phase commit 或任何远端/data/provider/publisher 动作。
+
+2026-07-20: 用户通过 `/goal 这个plan交给你全权负责执行` 为 Terminal UI/Trader Registry exact revision `v2-review-foldback-2026-07-20` 发出独立 implementation-start 指令，记录为 `user-instruction:2026-07-20-execute-terminal-ui-registry-plan`。Phase 0 已进入 `in-progress`，当前冻结 live baseline、精确 manifest、token/registry contracts 与受保护边界；本地实现、验证、必要 remediation、独立 implementation review、lifecycle closeout 及隔离临时 content/SQLite 验收获授权。用户随后允许现有 activation 变更随下一 phase 提交；由于 v2 durable checkpoint 禁止把两个生命周期产品塞进同一 checkpoint，pre-dirty activation 已作为 v1-compatible scoped commit `3f589a027d3c1351672660ab8f4e9157a792821e` 独立固化，`user-instruction:2026-07-20-commit-activation-with-next-phase` 保留为一次 Phase 0 `phase-exit` checkpoint 权限。未授权 canonical content/tracked DB、push/PR/merge、Pages/hosted、provider/broker 或其他远端动作。
 
 2026-07-20: 用户以“把这个 prop plan 迁移到 active”明确授权 Terminal UI/Trader Registry exact revision `v2-review-foldback-2026-07-20` 的 lifecycle activation，记录为 `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`。已且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap、optimization 回链与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。本次 activation 不启动 Phase 0，不授权实现、Git stage/commit/push、canonical data/DB、provider/broker、Pages、hosted 或任何远端动作；durable checkpoint 本地提交权限未授予，因此 plan 保持兼容的 `operating-modes-v1`。
 
@@ -134,12 +138,13 @@
 
 ## To Do
 
-- [ ] Await a separate implementation-start instruction before opening Terminal UI Phase 0.
+- [x] Recorded the separate implementation-start instruction and opened Terminal UI Phase 0.
 - [x] Recorded the explicit activation instruction for exact revision `v2-review-foldback-2026-07-20` and kept activation distinct from implementation start.
 - [ ] Record-only follow-ups remain in `docs/optimization/2026-07-18-repository-audit-followups/`; they are not approved work.
 
 ## Completed
 
+- [x] 2026-07-20 - Completed Terminal UI/Trader Registry Phase 0 with a clean checkpoint baseline, exact frontend/docs manifest, frozen terminal/token/registry contracts, protected-boundary hashes, 16-image browser baseline, truthful baseline failure classification, and no runtime/data/provider/publisher mutation.
 - [x] 2026-07-20 - Completed Review Workspaces Phase 6 and the full plan after external Grok Build independently accepted the exact frozen revision at high confidence with no findings; digests remained exact, lifecycle/index/state links were reconciled, and protected data/Git/remote boundaries remained unchanged.
 - [x] 2026-07-20 - Completed Review Workspaces Phase 5 with full backend/frontend/governance regression, desktop+narrow interactive/static matrices, keyboard/focus/announcement recovery, ten fresh screenshots, visual-reference comparison, and exact protected-boundary proof.
 - [x] 2026-07-20 - Completed Review Workspaces Phase 4 with shared Static workspace/trader/control contracts, hash compatibility, honest no-trader state, one engine owner, 37/37 tests, isolated 49-day export, four fresh browser artifacts, and unchanged publication/data boundaries.

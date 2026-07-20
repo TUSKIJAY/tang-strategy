@@ -1,6 +1,6 @@
 # Tang Strategy Terminal UI Fusion And Trader Registry
 
-- Lifecycle schema: `operating-modes-v1`
+- Lifecycle schema: `operating-modes-v2`
 - Status: Active
 - Plan slug: `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`
 - Revision: `v2-review-foldback-2026-07-20`
@@ -9,18 +9,28 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`
-- Current phase: phase-0
+- Current phase: phase-1
 - Phase state: not-started
-- Phase entry gate: `activation:user-instruction:2026-07-20-activate-terminal-ui-trader-registry`
-- Next gate: `phase-0-start`
+- Phase entry gate: `phase-0-exit`
+- Next gate: `phase-1-start`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
+- Implementation start evidence: `user-instruction:2026-07-20-execute-terminal-ui-registry-plan`
+- Current work unit: none
+- Work state: none
+- Blocker evidence: none
+- Implementation reviews: none
+- Latest implementation verdict: none
+- Checkpoint authority: `user-instruction:2026-07-20-commit-activation-with-next-phase`
+- Checkpoint authority mode: one-shot
+- Checkpoint authority kinds: phase-exit
+- Expected checkpoint kind: phase-exit
 - Owner: Codex
 - Created: 2026-07-20
 - Optimization source: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md`
-- Scope authority: lifecycle activation recording only; no implementation, Phase 0 start, data write, Git stage/commit/push, PR, merge, Pages publication, provider/broker access, hosted verification, or remote administration is authorized
+- Scope authority: `user-instruction:2026-07-20-execute-terminal-ui-registry-plan` authorizes local Phase 0-6 implementation, verification, remediation, lifecycle closeout, and isolated temporary-copy acceptance for this exact plan; `user-instruction:2026-07-20-commit-activation-with-next-phase` authorizes the next Phase 0 scoped local commit. Canonical data writes, push, PR, merge, Pages publication, provider/broker access, hosted verification, and remote administration remain unauthorized
 
 ## 1. Context And Evidence
 
@@ -71,6 +81,18 @@ The plan remained Proposed and review-only after approval until the separate act
 The user instruction `user-instruction:2026-07-20-activate-terminal-ui-trader-registry` authorizes exactly the adjacent lifecycle move from Proposed to Active for revision `v2-review-foldback-2026-07-20`. The plan is now recorded at `phase-0:not-started` with next gate `phase-0-start`.
 
 This activation does not start Phase 0 or authorize implementation, Git stage/commit/push, canonical data writes, provider/broker access, Pages publication, hosted verification, or remote administration. A later explicit implementation-start instruction is still required.
+
+### 1.7 Implementation start
+
+The user instruction `user-instruction:2026-07-20-execute-terminal-ui-registry-plan` authorizes end-to-end local execution of this exact active revision through implementation, verification, remediation when required, independent implementation review, and lifecycle closeout. Phase 0 is now `in-progress` with next gate `phase-0-exit`.
+
+The follow-up `user-instruction:2026-07-20-commit-activation-with-next-phase` authorizes one scoped Phase 0 local checkpoint after its exit gate. This authority includes isolated temporary-content/SQLite acceptance needed by the plan, but it does not authorize canonical content or tracked-DB writes, push, PR, merge, Pages publication, hosted verification, provider/broker access, or remote administration.
+
+### 1.8 Phase 0 exit and v2 migration
+
+Phase 0 completed against clean baseline `3f589a027d3c1351672660ab8f4e9157a792821e`. The exact manifest, terminal token/contrast table, registry fixtures, protected hashes/counts, 16-image before-state browser matrix, and pass/fail classification are frozen in `evidence/phase-0-baseline-and-scope-freeze.md`. No backend, route, schema, data, publisher, exporter, API-client, K-line, or excluded page-component change is required.
+
+This Active v1 subject therefore uses its first legal phase transition to migrate to the strict-superset `operating-modes-v2` schema. The first v2 checkpoint is the authorized Phase 0 `phase-exit`; after it forms, Phase 1 is ready but not started.
 
 ## 2. Objective And Success Criteria
 

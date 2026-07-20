@@ -5,9 +5,9 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-0`
+- Current phase: `phase-1`
 - Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Next gate: `phase-1-start`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-20
@@ -15,13 +15,13 @@
 - Harness profile: `governed`
 - Latest optimization intake: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/` (record + `screenshots/`) is `active-plan`. OPT-004 remains **user-locked A terminal-first**; OPT-001 peer nav and OPT-003 trade-panel fusion use that palette; OPT-002 resolves to an inline admin create draft with user-entered stable lowercase `trader_id`. Evidence remains under the batch's `screenshots/`.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
-- Current active plan (focus): `docs/exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Active`, activation evidence `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`, current state `phase-0:not-started`, next gate `phase-0-start`.
+- Current active plan (focus): `docs/exec-plans/active/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, schema `operating-modes-v2`, status `Active`, activation evidence `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`, implementation-start evidence `user-instruction:2026-07-20-execute-terminal-ui-registry-plan`, current state `phase-1:not-started`, next gate `phase-1-start`.
 - Durable governance authority: implementation and closeout completed under the named user instructions; verified implementation is `61ea580f0b284d835c79cd47130104b90a04d2f2`, v1 reconciliation boundary is `96166a51561ea75f4a6bcad9de9f97fdb7ff2e1d`, and standing local commit authority is consumed. No push/PR/merge, Pages/hosted, provider/broker, tracked data, or other remote authority was granted.
 - Previous completed governance plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md`, revision `v2-review-foldback-2026-07-20`, verified implementation `61ea580f0b284d835c79cd47130104b90a04d2f2`, `implementation-review-001: accept/high`, next gate `closed`.
 - Terminal UI design reviews: `review-001` revise/high on v1 (SHA-256 `c2c20927...a923f`, append-only); `review-002` approve/high on v2 (SHA-256 `40afdcfd1eb98594a8f4816ad652411ca8957c371cfc8a315b975bcaf3dad12e`). All `review-001` findings are closed in v2: live slug `^[a-z][a-z0-9_]{1,63}$`, color `^#[0-9A-Fa-f]{6}$`, JSON `detail`/raw error association, bottom-pinned peer-nav, name-stable `test:trade-records` file-list expansion.
 - Terminal UI proposal decisions retained: one exact terminal token table across shell/Data/Review/Backtest/Teaching/Admin/Login; warm orange brand-only; trader workspace stays bottom-pinned but uses the same peer-nav renderer/classes/state; shared Review/Static trade components use one palette plus density; add-trader mirrors exact slug/color contracts, parses JSON `detail` or raw API error text with a form-level fallback, reuses the existing full-registry admin PUT, and creates no fake point/day/group.
 - Proposal baseline: live evidence was read at `codex/project-harness@115d2cfee1d7e408b5ecd4465db73064c0d717b5`; the already-dirty optimization reorganization and prior lifecycle edits remain user-owned and must not be reset or swept into a future plan commit.
-- Terminal UI authority: activation is consumed and recorded for exact v2, stopping at `phase-0:not-started`. It grants no implementation start, canonical data write, stage/commit/push, PR, merge, Pages, hosted verification, provider/broker, or other remote action; Phase 0 still requires a separate explicit implementation-start instruction.
+- Terminal UI authority: activation and implementation-start are consumed and recorded for exact v2. Local Phase 0-6 implementation, verification, necessary remediation, independent implementation review, lifecycle closeout, and isolated temporary-copy acceptance are authorized. The one-shot Phase 0 checkpoint authority `user-instruction:2026-07-20-commit-activation-with-next-phase` is consumed when its `phase-exit` commit forms; later phase commits and all canonical content/tracked DB writes, push, PR, merge, Pages, hosted verification, provider/broker, and remote actions remain unauthorized.
 - Current completed plan: `docs/exec-plans/completed/2026-07-19-tang-strategy-review-workspaces-and-trader-point-editing-plan.md`, frozen revision `v3-round-1-review-foldback-2026-07-19`, covering OPT-001 through OPT-004 as one Review/Data/Admin/Static UI contract
 - Optimization provenance: `docs/optimization/2026-07-19-review-ui-and-trader-editing/`; default visual baseline is `.../screenshots/2026-07-19-review-ui-reference-v1.png` at SHA-256 `57c34ea...d3c5`
 - Review Workspaces proposal baseline: live pre-proposal HEAD was `codex/project-harness@772b94595ccd15d41d06f966dd72e0bb7829c441`; related optimization/state/design inputs were uncommitted and unrelated `output/` artifacts were excluded
@@ -47,7 +47,7 @@
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
 3. Preserve unrelated changes and read `docs/operating-modes.md`, the current active Terminal UI plan, its `review-001`/`review-002`, and the active/proposed/reviews indexes.
 4. Durable Checkpoint governance is Completed after `implementation-review-001: accept/high`; verify its final reconciliation SHA and otherwise treat next gate as `closed`.
-5. Terminal UI activation is recorded and consumed; implementation start, any local checkpoint commit, push/PR/merge, data/provider/broker, publication, and remote actions remain separately gated.
+5. Terminal UI Phase 0 is complete and migrated the plan to v2; start Phase 1 from the exact frozen manifest. The Phase 0 checkpoint authority is consumed after commit; later phase commits, push/PR/merge, canonical data/provider/broker, publication, and remote actions remain separately gated.
 6. The multi-trader, operating-modes, and Review Workspaces plans are Completed; their prior authorities cannot be reused for this proposal.
 7. The transfer, Phase 6, and one-time 2026-07-20 commit/push instructions are consumed. Every further commit, push, and remote/publication action requires new authority.
 8. Keep existing completed-plan reviews append-only and preserve all current optimization screenshot moves and unrelated worktree paths.
@@ -57,7 +57,7 @@
 | Check | Result |
 | --- | --- |
 | Current Durable Checkpoint governance | Completed revision `v2-review-foldback-2026-07-20`; verified implementation `61ea580f...`; `implementation-review-001: accept/high`; 171 operating + 38 checkpoint fixtures pass; next gate `closed`; no push/data/remote authority |
-| Current terminal UI/registry plan | Active revision `v2-review-foldback-2026-07-20`; `review-001: revise/high`@v1 append-only; matching-revision `review-002: approve/high`@v2; activation `user-instruction:2026-07-20-activate-terminal-ui-trader-registry`; `phase-0:not-started`; next gate `phase-0-start`; no implementation/Git/data/remote authority |
+| Current terminal UI/registry plan | Active revision `v2-review-foldback-2026-07-20`, schema `operating-modes-v2`; `review-001: revise/high`@v1 append-only; `review-002: approve/high`@v2; activation and implementation start recorded; Phase 0 exact manifest/contracts/16-image baseline complete; `phase-1:not-started`; next gate `phase-1-start`; no later commit/canonical-data/remote authority |
 | Current Review Workspaces revision | `workspace-review-v1:3d24de3baf38cf6e13c8c7295528f22989cf67548d949e3cd98f0739d06717cd@d73502139e6d25d5e050c376e90289c70ef23ecc`; packet `implementation-review-packet-001.md`; `implementation-review-001: accept/high`, no findings, Grok session `019f7bdd-3f80-7361-be62-f7be49f24147` |
 | Current Review Workspaces closeout | pass: implementation `ab655568d50d20c2a97e970658ec9fa3b41719b7`, lifecycle reconciliation `65fd15dd3a3b7030bc3d15fc0590ea26a048490c`, direct operating-modes, governed/auto harness and links, 146/146 lifecycle fixtures, startup budget, launcher syntax, frozen-digest recomputation, protected hashes, and `git diff --check`; lifecycle `Completed`, next gate `closed` |
 | Current Review Workspaces verification | pass: 78/78 backend, 38/38 frontend, 146/146 lifecycle fixtures, compileall, normal/static builds, governed/auto/operating/budget, SQLite integrity/FK, diff/scope checks |
@@ -132,7 +132,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Terminal UI/Trader Registry is Active at `phase-0:not-started`. The next legal gate is a separate explicit implementation-start instruction for `phase-0-start`. No local checkpoint commit, push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, or other remote action is authorized.
+Terminal UI/Trader Registry is Active at `phase-1:not-started`. Phase 0 evidence is frozen at `docs/exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/evidence/phase-0-baseline-and-scope-freeze.md`; the next gate is `phase-1-start`. The one-shot Phase 0 checkpoint authority is consumed after commit. Later commits, push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions are unauthorized.
 
 ## Handoff Boundary
 
