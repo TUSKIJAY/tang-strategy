@@ -3,17 +3,18 @@
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
 
-- Last updated: 2026-07-20
+- Last updated: 2026-07-21
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Latest optimization intake: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/` (record + `screenshots/`) is implemented and Completed. OPT-001 peer nav, OPT-002 inline create, OPT-003 fused Review panel, and OPT-004 terminal-first product skin have accepted Phase 1–5 evidence.
+- Current proposal: `docs/exec-plans/proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Proposed`, next gate `plan-revision`. User authorized exact local checkpoint-chain recovery plus lifecycle-only activation; product implementation, data, push/PR/merge, Pages/provider/broker, and remote actions remain out of scope.
+- Latest optimization intake: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/` is promoted to the current review-only proposal. User locks and mockup remain proposal evidence, not implementation evidence. Prior completed visual batch: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
 - Latest completed plan (focus): `docs/exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, lifecycle schema `operating-modes-v1`, status `Completed`, exact packet 002, `implementation-review-002: accept/high`, next gate `closed`.
 - Durable governance authority: implementation and closeout completed under the named user instructions; verified implementation is `61ea580f0b284d835c79cd47130104b90a04d2f2`, v1 reconciliation boundary is `96166a51561ea75f4a6bcad9de9f97fdb7ff2e1d`, and standing local commit authority is consumed. No push/PR/merge, Pages/hosted, provider/broker, tracked data, or other remote authority was granted.
@@ -46,8 +47,8 @@
 
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat the historical startup evidence above as live HEAD/worktree truth.
-3. Preserve unrelated changes and read `docs/operating-modes.md`, the completed Terminal UI plan, both implementation reviews, and the completed/reviews indexes.
-4. Durable Checkpoint governance is Completed after `implementation-review-001: accept/high`; verify its final reconciliation SHA and otherwise treat next gate as `closed`.
+3. Preserve unrelated changes and read `docs/operating-modes.md`, the current proposed Review Date Navigation plan, its source optimization/mockup, the completed Terminal UI plan, both Terminal UI implementation reviews, and the lifecycle indexes.
+4. The current proposal is at checkpoint recovery baseline. Form and verify `proposal-revision`, then `design-review`; only after the audited chain passes may the already-authorized activation move it to `active/phase-0:not-started`. Implementation still requires a later separate start instruction.
 5. Terminal UI is Completed after remediation-1 and `implementation-review-002: accept/high`. Do not resume a prior phase or reuse consumed authority. Later commits, push/PR/merge, canonical data/provider/broker, publication, and remote actions require new authority.
 6. The multi-trader, operating-modes, and Review Workspaces plans are Completed; their prior authorities cannot be reused for this proposal.
 7. The transfer, Phase 6, and one-time 2026-07-20 commit/push instructions are consumed. Every further commit, push, and remote/publication action requires new authority.
@@ -133,7 +134,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-No exec plan is Active. Terminal UI/Trader Registry is Completed after exact packet 002 received `implementation-review-002: accept/high`; next gate is `none`. Later commits, push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions require new authority.
+No exec plan is Active. The current Review Date Navigation And Trader Filter Fusion plan is Proposed at checkpoint recovery baseline; next gate is `plan-revision`. The user has authorized repair-through-activation only. Implementation-start, push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
 
 ## Handoff Boundary
 

@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Review 左栏效果图 · 去冗余日期导航</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-ui: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --surface-app: #141413;
+      --surface-panel: #1E1E1D;
+      --surface-control: #282827;
+      --surface-raised: #333331;
+      --border-subtle: #3B3B38;
+      --border-control: #74746E;
+      --text-primary: #E8E7E3;
+      --text-secondary: #C9C8C2;
+      --text-muted: #A7A69F;
+      --accent: #8B9A6D;
+      --accent-ink: #0F0F0E;
+      --status-success: #4CAF50;
+      --brand-warm: #A6532A;
+      /* Direction only. Names always use --text-primary (never red name text). */
+      --direction-call: #6F9F7A;
+      --direction-put: #E06B66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0b0b0a;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+    }
+    .page-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 24px 48px; }
+    .eyebrow {
+      color: var(--accent); font-size: 12px; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase; margin: 0 0 8px;
+    }
+    h1 { font-size: 28px; font-weight: 500; margin: 0 0 10px; line-height: 1.15; }
+    .lead { margin: 0 0 22px; max-width: 760px; color: var(--text-muted); font-size: 14px; line-height: 1.55; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface-app);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .panel > .bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-panel); font-size: 12px; color: var(--text-muted);
+    }
+    .panel > .bar strong { color: var(--text-primary); }
+    .panel > .bar .title { color: var(--text-primary); font-weight: 700; margin-right: 8px; }
+
+    .ctx {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--surface-raised);
+      background: var(--surface-panel);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .tabs { display: flex; gap: 4px; }
+    .tabs button {
+      flex: 1; border: 0; border-radius: 6px; padding: 7px 0;
+      font: 700 12px/1 var(--font-ui); letter-spacing: .06em;
+      background: var(--surface-control); color: var(--text-muted); cursor: default;
+    }
+    .tabs button.on { background: var(--accent); color: var(--accent-ink); }
+
+    /* mode switch — segmented, same geometry as ticker tabs */
+    .mode {
+      display: flex; gap: 4px;
+    }
+    .mode button {
+      flex: 1; border: 1px solid var(--border-subtle); border-radius: 6px;
+      padding: 5px 0; font: 700 11px/1 var(--font-ui);
+      letter-spacing: .06em; text-transform: uppercase;
+      background: transparent; color: var(--text-muted); cursor: pointer;
+    }
+    .mode button.on {
+      background: var(--surface-control); color: var(--text-primary);
+      border-color: var(--border-control);
+    }
+
+    .month-bar {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .month-bar .nav {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid var(--border-control); background: var(--surface-control);
+      color: var(--text-secondary); display: grid; place-items: center;
+      font-size: 14px; cursor: pointer; flex: 0 0 auto;
+    }
+    .month-bar .month {
+      flex: 1; text-align: center; font-size: 12px; font-weight: 700;
+      color: var(--text-primary); letter-spacing: .04em;
+    }
+
+    .meta {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10px; color: var(--text-muted);
+    }
+    .meta em { font-style: normal; color: var(--text-secondary); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chips button {
+      border: 0; border-radius: 4px; padding: 4px 7px; cursor: pointer;
+      font: 500 11px/1 var(--font-mono);
+      background: var(--surface-control); color: var(--text-secondary);
+    }
+    .chips button.on {
+      color: var(--text-primary);
+      box-shadow: inset 0 0 0 1px var(--accent);
+      background: color-mix(in srgb, var(--accent) 18%, var(--surface-control));
+    }
+    /* day-only chips in month mode — slightly wider hit target */
+    .chips.day-only button {
+      min-width: 28px;
+      text-align: center;
+      padding: 5px 0;
+    }
+
+    .jump-row {
+      display: flex; gap: 6px; align-items: center;
+    }
+    .jump-row input {
+      flex: 1; min-width: 0;
+      border: 1px solid var(--border-control); border-radius: 6px;
+      background: var(--surface-control); color: var(--text-primary);
+      padding: 5px 8px; font: 12px var(--font-mono);
+    }
+    .jump-row button {
+      border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface-control));
+      color: var(--accent); border-radius: 6px; padding: 5px 8px;
+      font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer;
+    }
+
+    .field {
+      display: flex; flex-direction: column; gap: 4px;
+      font-size: 11px; color: var(--text-muted);
+      letter-spacing: .05em; text-transform: uppercase;
+    }
+    .field .control {
+      padding: 5px 8px; font-size: 12px; color: var(--text-primary);
+      background: var(--surface-control); border: 1px solid var(--border-control);
+      border-radius: 6px; text-transform: none; letter-spacing: 0;
+    }
+    .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-row .btn {
+      padding: 5px 10px; font-size: 12px; color: var(--text-primary);
+      background: var(--surface-control); border: 1px solid var(--border-control);
+      border-radius: 6px;
+    }
+    .status-ok { font-size: 11px; color: var(--status-success); }
+
+    .hint {
+      padding: 8px 12px; font-size: 11px; color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle); background: var(--surface-app);
+    }
+    .list {
+      padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 8px;
+    }
+    /* A · Segment: 全部 | person — replaces checkbox + Focus */
+    .trader-seg {
+      display: flex; gap: 4px; flex-wrap: wrap;
+    }
+    .trader-seg button {
+      flex: 1 1 auto;
+      min-width: 0;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font: 600 12px var(--font-ui);
+      color: var(--text-muted);
+      background: var(--surface-control);
+      cursor: pointer;
+    }
+    .trader-seg button.on {
+      color: var(--accent-ink);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* B · Chips multi-toggle — no Focus button */
+    .trader-chips {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .trader-chips button {
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font: 600 12px var(--font-ui);
+      color: var(--text-muted);
+      background: transparent;
+      cursor: pointer;
+    }
+    .trader-chips button.on {
+      color: var(--text-primary);
+      border-color: var(--border-control);
+      background: var(--surface-control);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
+    .filter-caption {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 0 0 6px;
+    }
+    .card.hidden-demo { display: none; }
+    .legacy-strike {
+      opacity: .55;
+      text-decoration: line-through;
+      pointer-events: none;
+    }
+    .legacy-row {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+      border-radius: 6px; border: 1px solid var(--border-subtle);
+      background: var(--surface-control); font-size: 12px; color: var(--text-primary);
+    }
+    .legacy-row .btn {
+      margin-left: auto; padding: 4px 8px; font-size: 11px; font-weight: 600;
+      border-radius: 6px; border: 1px solid var(--border-control);
+      background: var(--surface-raised); color: var(--text-secondary);
+    }
+    .export-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 6px 10px; font-size: 12px; border-radius: 6px;
+      border: 1px solid var(--border-control); background: var(--surface-control);
+      color: var(--text-primary);
+    }
+    .card {
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--dir-color, var(--border-subtle));
+      border-radius: 8px; background: var(--surface-control); padding: 10px;
+    }
+    .card.call { --dir-color: var(--direction-call); }
+    .card.put { --dir-color: var(--direction-put); }
+    .card .row { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+    .card strong {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    /* Names always the same default color; full name already identifies the trader. */
+    .card .trader-name { color: var(--text-primary); font-weight: 600; }
+    .card .dir-label {
+      font: 700 11px var(--font-mono);
+      letter-spacing: .04em;
+      color: var(--dir-color);
+    }
+    .card small { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .badge {
+      font: 600 10px var(--font-mono); text-transform: uppercase;
+      padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      background: var(--surface-raised);
+      align-self: start;
+    }
+    .glyph {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; margin-top: 2px;
+    }
+    .glyph .tri {
+      width: 0; height: 0;
+      border-left: 5px solid transparent; border-right: 5px solid transparent;
+    }
+    .glyph.call .tri { border-bottom: 9px solid var(--direction-call); }
+    .glyph.put .tri { border-top: 9px solid var(--direction-put); }
+    .drill { margin-top: 8px; margin-left: 26px; font-size: 11px; color: var(--text-muted); }
+
+    /* Chart marker sample: same name color; CALL/PUT carry the color */
+    .marker-sample {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+    }
+    .pin {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 10px 5px 8px;
+      border-radius: 8px;
+      background: var(--surface-control);
+      border: 1px solid var(--border-subtle);
+      font: 500 12px var(--font-ui);
+      color: var(--text-primary);
+    }
+    .pin .mark {
+      display: grid; place-items: center;
+      width: 18px; height: 18px; flex: 0 0 auto;
+    }
+    .pin .mark .tri {
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+    }
+    .pin.call .mark .tri { border-bottom: 9px solid var(--direction-call); }
+    .pin.put .mark .tri { border-top: 9px solid var(--direction-put); }
+    .pin .who {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .pin.call .side { color: var(--direction-call); font: 700 11px var(--font-mono); }
+    .pin.put .side { color: var(--direction-put); font: 700 11px var(--font-mono); }
+
+    /* Scale demos: 6–8 traders */
+    .scale-block {
+      max-width: 1280px;
+      margin: 0 auto 18px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      background: var(--surface-panel);
+      padding: 16px 18px 18px;
+    }
+    .scale-outer {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px 8px;
+    }
+    .scale-block > h2 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .scale-block > .lead-sm {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .scale-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .scale-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      background: var(--surface-app);
+      padding: 12px;
+      min-width: 0;
+    }
+    .scale-card h3 {
+      margin: 0 0 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .scale-card .tag-row {
+      display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+      margin-bottom: 10px;
+    }
+    .scale-tag {
+      font-size: 10px; font-weight: 700; letter-spacing: .04em;
+      text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
+      border: 1px solid var(--border-subtle); color: var(--text-muted);
+    }
+    .scale-tag.bad {
+      color: #E06B66;
+      border-color: color-mix(in srgb, #E06B66 40%, var(--border-subtle));
+      background: color-mix(in srgb, #E06B66 10%, transparent);
+    }
+    .scale-tag.good {
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+    .scale-card p.desc {
+      margin: 0 0 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .seg-cramped {
+      display: flex; flex-wrap: wrap; gap: 3px;
+    }
+    .seg-cramped span {
+      padding: 5px 6px; font-size: 10px; font-weight: 600;
+      border-radius: 5px; border: 1px solid var(--border-subtle);
+      background: var(--surface-control); color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .seg-cramped span.on {
+      background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
+    }
+    .seg-scaled {
+      display: flex; gap: 6px; align-items: stretch;
+    }
+    .seg-scaled .scope {
+      display: flex; gap: 4px; flex: 0 0 auto;
+    }
+    .seg-scaled .scope button,
+    .seg-scaled .picker {
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font: 600 12px var(--font-ui);
+      background: var(--surface-control);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .seg-scaled .scope button.on {
+      background: var(--accent); color: var(--accent-ink); border-color: var(--accent);
+    }
+    .seg-scaled .picker {
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      color: var(--text-primary); text-align: left;
+    }
+    .seg-scaled .picker:disabled {
+      opacity: .45; cursor: not-allowed;
+    }
+    .seg-scaled .picker em {
+      font-style: normal; color: var(--text-muted); font-size: 11px;
+    }
+    .picker-menu {
+      margin-top: 8px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: var(--surface-control);
+      max-height: 160px;
+      overflow: auto;
+      display: none;
+    }
+    .picker-menu.open { display: block; }
+    .picker-menu button {
+      display: block; width: 100%; text-align: left;
+      border: 0; border-bottom: 1px solid var(--border-subtle);
+      background: transparent; color: var(--text-primary);
+      padding: 8px 10px; font: 500 12px var(--font-ui); cursor: pointer;
+    }
+    .picker-menu button:last-child { border-bottom: 0; }
+    .picker-menu button:hover,
+    .picker-menu button.on { background: var(--surface-raised); }
+    .chip-flood {
+      display: flex; flex-wrap: wrap; gap: 5px;
+    }
+    .chip-flood span {
+      padding: 4px 9px; font-size: 11px; font-weight: 600;
+      border-radius: 999px; border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+    .chip-flood span.on {
+      color: var(--text-primary);
+      background: var(--surface-control);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+    .chip-summary {
+      display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+    }
+    .chip-summary .summary-text {
+      flex: 1; min-width: 140px;
+      font-size: 12px; color: var(--text-primary); line-height: 1.4;
+    }
+    .chip-summary .summary-text strong { font-weight: 600; }
+    .chip-summary .summary-text span.muted { color: var(--text-muted); }
+    .chip-summary .edit-btn {
+      border: 1px solid var(--border-control);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font: 600 11px var(--font-ui);
+      background: var(--surface-control);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .chip-drawer {
+      margin-top: 10px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: var(--surface-control);
+      padding: 10px;
+      display: none;
+    }
+    .chip-drawer.open { display: block; }
+    .chip-drawer .tools {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+    }
+    .chip-drawer .tools button {
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 4px 8px;
+      font: 600 11px var(--font-ui);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .chip-drawer input[type="search"] {
+      width: 100%;
+      margin-bottom: 8px;
+      border: 1px solid var(--border-control);
+      border-radius: 6px;
+      padding: 6px 8px;
+      background: var(--surface-app);
+      color: var(--text-primary);
+      font: 12px var(--font-ui);
+    }
+    .chip-drawer .chip-list {
+      display: flex; flex-wrap: wrap; gap: 5px;
+      max-height: 120px; overflow: auto;
+    }
+    .chip-drawer .chip-list button {
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font: 600 11px var(--font-ui);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .chip-drawer .chip-list button.on {
+      color: var(--text-primary);
+      background: var(--surface-raised);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+    .scale-rule {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .scale-rule code {
+      font-family: var(--font-mono); font-size: 11px;
+      background: var(--surface-control); padding: 1px 5px; border-radius: 4px;
+      color: var(--text-secondary);
+    }
+    @media (max-width: 900px) {
+      .scale-grid { grid-template-columns: 1fr; }
+    }
+
+    .notes {
+      display: grid; gap: 12px;
+    }
+    .note {
+      border: 1px solid var(--border-subtle); border-radius: 14px;
+      padding: 14px 16px; background: var(--surface-panel);
+    }
+    .note h2 {
+      margin: 0 0 8px; font-size: 12px; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--accent);
+    }
+    .note ul { margin: 0; padding-left: 18px; color: var(--text-secondary); font-size: 13px; line-height: 1.55; }
+    .note li + li { margin-top: 4px; }
+    .note code {
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--text-secondary); background: var(--surface-control);
+      padding: 1px 5px; border-radius: 4px;
+    }
+    .bad { color: #E06B66; }
+    .good { color: var(--status-success); }
+
+    .hidden { display: none !important; }
+
+    .compare-modes {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .compare-modes .mini-title {
+      font-size: 12px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin: 0 0 8px;
+    }
+    .mini-panel {
+      border: 1px solid var(--border-subtle); border-radius: 12px;
+      padding: 12px; background: var(--surface-panel);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .grid, .compare-modes { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <p class="eyebrow">Review only · design mockup (iterate freely · not live app)</p>
+    <h1>去掉月份冗余：两种模式各管一层</h1>
+    <p class="lead">
+      规则：<strong>最近 = 不显示月份条</strong>（chip 用 <code>MM-DD</code>，可跨月）；
+      <strong>按月 = 月份条唯一，chip 只标日号</strong>。
+      左栏不展示 Ext K / Rescan / Backtest。点「最近 / 按月」可切换预览。
+    </p>
+
+    <div class="grid">
+      <section class="panel" id="live">
+        <div class="bar">
+          <span><span class="title">Daily Review</span>日期 <strong id="selectedDate">2026-07-17</strong> · 进场 <strong>4</strong></span>
+        </div>
+        <div class="ctx">
+          <div class="tabs">
+            <button type="button">QQQ</button>
+            <button type="button" class="on">SPY</button>
+          </div>
+
+          <div class="mode" role="tablist" aria-label="日期浏览模式">
+            <button type="button" class="on" data-mode="recent" id="modeRecent">最近</button>
+            <button type="button" data-mode="month" id="modeMonth">按月</button>
+          </div>
+
+          <!-- 仅「按月」出现：月份是唯一的时间层级 -->
+          <div class="month-bar hidden" id="monthBar">
+            <button type="button" class="nav" id="prevMonth" aria-label="上一月">‹</button>
+            <div class="month" id="monthLabel">2026-07</div>
+            <button type="button" class="nav" id="nextMonth" aria-label="下一月">›</button>
+          </div>
+
+          <div class="meta" id="metaLine">
+            <span>显示最近 <em>12</em> 个交易日</span>
+            <span>全库 SPY <em>46</em></span>
+          </div>
+
+          <div class="chips" id="chipRecent">
+            <button type="button" class="on" data-date="2026-07-17">07-17</button>
+            <button type="button" data-date="2026-07-16">07-16</button>
+            <button type="button" data-date="2026-07-15">07-15</button>
+            <button type="button" data-date="2026-07-14">07-14</button>
+            <button type="button" data-date="2026-07-13">07-13</button>
+            <button type="button" data-date="2026-07-10">07-10</button>
+            <button type="button" data-date="2026-07-09">07-09</button>
+            <button type="button" data-date="2026-07-08">07-08</button>
+            <button type="button" data-date="2026-06-30">06-30</button>
+            <button type="button" data-date="2026-06-29">06-29</button>
+            <button type="button" data-date="2026-06-26">06-26</button>
+            <button type="button" data-date="2026-06-25">06-25</button>
+          </div>
+
+          <!-- 按月：chip 只显示日，月份已在 monthBar -->
+          <div class="chips day-only hidden" id="chipMonth">
+            <button type="button" class="on" data-date="2026-07-17">17</button>
+            <button type="button" data-date="2026-07-16">16</button>
+            <button type="button" data-date="2026-07-15">15</button>
+            <button type="button" data-date="2026-07-14">14</button>
+            <button type="button" data-date="2026-07-13">13</button>
+            <button type="button" data-date="2026-07-10">10</button>
+            <button type="button" data-date="2026-07-09">09</button>
+            <button type="button" data-date="2026-07-08">08</button>
+            <button type="button" data-date="2026-07-07">07</button>
+            <button type="button" data-date="2026-07-06">06</button>
+            <button type="button" data-date="2026-07-02">02</button>
+            <button type="button" data-date="2026-07-01">01</button>
+          </div>
+
+          <!-- 跳转是可选工具，不重复展示月份身份 -->
+          <div class="jump-row" id="jumpRow">
+            <input type="text" value="2026-07-17" aria-label="跳转到交易日" readonly />
+            <button type="button">跳转</button>
+          </div>
+
+          <label class="field">Strategy
+            <div class="control">Tang v4.4 Activation Wick</div>
+          </label>
+          <div class="status-ok">SQLite review assembled automatically</div>
+        </div>
+
+        <div class="hint">提示 (4 进场 · 5 启动 / 1 过期)</div>
+        <div class="list">
+          <label class="field">Eligibility
+            <div class="control">Display</div>
+          </label>
+
+          <p class="filter-caption">方案 B · Chip（OPT 已锁定，可点）</p>
+          <div class="trader-chips" id="segAsChipsMain" aria-label="交易者 chip 多选">
+            <button type="button" class="on" data-chip="tang">Tang</button>
+            <button type="button" class="on" data-chip="vordin">沃德哥</button>
+          </div>
+
+          <div class="export-btn">↓ Download JSON + 3 CSV</div>
+
+          <div class="card call" data-trader="tang">
+            <div class="row">
+              <span class="glyph call"><span class="tri"></span></span>
+              <span>
+                <strong><span class="trader-name">Tang</span> <span class="dir-label">CALL</span></strong>
+                <small>SPY 2026-07-17 · result unknown</small>
+              </span>
+              <span class="badge">verified</span>
+            </div>
+            <div class="drill">Show legs/events</div>
+          </div>
+          <div class="card put" data-trader="tang">
+            <div class="row">
+              <span class="glyph put"><span class="tri"></span></span>
+              <span>
+                <strong><span class="trader-name">Tang</span> <span class="dir-label">PUT</span></strong>
+                <small>SPY 2026-07-17 · result unknown</small>
+              </span>
+              <span class="badge">verified</span>
+            </div>
+            <div class="drill">Show legs/events</div>
+          </div>
+          <div class="card call" data-trader="vordin">
+            <div class="row">
+              <span class="glyph call"><span class="tri"></span></span>
+              <span>
+                <strong><span class="trader-name">沃德哥</span> <span class="dir-label">CALL</span></strong>
+                <small>SPY 2026-07-17 · result unknown</small>
+              </span>
+              <span class="badge">verified</span>
+            </div>
+            <div class="drill">Show legs/events</div>
+          </div>
+          <div class="card put" data-trader="vordin">
+            <div class="row">
+              <span class="glyph put"><span class="tri"></span></span>
+              <span>
+                <strong><span class="trader-name">沃德哥</span> <span class="dir-label">PUT</span></strong>
+                <small>SPY 2026-07-17 · result unknown</small>
+              </span>
+              <span class="badge">verified</span>
+            </div>
+            <div class="drill">Show legs/events</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="notes">
+        <div class="note">
+          <h2>分层规则</h2>
+          <ul>
+            <li class="good"><strong>最近</strong>：无月份条；chip 用 <code>MM-DD</code>（可跨月，必须带月）；meta = 显示最近 N / 全库</li>
+            <li class="good"><strong>按月</strong>：月份条是唯一月身份；chip 只标 <code>DD</code>；meta = 本月交易日 / 全库</li>
+            <li class="good"><strong>跳转</strong>：独立一行工具，两种模式都可用，不和月份条绑死</li>
+            <li class="good">交易区不 mirror ticker/日期；选日权威只在 rail</li>
+            <li class="good">左栏不展示 Ext K / Rescan / Backtest</li>
+          </ul>
+        </div>
+        <div class="note">
+          <h2>交易者筛选 · 两种替代（可点试）</h2>
+          <ul>
+            <li class="good">现状 <code>☑ + Focus</code> 功能重叠，产品里不主流</li>
+            <li class="good"><strong>B Chip（已锁定）</strong>：多选、可任意组合；人多时摘要+编辑+搜索+全选/清空；去掉 Focus</li>
+            <li class="good"><strong>A 分段（不采用）</strong>：仅作对比；难做任意子集，人多要改成「全部|单人+下拉」</li>
+          </ul>
+
+          <p class="filter-caption" style="margin-top:12px">现状（不推荐）</p>
+          <div class="legacy-strike">
+            <div class="legacy-row"><span>☑ Tang</span><span class="btn">Focus</span></div>
+            <div class="legacy-row" style="margin-top:6px"><span>☑ 沃德哥</span><span class="btn">Focus</span></div>
+          </div>
+
+          <p class="filter-caption" style="margin-top:14px">方案 A · 分段</p>
+          <div class="trader-seg" id="segFilterB">
+            <button type="button" class="on" data-seg="all">全部</button>
+            <button type="button" data-seg="tang">Tang</button>
+            <button type="button" data-seg="vordin">沃德哥</button>
+          </div>
+          <div class="meta" style="margin-top:6px;font-size:11px;color:var(--text-muted)">
+            点「全部」= 多人；点人名 = 旧 Focus。无第二按钮。
+          </div>
+
+          <p class="filter-caption" style="margin-top:14px">方案 B · Chip 多选（无 Focus）</p>
+          <div class="trader-chips" id="chipFilter">
+            <button type="button" class="on" data-chip="tang">Tang</button>
+            <button type="button" class="on" data-chip="vordin">沃德哥</button>
+          </div>
+          <div class="meta" style="margin-top:6px;font-size:11px;color:var(--text-muted)" id="chipHint">
+            当前：Tang + 沃德哥。点 chip 开关；全关时列表为空。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-width scale comparison: 6–8 traders -->
+    <div class="scale-outer">
+    <div class="scale-block" id="scaleDemo">
+      <h2>人数变多时 · A / B 怎么收（模拟 8 人有点位）</h2>
+      <p class="lead-sm">
+        假设当日可见交易者：Tang、沃德哥、Alice、Bob、Carol、Dave、Eve、Frank（8 人）。
+        左列 = 硬铺开（反例）；右列 = 收纳后（推荐形态）。右侧可点。
+      </p>
+      <div class="scale-grid">
+        <div class="scale-card">
+          <div class="tag-row">
+            <h3 style="margin:0;flex:1">A 分段 · 硬铺</h3>
+            <span class="scale-tag bad">反例</span>
+          </div>
+          <p class="desc">9 段并排/换行，窄栏不可读，也不该上生产。</p>
+          <div class="seg-cramped" aria-hidden="true">
+            <span class="on">全部</span>
+            <span>Tang</span><span>沃德哥</span><span>Alice</span><span>Bob</span>
+            <span>Carol</span><span>Dave</span><span>Eve</span><span>Frank</span>
+          </div>
+        </div>
+        <div class="scale-card">
+          <div class="tag-row">
+            <h3 style="margin:0;flex:1">A 分段 · 收纳</h3>
+            <span class="scale-tag good">推荐变形</span>
+          </div>
+          <p class="desc">只留「全部 / 单人」；单人时用人名选择器，不再 8 段横铺。</p>
+          <div class="seg-scaled">
+            <div class="scope" id="scaleSegScope">
+              <button type="button" class="on" data-scale-scope="all">全部</button>
+              <button type="button" data-scale-scope="one">单人</button>
+            </div>
+            <button type="button" class="picker" id="scalePicker" disabled>
+              <span id="scalePickerLabel">选择交易者</span>
+              <em>▾</em>
+            </button>
+          </div>
+          <div class="picker-menu" id="scalePickerMenu" role="listbox">
+            <button type="button" data-person="Tang">Tang</button>
+            <button type="button" data-person="沃德哥">沃德哥</button>
+            <button type="button" data-person="Alice">Alice</button>
+            <button type="button" data-person="Bob">Bob</button>
+            <button type="button" data-person="Carol">Carol</button>
+            <button type="button" data-person="Dave">Dave</button>
+            <button type="button" data-person="Eve">Eve</button>
+            <button type="button" data-person="Frank">Frank</button>
+          </div>
+          <div class="meta" style="margin-top:8px;font-size:11px;color:var(--text-muted)" id="scaleSegHint">
+            当前：全部 8 人。
+          </div>
+        </div>
+        <div class="scale-card">
+          <div class="tag-row">
+            <h3 style="margin:0;flex:1">B Chip · 硬铺</h3>
+            <span class="scale-tag bad">反例</span>
+          </div>
+          <p class="desc">8 个 chip 直接占满左栏高度，点位列表被挤下去。</p>
+          <div class="chip-flood" aria-hidden="true">
+            <span class="on">Tang</span><span class="on">沃德哥</span><span class="on">Alice</span>
+            <span class="on">Bob</span><span class="on">Carol</span><span class="on">Dave</span>
+            <span class="on">Eve</span><span class="on">Frank</span>
+          </div>
+        </div>
+        <div class="scale-card">
+          <div class="tag-row">
+            <h3 style="margin:0;flex:1">B Chip · 收纳</h3>
+            <span class="scale-tag good">推荐变形</span>
+          </div>
+          <p class="desc">默认只显示摘要；点「编辑」再展开搜索 + 全选/清空 + chip。</p>
+          <div class="chip-summary">
+            <div class="summary-text" id="scaleChipSummary">
+              <strong>8 人已选</strong>
+              <span class="muted"> · Tang、沃德哥、Alice、Bob…</span>
+            </div>
+            <button type="button" class="edit-btn" id="scaleChipEdit">编辑</button>
+          </div>
+          <div class="chip-drawer" id="scaleChipDrawer">
+            <input type="search" id="scaleChipSearch" placeholder="搜索交易者…" aria-label="搜索交易者" />
+            <div class="tools">
+              <button type="button" id="scaleChipAll">全选</button>
+              <button type="button" id="scaleChipNone">清空</button>
+            </div>
+            <div class="chip-list" id="scaleChipList">
+              <button type="button" class="on" data-scale-chip="Tang">Tang</button>
+              <button type="button" class="on" data-scale-chip="沃德哥">沃德哥</button>
+              <button type="button" class="on" data-scale-chip="Alice">Alice</button>
+              <button type="button" class="on" data-scale-chip="Bob">Bob</button>
+              <button type="button" class="on" data-scale-chip="Carol">Carol</button>
+              <button type="button" class="on" data-scale-chip="Dave">Dave</button>
+              <button type="button" class="on" data-scale-chip="Eve">Eve</button>
+              <button type="button" class="on" data-scale-chip="Frank">Frank</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="scale-rule">
+        <strong>建议阈值：</strong>
+        可见 ≤3 → A 原分段或 B 直铺 chip；
+        4～6 → A 用「全部|单人+选择器」，B 可直铺或开始摘要；
+        ≥7 → A 必须收纳，B 用「摘要 + 编辑抽屉」；
+        始终只展示<strong>当日有点位</strong>的人，不是注册表全量。
+      </p>
+    </div>
+    </div>
+
+    <div class="page-wrap" style="padding-top:0">
+      <div class="notes" style="margin-top:14px">
+        <div class="note">
+          <h2>点位颜色打样 · 方向上色</h2>
+          <ul>
+            <li class="good"><strong>名字统一正文色</strong>——点位已显示全名，身份靠文字，不染色、禁止红字人名</li>
+            <li class="good"><strong>颜色只服务方向</strong>：CALL 与 PUT 用不同色（三角 + CALL/PUT 字 + 左边条）</li>
+            <li class="good">多人同屏：靠全名区分交易者；靠颜色区分多空</li>
+          </ul>
+          <div class="marker-sample" aria-label="图上标签打样">
+            <span class="pin call">
+              <span class="mark"><span class="tri"></span></span>
+              <span class="who">Tang</span>
+              <span class="side">CALL</span>
+            </span>
+            <span class="pin put">
+              <span class="mark"><span class="tri"></span></span>
+              <span class="who">Tang</span>
+              <span class="side">PUT</span>
+            </span>
+            <span class="pin call">
+              <span class="mark"><span class="tri"></span></span>
+              <span class="who">沃德哥</span>
+              <span class="side">CALL</span>
+            </span>
+            <span class="pin put">
+              <span class="mark"><span class="tri"></span></span>
+              <span class="who">沃德哥</span>
+              <span class="side">PUT</span>
+            </span>
+          </div>
+        </div>
+        <div class="note">
+          <h2>信息架构（一层只说一件事）</h2>
+          <ul>
+            <li>Ticker tabs → 选标的</li>
+            <li>最近 / 按月 → 选浏览策略（不是选日期）</li>
+            <li>月份条（仅按月）→ 选月</li>
+            <li>chip → 选日</li>
+            <li>顶栏「日期」→ 只读当前结果，不是第三套筛选</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="compare-modes">
+      <div>
+        <p class="mini-title">模式对照 · 最近</p>
+        <div class="mini-panel">
+          <div class="mode"><button class="on" type="button">最近</button><button type="button">按月</button></div>
+          <div class="meta"><span>显示最近 <em>12</em> 个交易日</span><span>全库 SPY <em>46</em></span></div>
+          <div class="chips">
+            <button class="on" type="button">07-17</button>
+            <button type="button">07-16</button>
+            <button type="button">07-15</button>
+            <button type="button">06-30</button>
+            <button type="button">06-29</button>
+            <button type="button">…</button>
+          </div>
+          <div class="meta" style="opacity:.75">跨月时 MM-DD 有意义；无需再显示 2026-07</div>
+        </div>
+      </div>
+      <div>
+        <p class="mini-title">模式对照 · 按月</p>
+        <div class="mini-panel">
+          <div class="mode"><button type="button">最近</button><button class="on" type="button">按月</button></div>
+          <div class="month-bar">
+            <div class="nav">‹</div>
+            <div class="month">2026-07</div>
+            <div class="nav">›</div>
+          </div>
+          <div class="meta"><span>本月交易日 <em>12</em></span><span>全库 SPY <em>46</em></span></div>
+          <div class="chips day-only">
+            <button class="on" type="button">17</button>
+            <button type="button">16</button>
+            <button type="button">15</button>
+            <button type="button">14</button>
+            <button type="button">13</button>
+            <button type="button">10</button>
+            <button type="button">…</button>
+          </div>
+          <div class="meta" style="opacity:.75">月在条上，chip 只留日号，不再写 07-</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="lead" style="margin-top:18px;margin-bottom:0">
+      归档路径：<code>docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/mockups/review-left-column.html</code>
+      · 对应 OPT 记录同目录上级 md · status recorded · 未授权实施。
+      Data/Admin/Static 的 DateRail 不在本批范围。
+    </p>
+  </div>
+
+  <script>
+    const modeRecent = document.getElementById('modeRecent');
+    const modeMonth = document.getElementById('modeMonth');
+    const monthBar = document.getElementById('monthBar');
+    const chipRecent = document.getElementById('chipRecent');
+    const chipMonth = document.getElementById('chipMonth');
+    const metaLine = document.getElementById('metaLine');
+    const selectedDate = document.getElementById('selectedDate');
+
+    function setMode(mode) {
+      const isRecent = mode === 'recent';
+      modeRecent.classList.toggle('on', isRecent);
+      modeMonth.classList.toggle('on', !isRecent);
+      monthBar.classList.toggle('hidden', isRecent);
+      chipRecent.classList.toggle('hidden', !isRecent);
+      chipMonth.classList.toggle('hidden', isRecent);
+      metaLine.innerHTML = isRecent
+        ? '<span>显示最近 <em>12</em> 个交易日</span><span>全库 SPY <em>46</em></span>'
+        : '<span>本月交易日 <em>12</em></span><span>全库 SPY <em>46</em></span>';
+    }
+
+    modeRecent.addEventListener('click', () => setMode('recent'));
+    modeMonth.addEventListener('click', () => setMode('month'));
+
+    function wireChips(root) {
+      root.querySelectorAll('button[data-date]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          root.querySelectorAll('button').forEach((b) => b.classList.remove('on'));
+          btn.classList.add('on');
+          selectedDate.textContent = btn.dataset.date;
+        });
+      });
+    }
+    wireChips(chipRecent);
+    wireChips(chipMonth);
+
+    setMode('recent');
+
+    // --- Trader filter demos (B chips primary; A segment still in notes) ---
+    const tradeCards = () => document.querySelectorAll('.list .card[data-trader]');
+    const nameMap = { tang: 'Tang', vordin: '沃德哥' };
+
+    function applyTraderFilter(allowed) {
+      tradeCards().forEach((card) => {
+        const id = card.dataset.trader;
+        const show = allowed == null ? true : allowed.has(id);
+        card.classList.toggle('hidden-demo', !show);
+      });
+    }
+
+    function wireSeg(root) {
+      if (!root) return;
+      root.querySelectorAll('button[data-seg]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          root.querySelectorAll('button').forEach((b) => b.classList.remove('on'));
+          btn.classList.add('on');
+          const seg = btn.dataset.seg;
+          applyTraderFilter(seg === 'all' ? null : new Set([seg]));
+        });
+      });
+    }
+
+    function updateChipHint() {
+      const chips = document.getElementById('chipFilter');
+      const hint = document.getElementById('chipHint');
+      if (!chips || !hint) return;
+      const on = [...chips.querySelectorAll('button.on')].map((b) => nameMap[b.dataset.chip] || b.dataset.chip);
+      hint.textContent = on.length
+        ? `当前：${on.join(' + ')}。点 chip 开关；全关时列表为空。`
+        : '当前：无人选中，列表为空。';
+    }
+
+    function wireChipGroup(root, { updateHint, driveList } = {}) {
+      if (!root) return;
+      root.querySelectorAll('button[data-chip]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('on');
+          if (driveList) {
+            const allowed = new Set(
+              [...root.querySelectorAll('button.on')].map((b) => b.dataset.chip),
+            );
+            applyTraderFilter(allowed);
+          }
+          if (updateHint) updateChipHint();
+        });
+      });
+    }
+
+    wireSeg(document.getElementById('segFilterB'));
+    wireChipGroup(document.getElementById('segAsChipsMain'), { driveList: true });
+    wireChipGroup(document.getElementById('chipFilter'), { updateHint: true, driveList: true });
+    updateChipHint();
+
+    // --- Scale demos (8 traders) ---
+    const scaleScope = document.getElementById('scaleSegScope');
+    const scalePicker = document.getElementById('scalePicker');
+    const scalePickerMenu = document.getElementById('scalePickerMenu');
+    const scalePickerLabel = document.getElementById('scalePickerLabel');
+    const scaleSegHint = document.getElementById('scaleSegHint');
+    let scalePerson = '沃德哥';
+
+    function setScaleScope(scope) {
+      if (!scaleScope) return;
+      scaleScope.querySelectorAll('button').forEach((b) => {
+        b.classList.toggle('on', b.dataset.scaleScope === scope);
+      });
+      if (scalePicker) scalePicker.disabled = scope === 'all';
+      if (scalePickerMenu && scope === 'all') scalePickerMenu.classList.remove('open');
+      if (scaleSegHint) {
+        scaleSegHint.textContent = scope === 'all'
+          ? '当前：全部 8 人。'
+          : `当前：仅 ${scalePerson}（单人模式）。`;
+      }
+    }
+
+    if (scaleScope) {
+      scaleScope.querySelectorAll('button').forEach((btn) => {
+        btn.addEventListener('click', () => setScaleScope(btn.dataset.scaleScope));
+      });
+    }
+    if (scalePicker && scalePickerMenu) {
+      scalePicker.addEventListener('click', () => {
+        if (scalePicker.disabled) return;
+        scalePickerMenu.classList.toggle('open');
+      });
+      scalePickerMenu.querySelectorAll('button[data-person]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          scalePerson = btn.dataset.person;
+          scalePickerLabel.textContent = scalePerson;
+          scalePickerMenu.querySelectorAll('button').forEach((b) => {
+            b.classList.toggle('on', b.dataset.person === scalePerson);
+          });
+          scalePickerMenu.classList.remove('open');
+          setScaleScope('one');
+        });
+      });
+    }
+
+    const scaleChipEdit = document.getElementById('scaleChipEdit');
+    const scaleChipDrawer = document.getElementById('scaleChipDrawer');
+    const scaleChipList = document.getElementById('scaleChipList');
+    const scaleChipSummary = document.getElementById('scaleChipSummary');
+    const scaleChipSearch = document.getElementById('scaleChipSearch');
+
+    function refreshScaleChipSummary() {
+      if (!scaleChipList || !scaleChipSummary) return;
+      const selected = [...scaleChipList.querySelectorAll('button.on')].map((b) => b.dataset.scaleChip);
+      const head = selected.slice(0, 3).join('、');
+      const more = selected.length > 3 ? '…' : '';
+      scaleChipSummary.innerHTML = selected.length
+        ? `<strong>${selected.length} 人已选</strong><span class="muted"> · ${head}${more}</span>`
+        : '<strong>0 人已选</strong><span class="muted"> · 列表将为空</span>';
+    }
+
+    if (scaleChipEdit && scaleChipDrawer) {
+      scaleChipEdit.addEventListener('click', () => {
+        const open = scaleChipDrawer.classList.toggle('open');
+        scaleChipEdit.textContent = open ? '收起' : '编辑';
+      });
+    }
+    if (scaleChipList) {
+      scaleChipList.querySelectorAll('button[data-scale-chip]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('on');
+          refreshScaleChipSummary();
+        });
+      });
+    }
+    const scaleChipAll = document.getElementById('scaleChipAll');
+    const scaleChipNone = document.getElementById('scaleChipNone');
+    if (scaleChipAll) {
+      scaleChipAll.addEventListener('click', () => {
+        scaleChipList.querySelectorAll('button').forEach((b) => {
+          if (b.style.display === 'none') return;
+          b.classList.add('on');
+        });
+        refreshScaleChipSummary();
+      });
+    }
+    if (scaleChipNone) {
+      scaleChipNone.addEventListener('click', () => {
+        scaleChipList.querySelectorAll('button').forEach((b) => b.classList.remove('on'));
+        refreshScaleChipSummary();
+      });
+    }
+    if (scaleChipSearch && scaleChipList) {
+      scaleChipSearch.addEventListener('input', () => {
+        const q = scaleChipSearch.value.trim().toLowerCase();
+        scaleChipList.querySelectorAll('button').forEach((b) => {
+          const hit = !q || b.dataset.scaleChip.toLowerCase().includes(q);
+          b.style.display = hit ? '' : 'none';
+        });
+      });
+    }
+    refreshScaleChipSummary();
+  </script>
+</body>
+</html>

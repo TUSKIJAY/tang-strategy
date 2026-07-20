@@ -3,12 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
+
+2026-07-21: 用户授权修复当前 Review Date Navigation plan 的 checkpoint 链并在通过后 activation。recovery baseline 将 v1 `review-001` 保持为 append-only，v2 `review-002` 后续绑定新 `proposal-revision` checkpoint。next gate `plan-revision`；不授权实施、数据或远端动作。
 
 2026-07-20: `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` 已由 exact implementation/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`、紧邻 boundary-metadata commit 及其最终 `codex/project-harness` push 消费；不授权进一步 commit/push、PR、merge、Pages、canonical data、provider/broker 或其他远端动作。
 

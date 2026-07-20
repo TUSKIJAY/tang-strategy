@@ -44,7 +44,7 @@ None.
 
 ## Proposed Plans
 
-None.
+- [Tang Strategy Review Date Navigation And Trader Filter Fusion](./proposed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
 
 ## Completed Plans
 
