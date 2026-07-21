@@ -6,6 +6,7 @@
 
 | Batch | Scope | Status | Lifecycle links |
 | --- | --- | --- | --- |
+| [`2026-07-21-kline-5m-switch-viewport-glitch`](./2026-07-21-kline-5m-switch-viewport-glitch/2026-07-21-kline-5m-switch-viewport-glitch.md) | K-line engine: 5m toolbar switch first paint viewport broken until mouse wheel | recorded | none; record-only |
 | [`2026-07-21-trade-points-and-kline-marker-labels`](./2026-07-21-trade-points-and-kline-marker-labels/2026-07-21-trade-points-and-kline-marker-labels.md) | Cards: points only (drop $/%); K-line: BUY/SELL labels + UI nickname `vordinkkk` → `vordin` | recorded | none; record-only; single mock `mockups/trade-points-and-kline-labels.html` |
 | [`2026-07-21-kline-marker-action-and-trader-nickname`](./2026-07-21-kline-marker-action-and-trader-nickname/2026-07-21-kline-marker-action-and-trader-nickname.md) | (split) K-line BUY/SELL + nickname | superseded | merged into trade-points-and-kline-marker-labels |
 | [`2026-07-21-trade-card-simplify-points-only`](./2026-07-21-trade-card-simplify-points-only/2026-07-21-trade-card-simplify-points-only.md) | (split) Trade cards drop amount/profit | superseded | merged into trade-points-and-kline-marker-labels |

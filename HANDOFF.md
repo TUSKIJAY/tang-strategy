@@ -14,10 +14,10 @@
 - Branch: `codex/project-harness`
 - No active or proposed plan.
 - **Optimization record mode is open** (user enabled). Record-only under `docs/optimization/`.
-- Latest recorded batch (no implementation authority):
+- Latest recorded batches (no implementation authority):
+  - `docs/optimization/2026-07-21-kline-5m-switch-viewport-glitch/` — 5m switch first-paint viewport glitch (wheel fixes).
   - `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/` — cards points-only + K-line BUY/SELL + `vordinkkk` nickname.
-  - Mock: `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/mockups/trade-points-and-kline-labels.html`
-  - Split predecessors superseded: `trade-card-simplify-points-only`, `kline-marker-action-and-trader-nickname`.
+  - Mock: `.../trade-points-and-kline-marker-labels/mockups/trade-points-and-kline-labels.html`
 - Coding Mode repository mutations now include one task-scoped local commit by default. The only no-commit cases are an explicit user opt-out, draft/failed/incomplete work, or inability to separate task paths safely from unrelated dirty changes.
 - Stage only task-owned literal paths. Never use repository-wide, directory, glob, `-A`, `commit -a`, or implicit staging.
 - A local commit never grants push, PR, merge, Pages, publication, provider/broker, hosted verification, or another remote action.
