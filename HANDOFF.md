@@ -14,7 +14,8 @@
 - Project: `Tang Strategy`
 - Harness profile: `governed`
 - Current plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Completed`, phase `none`, next gate `closed`. Implementation start `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`. Independent `implementation-review-001: accept/high`. Verified implementation commit `b09e08156ea3efeeebc4fc9c21d53a72fac297c6`; freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`. Frontend 48/48; builds/harness/protected hashes pass. Push/PR/merge/Pages/data/remote unauthorized.
-- Latest optimization intake: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/` is **implemented** under the completed plan above. Prior completed visual batch: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
+- Operating mode: **optimization record mode** (user-enabled 2026-07-21). Record-only; no implementation/plan activation from intake alone.
+- Latest optimization intake: `docs/optimization/2026-07-21-review-trade-panel-type-scale/` **recorded** OPT-001 — **现实交易者点位** cards type too large (user-clarified; not filter/export). Also open: `docs/optimization/2026-07-21-data-page-progressive-date-nav/` OPT-001 (Data progressive date). Prior completed: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/` (implemented).
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
 - Latest completed plan (focus): `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, `implementation-review-001: accept/high`, next gate `closed`.
 - Previous completed plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, lifecycle schema `operating-modes-v1`, status `Completed`, exact packet 002, `implementation-review-002: accept/high`, next gate `closed`.
@@ -49,10 +50,11 @@
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat historical HEAD evidence above as live worktree truth.
 3. Preserve unrelated dirty paths (`.playwright-cli/`, `output/`).
-4. Review Date Navigation And Trader Filter Fusion is **Completed** with `implementation-review-001: accept/high`. Verified implementation / phase-exit commit is `b09e08156ea3efeeebc4fc9c21d53a72fac297c6` (feat ship `064550c1…`); completed-migration is recorded. Push/PR/merge/Pages/data/remote remain unauthorized.
-5. Do not push/PR/merge/Pages/provider/broker/mutate tracked DB or canonical content without new authority.
-6. Terminal UI, multi-trader, operating-modes, Review Workspaces, and Durable Checkpoint plans remain Completed; their authorities cannot be reused.
-7. Keep completed-plan reviews append-only.
+4. Optimization record mode is active. Continue intake under `docs/optimization/` only; do not implement from records. Open batches: `2026-07-21-review-trade-panel-type-scale` OPT-001 (**现实交易者点位** card type scale); `2026-07-21-data-page-progressive-date-nav` OPT-001 (Data progressive date nav).
+5. Review Date Navigation And Trader Filter Fusion is **Completed** with `implementation-review-001: accept/high`. Verified implementation / phase-exit commit is `b09e08156ea3efeeebc4fc9c21d53a72fac297c6` (feat ship `064550c1…`); completed-migration is recorded. Push/PR/merge/Pages/data/remote remain unauthorized.
+6. Do not push/PR/merge/Pages/provider/broker/mutate tracked DB or canonical content without new authority.
+7. Terminal UI, multi-trader, operating-modes, Review Workspaces, and Durable Checkpoint plans remain Completed; their authorities cannot be reused.
+8. Keep completed-plan reviews append-only.
 
 ## Verification Evidence
 
