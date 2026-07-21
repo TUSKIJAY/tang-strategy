@@ -4,11 +4,13 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation-recording`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
+
+2026-07-21: 用户以“查看review002然后把prop plan迁移到active”明确授权 Trade Points And K-line Marker Labels exact revision `v2-review-foldback-2026-07-21` 的 lifecycle activation，记录为 `user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan`。已且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap、optimization 回链与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。Matching design approval 为 `review-002: approve/high`。本次 activation 不启动 Phase 0，不授权实现、content/DB 写入、Git stage/commit/push 以外的远端动作、provider/broker、Pages 或 hosted 动作。
 
 2026-07-21: Independent revision review `review-002` on exact revision `v2-review-foldback-2026-07-21` returned `approve/high` with no findings. V2 closes all `review-001` items: atomic canonical-registry + candidate SQLite projection and dual-surface proof; executable zero/one/two-or-more cross-leg card time ranges; and display-name + BUY/SELL for marker label/tooltip title with exact four-action fail-closed handling. Reviewer independently verified the live write/rollback/CAS path, untouched JSON/DB/view baseline, integrity/FK, QQQ fixture, consumers, schema enum, evidence hashes, harness, and authority separation. Lifecycle remains Proposed; next gate `activation-recording`. Approval does not activate or authorize implementation, content/DB mutation, provider/broker, publication, push, or remote action.
 

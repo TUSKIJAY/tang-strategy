@@ -4,19 +4,20 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation-recording`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
-- Current Proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md` revision `v2-review-foldback-2026-07-21`; `review-002: approve/high`.
-- Reviews: `review-001: revise/high` on v1 (append-only) → `review-002: approve/high` on exact v2.
-- Next gate: explicit user instruction to move the approved Proposed plan to Active (`activation-recording`). No activation or implementation authority yet.
-- V2 foldbacks locked: atomic registry + candidate SQLite projection for `vordin → vordinkkk`; pure cross-leg card time-range helper + Node cases; `marker_label` + tooltip `title` both display-name + BUY/SELL with four-action fail-closed map.
-- Promoted OPT scope: session OPT-001 (cards points-only) + OPT-002 (BUY/SELL + `vordinkkk`); OPT-003…006 remain recorded-only.
+- Current Active plan: `docs/exec-plans/active/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md` revision `v2-review-foldback-2026-07-21`.
+- Activation: `user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan` (after `review-002: approve/high`).
+- State: `phase-0:not-started`; next gate `phase-0-start`.
+- **Does not authorize** Phase 0 start, implementation, content/DB write, push, PR, Pages, provider/broker, or remote action.
+- V2 locks retained: atomic registry + candidate SQLite projection for `vordin → vordinkkk`; pure cross-leg card time-range; `marker_label` + tooltip `title` display-name + BUY/SELL with four-action fail-closed map.
+- Promoted OPT scope: session OPT-001 + OPT-002; OPT-003…006 remain recorded-only.
 - **Optimization record mode remains open** for non-promoted items under `docs/optimization/`.
 - Session batch: `docs/optimization/2026-07-21-review-trade-and-kline-session/`; named promotion source: `.../2026-07-21-trade-points-and-kline-marker-labels/`.
 - Coding Mode repository mutations now include one task-scoped local commit by default. The only no-commit cases are an explicit user opt-out, draft/failed/incomplete work, or inability to separate task paths safely from unrelated dirty changes.

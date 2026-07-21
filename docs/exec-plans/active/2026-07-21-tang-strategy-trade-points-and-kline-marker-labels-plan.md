@@ -1,18 +1,18 @@
 # Tang Strategy Trade Points And K-line Marker Labels
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Proposed
+- Status: Active
 - Plan slug: `2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`
 - Revision: `v2-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-points-kline-labels`
-- Design reviews: ../reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/review-001.md@revise@v1-proposal-2026-07-21 ../reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/review-002.md@approve@v2-review-foldback-2026-07-21
+- Design reviews: ../reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/review-002.md@approve@v2-review-foldback-2026-07-21
 - Latest design verdict: approve
 - Review independence: attested
-- Activation evidence: none
-- Current phase: none
-- Phase state: none
-- Phase entry gate: none
-- Next gate: `activation-recording`
+- Activation evidence: user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan
+- Current phase: phase-0
+- Phase state: not-started
+- Phase entry gate: phase-0-start
+- Next gate: `phase-0-start`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -21,7 +21,7 @@
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/2026-07-21-trade-points-and-kline-marker-labels.md` (user-named; superseded pointer) with authoritative detail in session batch OPT-001/OPT-002 `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`
 - Proposal baseline: `codex/project-harness@6c62c2b1ff8314da36a5f2dad57a81451c720edb`
-- Scope authority: review-only; this proposed plan does not authorize activation, implementation, push, PR, merge, Pages, provider/broker, publication, or any remote action. A later authorized implementation of this revision may perform **one local governed registry display_name mutation** only through the frozen atomic content→SQLite projection path in §3.1 / §3.3 (no provider, publication, or remote authority).
+- Scope authority: lifecycle activation only under `user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan`. Stops at `phase-0:not-started` / next gate `phase-0-start`. Does **not** start Phase 0 or authorize implementation, content/DB write, push, PR, merge, Pages, provider/broker, publication, or any remote action. Matching design approval is `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-21`.
 
 ## 1. Context And Evidence
 
@@ -250,11 +250,19 @@ Untracked `output/local-acceptance/` and `output/playwright/trade-panel-polish-2
 ## 6. Review And Activation Gate
 
 - Review location: `docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/`
-- Required design verdict: `approve` on **exact** revision `v2-review-foldback-2026-07-21` (or a later foldback revision id)
-- `review-001` remains append-only evidence against v1 and **cannot** approve v2
-- Required user approval for activation: explicit instruction after matching approve (e.g. move prop plan to active)
-- Activation is a separate lifecycle change before implementation
-- Implementation start requires a later explicit start/execute instruction after activation recording
-- Revising this durable plan is committed locally by default under `docs/operating-modes.md` §2; no push/PR/remote authority
+- Matching design approval: `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-21`
+- `review-001` remains append-only evidence against v1 and cannot approve v2
+- Activation recording: consumed by `user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan` — plan lives under `docs/exec-plans/active/`; state `phase-0:not-started`; next gate `phase-0-start`
+- Implementation start still requires a later explicit start/execute instruction; activation alone does not authorize implementation or content/DB write
+- Local commit authority for this activation package follows `docs/operating-modes.md` §2; no push/PR/remote authority
+
+### 6.1 Activation record
+
+| Field | Value |
+| --- | --- |
+| Instruction | user message authorizing move of the approved prop plan to active (`user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan`) |
+| Matching design review | `review-002.md@approve@v2-review-foldback-2026-07-21` |
+| Result | plan at `docs/exec-plans/active/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md`; `phase-0:not-started`; next gate `phase-0-start` |
+| Not authorized by this step | Phase 0 start, implementation, content/DB mutation, Git push, PR/merge, Pages, provider/broker, remote |
 
 The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../../operating-modes.md) for state invariants, review paths, gate-token syntax, manual transitions, and closeout fields.

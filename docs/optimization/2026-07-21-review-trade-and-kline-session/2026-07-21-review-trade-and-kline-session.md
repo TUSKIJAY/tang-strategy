@@ -8,8 +8,8 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Trade cards: points only (drop $ / %) | Review / Trade Cards | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) | 只保留交易时间点位 |
-| OPT-002 | K-line markers: BUY/SELL + nickname `vordinkkk` | Review / K-line + trader display | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) | 方向靠颜色箭头；UI 昵称映射 `vordin` |
+| OPT-001 | Trade cards: points only (drop $ / %) | Review / Trade Cards | active-plan | [active plan](../../exec-plans/active/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) | 只保留交易时间点位 |
+| OPT-002 | K-line markers: BUY/SELL + nickname `vordinkkk` | Review / K-line + trader display | active-plan | [active plan](../../exec-plans/active/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) | 方向靠颜色箭头；UI 昵称映射 `vordin` |
 | OPT-003 | Trade tools: remove Eligibility segment | Review / Trade tools | recorded | none | 取消 Display / Reported / Calculated 整行 |
 | OPT-004 | K-line 5m switch: first-paint viewport glitch | Review / Kline Engine | recorded | none | 点 5m 先坏图，滚轮后才正常 |
 | OPT-005 | Group focus span + legs/events timeline UI | Review / Cards ↔ Chart | recorded | none | 点卡片框整段交易；legs 紧凑时间线，可点单笔（方向已认可） |
@@ -45,7 +45,7 @@
 - Current friction: Cards / expanded legs surface `$` amounts, fees, and profit / return % noise.
 - Desired outcome: Presentation-only subtraction — **timestamps + price points** only on the card reading path.
 - Boundary: Schema / API / reported·calculated fields may remain in data; Review / Static / Admin shared cards; presentation only.
-- Lifecycle status: promoted-to-proposed → [`2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) revision `v1-proposal-2026-07-21`
+- Lifecycle status: active-plan → [`2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`](../../exec-plans/active/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) revision `v2-review-foldback-2026-07-21`
 
 ## OPT-002 K-line markers: BUY/SELL + nickname `vordinkkk`
 
@@ -56,7 +56,7 @@
   2. UI shows **`vordinkkk`**; persistence keeps **`trader_id: vordin`** (沃德哥).
 - Boundary: Event option type + action fields; canonical `trader_id`; historical day files. Card CALL/PUT badges may remain.
 - Live contract note: `tradeRecords.js` builds `marker_label` as `` `${trader_id} ${CALL|PUT}` `` (+ optional `×N`).
-- Lifecycle status: promoted-to-proposed → [`2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) revision `v1-proposal-2026-07-21`
+- Lifecycle status: active-plan → [`2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`](../../exec-plans/active/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) revision `v2-review-foldback-2026-07-21`
 
 ## OPT-003 Trade tools: remove Eligibility segment
 

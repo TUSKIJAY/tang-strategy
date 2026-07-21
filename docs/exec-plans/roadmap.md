@@ -31,11 +31,11 @@
 
 ## Active Plans
 
-None.
+- [Tang Strategy Trade Points And K-line Marker Labels](./active/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) — Active revision `v2-review-foldback-2026-07-21`; `review-002: approve/high`; `phase-0:not-started`; next gate `phase-0-start`. Activation only; no implementation start.
 
 ## Proposed Plans
 
-- [Tang Strategy Trade Points And K-line Marker Labels](./proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) — Proposed revision `v2-review-foldback-2026-07-21`; `review-002: approve/high`; next gate `activation-recording`; no activation/implementation authority.
+None.
 
 ## Completed Plans
 
