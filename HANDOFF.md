@@ -7,13 +7,13 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`, revision `v2-review-foldback-2026-07-21`, status `Proposed`, `review-002: revise/high`, next gate `plan-revision`. V2 closes the three `review-001` product findings; remaining foldback is verification-carrier only: keep Node tests for pure/source contracts and use one deterministic browser fixture for actual Eligibility and synthetic `>=7` drawer interactions, or explicitly add a component-test harness. Optimization source `docs/optimization/2026-07-21-review-trade-panel-visual-polish/`; locked mock `mockups/trade-panel-v2.html`. Review-only; no activation, implementation, push, data, provider/broker, Pages, or remote authority.
+- Current plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`, revision `v3-review-foldback-2026-07-21`, status `Proposed`, `review-003: approve/high@v3`, next gate `activation-recording`. V3 freezes Node **N-*** pure/source carriers vs mandatory Playwright **B-*** interaction carriers (Eligibility, synthetic `>=7` drawer via route-intercepted in-memory payload, four-file Download); no test-or-browser fallback; no jsdom harness. Optimization source `docs/optimization/2026-07-21-review-trade-panel-visual-polish/`; locked mock `mockups/trade-panel-v2.html`. Approval does not activate; no implementation, push, data, provider/broker, Pages, or remote authority.
 - Prior completed (not current focus): Data Progressive Navigation And Trade Card Density, verified `74334935a09f60c23748cdf0ecce5e52c1d643be`, next gate `closed`.
 - Implementation truth: Data Market days opts into progressive DateRail; Review/Static `.dr-sidebar` trade cards use frozen 12px/11px density; Admin exhaustive DateRail and unscoped trade defaults unchanged. V1–V3 screenshots under `output/data-progressive-nav-trade-density-20260721/` (untracked).
 - Previous completed governance plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md`, revision `v2-review-foldback-2026-07-20`, verified implementation `61ea580f0b284d835c79cd47130104b90a04d2f2`, `implementation-review-001: accept/high`, next gate `closed`.
@@ -46,7 +46,7 @@
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat historical HEAD evidence above as live worktree truth.
 3. Preserve unrelated dirty paths (frontend review files if dirty, `output/`, `.playwright-cli/`).
-4. **Current focus is Proposed** `2026-07-21-tang-strategy-trade-panel-visual-polish-plan` revision `v2-review-foldback-2026-07-21`. `review-002` is `revise/high`; next gate is `plan-revision` of the verification carrier. Do not activate, implement, push, or touch data/remote unless separately authorized.
+4. **Current focus is Proposed** `2026-07-21-tang-strategy-trade-panel-visual-polish-plan` revision `v3-review-foldback-2026-07-21`. `review-003: approve/high` is the matching-revision design approval; next gate is `activation-recording`. Do not activate, implement, push, or touch data/remote unless separately authorized.
 5. Prior completed: Data Progressive Navigation And Trade Card Density remains Completed at `74334935a09f60c23748cdf0ecce5e52c1d643be`; its authority is consumed.
 6. Review Date Navigation And Trader Filter Fusion is **Completed** with `implementation-review-001: accept/high`. Verified implementation / phase-exit commit is `b09e08156ea3efeeebc4fc9c21d53a72fac297c6` (feat ship `064550c1…`); completed-migration is recorded. Push/PR/merge/Pages/data/remote remain unauthorized.
 7. Do not push/PR/merge/Pages/provider/broker/mutate tracked DB or canonical content without new authority.
@@ -57,7 +57,7 @@
 
 | Check | Result |
 | --- | --- |
-| Current Trade Panel Visual Polish | Proposed revision `v2-review-foldback-2026-07-21`; `review-002: revise/high`; all `review-001` product findings closed; remaining carrier mismatch: Node source/pure tests vs actual browser interactions; next gate `plan-revision`; frontend 49/49 baseline pass; incoming index mismatch reconciled; no activation/implementation/push/data/remote authority |
+| Current Trade Panel Visual Polish | Proposed revision `v3-review-foldback-2026-07-21`; `review-003: approve/high`; next gate `activation-recording`; Node N-* pure/source vs mandatory Playwright B-* interactions frozen; path `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`; approval does not activate; no implementation/push/data/remote authority |
 | Prior Data Progressive Nav + Trade Card Density | Completed revision `v4-review-foldback-2026-07-21`; verified implementation `74334935a09f60c23748cdf0ecce5e52c1d643be`; freeze aggregate `f8caa351e78d890ea82a5ab32c65f443acf48c3123c82bb566194980d1fd159c`; `implementation-review-001: accept/high`; next gate `closed` |
 | Current Review Date Nav + Trader Filter Fusion | Completed revision `v2-review-foldback-2026-07-20`; verified implementation / phase-exit `b09e08156ea3efeeebc4fc9c21d53a72fac297c6`; freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`; `implementation-review-001: accept/high`; frontend 48/48; builds/harness/protected hashes pass; next gate `closed`; no push/data/remote authority |
 | Current Durable Checkpoint governance | Completed revision `v2-review-foldback-2026-07-20`; verified implementation `61ea580f...`; `implementation-review-001: accept/high`; 171 operating + 38 checkpoint fixtures pass; next gate `closed`; no push/data/remote authority |
@@ -135,7 +135,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Proposed plan `2026-07-21-tang-strategy-trade-panel-visual-polish-plan` revision `v2-review-foldback-2026-07-21` received `review-002: revise/high` and awaits **plan-revision** of the verification carrier. Revision does not activate. Activation, implementation, further Git, Pages, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
+Proposed plan `2026-07-21-tang-strategy-trade-panel-visual-polish-plan` revision `v3-review-foldback-2026-07-21` received matching-revision `review-003: approve/high` and awaits explicit **activation-recording**. Approval does not activate. Activation, implementation, further Git, Pages, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
 
 ## Handoff Boundary
 

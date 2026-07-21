@@ -14,7 +14,7 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Polish shared trade tools + group cards (Review / Static / Admin) | Shared trade filter/export/list chrome | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) revision `v2-review-foldback-2026-07-21` | Mock accepted; `review-002: revise/high`; next gate plan-revision; still no implementation authority |
+| OPT-001 | Polish shared trade tools + group cards (Review / Static / Admin) | Shared trade filter/export/list chrome | proposed-approved | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) revision `v3-review-foldback-2026-07-21`; [review-003](../../exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-003.md): `approve/high` | Mock accepted; review-001/002 folded into v3; approval does not activate or authorize implementation |
 
 ## Relationship To Prior Work
 
@@ -87,7 +87,7 @@ Open the mockup in a browser. Paths are relative to this record.
   - Direction color semantics from completed fusion plan
 - Lifecycle status: promoted-to-proposed
 - Mock proposal: [`./mockups/trade-panel-v2.html`](./mockups/trade-panel-v2.html)
-- Proposed plan: [`docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) revision `v2-review-foldback-2026-07-21`; next gate `design-review`
+- Proposed plan: [`docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) revision `v3-review-foldback-2026-07-21`; `review-003: approve/high`; next gate `activation-recording`
 
 ## Record Mode Session
 
@@ -98,4 +98,6 @@ Open the mockup in a browser. Paths are relative to this record.
 - Design review-001: 2026-07-21 `revise/high` on `v1-proposal-2026-07-21`
 - Plan revision foldback: 2026-07-21 → `v2-review-foldback-2026-07-21` (Eligibility a11y + English drawer freeze + production-scoped Download proof)
 - Design review-002: 2026-07-21 `revise/high` on `v2-review-foldback-2026-07-21`; product closures accepted, verification carrier must be made executable and unambiguous
-- Next: plan revision of the Node-vs-browser interaction carrier; no activation or implementation authority
+- Plan revision foldback: 2026-07-21 → `v3-review-foldback-2026-07-21` (Node N-* pure/source vs Playwright B-* interaction matrix; no fallback)
+- Design review-003: 2026-07-21 `approve/high` on exact `v3-review-foldback-2026-07-21`; no findings; next gate `activation-recording`
+- Next: explicit lifecycle activation instruction; approval alone does not activate or authorize implementation

@@ -7,8 +7,12 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent revision review `review-003` on exact revision `v3-review-foldback-2026-07-21` returned `approve/high` with no findings. V3 closes the sole `review-002` blocker by assigning pure/source proof to mandatory Node **N-*** carriers and real selection/focus/filter, synthetic `>=7` drawer, and four-file Download behavior to mandatory Playwright **B-*** carriers; the same IDs govern success criteria, manifest, Phase 0 verification, and exit. Existing Playwright dev dependency, 49/49 frontend baseline, governed harness, in-memory fixture boundary, nine-path scope, and authority separation were independently verified. Lifecycle remains Proposed; next gate `activation-recording`. Approval does not activate or authorize implementation, further Git, push, data, provider/broker, Pages, or remote action.
+
+2026-07-21: Folded `review-002: revise/high` into Proposed revision `v3-review-foldback-2026-07-21`. Closure: frozen executable verification carrier matrix with no test-or-browser fallback. **N-*** carriers stay on plain Node `test:trade-records` (pure filter/export + source text only). **B-*** carriers are mandatory Playwright receipts: Eligibility selection/focus/filter (**B-Eligibility-interaction**), synthetic `>=7` drawer via `route-intercepted-in-memory-payload` (**B-Drawer-scale**), and four-file Download across Review/Static/Admin (**B-Download-four-file**). Product locks from v2 retained; no jsdom/Testing Library expansion. `review-001`/`review-002` remain append-only and cannot approve v3. Next gate independent `design-review` of exact v3. No activation, implementation, push, data, or remote authority.
 
 2026-07-21: Independent revision review `review-002` on exact revision `v2-review-foldback-2026-07-21` returned `revise/high`. V2 closes all `review-001` product findings, but its verification carrier is contradictory: plain Node `test:trade-records` has no JSX/DOM/React renderer and cannot execute the mandated Eligibility and synthetic `>=7` drawer interactions, while the plan also permits browser receipts as a fallback. Required foldback: one executable carrier matrix—Node for pure/source contracts; deterministic browser fixture injection for actual segment/drawer interactions (or an explicitly expanded component-test harness)—with no test-or-browser ambiguity. Incoming constrained-index prose was mechanically normalized during review reconciliation. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, push, data, provider/broker, Pages, or remote authority.
 
