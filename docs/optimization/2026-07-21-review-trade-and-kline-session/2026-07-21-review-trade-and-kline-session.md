@@ -1,19 +1,19 @@
 # Optimization Batch · 2026-07-21
 
-> Record-only intake. This file does not authorize implementation.
+> Optimization intake batch. This file does not authorize implementation.
 >
 > **Session-consolidated batch.** All 2026-07-21 Review trade-panel / K-line friction from this optimization-record session lives here. Earlier same-day split batches are `superseded` (see below).
 >
-> A finalized record and its direct index update are committed locally by default under `docs/operating-modes.md` §2. This does not authorize implementation or remote action.
+> 2026-07-21: User instruction converting this document to a prop plan promoted **OPT-003…006** only. OPT-001/002 remain completed under the earlier plan. Proposed plan does not authorize activation, implementation, or remote action.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
 | OPT-001 | Trade cards: points only (drop $ / %) | Review / Trade Cards | completed | [completed plan](../../exec-plans/completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) | 只保留交易时间点位 |
 | OPT-002 | K-line markers: BUY/SELL + nickname `vordinkkk` | Review / K-line + trader display | completed | [completed plan](../../exec-plans/completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) | 方向靠颜色箭头；UI 昵称映射 `vordin` |
-| OPT-003 | Trade tools: remove Eligibility segment | Review / Trade tools | recorded | none | 取消 Display / Reported / Calculated 整行 |
-| OPT-004 | K-line 5m switch: first-paint viewport glitch | Review / Kline Engine | recorded | none | 点 5m 先坏图，滚轮后才正常 |
-| OPT-005 | Group focus span + legs/events timeline UI | Review / Cards ↔ Chart | recorded | none | 点卡片框整段交易；legs 紧凑时间线，可点单笔（方向已认可） |
-| OPT-006 | Data page Market days: progressive rail stretched ugly | Data / Market days | recorded | none | 宽面板里被拉满的 QQQ/SPY、最近/按月 不伦不类 |
+| OPT-003 | Trade tools: remove Eligibility segment | Review / Trade tools | promoted | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) | 取消 Display / Reported / Calculated 整行 |
+| OPT-004 | K-line 5m switch: first-paint viewport glitch | Review / Kline Engine | promoted | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) | 点 5m 先坏图，滚轮后才正常 |
+| OPT-005 | Group focus span + legs/events timeline UI | Review / Cards ↔ Chart | promoted | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) | 点卡片框整段交易；legs 紧凑时间线，可点单笔（方向已认可） |
+| OPT-006 | Data page Market days: progressive rail stretched ugly | Data / Market days | promoted | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) | 宽面板里被拉满的 QQQ/SPY、最近/按月 不伦不类 |
 
 ## Visual Reference
 
@@ -67,7 +67,7 @@
   - Underlying eligibility flags on groups / admin editor forms are **not** automatically deleted from schema by this UI hide; plan time decides whether filter state hard-defaults to display-eligible only, or admin-only controls remain elsewhere.
   - Primary surface: shared Trade tools used by Review (and Static/Admin if same component).
 - Live source: `frontend/src/features/review/TraderFilters.jsx` Eligibility `radiogroup`.
-- Lifecycle status: recorded
+- Lifecycle status: promoted → Proposed plan `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan` revision `v1-proposal-2026-07-21`; next gate independent `design-review`. No activation/implementation authority.
 
 ## OPT-004 K-line 5m switch first-paint viewport glitch
 
@@ -76,7 +76,7 @@
 - Desired outcome: First `render` after `setTimeframe('5m')` (ideally any TF switch) must show a correct viewport without wheel interaction.
 - Likely surface (investigation only): `frontend/src/kline/kline-engine.js` `setTimeframe` + shared `ViewportManager.zoomScale` / `viewStart` vs 1m→5m window constants.
 - Boundary: No change to bars payloads / assemble / seed contracts; not a publish/DB issue.
-- Lifecycle status: recorded
+- Lifecycle status: promoted → Proposed plan `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan` revision `v1-proposal-2026-07-21`; next gate independent `design-review`. No activation/implementation authority.
 
 ## OPT-005 Group focus span + legs/events timeline UI
 
@@ -100,7 +100,7 @@
   - No schema change required for UI; span is derived from existing leg events’ timestamps / bar indices.
   - Admin editor forms out of scope unless they share the same list component.
 - User foldback (2026-07-21): 方向认可（“可以的”）— span fit + compact timeline locked for mock.
-- Lifecycle status: recorded
+- Lifecycle status: promoted → Proposed plan `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan` revision `v1-proposal-2026-07-21`; next gate independent `design-review`. No activation/implementation authority.
 
 ## OPT-006 Data page Market days: progressive rail stretched / incongruous
 
@@ -118,4 +118,4 @@
   4. Prefer Data-scoped surface class (e.g. `.page .panel .review-context-panel` / density variant) over breaking Review sidebar where stretch is intentional.
 - Likely surface: `DashboardPage.jsx` + `ReviewContextPanel.jsx` + `styles.css` (`.ticker-tabs button { flex: 1 }`, `.date-rail-mode button { flex: 1 }`).
 - Boundary: No change to market-day inventory, ticker isolation, progressive browse state machine, or open-Review-on-date behavior unless plan expands; presentation/layout only.
-- Lifecycle status: recorded
+- Lifecycle status: promoted → Proposed plan `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan` revision `v1-proposal-2026-07-21`; next gate independent `design-review`. No activation/implementation authority.

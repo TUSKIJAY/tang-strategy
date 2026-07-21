@@ -4,4 +4,4 @@ Proposed plans are drafts and carry no implementation authority.
 
 | Plan | Status | Review | Next gate |
 | --- | --- | --- | --- |
-| None | — | — | none |
+| [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) | Proposed | none | design-review |

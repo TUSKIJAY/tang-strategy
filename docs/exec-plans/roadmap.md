@@ -35,7 +35,7 @@ None.
 
 ## Proposed Plans
 
-None.
+- [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Proposed; revision `v1-proposal-2026-07-21`; next gate `design-review`; session OPT-003…006 only (OPT-001/002 already completed)
 
 ## Completed Plans
 

@@ -3,12 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-21: User instruction converting session optimization batch `docs/optimization/2026-07-21-review-trade-and-kline-session/` to prop plan. Promoted **OPT-003…006 only** to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v1-proposal-2026-07-21`. Scope: remove Eligibility tools row (default display filter); 5m first-paint viewport fix; group span-fit + compact legs timeline; Data progressive rail density. OPT-001/002 remain completed. Indexes/roadmap/OPT back-links/state blocks reconciled. Next gate independent `design-review`. No activation, implementation, push, data pipeline, provider/broker, or remote authority.
 
 2026-07-21: Trade Points And K-line Marker Labels is **Completed**. Goal OBJECTIVE accept-active-plan-until-complete authorized full local execution through closeout. Phase 0 baseline freeze; Phase 1 product commit `717ac8ae9bf5faf00ec6dff3b81d04c51c86b145` (card points-only, marker display_name BUY/SELL, dual-surface vordin display_name to vordinkkk); packet-001 + independent `implementation-review-001: accept/high`; migrated to completed/. Frontend 54/54 test:trade-records, normal+static builds, harness auto, N-Registry-dual, V1-V3 screenshots under untracked output/playwright/trade-points-marker-labels-20260721/. Push/PR/merge/Pages/provider/broker remain unauthorized. Next gate: closed.
 
