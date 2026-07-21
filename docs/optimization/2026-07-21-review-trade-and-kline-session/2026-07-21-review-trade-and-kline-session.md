@@ -12,6 +12,7 @@
 | OPT-002 | K-line markers: BUY/SELL + nickname `vordinkkk` | Review / K-line + trader display | recorded | none | 方向靠颜色箭头；UI 昵称映射 `vordin` |
 | OPT-003 | Trade tools: remove Eligibility segment | Review / Trade tools | recorded | none | 取消 Display / Reported / Calculated 整行 |
 | OPT-004 | K-line 5m switch: first-paint viewport glitch | Review / Kline Engine | recorded | none | 点 5m 先坏图，滚轮后才正常 |
+| OPT-005 | Group focus span + legs/events timeline UI | Review / Cards ↔ Chart | recorded | none | 点卡片框整段交易；legs 紧凑时间线，可点单笔 |
 
 ## Visual Reference
 
@@ -21,6 +22,8 @@
 | K-line markers live (`vordin CALL/PUT`) | [`screenshots/2026-07-21-kline-marker-buysell-trader-nickname.png`](./screenshots/2026-07-21-kline-marker-buysell-trader-nickname.png) |
 | Eligibility row to remove | [`screenshots/2026-07-21-trade-tools-eligibility-remove.png`](./screenshots/2026-07-21-trade-tools-eligibility-remove.png) |
 | 5m switch broken first paint | [`screenshots/2026-07-21-kline-5m-switch-initial-viewport.png`](./screenshots/2026-07-21-kline-5m-switch-initial-viewport.png) |
+| Group select zooms first event only | [`screenshots/2026-07-21-trade-group-select-first-event-only.png`](./screenshots/2026-07-21-trade-group-select-first-event-only.png) |
+| Legs/events current expanded UI | [`screenshots/2026-07-21-trade-legs-events-current-ui.png`](./screenshots/2026-07-21-trade-legs-events-current-ui.png) |
 | **Session mock (all UI items)** | [`mockups/review-trade-and-kline-session.html`](./mockups/review-trade-and-kline-session.html) |
 
 ## Supersedes (this session)
@@ -71,4 +74,27 @@
 - Desired outcome: First `render` after `setTimeframe('5m')` (ideally any TF switch) must show a correct viewport without wheel interaction.
 - Likely surface (investigation only): `frontend/src/kline/kline-engine.js` `setTimeframe` + shared `ViewportManager.zoomScale` / `viewStart` vs 1m→5m window constants.
 - Boundary: No change to bars payloads / assemble / seed contracts; not a publish/DB issue.
+- Lifecycle status: recorded
+
+## OPT-005 Group focus span + legs/events timeline UI
+
+- Source evidence:
+  - Chart after selecting 沃德哥 PUT: [`screenshots/2026-07-21-trade-group-select-first-event-only.png`](./screenshots/2026-07-21-trade-group-select-first-event-only.png) — viewport zooms a **single** bar near first event; other events of the same group not framed as a span.
+  - Expanded legs: [`screenshots/2026-07-21-trade-legs-events-current-ui.png`](./screenshots/2026-07-21-trade-legs-events-current-ui.png) — dense unaligned text (`buy_open` / `sell_partial` / `fees ?` glued together); user: 效果不行，需要优化 UI.
+  - User question: 点 PUT 框只会放大第一笔，后面交易如何体现？每笔都单独放大又浪费空间。
+- Current friction:
+  1. `selectTradeGroup` resolves **one** annotation (first matching `trade_group_id`) and `fitRange` around that single bar — multi-event groups (open + closes / partials) lose group context on chart.
+  2. Expanded legs/events is a raw dump: hard to scan, wastes vertical space when many partials, shows fees/`?` noise (conflicts with OPT-001 subtraction).
+- **Design direction (recommended, locked for mock):**
+  1. **Group select → fit the whole event span** of that group: `min(event bar) … max(event bar)` + modest padding. One zoom frames the trade lifecycle without “one zoom per event”.
+  2. Soft highlight band across that span (not only a single marker flash).
+  3. Collapsed card meta: **time span + event count** e.g. `09:42 → 10:01 · 7 pts` (no $/%).
+  4. Expanded **timeline UI** (compact table rows): `TIME | ACTION | QTY @ PX` — short actions (`BUY` / `SELL` / `PART`), **no fees** (OPT-001).
+  5. **Optional secondary navigation**: click a timeline row → center/highlight that event bar *without* expanding the whole day; primary group select stays span-fit.
+  6. Do **not** auto-fit each partial independently on group click (space waste / jarring).
+- Desired outcome: Selecting a group shows “this trade’s window”; expanded legs are a scannable point timeline; multi-event groups remain honest without one-bar tunnel vision or full-day noise.
+- Boundary:
+  - Live path today: `ReviewPage.jsx` `selectTradeGroup` + `TraderTradeList.jsx` expand block; annotations from `buildTradeRecordAnnotations`.
+  - No schema change required for UI; span is derived from existing leg events’ timestamps / bar indices.
+  - Admin editor forms out of scope unless they share the same list component.
 - Lifecycle status: recorded

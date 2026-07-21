@@ -6,7 +6,7 @@
 
 | Batch | Scope | Status | Lifecycle links |
 | --- | --- | --- | --- |
-| [`2026-07-21-review-trade-and-kline-session`](./2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md) | Session: cards points-only; K-line BUY/SELL + `vordinkkk`; remove Eligibility; 5m viewport glitch | recorded | none; record-only; mock `mockups/review-trade-and-kline-session.html` |
+| [`2026-07-21-review-trade-and-kline-session`](./2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md) | Session: cards points-only; K-line BUY/SELL + `vordinkkk`; remove Eligibility; 5m viewport; group span focus + legs timeline | recorded | none; record-only; mock `mockups/review-trade-and-kline-session.html` |
 | [`2026-07-21-kline-5m-switch-viewport-glitch`](./2026-07-21-kline-5m-switch-viewport-glitch/2026-07-21-kline-5m-switch-viewport-glitch.md) | (split) 5m first-paint viewport | superseded | → session OPT-004 |
 | [`2026-07-21-trade-points-and-kline-marker-labels`](./2026-07-21-trade-points-and-kline-marker-labels/2026-07-21-trade-points-and-kline-marker-labels.md) | (partial merge) cards + markers | superseded | → session OPT-001/002 |
 | [`2026-07-21-kline-marker-action-and-trader-nickname`](./2026-07-21-kline-marker-action-and-trader-nickname/2026-07-21-kline-marker-action-and-trader-nickname.md) | (split) K-line BUY/SELL + nickname | superseded | → session OPT-002 |
