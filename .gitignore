@@ -45,6 +45,7 @@ Desktop.ini
 *.swo
 data/seed/market-data/
 .claude/
+.playwright-cli/
 ONLINE_REVIEW_OPTIMIZATION.md
 
 # Local IB publish automation (personal scaffolding, see docs/daily-publish-runbook.md)
