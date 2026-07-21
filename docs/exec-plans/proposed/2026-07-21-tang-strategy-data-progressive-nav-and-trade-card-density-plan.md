@@ -3,9 +3,9 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
 - Plan slug: `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`
-- Revision: `v2-review-foldback-2026-07-21`
+- Revision: `v3-review-foldback-2026-07-21`
 - Plan author ID: `codex-plan-author-2026-07-21-data-nav-trade-density`
-- Design reviews: ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-002.md@revise@v2-review-foldback-2026-07-21
+- Design reviews: ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-002.md@revise@v2-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-003.md@revise@v3-review-foldback-2026-07-21
 - Latest design verdict: revise
 - Review independence: attested
 - Activation evidence: none
@@ -21,7 +21,7 @@
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-data-page-progressive-date-nav/2026-07-21-data-page-progressive-date-nav.md`, `docs/optimization/2026-07-21-review-trade-panel-type-scale/2026-07-21-review-trade-panel-type-scale.md`
 - Proposal baseline: `codex/project-harness@6eee7e3b9993f57c51d710d40fc988eb15b489ce`
-- Scope authority: review-only; this proposed plan does not authorize implementation, activation, commit, push, data mutation, or remote actions. `review-001` targets only v1; v2 requires a new matching-revision design review before any activation.
+- Scope authority: review-only; this proposed plan does not authorize implementation, activation, commit, push, data mutation, or remote actions. `review-001` targets v1 only; `review-002` targets v2 only; v3 requires a new matching-revision design review before any activation.
 
 ## 1. Context And Evidence
 
@@ -38,19 +38,27 @@
 
 提案基于 `codex/project-harness@6eee7e3b9993f57c51d710d40fc988eb15b489ce` 的工作树状态起草。`review-001` lifecycle package 记录在 `406f3c401a8478edaf166e22dd88d493f7003862`。
 
-### 1.2 `review-001` foldback closure map
+### 1.2 Review foldback closure map
 
-Independent `review-001` returned `revise/high` against frozen revision `v1-proposal-2026-07-21`. Revision `v2-review-foldback-2026-07-21` folds every finding into the operative contract:
+#### review-001 closure (v1 → v2)
 
 | Severity | Finding (summary) | V2 closure |
 | --- | --- | --- |
-| P1 | Closeout jumped `proposed/` → `completed/` with no independent implementation review; single-commit wording collapsed implementation / review / closeout | §4 Phases 2–4 and §5 require Active verification → independent implementation review (`accept`) → separately authorized Completed migration; commit/push authority stay separate |
-| P1 | Two-file scope omitted contract-test / comment reconciliation; missing `npm run test:trade-records` and static build | §3.1 manifest and §4 Phases 0–2 include `ReviewContextPanel.jsx` (comment-only), `reviewWorkspace.test.js`, `npm run test:trade-records`, normal build, and `VITE_STATIC_REVIEWS=true npm run build:static-reviews` |
-| P2 | Global `.trade-*` CSS would change Admin `TraderTradeList` outside OPT scope | §2.2 / §3 / §4 WU-B freeze density overrides under `.dr-sidebar` only; Admin remains on unscoped defaults |
-| P2 | 11px/12px and visual exit deferred to subjective judgment; no screenshot matrix | §2.3 freezes exact px/gap/padding tokens and a desktop+narrow Review/Static/Data matrix |
-| P3 | Final contract link `../operating-modes.md` was broken | Final link is [`../../operating-modes.md`](../../operating-modes.md) |
+| P1 | Closeout jumped `proposed/` → `completed/` with no independent implementation review | §4 added Active verification → independent implementation review → separately authorized Completed migration |
+| P1 | Two-file scope omitted contract-test / comment reconciliation; missing test & static build | §3.1 manifest and phases include `ReviewContextPanel.jsx` comment-only, `reviewWorkspace.test.js`, `npm run test:trade-records`, and both builds |
+| P2 | Global `.trade-*` CSS would change Admin | §2.2 freezes density overrides under `.dr-sidebar` only |
+| P2 | Visual exit deferred to subjective judgment; no screenshot matrix | §2.3 freezes exact px/gap/padding tokens and a screenshot matrix |
+| P3 | Final contract link was broken | Fixed to `../../operating-modes.md` |
 
-`review-001` is append-only v1 evidence and cannot approve v2. Next gate is an independent design review of exact revision `v2-review-foldback-2026-07-21`.
+#### review-002 closure (v2 → v3)
+
+| Severity | Finding (summary) | V3 closure |
+| --- | --- | --- |
+| 严重-1 | 三轮重复测试/构建、六张强制截图、四个实施后阶段和额外 closeout 用户门超出小型 UI 改动所需 | §4 压缩为三个阶段（Baseline+Implementation → Acceptance+Implementation-review → Closeout）；测试/构建只运行一次（Phase 1 退出门）；截图从 6 张精简为 3 张；Admin 不受影响由 scoped CSS diff + 合同测试证明，不强制拍负向截图 |
+| 严重-2 | 截图矩阵未固定可复现 fixture；V5 允许条件跳过 | §2.3 固定 fixture 为 SPY `2026-07-17`（已确认包含 Tang + 沃德哥 groups），删除条件跳过；只保留 Data desktop、Review desktop expanded、Review narrow 三张 |
+| 中等-1 | Completed migration 被无条件拆成新用户提示 | §4 Phase 2 改为：closeout 需要覆盖 closeout 的明确用户授权；若用户已通过完整执行授权（如"全权执行该 plan 直到收尾"）明确委托了 closeout，则无需重复询问。仅 activation 或仅 implementation-start 不足。Push/PR/Pages 等远程权限继续独立 |
+
+`review-001` 和 `review-002` 均为先前 revision 的 append-only 证据，不能 approve v3。Next gate 是对 exact revision `v3-review-foldback-2026-07-21` 的独立 design review。
 
 ### 1.3 Visual evidence
 
@@ -65,7 +73,7 @@ Independent `review-001` returned `revise/high` against frozen revision `v1-prop
 **Data 页面日期导航：**
 
 - `ReviewContextPanel.jsx` 接受 `dateNavigation` 属性并透传给 `DateRail`。`DateRail` 默认 `dateNavigation='exhaustive'`；当值为 `'progressive'` 时渲染最近/按月交互。
-- 文件头注释仍写 “Progressive mode is opt-in via dateNavigation="progressive" (Review only).” — Data 接入 progressive 后必须把该注释改成真实消费者集合。
+- 文件头注释仍写 "Progressive mode is opt-in via dateNavigation=\"progressive\" (Review only)." — Data 接入 progressive 后必须把该注释改成真实消费者集合。
 - `ReviewPage.jsx` 传递 `dateNavigation="progressive"`；`DashboardPage.jsx` **未传递** `dateNavigation`，因此继承 exhaustive。
 - `StaticReviewsApp`、`AdminTradersPage`、`TraderPointEditor` 同样未传递，均使用 exhaustive。
 
@@ -74,7 +82,7 @@ Independent `review-001` returned `revise/high` against frozen revision `v1-prop
 - `frontend/src/features/review/reviewWorkspace.test.js` 当前断言：
   - only `ReviewPage` opts into progressive；`DashboardPage` / Admin / editor / Static 均 `doesNotMatch(/dateNavigation=/)`
   - `.dr-sidebar .trade-record-list { gap: 8px; }`
-- Data progressive 与 gap 6px 落地后，这些断言必须同步改写，否则 Phase 1 无法通过 `npm run test:trade-records`。
+- Data progressive 与 gap 6px 落地后，这些断言必须同步改写，否则无法通过 `npm run test:trade-records`。
 
 **交易者点位卡片排版（`frontend/src/styles.css`）：**
 
@@ -110,7 +118,7 @@ Independent `review-001` returned `revise/high` against frozen revision `v1-prop
 2. Data 页面默认展示「最近」标签页与最近 12 个市场日芯片；可切换「按月」浏览；行为与 Review progressive 合约一致（初始化选中最新日、按月浏览不因 chip 选择重置 browseMode、切换 ticker 走 workspace 合约）。
 3. 共享默认值 `dateNavigation='exhaustive'` 不改变。
 4. `AdminTradersPage`、`TraderPointEditor`、`StaticReviewsApp` 保持 exhaustive（不出现 `dateNavigation=` prop）。
-5. `ReviewContextPanel.jsx` 顶部注释改为反映真实 opt-in 消费者：至少 **Review + Data**；不得再写 “Review only”。
+5. `ReviewContextPanel.jsx` 顶部注释改为反映真实 opt-in 消费者：至少 **Review + Data**；不得再写 "Review only"。
 6. `reviewWorkspace.test.js` 改写 progressive 消费者断言：`ReviewPage` 与 `DashboardPage` 均匹配 `dateNavigation="progressive"`；Admin / editor / Static 仍不得匹配。
 
 **WU-B Trade Card Type Scale（仅 `.dr-sidebar`）：**
@@ -128,23 +136,20 @@ Independent `review-001` returned `revise/high` against frozen revision `v1-prop
 
 8. CALL/PUT 方向颜色 token 不变（`--direction-call: #6F9F7A`、`--direction-put: #E06B66`）。
 9. 卡片选中/活跃态、legs/events 展开内容、Eligibility/B chips/Download 合约与语义不变。
-10. Interactive Review 与 Static Review（共享 `.dr-sidebar`）自动获得相同密度；Admin `TraderTradeList` 视觉保持当前全局默认。
+10. Interactive Review 与 Static Review（共享 `.dr-sidebar`）自动获得相同密度；Admin `TraderTradeList` 视觉保持当前全局默认。Admin 不受影响由 `.dr-sidebar` scoped CSS diff + 合同测试证明，不强制单独截图。
 11. `reviewWorkspace.test.js` 将 `.dr-sidebar .trade-record-list { gap: 8px; }` 断言更新为 `gap: 6px`，并增加至少一条对 `.dr-sidebar .trade-trader-name` / `.dr-sidebar .trade-group-summary` 12px 作用域的 source 合约匹配；不得要求全局未 scoped 选择器出现 12px 字号。
 
 ### 2.3 Frozen visual acceptance matrix
 
-Phase 2 必须产生可复现截图（建议目录 `output/playwright/data-nav-trade-density-phase2-<YYYYMMDD>/`，未跟踪产物不得 sweep 进 commit）。对比基线为 §1.3 三张 OPT 截图。
+Phase 1 必须在实施完成后产出以下三张可复现截图，用于 implementation review 证据。截图使用**固定 fixture**：SPY `2026-07-17`（已确认包含 Tang + 沃德哥 trader groups，含多方向点位）。对比基线为 §1.3 三张 OPT 截图。
 
-| # | Surface | Viewport | Required coverage |
-| --- | --- | --- | --- |
-| V1 | Data Market days | desktop `1672x941` | progressive「最近」默认可见；可切换「按月」；不再铺满全部历史月芯片网格 |
-| V2 | Review 现实交易者点位 | desktop `1672x941` | Tang 单卡标题/方向/meta 密度；选中态；与 signal/date chrome 无字号断层 |
-| V3 | Review 现实交易者点位 | desktop `1672x941` | 沃德哥（或当前 multi-point trader）多卡；至少一个 expanded `Show legs/events` 状态 |
-| V4 | Review 现实交易者点位 | narrow `820x1180` | 长 display name 可 wrap、无横向溢出、卡片仍可读 |
-| V5 | Static Review 左栏 | desktop `1672x941` | 同一 `.dr-sidebar` 点位卡密度与 interactive 一致（若当日有 trader groups） |
-| V6 | Admin traders inspection list | desktop `1672x941` | **负向验收**：Admin 列表**不得**出现本计划的 12px/6px sidebar 密度（保持实现前默认体量） |
+| # | Surface | Viewport | Fixture | Required coverage |
+| --- | --- | --- | --- | --- |
+| V1 | Data Market days | desktop `1672x941` | SPY `2026-07-17` | progressive「最近」默认可见；可切换「按月」；不再铺满全部历史月芯片网格 |
+| V2 | Review 现实交易者点位 | desktop `1672x941` | SPY `2026-07-17` | Tang + 沃德哥卡片标题/方向/meta 密度；至少一个 expanded `Show legs/events` 状态；与 signal/date chrome 无字号断层 |
+| V3 | Review 现实交易者点位 | narrow `820x1180` | SPY `2026-07-17` | 长 display name 可 wrap、无横向溢出、卡片仍可读 |
 
-实施时不得以“看起来差不多”替代上述矩阵；像素 token 以 §2.2 表为准，不得在实现阶段改回主观 11/12 二选一。
+截图建议存放 `output/` 目录（未跟踪产物，不 sweep 进 commit）。像素 token 以 §2.2 表为准。
 
 ## 3. Constraints And Invariants
 
@@ -162,7 +167,6 @@ Phase 2 必须产生可复现截图（建议目录 `output/playwright/data-nav-t
 5. Optimization records + `docs/optimization/index.md` status/lifecycle links.
 6. `PROGRESS.md` / `HANDOFF.md` state blocks.
 7. Plan file location + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + roadmap as lifecycle transitions require.
-8. Implementation-review packet / evidence under `docs/exec-plans/reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/`.
 
 **Out of manifest / must not change:**
 
@@ -182,92 +186,59 @@ Phase 2 必须产生可复现截图（建议目录 `output/playwright/data-nav-t
 
 ## 4. Phases
 
-### Phase 0 — Baseline And Scope Freeze
+### Phase 0 — Baseline, Implementation, And Verification
 
-- Entry gate: matching-revision design-review `approve` on `v2-review-foldback-2026-07-21` **and** explicit user activation recording to Active at `phase-0:not-started`, followed by a separate implementation-start instruction.
+- Entry gate: matching-revision design-review `approve` on `v3-review-foldback-2026-07-21` **and** explicit user activation + implementation-start.
 - Work:
-  1. Run `python3 scripts/check-project-harness.py --root . --profile auto`.
-  2. Run `cd frontend && npm run test:trade-records`.
-  3. Run `cd frontend && npm run build`.
-  4. Run `cd frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews`.
-  5. Freeze §3.1 manifest paths present; capture before hashes for the four implementation files; record that Admin CSS remains unscoped defaults.
-  6. Optional: capture before screenshots for V1–V6 if not already covered by OPT evidence.
-- Verification: harness green; contract tests green; both builds green; manifest exact; no unrelated edits.
-- Exit gate: baseline receipt recorded; next gate `phase-1-start`.
 
-### Phase 1 — Implementation (WU-A + WU-B + contracts)
+  **Baseline：**
 
-- Entry gate: Phase 0 complete.
-- Work:
+  1. Run `python3 scripts/check-project-harness.py --root . --profile auto` — confirm harness green.
+  2. Freeze §3.1 manifest paths present; confirm Admin CSS remains unscoped defaults.
 
   **WU-A Data Progressive DateRail：**
 
-  In `DashboardPage.jsx`, add the progressive prop next to the existing `ReviewContextPanel` props:
-
-  ```diff
-     <ReviewContextPanel
-  +    dateNavigation="progressive"
-  ```
-
-  In `ReviewContextPanel.jsx`, update the file-header comment only, for example:
-
-  ```text
-  // Progressive mode is opt-in via dateNavigation="progressive"
-  // (currently Review + Data; default remains exhaustive for Admin/Static/editor).
-  ```
-
-  Do **not** change the default parameter `dateNavigation = 'exhaustive'`.
+  3. In `DashboardPage.jsx`, add `dateNavigation="progressive"` prop to `<ReviewContextPanel>`.
+  4. In `ReviewContextPanel.jsx`, update file-header comment only to reflect Review + Data consumers.
+  5. Do **not** change the default parameter `dateNavigation = 'exhaustive'`.
 
   **WU-B Trade Card Type Scale：**
 
-  In `frontend/src/styles.css`, within the existing Review sidebar trade overrides region (near current `.dr-sidebar .trade-record-list` / `.trade-group-summary` rules), set exactly the §2.2 selector table. Replace the current sidebar `gap: 8px` / `padding: 10px` overrides with the frozen values. Do not restyle unscoped global trade rules.
+  6. In `frontend/src/styles.css`, within the existing Review sidebar trade overrides region, set exactly the §2.2 selector table. Replace the current sidebar `gap: 8px` / `padding: 10px` overrides with the frozen values. Do not restyle unscoped global trade rules.
 
   **Contract tests：**
 
-  Update `reviewWorkspace.test.js` so that:
+  7. Update `reviewWorkspace.test.js` so that:
+     - progressive opt-in assertions expect **both** Review and Dashboard;
+     - Admin / editor / Static still have no `dateNavigation=`;
+     - `.dr-sidebar .trade-record-list` expects `gap: 6px`;
+     - at least one assertion pins `.dr-sidebar` scoped 12px trader-name / summary density.
 
-  - progressive opt-in assertions expect **both** Review and Dashboard;
-  - Admin / editor / Static still have no `dateNavigation=`;
-  - `.dr-sidebar .trade-record-list` expects `gap: 6px`;
-  - at least one assertion pins `.dr-sidebar` scoped 12px trader-name / summary density.
-
-- Verification:
+- Verification (一次性运行，不重复)：
   1. `cd frontend && npm run test:trade-records` green.
   2. `cd frontend && npm run build` green.
   3. `cd frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews` green.
-  4. Diff limited to the four implementation files in §3.1.
-- Exit gate: implementation complete and contract/build green; next gate `phase-2-start`.
+  4. `python3 scripts/check-project-harness.py --root . --profile auto` green.
+  5. Diff limited to the four implementation files in §3.1.
+  6. Local `npm run dev` 交互验证：Data progressive 最近/按月可用；Review progressive 不变；Admin DateRail exhaustive + Admin 点位列表保持默认体量（由 scoped CSS diff + 合同测试证明）。
+  7. 拍摄 §2.3 三张截图（V1–V3），fixture SPY `2026-07-17`，存放 `output/` 目录。
+- Exit gate: 合同测试 + 两种 build + harness 全绿；截图完整；diff 仅限四文件。Next gate `implementation-review`.
 
-### Phase 2 — Integrated Acceptance
+### Phase 1 — Independent Implementation Review
 
-- Entry gate: Phase 1 complete.
-- Work:
-  1. Local interactive stack verification:
-     - Data: progressive 最近/按月；与 Review 行为一致。
-     - Review: progressive 不变；点位卡密度符合 §2.2。
-     - Admin: DateRail exhaustive；点位列表**保持**默认体量（V6）。
-     - Static: DateRail exhaustive；`.dr-sidebar` 点位卡密度与 Review 一致（V5）。
-  2. Capture V1–V6 screenshot matrix from §2.3; note console errors must be zero on exercised paths.
-  3. Re-run harness auto profile + both builds + `npm run test:trade-records`.
-  4. Write phase evidence under `docs/exec-plans/reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/evidence/`.
-- Verification: matrix complete; contracts/builds/harness green; no DB/content/workflow drift.
-- Exit gate: acceptance receipt recorded; next gate `implementation-review-packet`.
-
-### Phase 3 — Independent Implementation Review
-
-- Entry gate: Phase 2 complete; implementation-review packet frozen (manifest hashes, commands, evidence paths, authority boundary).
+- Entry gate: Phase 0 完成；implementation-review packet frozen（manifest 哈希、命令、截图路径、authority boundary）。
 - Work:
   1. Package exact review target (implementation commit or frozen digest + paths) in `implementation-review-packet-001.md`.
   2. Obtain independent `implementation-review-001` with verdict `accept` / `revise` / `reject`.
   3. If `revise`, open a remediation work unit; do **not** migrate to Completed.
 - Verification: matching independent `accept` on the frozen implementation target.
-- Exit gate: `Implementation review` metadata records `…/implementation-review-001.md@accept`; next gate `completed-migration` **only after separate user authority**.
+- Exit gate: `Implementation review` metadata records `…/implementation-review-001.md@accept`; next gate `completed-migration`.
 
-### Phase 4 — Completed Migration (separately authorized)
+### Phase 2 — Closeout (Completed Migration)
 
-- Entry gate: Phase 3 `accept` **and** a new explicit user instruction authorizing completed-migration lifecycle edits (implementation-start / phase authority does **not** imply this).
+- Entry gate: Phase 1 `accept` **and** 覆盖 closeout 的明确用户授权。若用户已通过完整执行授权（如"全权执行该 plan 直到收尾"或等效表述）明确委托了 closeout，则视为已满足，无需重复询问。仅 activation 或仅 implementation-start 不足以隐含 closeout 权限。
 - Work:
-  1. Move plan file from `active/` → `completed/` (source of truth after activation is `active/`, never jump from `proposed/`).
+  1. Move plan file from `active/` → `completed/`.
   2. Reconcile proposed/active/completed/reviews indexes, roadmap, and the two state blocks.
   3. Mark both optimization batches `completed` with lifecycle link to this plan; update `docs/optimization/index.md`.
   4. Record `Final disposition: Completed`, verified implementation commit, and any lifecycle reconciliation commit per operating-modes rules.
@@ -278,41 +249,41 @@ Phase 2 必须产生可复现截图（建议目录 `output/playwright/data-nav-t
 
 | Action | Authority required |
 | --- | --- |
-| Design review of v2 | independent reviewer; no activation |
+| Design review of v3 | independent reviewer; no activation |
 | Activation recording | explicit user activate instruction |
-| Phase 0–3 implementation & verification | explicit implementation-start after Active |
+| Phase 0 implementation & verification | explicit implementation-start after Active |
 | Local scoped commits (if any) | separate Git/checkpoint authority; never implied |
 | Push / PR / merge / Pages / data / remote | never granted by this plan text |
-| Completed migration | separate explicit user instruction after implementation-review `accept` |
+| Completed migration | explicit user authority covering closeout; full-execution grants (e.g. "全权执行直到收尾") satisfy this without repeating |
 
 ## 5. Evidence And Commit Plan
 
-- Baseline / per-phase commands (all required where listed in phases):
+- Baseline / verification commands (run once in Phase 0 exit):
   - `python3 scripts/check-project-harness.py --root . --profile auto`
   - `cd frontend && npm run test:trade-records`
   - `cd frontend && npm run build`
   - `cd frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews`
 - Focused checks:
-  - Interactive Data/Review/Admin/Static progressive vs exhaustive behavior
-  - V1–V6 screenshot matrix against OPT baselines
+  - Interactive Data/Review/Admin progressive vs exhaustive behavior
+  - V1–V3 screenshot matrix against OPT baselines (fixture: SPY `2026-07-17`)
 - Expected state/handoff updates:
   - `PROGRESS.md` / `HANDOFF.md` at each lifecycle transition
   - Optimization records at Completed migration only
 - Commit boundaries (if/when separately authorized):
-  - Implementation-phase commit(s): only the four §3.1 implementation files (+ phase evidence if required by standing checkpoint rules)
-  - Implementation-review / remediation commits: review packet + remediation only
-  - Completed-migration commit: lifecycle indexes/state/OPT status only after `accept` + migration authority
+  - Implementation commit: only the four §3.1 implementation files
+  - Implementation-review commit: review packet only
+  - Completed-migration commit: lifecycle indexes/state/OPT status only after `accept` + closeout authority
   - **Forbidden:** one commit that collapses product implementation + independent review verdict + Completed migration
   - **Forbidden:** push/PR/Pages from any phase of this plan without new remote authority
 
 ## 6. Review And Activation Gate
 
 - Review location: `docs/exec-plans/reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/`
-- Append-only v1 evidence: `review-001.md@revise@v1-proposal-2026-07-21`
-- Required next design verdict: independent `approve` on exact revision `v2-review-foldback-2026-07-21` (as `review-002` or later)
+- Append-only prior evidence: `review-001.md@revise@v1-proposal-2026-07-21`, `review-002.md@revise@v2-review-foldback-2026-07-21`
+- Required next design verdict: independent `approve` on exact revision `v3-review-foldback-2026-07-21`
 - Required user approval for activation: yes — matching-revision approve does **not** activate
 - Activation is a separate lifecycle change: Proposed → Active at `phase-0:not-started` only
 - Implementation start requires a later explicit start/execute instruction after activation recording
-- Completed migration requires implementation-review `accept` **and** a further explicit user instruction
+- Completed migration requires implementation-review `accept` **and** user authority covering closeout (full-execution grants satisfy this)
 
 The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../../operating-modes.md) for state invariants, review paths, gate-token syntax, manual transitions, and closeout fields.

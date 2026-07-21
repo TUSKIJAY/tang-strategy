@@ -14,7 +14,7 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Reduce **现实交易者点位** list/card type scale to match Review density | Review left column / `TraderTradeList` group cards | promoted-to-proposed | [plan](../../exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) revision `v2-review-foldback-2026-07-21` | User clarified 2026-07-21: 是现实交易者点位这部分，不是整块 filter/export; `review-002: revise/high` keeps scoped CSS but requests lighter acceptance |
+| OPT-001 | Reduce **现实交易者点位** list/card type scale to match Review density | Review left column / `TraderTradeList` group cards | promoted-to-proposed | [plan](../../exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) revision `v3-review-foldback-2026-07-21` | User clarified 2026-07-21: 是现实交易者点位这部分，不是整块 filter/export; `review-003: revise/high` keeps the lightweight flow but fixes the ticker fixture |
 
 ## Relationship To Prior Work
 
