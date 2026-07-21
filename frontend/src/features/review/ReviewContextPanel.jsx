@@ -12,7 +12,7 @@ import {
 // Shared workspace navigation (plan §3.1): ticker is the authoritative parent
 // context, dates render only for the selected ticker, and the selected state is
 // visible and programmatic. Used by Data, Review, Admin, and Static Review.
-// Progressive mode is opt-in via dateNavigation="progressive" (Review only).
+// Progressive mode is opt-in via dateNavigation="progressive" (Review + Data).
 
 export function TickerTabs({ tickers, value, onChange }) {
   return (

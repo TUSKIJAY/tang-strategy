@@ -95,6 +95,7 @@ export function DashboardPage({ state, setState, onNavigate }) {
           workspace={workspace}
           onSwitchTicker={handleSwitchTicker}
           onSelectDate={openReviewDay}
+          dateNavigation="progressive"
         />
       </div>
     </section>

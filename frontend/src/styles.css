@@ -1319,8 +1319,12 @@ main { padding: 36px; overflow: auto; }
 
 /* Review may compact spacing, but shared trade components own one palette. */
 .dr-sidebar .trade-filter-panel { padding: 10px 12px; }
-.dr-sidebar .trade-record-list { gap: 8px; }
-.dr-sidebar .trade-group-summary { padding: 10px; }
+.dr-sidebar .trade-record-list { gap: 6px; }
+.dr-sidebar .trade-group-card { font-size: 12px; }
+.dr-sidebar .trade-group-summary { padding: 6px 8px; gap: 8px; font-size: 12px; }
+.dr-sidebar .trade-trader-name { font-size: 12px; font-weight: 700; }
+.dr-sidebar .trade-group-summary small { font-size: 11px; }
+.dr-sidebar .trade-drilldown-toggle { font-size: 11px; }
 
 .trade-record-list { display: grid; gap: 10px; }
 .trade-record-empty { padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-subtle); }

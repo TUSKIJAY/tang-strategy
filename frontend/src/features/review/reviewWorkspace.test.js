@@ -341,7 +341,16 @@ test('static Review consumes shared workspace and trader contracts with one engi
   const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
   assert.match(styles, /\.trade-filter-panel \{[^}]*background: var\(--surface-panel\);/);
   assert.match(styles, /\.dr-sidebar \.trade-filter-panel \{ padding: 10px 12px; \}/);
-  assert.match(styles, /\.dr-sidebar \.trade-record-list \{ gap: 8px; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-record-list \{ gap: 6px; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-group-card \{ font-size: 12px; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-group-summary \{ padding: 6px 8px; gap: 8px; font-size: 12px; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-trader-name \{ font-size: 12px; font-weight: 700; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-group-summary small \{ font-size: 11px; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-drilldown-toggle \{ font-size: 11px; \}/);
+  // Density is scoped to .dr-sidebar only; Admin keeps unscoped global defaults.
+  assert.doesNotMatch(styles, /^\.trade-record-list \{[^}]*gap: 6px;/m);
+  assert.doesNotMatch(styles, /^\.trade-trader-name \{[^}]*font-size: 12px;/m);
+  assert.doesNotMatch(styles, /^\.trade-group-summary \{[^}]*padding: 6px 8px;/m);
   assert.doesNotMatch(styles, /\.dr-sidebar \.trade-filter-panel,\s*\.dr-sidebar \.trade-group-card/);
   assert.doesNotMatch(styles, /\.dr-sidebar \.trade-context-mirror-item|\.dr-sidebar \.trade-leg/);
   assert.match(styles, /--font-ui: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Noto Sans SC", sans-serif;/);
@@ -470,14 +479,15 @@ test('progressive date navigation projects recent and month modes without fabric
   assert.deepEqual(missing.dates, []);
   assert.match(missing.meta, /全库 IWM 0/);
 
-  // Only ReviewPage opts into progressive.
+  // Review + Data opt into progressive; Admin / editor / Static stay exhaustive.
   const reviewSource = readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8');
   const dashboardSource = readFileSync(new URL('../../pages/DashboardPage.jsx', import.meta.url), 'utf8');
   const adminSource = readFileSync(new URL('../../pages/AdminTradersPage.jsx', import.meta.url), 'utf8');
   const editorSource = readFileSync(new URL('./TraderPointEditor.jsx', import.meta.url), 'utf8');
   const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
   assert.match(reviewSource, /dateNavigation="progressive"/);
-  for (const source of [dashboardSource, adminSource, editorSource, staticSource]) {
+  assert.match(dashboardSource, /dateNavigation="progressive"/);
+  for (const source of [adminSource, editorSource, staticSource]) {
     assert.doesNotMatch(source, /dateNavigation=/);
   }
   assert.doesNotMatch(reviewSource + dashboardSource + staticSource, /跳转/);
