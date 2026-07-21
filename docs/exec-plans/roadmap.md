@@ -31,14 +31,15 @@
 
 ## Active Plans
 
-- [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./completed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Completed; revision `v3-review-foldback-2026-07-21`; `implementation-review-001: accept/high`; product commit `a76b83680e80ab8bf7a857fa776146a2aa4f24aa`; next gate `closed`
+None.
 
 ## Proposed Plans
 
-None.
+- [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) — Proposed; revision `v1-proposal-2026-07-21`; OPT-001 + OPT-002; next gate `design-review`
 
 ## Completed Plans
 
+- [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./completed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Trade Points And K-line Marker Labels](./completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Trade Panel Visual Polish](./completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Data Progressive Navigation And Trade Card Density](./completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) — Completed; canonical details: [completed index](./completed/index.md)

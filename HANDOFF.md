@@ -3,19 +3,19 @@
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
-- Latest durable work: OPT batch **record closeout** `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/` — OPT-001 + OPT-002 `recorded` with mock foldback; design mock `./mock.html`.
-- Mock locks: OPT-001 ≈20px gaps + captions + Traders-row dedupe (Download disposition open); OPT-002 cancel blue band entirely, no replacement, keep locate; Review+Static parity.
-- No active/proposed plan. User will open a **new session** to request prop-plan conversion; that authority is not granted yet.
-- Preserve untracked `output/` trees (incl. informal `mock-*.png`); do not stage.
+- Latest durable work: Proposed plan from OPT-001 + OPT-002 — `docs/exec-plans/proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md` revision `v1-proposal-2026-07-21`.
+- Mock locks frozen in plan: ≈20px gaps + captions; Traders-row dedupe; Download **removed** (not relocated) on Review/Static; blue band cancel (group + event paint); keep fitRange; markers unchanged; Review+Static parity.
+- Next gate: independent codex `design-review` of exact v1.
+- Preserve untracked `output/` trees; do not stage.
 - No push/PR/merge/Pages/provider/broker without explicit user request.
 
 ## Latest Completed Work
@@ -27,12 +27,13 @@
 
 ## Verification Baseline
 
-- Record closeout: batch layout, `mock.html` + screenshot hashes in OPT record, index link, `git diff --check` on staged docs.
+- Proposal package: plan metadata, proposed/reviews indexes, roadmap, OPT back-links, matching state blocks; `python scripts/check-operating-modes.py --root .`.
 - Prior product baseline (unchanged): `cd frontend && npm run test:trade-records`; builds; harness auto.
 
 ## Resume Rules
 
 1. Re-run startup Git status and preserve untracked `output/` trees.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. No active plan. To promote: user must **explicitly** ask to draft a proposed plan from `2026-07-21-review-sidebar-spacing-and-kline-selection-band` OPT-001 + OPT-002 (and mock locks).
-4. No remote actions without explicit user request.
+3. Current plan is **Proposed** only. Independent design review required before activation.
+4. This session’s user instruction authorizes post-approve activation; it does not start Phase 0 implementation.
+5. No remote actions without explicit user request.

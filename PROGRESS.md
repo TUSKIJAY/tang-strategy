@@ -3,12 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-21: User instruction converting OPT batch `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/` OPT-001 + OPT-002 to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md` revision `v1-proposal-2026-07-21`. Locks: Review+Static parity; ≈20px inter-block gaps + 交易者/策略讲解 captions/hairlines; remove `Trade tools` title; **Download removed from Review/Static stack (not relocated)**; cancel blue group/event selection band with **no** replacement cue; keep fitRange locate; marker labels unchanged. Next gate independent `design-review`. No activation, implementation, push, DB/content, provider/broker, or remote authority.
 
 2026-07-21: OPT batch `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/` **record closeout**. OPT-001 (sidebar stack gaps + section captions + Traders-row dedupe; Download disposition open for impl review) and OPT-002 (cancel blue selection band entirely, no replacement cue; keep fitRange locate; marker labels unchanged). Mock decisions folded into Scope Lock / Desired outcome; design mock `mock.html` SHA-256 `f2386dbd…ce46` tracked; live friction screenshots under `screenshots/`. Index + PROGRESS/HANDOFF reconciled. Both OPTs remain `recorded`. No proposed plan, implementation, or remote authority. User intends a **new session** for prop-plan conversion — that still requires an explicit request there. Preserve untracked `output/` mock drafts; do not stage.
 

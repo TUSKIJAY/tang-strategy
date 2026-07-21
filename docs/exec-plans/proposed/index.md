@@ -4,4 +4,4 @@ Proposed plans are drafts and carry no implementation authority.
 
 | Plan | Status | Review | Next gate |
 | --- | --- | --- | --- |
-| None | — | — | none |
+| [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | Proposed | none | design-review |
