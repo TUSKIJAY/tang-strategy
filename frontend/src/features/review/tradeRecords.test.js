@@ -563,11 +563,17 @@ test('trader filter component pins B chips, availability, and no focus override'
   assert.match(source, /className="trade-trader-empty" role="status"/);
   // B chips use aria-pressed; drawer thresholds follow frozen constants.
   assert.match(source, /aria-pressed=\{pressed\}/);
-  assert.match(source, /className=\{\`trade-trader-chip \$\{pressed \? 'active' : ''\}\`\}/);
-  assert.match(source, /TRADER_CHIP_INLINE_MAX/);
-  assert.match(source, />\s*编辑\s*</);
-  assert.match(source, />\s*全选\s*</);
-  assert.match(source, />\s*清空\s*</);
+  assert.match(source, />\s*Edit\s*</);
+  assert.match(source, />\s*Select all\s*</);
+  assert.match(source, />\s*Clear\s*</);
+  assert.match(source, /Search traders/);
+  assert.match(source, /Name or ID/);
+  assert.match(source, /No matching traders/);
+  assert.match(source, /trade-eligibility-fieldset/);
+  assert.match(source, /type="radio"\s+name="eligibility"/);
+  assert.match(source, />Display</);
+  assert.match(source, />Reported</);
+  assert.match(source, />Calculated</);
   assert.equal(TRADER_CHIP_INLINE_MAX, 6);
   assert.equal(TRADER_CHIP_SUMMARY_MIN, 7);
   const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
@@ -590,6 +596,19 @@ test('trader filter component pins B chips, availability, and no focus override'
   assert.equal(summary.selectedCount, 4);
   assert.deepEqual(summary.names, ['Alice', 'Bob', 'Cara']);
   assert.equal(summary.overflow, 1);
+});
+
+test('production sources enforce short Download control without long copy (N-Download-source)', () => {
+  const exportSource = readFileSync(new URL('./TradeExportControls.jsx', import.meta.url), 'utf8');
+  const filtersSource = readFileSync(new URL('./TraderFilters.jsx', import.meta.url), 'utf8');
+  const reviewSource = readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8');
+  const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
+  const adminSource = readFileSync(new URL('../../pages/AdminTradersPage.jsx', import.meta.url), 'utf8');
+  const sources = [exportSource, filtersSource, reviewSource, staticSource, adminSource];
+  for (const s of sources) {
+    assert.doesNotMatch(s, /Download JSON \+ 3 CSV/);
+  }
+  assert.match(exportSource, /<Download size=\{13\} \/> Download/);
 });
 
 // --- Trader point editor candidate contract (plan §3.4) -----------------------

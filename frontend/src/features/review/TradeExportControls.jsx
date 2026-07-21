@@ -18,7 +18,7 @@ export function TradeExportControls({ payload, groups = [], filters = null }) {
 
   return (
     <button type="button" className="trade-export-button" onClick={downloadAll} disabled={!payload}>
-      <Download size={15} /> Download JSON + 3 CSV
+      <Download size={13} /> Download
     </button>
   );
 }

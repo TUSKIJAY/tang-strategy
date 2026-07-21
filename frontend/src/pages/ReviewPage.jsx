@@ -530,16 +530,14 @@ export function ReviewPage({ state, setState }) {
           </div>
           <div className="dr-signal-list">
             {tradeRecords && (
-              <>
-                <TraderFilters
-                  traders={tradeRecords.traders}
-                  value={tradeFilters}
-                  onChange={setTradeFilters}
-                  context={{ ticker: tradeRecords.ticker, tradeDate: tradeRecords.trade_date }}
-                  availableTraderIds={traderAvailability.availableTraderIds}
-                />
-                <TradeExportControls payload={tradeRecords} groups={filteredTradeGroups} filters={tradeFilters} />
-              </>
+              <TraderFilters
+                traders={tradeRecords.traders}
+                value={tradeFilters}
+                onChange={setTradeFilters}
+                context={{ ticker: tradeRecords.ticker, tradeDate: tradeRecords.trade_date }}
+                availableTraderIds={traderAvailability.availableTraderIds}
+                exportControls={<TradeExportControls payload={tradeRecords} groups={filteredTradeGroups} filters={tradeFilters} />}
+              />
             )}
             <TraderTradeList
               groups={filteredTradeGroups}

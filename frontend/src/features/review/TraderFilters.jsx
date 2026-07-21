@@ -10,7 +10,7 @@ import {
 // - traderIds is the only visibility authority.
 // - When `context` is supplied, resolved-context mirror is omitted; workspace owns day.
 // - availableTraderIds drives chips; empty availability shows one neutral message.
-// - <=6 chips inline; >=7 summary + 编辑 drawer with search/全选/清空.
+// - <=6 chips inline; >=7 summary + Edit drawer with search/Select all/Clear.
 
 export function TraderFilters({
   traders = [],
@@ -20,6 +20,7 @@ export function TraderFilters({
   context = null,
   availableTraderIds = null,
   emptyMessage = '当前 ticker/date 没有可显示的交易者点位。',
+  exportControls = null,
 }) {
   const filters = value || initialTradeRecordFilters(traders);
   const tickers = Object.keys(availability).sort();
@@ -98,8 +99,13 @@ export function TraderFilters({
 
   return (
     <section className="trade-filter-panel" aria-label="Trade record filters">
+      <div className="trade-tools-head">
+        <span className="trade-tools-title">Trade tools</span>
+        {exportControls}
+      </div>
+
       {!context && (
-        <>
+        <div className="trade-tools-row trade-context-selects">
           <label>
             Ticker
             <select
@@ -118,57 +124,95 @@ export function TraderFilters({
               {dates.map((date) => <option key={date}>{date}</option>)}
             </select>
           </label>
-        </>
-      )}
-      <label>
-        Eligibility
-        <select value={filters.eligibility} onChange={(event) => update({ eligibility: event.target.value })}>
-          <option value="display">Display</option>
-          <option value="reported">Reported stats</option>
-          <option value="calculated">Calculated stats</option>
-        </select>
-      </label>
-      {availableTraderIds && visibleTraders.length === 0 ? (
-        <p className="trade-trader-empty" role="status">{emptyMessage}</p>
-      ) : useDrawer ? (
-        <div className="trade-trader-summary-row">
-          <span className="trade-trader-summary" aria-live="polite">{summary.label}</span>
-          <button
-            type="button"
-            className="trade-trader-edit"
-            aria-expanded={drawerOpen}
-            aria-controls={drawerId}
-            onClick={() => setDrawerOpen((open) => !open)}
-          >
-            编辑
-          </button>
-          {drawerOpen && (
-            <div className="trade-trader-drawer" id={drawerId}>
-              <label className="trade-trader-search" htmlFor={searchId}>
-                搜索交易者
-                <input
-                  id={searchId}
-                  type="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="名称或 ID"
-                />
-              </label>
-              <div className="trade-trader-drawer-actions">
-                <button type="button" onClick={selectAll}>全选</button>
-                <button type="button" onClick={clearAll}>清空</button>
-              </div>
-              {displayedTraders.length === 0 ? (
-                <p className="trade-trader-empty" role="status">无匹配交易者</p>
-              ) : (
-                renderChips(displayedTraders)
-              )}
-            </div>
-          )}
         </div>
-      ) : (
-        renderChips(visibleTraders)
       )}
+
+      <div className="trade-tools-row">
+        <fieldset className="trade-eligibility-fieldset">
+          <legend className="trade-filter-label">Eligibility</legend>
+          <div className="trade-eligibility-seg" role="radiogroup" aria-label="Eligibility">
+            <label className={`trade-eligibility-option ${filters.eligibility === 'display' ? 'active' : ''}`}>
+              <input
+                type="radio"
+                name="eligibility"
+                value="display"
+                checked={filters.eligibility === 'display'}
+                onChange={(event) => update({ eligibility: event.target.value })}
+              />
+              <span>Display</span>
+            </label>
+            <label className={`trade-eligibility-option ${filters.eligibility === 'reported' ? 'active' : ''}`}>
+              <input
+                type="radio"
+                name="eligibility"
+                value="reported"
+                checked={filters.eligibility === 'reported'}
+                onChange={(event) => update({ eligibility: event.target.value })}
+              />
+              <span>Reported</span>
+            </label>
+            <label className={`trade-eligibility-option ${filters.eligibility === 'calculated' ? 'active' : ''}`}>
+              <input
+                type="radio"
+                name="eligibility"
+                value="calculated"
+                checked={filters.eligibility === 'calculated'}
+                onChange={(event) => update({ eligibility: event.target.value })}
+              />
+              <span>Calculated</span>
+            </label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div className="trade-tools-row trade-traders-row">
+        <span className="trade-filter-label">Traders</span>
+        {availableTraderIds && visibleTraders.length === 0 ? (
+          <p className="trade-trader-empty" role="status">{emptyMessage}</p>
+        ) : useDrawer ? (
+          <div className="trade-trader-summary-row">
+            <span className="trade-trader-summary" aria-live="polite">
+              {summary.selectedCount === 0
+                ? 'No traders selected'
+                : `${summary.selectedCount} selected · ${summary.names.join(', ')}${summary.overflow ? ` +${summary.overflow}` : ''}`}
+            </span>
+            <button
+              type="button"
+              className="trade-trader-edit"
+              aria-expanded={drawerOpen}
+              aria-controls={drawerId}
+              onClick={() => setDrawerOpen((open) => !open)}
+            >
+              Edit
+            </button>
+            {drawerOpen && (
+              <div className="trade-trader-drawer" id={drawerId}>
+                <label className="trade-trader-search" htmlFor={searchId}>
+                  Search traders
+                  <input
+                    id={searchId}
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Name or ID"
+                  />
+                </label>
+                <div className="trade-trader-drawer-actions">
+                  <button type="button" onClick={selectAll}>Select all</button>
+                  <button type="button" onClick={clearAll}>Clear</button>
+                </div>
+                {displayedTraders.length === 0 ? (
+                  <p className="trade-trader-empty" role="status">No matching traders</p>
+                ) : (
+                  renderChips(displayedTraders)
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          renderChips(visibleTraders)
+        )}
+      </div>
     </section>
   );
 }

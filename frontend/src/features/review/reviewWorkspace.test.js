@@ -339,13 +339,13 @@ test('static Review consumes shared workspace and trader contracts with one engi
   assert.doesNotMatch(staticSource, />Overview</);
   assert.doesNotMatch(staticSource, /AdminTradersPage|\/api\/admin|编辑交易者点位/);
   const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
-  assert.match(styles, /\.trade-filter-panel \{[^}]*background: var\(--surface-panel\);/);
+  assert.match(styles, /\.trade-filter-panel \{[^}]*background: var\(--surface-app\);/);
   assert.match(styles, /\.dr-sidebar \.trade-filter-panel \{ padding: 10px 12px; \}/);
   assert.match(styles, /\.dr-sidebar \.trade-record-list \{ gap: 6px; \}/);
   assert.match(styles, /\.dr-sidebar \.trade-group-card \{ font-size: 12px; \}/);
-  assert.match(styles, /\.dr-sidebar \.trade-group-summary \{ padding: 6px 8px; gap: 8px; font-size: 12px; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-group-summary \{ padding: 8px 10px; gap: 8px; font-size: 12px; \}/);
   assert.match(styles, /\.dr-sidebar \.trade-trader-name \{ font-size: 12px; font-weight: 700; \}/);
-  assert.match(styles, /\.dr-sidebar \.trade-group-summary small \{ font-size: 11px; \}/);
+  assert.match(styles, /\.dr-sidebar \.trade-group-meta \{ font-size: 11px; \}/);
   assert.match(styles, /\.dr-sidebar \.trade-drilldown-toggle \{ font-size: 11px; \}/);
   // Density is scoped to .dr-sidebar only; Admin keeps unscoped global defaults.
   assert.doesNotMatch(styles, /^\.trade-record-list \{[^}]*gap: 6px;/m);

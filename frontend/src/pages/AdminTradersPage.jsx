@@ -231,7 +231,6 @@ export function AdminTradersPage({ role = 'readonly', payloads = [], marketDays 
               : '只读：可检查与导出交易记录；新增/编辑点位需要管理员权限。'}
           </p>
         </div>
-        <TradeExportControls payload={payload} groups={groups} filters={filters} />
       </header>
       <ReviewContextPanel
         days={workspaceDays}
@@ -245,6 +244,7 @@ export function AdminTradersPage({ role = 'readonly', payloads = [], marketDays 
         onChange={setFilters}
         context={{ ticker: workspace.ticker, tradeDate: workspace.trade_date }}
         availableTraderIds={traderAvailability.availableTraderIds}
+        exportControls={<TradeExportControls payload={payload} groups={groups} filters={filters} />}
       />
       <div className="trade-stat-grid">
         <span>Groups <strong>{summary.group_count}</strong></span>
