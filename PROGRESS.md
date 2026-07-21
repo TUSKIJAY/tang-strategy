@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-21`. Closures: pure `canonicalizeTradeToolsFilters` forces display-only for list/availability/export (fixtures for omitted/reported/calculated); group-select sequence uses blue multi-bar band + fitRange without post-fit center scrollTo; event-row focus required; `N pts` = complete-timed count; mandatory **B-TF-first-paint** (1m↔5m, no wheel); host class `data-market-days-rail` + **B-Data-rail-layout**; mandatory **B-Group-span**. `review-001` remains append-only and cannot approve v2. Next gate independent `design-review` of exact v2. No activation, implementation, content/DB write, provider/broker, publication, push, or remote authority.
 
 2026-07-21: Independent design review `review-001` on exact revision `v1-proposal-2026-07-21` returned `revise/high` with four findings. Required foldback: make display-only list/availability/export behavior canonical after Eligibility chrome removal; freeze an executable group-span sequence that cannot be undone by post-fit centering and renders a real neutral band; select one mandatory first-frame timeframe carrier; and scope Data rail CSS with computed/visual Review-sidebar non-regression proof. All six evidence hashes matched. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 

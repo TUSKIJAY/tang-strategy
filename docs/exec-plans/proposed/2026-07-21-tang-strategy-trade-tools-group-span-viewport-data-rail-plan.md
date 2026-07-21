@@ -3,7 +3,7 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
 - Plan slug: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
-- Revision: `v1-proposal-2026-07-21`
+- Revision: `v2-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-tools-group-span-viewport-data-rail`
 - Design reviews: ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md@revise@v1-proposal-2026-07-21
 - Latest design verdict: revise
@@ -12,7 +12,7 @@
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -50,7 +50,22 @@
 - Data progressive nav + card density — progressive IA on Data; density under `.dr-sidebar`
 - Direction colors CALL/PUT tokens — fusion plan
 
-### 1.2 Visual evidence
+### 1.2 Review foldback closure map
+
+#### review-001 closure (v1 → v2)
+
+Independent `review-001` returned `revise/high` against exact revision `v1-proposal-2026-07-21` (plan SHA-256 `8d179e57…16b9` at HEAD `fb3eae63…eee2`). Revision `v2-review-foldback-2026-07-21` folds every finding:
+
+| Severity | Finding (summary) | V2 closure |
+| --- | --- | --- |
+| P1 | Removing Eligibility UI does not freeze one display-only authority for list / availability / export; helpers disagree on missing or stale `eligibility` | §1.4 + §2.2 + §2.4 freeze pure `canonicalizeTradeToolsFilters` (or equivalent) that **always** forces `eligibility: 'display'` before `filterTradeGroups`, `displayableTradeGroups`, and `exportSelectionFromFilters` on the shared tools path. Fixtures: omitted / `reported` / `calculated` / non-display group → identical display-only group IDs and `display_only: true` export. Admin editor group flags unchanged. |
+| P1 | Span helper can pass while live `fitRange` then `scrollTo(center:true)` undoes span; `marker`/`olive` styles draw dots not bands; event-row focus and `N pts` undefined; `B-Group-span` optional | §1.4 freezes **one** Review/Static integration sequence: derive all mappable indices → `setHighlightRanges` with style **`blue`** (live multi-bar band paint) → single `fitRange` → **no** post-fit centering `scrollTo` that mutates the fitted window. Event-row focus is **required** secondary (single-bar focus, no full-day fit). `N pts` = count of complete-timed events used for the span. Mandatory **B-Group-span** asserts stored highlight start/end, visible window contains full span, single-event behavior, Review/Static parity. |
+| P1 | TF first-paint carrier is optional pure-or-browser; V4 cannot prove first frame / no wheel | §2.4 freezes **only** mandatory **B-TF-first-paint** (Playwright). Exact fixture, no-wheel event log, TF click, first animation-frame boundary, assert rendered `start`/`end`/`count`/`zoomScale`/`followMode` for **1m→5m and 5m→1m**. V4 is supplemental visual only. Any tracked harness script path enters the manifest. |
+| P2 | Generic `.page .panel` CSS cannot prove Review sidebar safety | §1.4 freezes explicit host class **`data-market-days-rail`** on Data only. All flex/max-width overrides scoped under it. Carriers: **N-Data-rail-source** + **B-Data-rail-layout** computed styles (Data compact + Review sidebar unchanged) + screenshots V3 (Data) / V5 (Review desktop) / V6 (Review narrow). |
+
+`review-001` is append-only prior-revision evidence and **cannot approve v2**. Next gate is independent design review of exact revision `v2-review-foldback-2026-07-21`.
+
+### 1.3 Visual evidence
 
 | 证据 | 路径 | SHA-256 | 作用 |
 | --- | --- | --- | --- |
@@ -61,66 +76,60 @@
 | Data Market days stretched | `docs/optimization/2026-07-21-review-trade-and-kline-session/screenshots/2026-07-21-data-market-days-stretched-controls.png` | `39888c6db1ef1e211b21e6bf63de950ce40c597538f7ad72ae423c6aab0da0f8` | OPT-006 现状 |
 | Session mock (all UI items) | `docs/optimization/2026-07-21-review-trade-and-kline-session/mockups/review-trade-and-kline-session.html` | `f2cbec2cf0ae1ee2f292583c40c693adb766a911a4e5f872d9250828d680de6a` | OPT-003…006 目标方向 |
 
-### 1.3 Current repository facts
+### 1.4 Current repository facts
 
 **OPT-003 — Eligibility on trade tools:**
 
-- Live: `frontend/src/features/review/TraderFilters.jsx` renders `fieldset.trade-eligibility-fieldset` with Display / Reported / Calculated radios.
-- Default filter: `initialTradeRecordFilters` → `eligibility: 'display'` (`tradeRecords.js`).
-- Pure filter helpers still branch on `filters.eligibility` / `display_only` for export selection.
-- Admin group editor (`TraderPointEditor.jsx`) has a separate eligibility fieldset for group flags — **not** the tools-row segment.
-- Polish-plan tests pin Eligibility radiogroup source patterns and Playwright selection behavior.
+- Live: `TraderFilters.jsx` renders Eligibility fieldset (Display / Reported / Calculated).
+- `initialTradeRecordFilters` → `eligibility: 'display'`.
+- Live helper inconsistency (review-001): `displayableTradeGroups` defaults missing eligibility to display; `filterTradeGroups` treats missing eligibility as **no** eligibility filter; `exportSelectionFromFilters` emits `display_only: false` when eligibility is not exactly `'display'`.
+- Admin `TraderPointEditor` eligibility fieldset is separate (group flags).
 
 **OPT-004 — 5m first paint:**
 
-- Engine: `frontend/src/kline/kline-engine.js` `setTimeframe(timeframe)` maps previous visible start by time, then sets `viewportManager.viewStart` and `scheduleRender()`.
-- Viewport counts: `ViewportManager` uses timeframe-specific base/min/max (5m target slot width 18, min 18, max 72; 1m different).
-- Symptom evidence: after clicking 5m, candles crowd left with empty right; wheel zoom path recalculates and repairs the window.
-- Investigation surface only at proposal time: `setTimeframe` + `getResolvedViewCount` / `zoomScale` / first `render` after TF switch. **No bar payload / assemble / seed change.**
+- `kline-engine.js` `setTimeframe` maps previous start by time, sets `viewStart`, `scheduleRender()`.
+- Viewport counts are TF-specific (5m slot width 18, min 18, max 72).
+- No existing runtime K-line Node suite; engine is browser-owned.
 
 **OPT-005 — Group select + legs UI:**
 
-- `ReviewPage.jsx` / `StaticReviewsApp.jsx` `selectTradeGroup(group)`:
-  - Finds **first** annotation whose `trade_group_ids` includes the group id.
-  - `setHighlightRanges` with `startIndex === endIndex` (single bar).
-  - `fitRange` around that single index with small radius (~10–12 bars).
-- Multi-event groups (open + partials + close) therefore lose group lifecycle context on chart.
-- `TraderTradeList.jsx` expanded path dumps raw schema actions (`buy_open` / `sell_partial`) and qty@premium; scannability is poor.
-- Pure `groupEventTimeRange(group)` already yields chronological min/max HH:MM across complete events (card meta). Event **count** is available as `knownCount` but collapsed meta does not yet show `· N pts`.
-- Annotations from `buildTradeRecordAnnotations` still carry per-event bar indices — span can be derived without schema change.
+- `selectTradeGroup` finds first annotation, single-bar highlight (`style: 'marker'`), `fitRange` radius ~10–12, then `scrollTo(... center: true)`.
+- Live `drawHighlightRanges`: styles `marker` and `olive` collapse to a **single top-of-chart dot**; only `red` / `blue` paint multi-bar **bands**.
+- `groupEventTimeRange` yields min/max HH:MM + `knownCount` over complete events.
+- Expanded legs dump raw schema actions.
 
 **OPT-006 — Data progressive rail stretch:**
 
-- `DashboardPage.jsx` mounts shared `ReviewContextPanel` inside wide `.page .panel`.
-- Global CSS: `.ticker-tabs button { flex: 1 }` and `.date-rail-mode button { flex: 1 }` — tuned for narrow `.dr-sidebar` (~300px).
-- On the wide Data card, ticker and mode segments stretch into full-width slabs; day chips stay small → broken hierarchy.
-- Progressive IA (ticker → 最近/按月 → month nav → day chips) and open-Review-on-date behavior must remain.
+- `DashboardPage` mounts `ReviewContextPanel` in wide `.page .panel`.
+- Global `.ticker-tabs button` / `.date-rail-mode button` use `flex: 1` (fine in narrow `.dr-sidebar`).
 
-### 1.4 User scope locks (v1)
+### 1.5 User scope locks (v2; supersedes ambiguous v1 bullets)
 
 | Decision | Lock |
 | --- | --- |
-| OPT-003 UI | **Remove** the Trade tools Eligibility row (label + Display/Reported/Calculated) from shared `TraderFilters` so it is **not shown** on Review / Static / Admin tools strip |
-| OPT-003 filter default | Hard-default list/export filtering to **display-eligible** semantics (`eligibility: 'display'` / equivalent). Do not leave a hidden mid-session segment state that users can no longer change from this chrome |
-| OPT-003 schema | Group eligibility **flags** and Admin editor eligibility controls **remain**; this is UI hide + default, not schema deletion |
-| OPT-003 Download / Traders | Keep Download and Traders chip area unless a later OPT says otherwise |
-| OPT-004 outcome | First `render` after `setTimeframe('5m')` (ideally any TF switch) shows a correct full-window viewport **without** requiring wheel interaction |
+| OPT-003 UI | **Remove** Eligibility row from shared `TraderFilters` tools strip (Review / Static / Admin tools) |
+| OPT-003 display-only authority | Pure **`canonicalizeTradeToolsFilters(filters)`** (name may vary) **always** sets `eligibility: 'display'` for shared tools consumers. **Every** list / availability / export call path uses the canonicalized object (or helpers themselves force-display). Stale `reported`/`calculated`/omitted inputs cannot widen the set. Export selection always has `display_only: true` on this path |
+| OPT-003 schema | Group eligibility **flags** + Admin editor fieldset **remain** |
+| OPT-003 Download / Traders | Keep |
+| OPT-004 outcome | First painted frame after TF switch is a correct full-window viewport without wheel |
+| OPT-004 carrier | **Mandatory B-TF-first-paint only** (no pure-or-browser fallback). Covers 1m→5m and 5m→1m |
 | OPT-004 data | No bars/assemble/seed/DB/publish changes |
-| OPT-005 group select | Fit **whole event span**: min(event bar)…max(event bar) + modest padding; one zoom frames the trade lifecycle |
-| OPT-005 highlight | Soft highlight **band** across the span (not only a single-marker flash) |
-| OPT-005 collapsed meta | Time span + event count, e.g. `09:42 → 10:01 · 7 pts` (no $/%; aligns with completed points-only) |
-| OPT-005 expanded UI | Compact timeline rows: `TIME \| ACTION \| QTY @ PX`; short actions **BUY** / **SELL** / **PART**; **no fees** |
-| OPT-005 secondary nav | Optional: click a timeline row → center/highlight that event bar **without** expanding the whole day; primary group select stays span-fit |
-| OPT-005 anti-pattern | Do **not** auto-fit each partial independently on group click |
-| OPT-006 layout | Market days on Data feel like a **compact control strip**; ticker + mode content-sized or max-width; prefer Data-scoped surface (e.g. `.page .panel .review-context-panel`) over breaking Review sidebar stretch |
-| OPT-006 IA | Progressive browse state machine, ticker isolation, open-Review-on-date **unchanged** |
-| Surfaces | OPT-003/005 shared list/tools: Review + Static + Admin where the same components are used. OPT-004 engine: interactive Review (and Static if same engine). OPT-006: Data (`DashboardPage`) primary; Review sidebar density must not regress |
+| OPT-005 group-select sequence | **Exact order (Review + Static identical):** (1) collect all mappable bar indices for the group on 1m (or active TF if annotations exist); (2) `setHighlightRanges({ timeframe, startIndex: min, endIndex: max, style: 'blue' })` — **`blue` is required** because it paints a real multi-bar band in live engine; do **not** use `marker`/`olive` for span; (3) one `fitRange` over that span with modest padding; (4) **forbidden** after group-select: `scrollTo` with `center: true` (or any recenter) that changes `viewStart`/`zoomScale` away from the fitted window |
+| OPT-005 single-event | min===max still uses blue band + tight fitRange |
+| OPT-005 event-row focus | **Required** secondary: timeline row click → single-bar highlight + center/focus that event **without** expanding to full day and **without** replacing the primary span-fit as the card-click behavior |
+| OPT-005 `N pts` | Count of **complete-timed** events included in the span helper (`knownCount`); incomplete times excluded from both span and count |
+| OPT-005 expanded UI | `TIME \| ACTION \| QTY @ PX`; BUY/SELL/PART; no fees |
+| OPT-005 anti-pattern | No auto-fit each partial on group click |
+| OPT-006 host class | Explicit **`data-market-days-rail`** (or exact string frozen in Phase 0 if renamed once) on Data host only — **not** bare `.page .panel` |
+| OPT-006 CSS | All ticker/mode flex/max-width overrides under `.data-market-days-rail …` only |
+| OPT-006 IA | Progressive state machine, ticker isolation, open-Review-on-date unchanged |
+| Surfaces | OPT-003 tools: Review+Static+Admin. OPT-005: Review+Static parity. OPT-004: Review (+Static if same engine). OPT-006: Data host; Review sidebar must not regress |
 
-Rejected for this plan: reopening OPT-001/002 product locks; schema version bumps; day-file rewrites; Pages/publisher; provider/broker; deleting eligibility columns from export JSON/CSV unless they already key off display_only defaults; redesigning Admin editor eligibility forms beyond shared tools strip.
+Rejected: reopening OPT-001/002; schema bumps; day-file rewrites; Pages/provider/broker; rubber-stamp pure defaults that leave export wide-open; `marker`/`olive` as span band; optional TF carrier wording; generic `.page .panel` density selector as the sole scope.
 
-### 1.5 Lane 3 classification
+### 1.6 Lane 3 classification
 
-Cross-surface frontend work: shared trade tools/list, K-line engine viewport, Review/Static group-focus behavior, and Data progressive rail density. Classified Coding Mode **Lane 3** (proposed Exec Plan) for multi-module UX contracts and independent design review. No market-data fetch, provider/broker, Pages publication, tracked DB mutation, or content day-file rewrites.
+Cross-surface frontend work: shared trade tools/list, K-line engine viewport + highlight, Review/Static group-focus, Data progressive rail density, and mandatory Playwright carriers. Classified Coding Mode **Lane 3**. No market-data fetch, provider/broker, Pages, tracked DB, or content day-file rewrites.
 
 ## 2. Objective And Success Criteria
 
@@ -128,55 +137,54 @@ Cross-surface frontend work: shared trade tools/list, K-line engine viewport, Re
 
 把 session 剩余摩擦一次收口：
 
-1. Trade tools **不再展示** Eligibility 分段，列表默认按 display-eligible 过滤；
-2. K 线 **任意 TF 切换（至少 1m→5m）首帧视口正确**，无需滚轮修复；
-3. 点击交易组时图表 **框住整段事件跨度**，展开 legs 变成可扫的点位时间线，并可点单笔；
-4. Data 页 Market days progressive rail 在宽面板中保持 **紧凑工具条比例**，不再被 `flex:1` 拉成横条。
+1. Trade tools **不再展示** Eligibility；list/availability/export **统一** display-only；
+2. K 线 TF 切换 **首帧**视口正确（强制浏览器 carrier）；
+3. 点击交易组 **框住整段** + 真实 multi-bar band；展开为可扫时间线并可点单笔；
+4. Data Market days 使用 **显式 host class** 紧凑布局，Review 侧栏不回归。
 
 ### 2.2 Success criteria
 
-1. **OPT-003 — Eligibility chrome gone:** Production sources for shared tools strip (`TraderFilters.jsx` and consumers) no longer render Eligibility / Display / Reported / Calculated segment chrome. Carrier **N-Eligibility-removed-source**.
-2. **OPT-003 — Default filter:** Runtime filters hard-default to display-eligible behavior. Groups that are not display-eligible are filtered out of the Review tools list path the same way today’s `eligibility: 'display'` path works. Export selection continues to use display-only semantics unless a separate admin path explicitly differs (document if Admin list still shares the component). Carrier **N-Eligibility-default** (pure filter fixtures).
-3. **OPT-003 — Schema/editor intact:** Admin `TraderPointEditor` eligibility flags remain editable; group schema fields are not deleted.
-4. **OPT-004 — First-paint viewport:** After switching 1m→5m (and 5m→1m) on QQQ or SPY `2026-07-17` (or equivalent available day), the first painted frame uses a sane window width (no permanent left-crowded / right-empty glitch that only wheel fixes). Prefer pure viewport unit proof if extractable; otherwise deterministic browser receipt **B-TF-first-paint**. Carrier matrix freezes one executable path (no “test or screenshot” ambiguity).
-5. **OPT-005 — Span fit:** `selectTradeGroup` (Review + Static) computes min/max bar indices across **all** annotations/events for that `trade_group_id` on the active timeframe (default 1m path as today) and calls `fitRange` on that span with modest padding. Single-event groups remain a tight window. Carrier **N-Group-span** (pure helper) + **B-Group-span** or screenshot V2 proving multi-event span (not first-bar only).
-6. **OPT-005 — Highlight band:** Highlight range uses the same span (style may be `marker` band or existing multi-bar highlight API); not `start === end` unless the group has one bar only.
-7. **OPT-005 — Collapsed meta:** Card meta shows time span from pure helper plus event count (`· N pts` when N≥1, exact copy frozen in implementation notes if mock uses `pts`). No $/%. Carrier **N-Card-meta**.
-8. **OPT-005 — Timeline UI:** Expanded legs render compact rows `TIME | ACTION | QTY @ PX` with short actions BUY/SELL/PART (map: `buy_open`/`buy_add`→BUY, `sell_close`→SELL, `sell_partial`→PART). No fees/`?` fee noise. Carrier **N-Timeline-source** + visual V1.
-9. **OPT-005 — Row click (secondary):** Clicking a timeline row centers/highlights that event without replacing primary span-fit as the group-select behavior. If implementation stages this behind a small helper, both paths stay pure-testable. Carrier **N-Event-focus** and/or browser note on V1.
-10. **OPT-006 — Data density:** On Data page wide panel, ticker tabs and 最近/按月 buttons are content-sized or capped (no full-bleed stretch). Prefer scoped CSS under `.page .panel .review-context-panel` (or equivalent density variant). Review `.dr-sidebar` progressive rail must not regress to broken non-stretch or broken stretch. Carrier **N-Data-rail-source** + screenshot V3.
-11. **Contracts preserved:** B-chip multi-select, Download four-file behavior, marker BUY/SELL labels, points-only cards (no outcome %), direction colors, progressive date state machine, open-Review-on-date, market-day inventory.
-12. **Tests/builds:** `npm run test:trade-records` green with updated carriers; normal + static Vite builds green; `python scripts/check-project-harness.py --root . --profile auto` green; `git diff --check` clean on task paths.
-13. **Screenshots:** §2.3 matrix under `output/` (untracked).
+1. **OPT-003 chrome gone:** Shared tools strip sources have no Eligibility / Display / Reported / Calculated segment. **N-Eligibility-removed-source**.
+2. **OPT-003 canonical display-only:** After canonicalization, `filterTradeGroups`, `displayableTradeGroups`, and `exportSelectionFromFilters` produce the same display-eligible group ID set for inputs with eligibility omitted, `'display'`, `'reported'`, or `'calculated'`, and export always has `display_only: true`. Non-display-eligible groups never appear. **N-Eligibility-default** fixtures cover all four inputs + at least one non-display group.
+3. **OPT-003 schema/editor intact:** Admin editor eligibility flags remain.
+4. **OPT-004 first-paint:** **B-TF-first-paint** green for 1m→5m and 5m→1m with no wheel events; asserts post-first-frame viewport metrics (visible start/end/count, zoomScale, followMode) are sane (no permanent left-crowd empty-right that only wheel repairs). V4 screenshot supplemental only.
+5. **OPT-005 span + band:** Pure **N-Group-span** computes min/max indices over all mappable complete events. Live select sequence matches §1.5. Highlight stored as blue multi-bar band. **B-Group-span** mandatory.
+6. **OPT-005 meta:** Span label + `· N pts` with N = complete-timed event count. **N-Card-meta**.
+7. **OPT-005 timeline:** Compact BUY/SELL/PART rows, no fees. **N-Timeline-source** + V1.
+8. **OPT-005 event focus:** Required row-click path; pure **N-Event-focus** + exercised in **B-Group-span** or a dedicated browser step on the same receipt.
+9. **OPT-006 density:** Host class present on Data only; computed layout proves compact Data controls and unchanged Review sidebar flex growth. **N-Data-rail-source** + **B-Data-rail-layout** + V3/V5/V6.
+10. **Contracts preserved:** B-chip, Download four-file payload shape, marker BUY/SELL, points-only cards, direction colors, progressive date IA, open-Review-on-date.
+11. **Tests/builds:** `npm run test:trade-records` green for all **N-\***; all **B-\*** receipts green under `output/`; normal + static builds; harness auto; `git diff --check` on task paths.
+12. **Screenshots:** §2.3 under `output/` (untracked).
 
 ### 2.3 Frozen visual acceptance matrix
 
 | # | Surface | Viewport | Fixture | Required coverage |
 | --- | --- | --- | --- | --- |
-| V1 | Interactive Review trade tools + expanded card | desktop `1672x941` | QQQ `2026-07-17` multi-event 沃德哥/vordinkkk PUT (or CALL) group | No Eligibility row; timeline rows BUY/SELL/PART; meta with span + count |
-| V2 | Interactive Review chart after group select | desktop `1672x941` | Same multi-event group | Viewport frames full event span; highlight band; not single first bar only |
-| V3 | Data Market days progressive rail | desktop `1672x941` | Any SPY/QQQ inventory | Ticker + mode compact (not full-bleed slabs); day chips hierarchy sane |
-| V4 | Interactive Review after 1m→5m switch | desktop `1672x941` | SPY or QQQ `2026-07-17` | First paint after 5m is a full usable window (no wheel required) |
+| V1 | Interactive Review tools + expanded card | desktop `1672x941` | QQQ `2026-07-17` multi-event vordin/vordinkkk group | No Eligibility; timeline BUY/SELL/PART; meta span + N pts |
+| V2 | Interactive Review chart after group select | desktop `1672x941` | Same multi-event group | Full span fit; **blue multi-bar band** (not top-dot only) |
+| V3 | Data Market days progressive rail | desktop `1672x941` | Any SPY/QQQ inventory | Compact ticker/mode under `data-market-days-rail` |
+| V4 | Review after 1m→5m | desktop `1672x941` | SPY or QQQ `2026-07-17` | Supplemental first-paint visual (does not replace **B-TF-first-paint**) |
+| V5 | Review sidebar progressive rail | desktop `1672x941` | Same | Sidebar stretch still intentional / not broken by Data overrides |
+| V6 | Review sidebar progressive rail | narrow `390x844` (or plan Phase-0 frozen narrow) | Same | Narrow sidebar still usable |
 
-Compare against §1.2 live screenshots and session mock.
-
-### 2.4 Frozen verification carrier matrix
+### 2.4 Frozen verification carrier matrix (v2 — no fallbacks)
 
 | Carrier ID | Tool | Proves | Must not claim |
 | --- | --- | --- | --- |
-| **N-Eligibility-removed-source** | Node `test:trade-records` source inspection | Shared `TraderFilters` production source has no Eligibility segment chrome / Display·Reported·Calculated tools-row | Admin editor fieldset deletion |
-| **N-Eligibility-default** | Node pure filter tests | Default / tools path filters as display-eligible; non-display groups excluded | Browser click |
-| **N-Group-span** | Node pure helper | min/max bar (or time→index) across all group events; single vs multi-event; incomplete times ignored | Canvas paint |
-| **N-Card-meta** | Node pure + list source | Span label + event count formatting; no $/% | Layout beauty |
-| **N-Timeline-source** | Node source inspection | Compact row structure; BUY/SELL/PART map; no fees on expand path | Click-to-chart |
-| **N-Event-focus** | Node pure helper (optional if staged) | Event→bar focus input shape without full-day fit | Playwright |
-| **N-Data-rail-source** | Node source/CSS inspection | Data-scoped max-width / flex overrides; Review `.dr-sidebar` stretch rules still intentional | Pixel-perfect Data aesthetics alone |
-| **N-TF-viewport** | Node pure viewport helper **if** logic is extractable without canvas; else omit and rely on **B-TF-first-paint** only | Correct post-switch count/viewStart invariants | Browser |
-| **B-TF-first-paint** | Playwright (or deterministic engine harness) | 1m→5m first frame usable; optional 5m→1m | Source regex |
-| **B-Group-span** | Playwright **or** V2 screenshot + pure **N-Group-span** with explicit dual requirement | Multi-event group select frames span | First-annotation-only path |
-| **V1–V4** | Screenshots under `output/` | Visual acceptance | Interaction beyond paint unless paired with B-\* |
+| **N-Eligibility-removed-source** | Node source | Tools strip has no Eligibility chrome | Admin editor deletion |
+| **N-Eligibility-default** | Node pure | Canonicalize + filter + displayable + export for omitted/display/reported/calculated; non-display group excluded; `display_only: true` | Browser |
+| **N-Group-span** | Node pure | min/max indices; multi vs single; incomplete ignored | Canvas |
+| **N-Card-meta** | Node pure + source | Span + `N pts` = complete-timed count; no $/% | Beauty |
+| **N-Timeline-source** | Node source | Row structure; BUY/SELL/PART; no fees | Click chart |
+| **N-Event-focus** | Node pure | Event→single-bar focus payload; distinct from group span-fit | Playwright alone |
+| **N-Data-rail-source** | Node source/CSS | Host class `data-market-days-rail`; overrides scoped under it; no bare `.page .panel` sole selector | Computed layout |
+| **B-TF-first-paint** | **Mandatory** Playwright | 1m→5m and 5m→1m; no wheel; first rAF after switch; assert viewport start/end/count/zoomScale/followMode sane | V4 alone; source regex |
+| **B-Group-span** | **Mandatory** Playwright | Multi-event: highlight start/end match span; visible window contains full span; single-event tight; Review **and** Static; no post-fit center undo; optional event-row focus step | V2 alone |
+| **B-Data-rail-layout** | **Mandatory** Playwright (or equivalent computed-style harness) | Data host: ticker/mode buttons not full-bleed flex-grown; Review `.dr-sidebar` controls retain expected flex/growth | Screenshot alone |
+| **V1–V6** | Screenshots | Visual acceptance | Interaction semantics |
 
-**Hard rule:** Do not assign real DOM TF-switch or canvas paint proofs to plain Node `test:trade-records` unless a pure helper is extracted. Prefer one named carrier per claim (no “test or browser” fallback wording).
+**Hard rule:** Every interaction/canvas/computed-layout claim names a **B-\*** carrier. Every pure/source claim names an **N-\*** carrier. No “test or browser” wording.
 
 ## 3. Constraints And Invariants
 
@@ -184,125 +192,116 @@ Compare against §1.2 live screenshots and session mock.
 
 **Modify (implementation):**
 
-1. `frontend/src/features/review/TraderFilters.jsx` — remove Eligibility fieldset/segment from tools strip; keep Download slot / Traders chrome.
-2. `frontend/src/features/review/tradeRecords.js` — keep/display-default eligibility filter semantics; pure helpers for group event span (bar indices), short action labels, optional event-focus payload; card meta count if co-located.
-3. `frontend/src/features/review/TraderTradeList.jsx` — collapsed meta span+count; compact timeline expand UI; optional row click callback.
-4. `frontend/src/pages/ReviewPage.jsx` — `selectTradeGroup` span-fit + highlight band; wire event-row focus if present.
-5. `frontend/src/pages/StaticReviewsApp.jsx` — same group-select / list wiring as Review for parity.
-6. `frontend/src/kline/kline-engine.js` — fix `setTimeframe` / viewport first-paint (and only supporting viewport helpers in the same file as required).
-7. `frontend/src/styles.css` — timeline row styles; Data-scoped progressive rail density (`.page .panel .review-context-panel` or equivalent); remove unused Eligibility tools styles only if unreferenced.
-8. `frontend/src/pages/DashboardPage.jsx` — only if a density className wrapper is needed on the panel / context host.
-9. `frontend/src/features/review/ReviewContextPanel.jsx` — only if a surface density prop/class is required (prefer CSS-only).
-10. `frontend/src/features/review/tradeRecords.test.js` and/or `reviewWorkspace.test.js` — **N-\*** carriers; update/remove polish-plan pins that required Eligibility tools chrome.
-11. Optional Playwright session artifacts under `output/playwright/…` (untracked) for **B-\*** carriers.
+1. `frontend/src/features/review/TraderFilters.jsx` — remove Eligibility fieldset; keep Download / Traders.
+2. `frontend/src/features/review/tradeRecords.js` — `canonicalizeTradeToolsFilters` (or equivalent) forced display; pure group bar-span helper; short action labels; event-focus payload; card meta count helper; ensure filter/displayable/export consume canonical display-only.
+3. `frontend/src/features/review/TraderTradeList.jsx` — meta span+N pts; timeline UI; required row-click callback prop.
+4. `frontend/src/pages/ReviewPage.jsx` — group-select sequence §1.5; wire event-row focus; pass canonicalized filters into list/export.
+5. `frontend/src/pages/StaticReviewsApp.jsx` — same as Review for group-select + filters.
+6. `frontend/src/pages/AdminTradersPage.jsx` — tools path uses canonical display-only; no Eligibility tools chrome if shared component.
+7. `frontend/src/kline/kline-engine.js` — TF first-paint fix in `setTimeframe` / viewport helpers only as required. Highlight **band** for trade span uses existing `blue` style (no requirement to re-enable olive multi-bar teaching bands).
+8. `frontend/src/styles.css` — timeline styles; **only** `.data-market-days-rail …` density overrides; cleanup unused Eligibility tools styles if unreferenced.
+9. `frontend/src/pages/DashboardPage.jsx` — add host class `data-market-days-rail` on the Market days progressive rail wrapper.
+10. `frontend/src/features/review/ReviewContextPanel.jsx` — only if a density prop is required (prefer host class on Dashboard).
+11. `frontend/src/features/review/tradeRecords.test.js` and/or `reviewWorkspace.test.js` — all **N-\*** carriers; remove obsolete Eligibility tools chrome pins.
+12. Playwright (or committed frontend harness scripts under `frontend/` if added) for **B-TF-first-paint**, **B-Group-span**, **B-Data-rail-layout**. Default receipts under `output/playwright/trade-tools-group-span-<timestamp>/` (untracked). If a tracked runner script is added, list its exact path in Phase 0 evidence.
 
-**Lifecycle / evidence (this proposal package and later transitions):**
+**Lifecycle / evidence:**
 
-12. Optimization session batch + `docs/optimization/index.md` status/lifecycle links for OPT-003…006.
-13. `PROGRESS.md` / `HANDOFF.md` state blocks.
-14. Plan file + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + `docs/exec-plans/roadmap.md` as lifecycle requires.
-15. Screenshots under `output/` (untracked; do not stage).
+13. Optimization batch + `docs/optimization/index.md`.
+14. `PROGRESS.md` / `HANDOFF.md`.
+15. Plan + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + roadmap.
+16. Screenshots under `output/` (untracked).
 
-**Out of manifest / must not change:**
+**Out of manifest:**
 
-- Backend APIs, tracked SQLite, content day JSON, seed market-data, Pages workflows, daily runbook, provider/broker.
-- OPT-001/002 completed product locks (points-only cards, marker BUY/SELL + display_name).
-- Eligibility **schema fields** on groups; Admin editor eligibility form (unless sharing accidental breakage — preserve).
-- Progressive date state machine semantics and market-day inventory.
-- Direction color tokens; B-chip threshold; Download four-file payload shape.
-- Unrelated dirty / untracked `output/` trees — preserve; do not stage.
+- Backend, tracked SQLite, content day JSON, seed, Pages, runbook, provider/broker.
+- OPT-001/002 locks; Admin editor eligibility form fields; progressive date state machine; direction tokens; B-chip threshold; Download payload columns.
+- Unrelated `output/` trees.
 
 ### 3.2 Unrelated dirty paths to preserve
 
-Untracked evidence trees under `output/local-acceptance/`, `output/playwright/trade-panel-polish-20260721/`, `output/playwright/trade-points-marker-labels-20260721/` (and any newer session dumps) are user/evidence-owned. Do not stage, delete, or mix into this lifecycle commit.
+Untracked `output/local-acceptance/`, `output/playwright/*` evidence trees — preserve; do not stage.
 
 ### 3.3 Safety / data boundaries
 
 - Presentation / engine / layout only.
-- No `--allow-date-loss`. No provider fetch. No Pages publish. No push/PR/remote.
-- No candidate DB projection. No content registry mutation.
+- No `--allow-date-loss`, provider fetch, Pages, push/PR/remote, DB projection, content registry mutation.
 - Activation and implementation require separate explicit user instructions after matching-revision design `approve`.
 
 ### 3.4 Behavioral invariants
 
-- Empty trader selection continues to hide groups honestly.
-- Voided/superseded group flags remain factual in data even if tools Eligibility chrome is gone.
-- Single-event groups still get a sensible tight fitRange (not empty span).
-- TF switch must not leave follow-mode or zoomScale in a state that only wheel can repair.
-- Data rail density changes must not break keyboard/ARIA roles on ticker tabs or mode group.
+- Empty trader selection still hides groups.
+- Group eligibility flags remain factual in data.
+- Single-event groups get tight blue band + fitRange.
+- TF switch must not leave zoomScale/followMode repairable only by wheel.
+- Data density must not break ticker tablist / mode group ARIA roles.
+- Teaching/setup highlight styles (`olive` dot behavior) must not be silently broken for non-trade ranges unless an explicit supersession is documented in phase evidence.
 
 ## 4. Phases
 
 ### Phase 0 — Baseline And Scope Freeze
 
-- Entry gate: plan Active + explicit implementation-start (or full-execution) instruction — **not** granted by this proposal.
-- Work:
-  1. Confirm HEAD baseline; re-hash §1.2 evidence.
-  2. Record green `npm run test:trade-records` count and which polish-plan Eligibility pins must be rewritten.
-  3. Freeze visual fixtures: QQQ `2026-07-17` multi-event group for V1/V2; Data inventory for V3; SPY or QQQ for V4 TF switch.
-  4. Note investigation hypothesis for OPT-004 (viewStart/zoomScale/getResolvedViewCount after 1m→5m) without expanding into bar pipeline work.
-- Verification: list §3.1 paths; confirm OPT-001/002 not reopened; confirm no DB/content paths in manifest.
-- Exit gate: `phase-0-exit` with baseline note (plan appendix or untracked `output/`).
+- Entry gate: plan Active + explicit implementation-start / full-execution — **not** granted by this proposal.
+- Work: HEAD baseline; re-hash §1.3 evidence; record trade-records baseline count; freeze QQQ `2026-07-17` multi-event group id for V1/V2/B-Group-span; freeze SPY or QQQ day for B-TF-first-paint; freeze narrow viewport for V6; confirm `blue` band paint path.
+- Verification: §3.1 paths; no OPT-001/002 reopen; no DB/content paths.
+- Exit gate: `phase-0-exit`.
 
 ### Phase 1 — Implementation
 
 - Entry gate: `phase-0-exit`.
-- Work units (may land as one commit under full-execution authority; split only if rollback boundary requires):
-  1. **WU-A OPT-003:** Remove Eligibility tools chrome; hard-default display filter; update **N-Eligibility-*** tests; drop obsolete B-Eligibility interaction requirement from this plan’s exit (polish-plan history remains append-only).
-  2. **WU-B OPT-005:** Pure span helper; `selectTradeGroup` span-fit + band; timeline UI + meta count; optional row focus; Review/Static parity.
-  3. **WU-C OPT-004:** Engine first-paint TF viewport fix; **B-TF-first-paint** or pure **N-TF-viewport**.
-  4. **WU-D OPT-006:** Data-scoped rail density CSS (+ wrapper class if needed); protect Review sidebar.
-- Verification: all §2.4 carriers applicable; normal + static builds; harness auto; V1–V4 screenshots.
-- Exit gate: `phase-1-exit`.
+- Work units:
+  1. **WU-A OPT-003:** Remove chrome; canonicalize display-only; **N-Eligibility-*** green.
+  2. **WU-B OPT-005:** Span helper; blue band; fitRange-only sequence; timeline; event focus; **N-\*** + **B-Group-span**.
+  3. **WU-C OPT-004:** Engine first-paint; **B-TF-first-paint** both directions.
+  4. **WU-D OPT-006:** `data-market-days-rail` + scoped CSS; **N-Data-rail-source** + **B-Data-rail-layout**.
+- Verification: all carriers; builds; harness; V1–V6.
+- Exit gate: `phase-1-exit`. Missing any **B-\*** fails exit.
 
 ### Phase 2 — Closeout Package
 
 - Entry gate: `phase-1-exit`.
-- Work: implementation-review packet; independent implementation review; on `accept`, migrate plan to `completed/` under operating-modes closeout rules; back-link OPT-003…006 to completed plan.
-- Verification: implementation review `accept`; indexes/roadmap/state blocks agree.
+- Work: implementation-review packet; independent implementation review; on `accept`, completed migration + OPT back-links.
 - Exit gate: `closed` after completed migration.
 
 ## 5. Evidence And Commit Plan
 
-- Baseline commands: `python scripts/check-operating-modes.py --root .`; `python -m unittest scripts.tests.test_operating_modes`; `python scripts/check-project-harness.py --root . --profile auto`
-- Focused checks (implementation): `cd frontend && npm run test:trade-records`; normal + static builds; **B-\*** receipts under `output/`; V1–V4 screenshots
-- Full checks: harness auto; `git diff --check` on staged paths
-- Expected state/handoff updates: Proposed now at v1 awaiting independent design review; Active only after matching design approve + user activation instruction
-- Task-owned commit paths for **this proposal step**:
+- Baseline commands: operating-modes checker; lifecycle unittest; harness auto
+- Focused checks (implementation): `npm run test:trade-records`; normal + static builds; **B-\*** under `output/`; V1–V6
+- Expected state now: Proposed **v2** awaiting independent design review of exact `v2-review-foldback-2026-07-21`
+- Task-owned commit paths for **this foldback**:
   - `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md`
   - `docs/exec-plans/proposed/index.md`
   - `docs/exec-plans/roadmap.md`
-  - `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`
-  - `docs/optimization/index.md`
+  - `docs/exec-plans/reviews/index.md` (verdict remains review-001 revise until review-002)
   - `PROGRESS.md`
   - `HANDOFF.md`
-- No-commit condition: none for a complete proposal package
+- No-commit condition: none for a complete foldback package
 
 ## 6. Review And Activation Gate
 
 - Review location: `docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/`
-- Required verdict: independent design-review `approve` on exact revision `v1-proposal-2026-07-21` (or a later foldback revision)
-- Required user approval: explicit activation instruction after matching-revision approve
-- Activation is a separate lifecycle change before implementation
-- Implementation start requires a later explicit start/execute instruction after activation recording
-- Creating this durable plan is committed locally by default; no separate commit-authority metadata is required
+- Required verdict: independent design-review `approve` on exact revision `v2-review-foldback-2026-07-21` (or a later foldback)
+- `review-001` remains append-only and cannot approve v2
+- Activation requires matching-revision approve **plus** explicit user activation instruction
+- Implementation requires later explicit start/execute after activation
 
 ### 6.1 Authority boundary (now)
 
 | Action | Authorized now? |
 | --- | --- |
-| Independent design review of exact v1 | Yes (reviewer, not implementer) |
-| Lifecycle activation Proposed → Active | No — needs matching approve + user activation instruction |
-| Phase 0 start / implementation | No |
+| Independent design review of exact v2 | Yes (reviewer, not plan author) |
+| Lifecycle activation | No |
+| Implementation | No |
 | Push / PR / merge / Pages | No |
-| Provider / broker / tracked DB / content day files | No |
+| Provider / broker / DB / content day files | No |
 
 ## 7. References
 
 - Operating modes: [`docs/operating-modes.md`](../../operating-modes.md)
 - Optimization source: [`docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`](../../optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md)
+- Design review-001 (v1): [`../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md`](../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md)
 - Completed OPT-001/002 plan: [`docs/exec-plans/completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md`](../completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md)
-- Completed polish plan (Eligibility history): [`docs/exec-plans/completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`](../completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md)
+- Completed polish plan: [`docs/exec-plans/completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`](../completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md)
 - Completed Data progressive nav: [`docs/exec-plans/completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md`](../completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md)
 
 The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../../operating-modes.md) for state invariants, review paths, gate-token syntax, manual transitions, and closeout fields.
