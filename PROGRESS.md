@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent revision review `review-002` on exact revision `v2-review-foldback-2026-07-21` returned `approve/high` with no findings. V2 closes all `review-001` items: atomic canonical-registry + candidate SQLite projection and dual-surface proof; executable zero/one/two-or-more cross-leg card time ranges; and display-name + BUY/SELL for marker label/tooltip title with exact four-action fail-closed handling. Reviewer independently verified the live write/rollback/CAS path, untouched JSON/DB/view baseline, integrity/FK, QQQ fixture, consumers, schema enum, evidence hashes, harness, and authority separation. Lifecycle remains Proposed; next gate `activation-recording`. Approval does not activate or authorize implementation, content/DB mutation, provider/broker, publication, push, or remote action.
 
 2026-07-21: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-21`. Closures: atomic registry write + candidate SQLite projection for `vordin → vordinkkk` (manifest includes tracked DB; no JSON-only edit); pure cross-leg `groupEventTimeRange` with zero/one/two-or-more render + Node multi-leg/out-of-order/incomplete cases; all user-visible annotation text (`marker_label` + tooltip `title`) uses display-name + BUY/SELL; exact four-action schema map with fail-closed omit. `review-001` remains append-only v1 evidence and cannot approve v2. Next gate independent `design-review` of exact v2. No activation, implementation, content/DB write, provider/broker, publication, push, or remote authority.
 
