@@ -1,13 +1,5 @@
 import { useState } from 'react';
-
-function outcomeLabel(group) {
-  const reported = group.reported_outcome?.return_pct;
-  const calculated = group.calculated_outcome?.return_pct;
-  if (reported != null && calculated != null) return `reported ${reported}% · calculated ${calculated}%`;
-  if (reported != null) return `reported ${reported}%`;
-  if (calculated != null) return `calculated ${calculated}%`;
-  return 'result unknown';
-}
+import { groupEventTimeRange } from './tradeRecords.js';
 
 export function TraderTradeList({ groups = [], traders = [], activeGroupId = '', onSelect }) {
   const [expanded, setExpanded] = useState({});
@@ -20,6 +12,7 @@ export function TraderTradeList({ groups = [], traders = [], activeGroupId = '',
         const isExpanded = Boolean(expanded[group.trade_group_id]);
         const direction = String(group.direction || '').toUpperCase() === 'PUT' ? 'PUT' : 'CALL';
         const directionClass = direction.toLowerCase();
+        const timeRange = groupEventTimeRange(group);
         return (
           <article
             key={group.trade_group_id}
@@ -35,7 +28,8 @@ export function TraderTradeList({ groups = [], traders = [], activeGroupId = '',
                   <span className={`trade-direction-word ${directionClass}`}>{direction}</span>
                 </span>
                 <small className="trade-group-meta">
-                  <em>{group.underlying}</em> · {group.trade_date} · {outcomeLabel(group)}
+                  <em>{group.underlying}</em> · {group.trade_date}
+                  {timeRange.label ? <> · {timeRange.label}</> : null}
                 </small>
               </span>
               <span className={`trade-review-badge ${group.review_status}`}>{group.review_status}</span>
@@ -63,7 +57,6 @@ export function TraderTradeList({ groups = [], traders = [], activeGroupId = '',
                         <time>{event.occurred_at?.slice(11, 16) || '--:--'}</time>
                         <span>{event.action}</span>
                         <span>{event.quantity ?? '?'} @ {event.premium ?? '?'}</span>
-                        <span>fees {event.fees ?? '?'}</span>
                       </div>
                     ))}
                   </div>

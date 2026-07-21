@@ -193,15 +193,56 @@ export function summarizeTradeGroups(groups = []) {
   };
 }
 
+/** Exact schema action → BUY/SELL. Empty/unknown → null (omit marker). */
+export function tradeEventActionSide(action) {
+  const value = String(action || '');
+  if (value === 'buy_open' || value === 'buy_add') return 'BUY';
+  if (value === 'sell_partial' || value === 'sell_close') return 'SELL';
+  return null;
+}
+
+/**
+ * Chronological min/max of complete leg event times across a group.
+ * Incomplete/missing times are ignored; array order is irrelevant.
+ * knownCount 0 → no label; 1 → HH:MM; ≥2 → HH:MM → HH:MM.
+ */
+export function groupEventTimeRange(group) {
+  const stamps = [];
+  array(group?.legs).forEach((leg) => {
+    array(leg?.events).forEach((event) => {
+      if (!event?.occurred_at || event.time_incomplete) return;
+      const hhmm = timePart(event.occurred_at);
+      if (!hhmm) return;
+      stamps.push({ at: String(event.occurred_at), hhmm });
+    });
+  });
+  stamps.sort((left, right) => left.at.localeCompare(right.at));
+  if (stamps.length === 0) {
+    return { knownCount: 0, start: null, end: null, label: null };
+  }
+  const start = stamps[0].hhmm;
+  const end = stamps[stamps.length - 1].hhmm;
+  if (stamps.length === 1) {
+    return { knownCount: 1, start, end: start, label: start };
+  }
+  return { knownCount: stamps.length, start, end, label: `${start} → ${end}` };
+}
+
 export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []) {
-  // Direction owns marker hue; registry color is intentionally unused here.
-  void traders;
+  // Direction owns marker shape/color; registry color is intentionally unused.
+  // Display names come from the traders map (display_name || trader_id).
+  const traderMap = new Map(array(traders).map((trader) => [trader.trader_id, trader]));
   const markers = [];
   array(groups).forEach((group) => {
+    const trader = traderMap.get(group.trader_id) || {};
+    const displayName = trader.display_name || group.trader_id;
     array(group.legs).forEach((leg) => {
       array(leg.events).forEach((event) => {
         if (!event.occurred_at || event.time_incomplete) return;
+        const actionSide = tradeEventActionSide(event.action);
+        if (!actionSide) return;
         const direction = group.direction === 'PUT' ? 'PUT' : 'CALL';
+        const sideText = `${displayName} ${actionSide}`;
         markers.push({
           id: `trade-record-${event.event_id}`,
           type: 'trade_record',
@@ -209,14 +250,15 @@ export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []
           event_id: event.event_id,
           trader_id: group.trader_id,
           direction,
+          action_side: actionSide,
           marker_shape: direction === 'PUT' ? 'triangle_down' : 'triangle_up',
           marker_color: directionColor(direction),
           anchor_side: direction === 'PUT' ? 'top' : 'bottom',
           bar_index: barIndexForEvent(event, bars),
           t: timePart(event.occurred_at),
-          title: `${group.trader_id} ${direction} ${event.action}`,
+          title: sideText,
           body: event.note || `${leg.expiry} ${leg.strike ?? '--'} ${leg.option_type}`,
-          marker_label: `${group.trader_id} ${direction}`,
+          marker_label: sideText,
           score: null,
         });
       });
@@ -224,7 +266,7 @@ export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []
   });
   const groupedMarkers = new Map();
   markers.forEach((marker) => {
-    const key = `${marker.bar_index}|${marker.trader_id}|${marker.direction}`;
+    const key = `${marker.bar_index}|${marker.trader_id}|${marker.direction}|${marker.action_side}`;
     const existing = groupedMarkers.get(key);
     if (!existing) {
       groupedMarkers.set(key, {
@@ -240,7 +282,7 @@ export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []
       existing.trade_group_ids.push(marker.trade_group_id);
     }
     existing.grouped_marker_count += 1;
-    existing.title = `${existing.trader_id} ${existing.direction} ${existing.grouped_marker_count} events`;
+    // title stays displayName + BUY|SELL; ×N is label-only.
   });
   return [...groupedMarkers.values()].map((marker) => {
     const count = marker.grouped_marker_count;

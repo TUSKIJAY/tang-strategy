@@ -15,6 +15,7 @@ import {
   filtersMatchWorkspace,
   filterTradeGroups,
   flattenTradeRecords,
+  groupEventTimeRange,
   initialTradeRecordFilters,
   mirrorWorkspaceContext,
   reconcileTraderSelection,
@@ -22,6 +23,7 @@ import {
   reviewHashRoute,
   sameTraderIdSet,
   summarizeTradeGroups,
+  tradeEventActionSide,
   traderSelectionSummary,
   TRADER_CHIP_INLINE_MAX,
   TRADER_CHIP_SUMMARY_MIN,
@@ -278,7 +280,8 @@ test('marker color is direction-owned while CALL and PUT shapes stay independent
   assert.equal(markers[0].marker_color, '#6F9F7A');
   assert.equal(markers[0].marker_shape, 'triangle_up');
   assert.equal(markers[0].grouped_marker_count, 2);
-  assert.equal(markers[0].marker_label, 'alice CALL ×2');
+  assert.equal(markers[0].marker_label, 'Alice BUY ×2');
+  assert.equal(markers[0].title, 'Alice BUY');
   assert.deepEqual(markers[0].event_ids, [
     'tg_20260717_alice_spy_001_l1_e1',
     'tg_20260717_alice_spy_001_l1_e2',
@@ -294,6 +297,189 @@ test('marker color is direction-owned while CALL and PUT shapes stay independent
   const sameMarkers = buildTradeRecordAnnotations(sameTrader, traders, bars);
   assert.equal(sameMarkers[0].marker_color, DIRECTION_CALL_COLOR);
   assert.equal(sameMarkers[1].marker_color, DIRECTION_PUT_COLOR);
+});
+
+// --- Trade points / marker labels (OPT-001/002 carriers) ----------------------
+
+test('N-Action-map exact schema map and fail-closed omit (N-Action-map)', () => {
+  assert.equal(tradeEventActionSide('buy_open'), 'BUY');
+  assert.equal(tradeEventActionSide('buy_add'), 'BUY');
+  assert.equal(tradeEventActionSide('sell_partial'), 'SELL');
+  assert.equal(tradeEventActionSide('sell_close'), 'SELL');
+  assert.equal(tradeEventActionSide(''), null);
+  assert.equal(tradeEventActionSide(null), null);
+  assert.equal(tradeEventActionSide(undefined), null);
+  assert.equal(tradeEventActionSide('hold'), null);
+  assert.equal(tradeEventActionSide('?'), null);
+  assert.equal(tradeEventActionSide('BUY'), null);
+
+  const bars = [{ t: '10:00' }, { t: '10:01' }, { t: '10:02' }];
+  const four = group({
+    id: 'tg_action_map',
+    traderId: 'alice',
+    direction: 'CALL',
+    events: [
+      event('e_open', 1, '2026-07-17T10:00:00-04:00', 'buy_open'),
+      event('e_add', 2, '2026-07-17T10:01:00-04:00', 'buy_add'),
+      event('e_partial', 3, '2026-07-17T10:02:00-04:00', 'sell_partial'),
+      event('e_close', 4, '2026-07-17T10:02:00-04:00', 'sell_close'),
+    ],
+  });
+  const mapped = buildTradeRecordAnnotations([four], traders, bars);
+  assert.deepEqual(
+    mapped.map((m) => [m.action_side, m.marker_label, m.title]).sort(),
+    [
+      ['BUY', 'Alice BUY', 'Alice BUY'],
+      ['BUY', 'Alice BUY', 'Alice BUY'],
+      ['SELL', 'Alice SELL ×2', 'Alice SELL'],
+    ].sort(),
+  );
+  // same bar BUY+SELL stay separate; same-side SELL groups with ×N
+  const sellMarkers = mapped.filter((m) => m.action_side === 'SELL');
+  assert.equal(sellMarkers.length, 1);
+  assert.equal(sellMarkers[0].grouped_marker_count, 2);
+
+  const bad = group({
+    id: 'tg_bad_action',
+    traderId: 'alice',
+    direction: 'CALL',
+    events: [
+      event('e_known', 1, '2026-07-17T10:00:00-04:00', 'buy_open'),
+      { ...event('e_empty', 2, '2026-07-17T10:01:00-04:00', ''), action: '' },
+      { ...event('e_unknown', 3, '2026-07-17T10:02:00-04:00', 'mystery'), action: 'mystery' },
+    ],
+  });
+  const omitted = buildTradeRecordAnnotations([bad], traders, bars);
+  assert.equal(omitted.length, 1);
+  assert.equal(omitted[0].marker_label, 'Alice BUY');
+  assert.doesNotMatch(omitted[0].marker_label, /\?/);
+  assert.doesNotMatch(omitted[0].title, /\?/);
+});
+
+test('N-Marker-label display_name + BUY/SELL on label and title (N-Marker-label)', () => {
+  const bars = [{ t: '10:00' }, { t: '10:01' }];
+  const markers = buildTradeRecordAnnotations(groups, traders, bars);
+  for (const marker of markers) {
+    assert.match(marker.marker_label, /^(Alice|Bob) (BUY|SELL)( ×\d+)?$/);
+    assert.match(marker.title, /^(Alice|Bob) (BUY|SELL)$/);
+    assert.doesNotMatch(marker.marker_label, /CALL|PUT/);
+    assert.doesNotMatch(marker.title, /CALL|PUT/);
+    assert.doesNotMatch(marker.title, /buy_open|buy_add|sell_partial|sell_close/);
+    assert.doesNotMatch(marker.marker_label, /\b(alice|bob)\b/);
+  }
+  assert.equal(markers[0].marker_label, 'Alice BUY ×2');
+  assert.equal(markers[0].title, 'Alice BUY');
+  assert.equal(markers[1].marker_label, 'Bob BUY');
+  assert.equal(markers[1].title, 'Bob BUY');
+
+  // display_name fallback to trader_id when registry entry lacks a name
+  const noNameTraders = [{ trader_id: 'alice', color: '#3366CC', active: true, sort_order: 10 }];
+  const fallback = buildTradeRecordAnnotations([groups[0]], noNameTraders, bars);
+  assert.equal(fallback[0].marker_label, 'alice BUY ×2');
+  assert.equal(fallback[0].title, 'alice BUY');
+
+  // empty traders list still falls back to trader_id (no void traders)
+  const rawId = buildTradeRecordAnnotations([groups[0]], [], bars);
+  assert.equal(rawId[0].marker_label, 'alice BUY ×2');
+
+  // nickname dual-surface vocabulary for vordin display
+  const vordinGroup = group({
+    id: 'tg_vordin_nick',
+    traderId: 'vordin',
+    direction: 'PUT',
+    events: [
+      event('ve1', 1, '2026-07-17T10:00:00-04:00', 'buy_open'),
+      event('ve2', 2, '2026-07-17T10:01:00-04:00', 'sell_close'),
+    ],
+  });
+  const nickTraders = [
+    { trader_id: 'vordin', display_name: 'vordinkkk', color: '#4E79A7', active: true, sort_order: 20 },
+  ];
+  const nickMarkers = buildTradeRecordAnnotations([vordinGroup], nickTraders, bars);
+  assert.equal(nickMarkers.length, 2);
+  assert.deepEqual(
+    nickMarkers.map((m) => m.marker_label).sort(),
+    ['vordinkkk BUY', 'vordinkkk SELL'],
+  );
+  assert.deepEqual(
+    nickMarkers.map((m) => m.title).sort(),
+    ['vordinkkk BUY', 'vordinkkk SELL'],
+  );
+  for (const marker of nickMarkers) {
+    // Raw trader_id must not appear as a token; display_name "vordinkkk" is fine.
+    assert.doesNotMatch(marker.marker_label, /\bvordin\b|CALL|PUT|沃德哥/);
+    assert.doesNotMatch(marker.title, /\bvordin\b|CALL|PUT|沃德哥|buy_open|sell_close/);
+  }
+});
+
+test('N-Card-time-range pure cross-leg chronology (N-Card-time-range)', () => {
+  assert.deepEqual(groupEventTimeRange({ legs: [] }), {
+    knownCount: 0, start: null, end: null, label: null,
+  });
+  assert.deepEqual(groupEventTimeRange(group({
+    id: 'g0', traderId: 'alice', direction: 'CALL', events: [],
+  })), { knownCount: 0, start: null, end: null, label: null });
+
+  const one = group({
+    id: 'g1',
+    traderId: 'alice',
+    direction: 'CALL',
+    events: [event('e1', 1, '2026-07-17T09:42:00-04:00', 'buy_open')],
+  });
+  assert.deepEqual(groupEventTimeRange(one), {
+    knownCount: 1, start: '09:42', end: '09:42', label: '09:42',
+  });
+
+  // Multi-leg, deliberately out-of-order array; incomplete times ignored.
+  const multi = {
+    trade_group_id: 'g_multi',
+    underlying: 'QQQ',
+    trade_date: '2026-07-17',
+    legs: [
+      {
+        leg_id: 'l2',
+        events: [
+          event('late', 1, '2026-07-17T14:30:00-04:00', 'sell_close'),
+          {
+            ...event('incomplete', 2, '2026-07-17T11:00:00-04:00', 'buy_add'),
+            time_incomplete: true,
+          },
+        ],
+      },
+      {
+        leg_id: 'l1',
+        events: [
+          event('mid', 1, '2026-07-17T11:15:00-04:00', 'buy_add'),
+          event('early', 2, '2026-07-17T09:35:00-04:00', 'buy_open'),
+          { ...event('missing', 3, null, 'sell_partial'), occurred_at: null },
+        ],
+      },
+    ],
+  };
+  const range = groupEventTimeRange(multi);
+  assert.equal(range.knownCount, 3);
+  assert.equal(range.start, '09:35');
+  assert.equal(range.end, '14:30');
+  assert.equal(range.label, '09:35 → 14:30');
+});
+
+test('N-Card-source reading path drops outcome/fees and uses time helper (N-Card-source)', () => {
+  const listSource = readFileSync(new URL('./TraderTradeList.jsx', import.meta.url), 'utf8');
+  assert.match(listSource, /groupEventTimeRange/);
+  assert.match(listSource, /from '\.\/tradeRecords\.js'/);
+  assert.doesNotMatch(listSource, /outcomeLabel/);
+  assert.doesNotMatch(listSource, /reported_outcome|calculated_outcome/);
+  assert.doesNotMatch(listSource, /return_pct/);
+  assert.doesNotMatch(listSource, /fees\s*\{/);
+  assert.doesNotMatch(listSource, />fees\s/);
+  assert.doesNotMatch(listSource, /reported \$|calculated \$|net_pnl|gross_pnl/);
+  // CALL/PUT chrome retained
+  assert.match(listSource, /trade-direction-word/);
+  assert.match(listSource, /trade-direction-shape/);
+  // Expanded legs keep time/action/qty@premium shape without fees span
+  assert.match(listSource, /event\.quantity \?\? '\?'\} @ \{event\.premium \?\? '\?'\}/);
+  assert.match(listSource, /event\.action/);
+  assert.match(listSource, /event\.occurred_at\?\.slice\(11, 16\)/);
 });
 
 test('kline renderer exposes only normalized trade color and shape hooks', () => {
