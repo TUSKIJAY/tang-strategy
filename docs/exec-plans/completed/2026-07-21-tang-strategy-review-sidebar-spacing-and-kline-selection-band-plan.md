@@ -1,7 +1,7 @@
 # Tang Strategy Review Sidebar Spacing And K-line Selection Band
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan`
 - Revision: `v2-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-sidebar-spacing-selection-band`
@@ -9,19 +9,19 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: user-instruction:2026-07-21-activate-sidebar-spacing-and-kline-selection-band-plan
-- Current phase: phase-0
-- Phase state: not-started
-- Phase entry gate: phase-0-start
-- Next gate: `phase-0-start`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: 5f36d29a44fb12aee2319ae147303cc970d83193
 - Lifecycle reconciliation commit: none
 - Owner: Grok
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/2026-07-21-review-sidebar-spacing-and-kline-selection-band.md` OPT-001 + OPT-002
 - Proposal baseline: `codex/project-harness@652092bd4577eeb004b2d4eda4c9452b8dd98f83`
-- Scope authority: lifecycle-activated only under `user-instruction:2026-07-21-activate-sidebar-spacing-and-kline-selection-band-plan` (goal OBJECTIVE chain approve→activate). Matching design approval `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-21`. Parked at `phase-0:not-started`. Does **not** authorize Phase 0 start, product implementation, push, PR, merge, Pages, provider/broker, tracked DB/content mutation, or any remote action
+- Scope authority: full local execution under `user-instruction:2026-07-21-execute-sidebar-spacing-and-kline-selection-band-plan` (goal OBJECTIVE 这个active plan交给你全权负责执行). Matching design approval `review-002: approve/high`. Implementation review `implementation-review-001: accept/high`. Product commit `5f36d29a44fb12aee2319ae147303cc970d83193`. No push/PR/merge/Pages/provider/broker/DB/content day-file/remote.
 - Local commit: task-scoped default; does not authorize implementation start, push, or remote action
 
 ## 1. Context And Evidence

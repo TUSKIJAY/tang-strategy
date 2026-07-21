@@ -10,8 +10,8 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Sidebar Trade tools / trader cards / strategy detail stack needs gaps | Review + Static `.dr-sidebar` mid-stack | active-plan | [active plan](../../exec-plans/active/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | User: tools → 交易者 → 策略讲解 三段贴死 · 2026-07-21 mock 方案已确认 |
-| OPT-002 | Trader select blue K-line band overlay is too loud | Review + Static K-line group/select highlight | active-plan | [active plan](../../exec-plans/active/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | Keep point jump; 2026-07-21 决策：直接取消蓝色带，不加替代提示 |
+| OPT-001 | Sidebar Trade tools / trader cards / strategy detail stack needs gaps | Review + Static `.dr-sidebar` mid-stack | completed | [completed plan](../../exec-plans/completed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | User: tools → 交易者 → 策略讲解 三段贴死 · 2026-07-21 mock 方案已确认 |
+| OPT-002 | Trader select blue K-line band overlay is too loud | Review + Static K-line group/select highlight | completed | [completed plan](../../exec-plans/completed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | Keep point jump; 2026-07-21 决策：直接取消蓝色带，不加替代提示 |
 
 ## Scope Lock (user-confirmed 2026-07-21)
 
@@ -74,8 +74,8 @@ Open the mock in a browser. Paths are relative to this record. Mock K-line data 
   - Keep recent card density / type scale; do not undo information content.
 - Boundary that must not change:
   - Progressive date rules; trade payload shape; strategy assemble pipeline; App shell left nav.
-  - Filter/export semantics stay unchanged, **except** the visible Download entry in this stack, which the user asked to remove (mock 2026-07-21). Its final disposition — removed outright vs relocated (e.g. into the Review 工具 menu) — is **open for implementation review**.
-- Lifecycle status: active-plan
+  - Filter/export semantics stay unchanged, **except** the visible Download entry in this stack, which the user asked to remove (mock 2026-07-21) — disposition frozen in the plan as **removed outright** on Review/Static (Admin keeps Download; pure export builders retained).
+- Lifecycle status: completed → plan `2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan` revision `v2-review-foldback-2026-07-21`; product commit `5f36d29a44fb12aee2319ae147303cc970d83193`; next gate `closed`.
 
 ## OPT-002 Trader Select Blue K-line Band Overlay Is Too Loud
 
@@ -89,14 +89,14 @@ Open the mock in a browser. Paths are relative to this record. Mock K-line data 
   - **Review and Static** stay aligned.
 - Boundary that must not change:
   - Marker labels (display_name + BUY/SELL); trade data; group-select focus target; timeframe/viewport contracts beyond the highlight chrome; no provider/DB/content mutation.
-- Lifecycle status: active-plan
+- Lifecycle status: completed → plan `2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan` revision `v2-review-foldback-2026-07-21`; product commit `5f36d29a44fb12aee2319ae147303cc970d83193`; next gate `closed`.
 
 ## Record Closeout (2026-07-21)
 
 - Intake complete for OPT-001 and OPT-002; mock decisions folded into Scope Lock, Desired outcome, and index.
 - Independent re-check after mock foldback: content aligned (pass); residual process items closed by committing `mock.html` + revised record + index.
 - Untracked `output/playwright/mock-*.png` trees are informal mock captures only — **not** batch evidence; do not stage.
-- 2026-07-21 user instruction converted this batch to Proposed plan, then independent design reviews through `review-002: approve/high` on revision `v2-review-foldback-2026-07-21`, then lifecycle activation to `docs/exec-plans/active/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md`. Both OPTs are `active-plan`. Parked at `phase-0:not-started` / next gate `phase-0-start`. Implementation still requires a separate execute instruction.
+- 2026-07-21 user instruction converted this batch to Proposed plan, then independent design reviews through `review-002: approve/high` on revision `v2-review-foldback-2026-07-21`, then lifecycle activation, then full local execution under `user-instruction:2026-07-21-execute-sidebar-spacing-and-kline-selection-band-plan`. Product commit `5f36d29a44fb12aee2319ae147303cc970d83193`; independent `implementation-review-001: accept/high`; plan migrated to `docs/exec-plans/completed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md`. Both OPTs are `completed`; next gate `closed`.
 
 ## Explicit Non-Authorization
 
