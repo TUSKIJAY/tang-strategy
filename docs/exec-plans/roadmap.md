@@ -31,11 +31,11 @@
 
 ## Active Plans
 
-None.
+- [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./active/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) — Active; revision `v2-review-foldback-2026-07-21`; `review-002: approve/high`; phase-0 `not-started`; next gate `phase-0-start`
 
 ## Proposed Plans
 
-- [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) — Proposed; revision `v2-review-foldback-2026-07-21`; `review-002: approve/high`@v2; next gate `activation-recording`
+None.
 
 ## Completed Plans
 

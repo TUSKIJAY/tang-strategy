@@ -10,8 +10,8 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Sidebar Trade tools / trader cards / strategy detail stack needs gaps | Review + Static `.dr-sidebar` mid-stack | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | User: tools → 交易者 → 策略讲解 三段贴死 · 2026-07-21 mock 方案已确认 |
-| OPT-002 | Trader select blue K-line band overlay is too loud | Review + Static K-line group/select highlight | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | Keep point jump; 2026-07-21 决策：直接取消蓝色带，不加替代提示 |
+| OPT-001 | Sidebar Trade tools / trader cards / strategy detail stack needs gaps | Review + Static `.dr-sidebar` mid-stack | active-plan | [active plan](../../exec-plans/active/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | User: tools → 交易者 → 策略讲解 三段贴死 · 2026-07-21 mock 方案已确认 |
+| OPT-002 | Trader select blue K-line band overlay is too loud | Review + Static K-line group/select highlight | active-plan | [active plan](../../exec-plans/active/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | Keep point jump; 2026-07-21 决策：直接取消蓝色带，不加替代提示 |
 
 ## Scope Lock (user-confirmed 2026-07-21)
 
@@ -75,7 +75,7 @@ Open the mock in a browser. Paths are relative to this record. Mock K-line data 
 - Boundary that must not change:
   - Progressive date rules; trade payload shape; strategy assemble pipeline; App shell left nav.
   - Filter/export semantics stay unchanged, **except** the visible Download entry in this stack, which the user asked to remove (mock 2026-07-21). Its final disposition — removed outright vs relocated (e.g. into the Review 工具 menu) — is **open for implementation review**.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: active-plan
 
 ## OPT-002 Trader Select Blue K-line Band Overlay Is Too Loud
 
@@ -89,14 +89,14 @@ Open the mock in a browser. Paths are relative to this record. Mock K-line data 
   - **Review and Static** stay aligned.
 - Boundary that must not change:
   - Marker labels (display_name + BUY/SELL); trade data; group-select focus target; timeframe/viewport contracts beyond the highlight chrome; no provider/DB/content mutation.
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: active-plan
 
 ## Record Closeout (2026-07-21)
 
 - Intake complete for OPT-001 and OPT-002; mock decisions folded into Scope Lock, Desired outcome, and index.
 - Independent re-check after mock foldback: content aligned (pass); residual process items closed by committing `mock.html` + revised record + index.
 - Untracked `output/playwright/mock-*.png` trees are informal mock captures only — **not** batch evidence; do not stage.
-- 2026-07-21 user instruction converted this batch to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md` revision `v1-proposal-2026-07-21`. Both OPTs are `promoted-to-proposed`. Next gate: independent design review. Activation/implementation still require their lifecycle gates.
+- 2026-07-21 user instruction converted this batch to Proposed plan, then independent design reviews through `review-002: approve/high` on revision `v2-review-foldback-2026-07-21`, then lifecycle activation to `docs/exec-plans/active/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md`. Both OPTs are `active-plan`. Parked at `phase-0:not-started` / next gate `phase-0-start`. Implementation still requires a separate execute instruction.
 
 ## Explicit Non-Authorization
 

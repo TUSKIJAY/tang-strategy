@@ -4,11 +4,13 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation-recording`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
+
+2026-07-21: User instruction chain authorized lifecycle activation of exact revision `v2-review-foldback-2026-07-21` after matching `review-002: approve/high` (`user-instruction:2026-07-21-activate-sidebar-spacing-and-kline-selection-band-plan`). Plan migrated `proposed/` → `active/`; Status Active; activation evidence set; phase parked at `phase-0:not-started`; next gate `phase-0-start`. Indexes/roadmap/OPT back-links/state blocks reconciled. This activation does **not** start Phase 0, does not authorize product implementation, content/DB mutation, push, PR, merge, Pages, provider/broker, or any remote action.
 
 2026-07-21: Independent design review `review-002` on exact revision `v2-review-foldback-2026-07-21` returned `approve/high` with no findings. V2 closes review-001 P1 through replacement tracked runner `frontend/scripts/playwright/review-sidebar-spacing-and-selection-band-acceptance.mjs`, independent `groupBarSpan` / `eventFocusPayload` oracles, empty `getHighlightRanges()` assertions after group/event selection, viewport containment, measured Review/Static layout gaps, and exclusion of the historical blue-band runner from this plan's exit gate. The exact pre-reconciliation plan SHA-256 `145fd3e9...eaf` and all three evidence hashes matched at HEAD `f704dfd3...d7b`. Lifecycle remains Proposed; next gate `activation-recording`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 
