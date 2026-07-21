@@ -7,14 +7,14 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md`, revision `v3-review-foldback-2026-07-21`, status `Proposed`, phase `none`, next gate `plan-revision`. Independent `review-003: revise/high`; no activation, implementation, push, data, or remote authority.
-- Review 003: v3 successfully removes the over-engineered process. One blocker remains: SPY `2026-07-17` cannot show 沃德哥 because those groups are QQQ and ticker filtering is strict. Keep three screenshots but split them across real SPY/QQQ fixtures; remove the unsupported long-name wrap requirement. Lifecycle remains v1 for this small plan.
+- Current plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md`, revision `v4-review-foldback-2026-07-21`, status `Proposed`, phase `none`, next gate `activation-recording`. Independent `review-004: approve/high`; no activation, implementation, push, data, or remote authority.
+- Review 004: all prior findings are closed. Three screenshots use real fixtures (Data SPY, Review QQQ 沃德哥 desktop, Review SPY Tang narrow); long-name wrap was removed; lightweight v1 lifecycle and one verification round remain intact. Await explicit activation instruction.
 - Optimization sources: both 2026-07-21 batches are `promoted-to-proposed` and linked to the current plan. The user clarified that the typography scope is **现实交易者点位**, not filter/export chrome.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
 - Latest completed plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, `implementation-review-001: accept/high`, next gate `closed`.

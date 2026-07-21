@@ -3,16 +3,16 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
 - Plan slug: `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`
-- Revision: `v3-review-foldback-2026-07-21`
+- Revision: `v4-review-foldback-2026-07-21`
 - Plan author ID: `codex-plan-author-2026-07-21-data-nav-trade-density`
-- Design reviews: ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-002.md@revise@v2-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-003.md@revise@v3-review-foldback-2026-07-21
-- Latest design verdict: revise
+- Design reviews: ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-002.md@revise@v2-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-003.md@revise@v3-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-004.md@approve@v4-review-foldback-2026-07-21
+- Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: none
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `plan-revision`
+- Next gate: `activation-recording`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -21,7 +21,7 @@
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-data-page-progressive-date-nav/2026-07-21-data-page-progressive-date-nav.md`, `docs/optimization/2026-07-21-review-trade-panel-type-scale/2026-07-21-review-trade-panel-type-scale.md`
 - Proposal baseline: `codex/project-harness@6eee7e3b9993f57c51d710d40fc988eb15b489ce`
-- Scope authority: review-only; this proposed plan does not authorize implementation, activation, commit, push, data mutation, or remote actions. `review-001` targets v1 only; `review-002` targets v2 only; v3 requires a new matching-revision design review before any activation.
+- Scope authority: review-only; this proposed plan does not authorize implementation, activation, commit, push, data mutation, or remote actions. `review-001` targets v1; `review-002` targets v2; `review-003` targets v3; v4 requires a new matching-revision design review before any activation.
 
 ## 1. Context And Evidence
 
@@ -54,11 +54,18 @@
 
 | Severity | Finding (summary) | V3 closure |
 | --- | --- | --- |
-| 严重-1 | 三轮重复测试/构建、六张强制截图、四个实施后阶段和额外 closeout 用户门超出小型 UI 改动所需 | §4 压缩为三个阶段（Baseline+Implementation → Acceptance+Implementation-review → Closeout）；测试/构建只运行一次（Phase 1 退出门）；截图从 6 张精简为 3 张；Admin 不受影响由 scoped CSS diff + 合同测试证明，不强制拍负向截图 |
-| 严重-2 | 截图矩阵未固定可复现 fixture；V5 允许条件跳过 | §2.3 固定 fixture 为 SPY `2026-07-17`（已确认包含 Tang + 沃德哥 groups），删除条件跳过；只保留 Data desktop、Review desktop expanded、Review narrow 三张 |
-| 中等-1 | Completed migration 被无条件拆成新用户提示 | §4 Phase 2 改为：closeout 需要覆盖 closeout 的明确用户授权；若用户已通过完整执行授权（如"全权执行该 plan 直到收尾"）明确委托了 closeout，则无需重复询问。仅 activation 或仅 implementation-start 不足。Push/PR/Pages 等远程权限继续独立 |
+| 严重-1 | 三轮重复测试/构建、六张强制截图、四个实施后阶段和额外 closeout 用户门超出小型 UI 改动所需 | 压缩为三个阶段；测试/构建只运行一次；截图精简为 3 张；Admin 由 scoped CSS + 合同测试证明 |
+| 严重-2 | 截图矩阵未固定可复现 fixture；V5 允许条件跳过 | §2.3 固定 fixture 为 `2026-07-17`，按 ticker 过滤合约拆分（SPY Tang / QQQ 沃德哥），删除条件跳过 |
+| 中等-1 | Completed migration 被无条件拆成新用户提示 | §4 Phase 2：完整执行授权覆盖 closeout，无需重复询问 |
 
-`review-001` 和 `review-002` 均为先前 revision 的 append-only 证据，不能 approve v3。Next gate 是对 exact revision `v3-review-foldback-2026-07-21` 的独立 design review。
+#### review-003 closure (v3 → v4)
+
+| Severity | Finding (summary) | V4 closure |
+| --- | --- | --- |
+| 严重 | SPY `2026-07-17` fixture 与 ticker 过滤合约冲突：Tang underlying=SPY，沃德哥 underlying=QQQ；`filterTradeGroups` 按 `group.underlying === filters.ticker` 过滤，单个 SPY workspace 不会显示沃德哥 | §2.3 截图按 ticker 拆分：V1=Data SPY desktop，V2=Review QQQ desktop（沃德哥多卡+expanded），V3=Review SPY narrow（Tang）；不再声称单个 ticker workspace 同时包含两者 |
+| 轻微 | "长 display name 可 wrap" 没有现成稳定样本 | V3 改为"narrow viewport 无横向溢出、现有名称与 meta 可读"；长名称换行由 CSS 结构和后续回归覆盖 |
+
+`review-001`、`review-002`、`review-003` 均为先前 revision 的 append-only 证据，不能 approve v4。Next gate 是对 exact revision `v4-review-foldback-2026-07-21` 的独立 design review。
 
 ### 1.3 Visual evidence
 
@@ -141,13 +148,13 @@
 
 ### 2.3 Frozen visual acceptance matrix
 
-Phase 1 必须在实施完成后产出以下三张可复现截图，用于 implementation review 证据。截图使用**固定 fixture**：SPY `2026-07-17`（已确认包含 Tang + 沃德哥 trader groups，含多方向点位）。对比基线为 §1.3 三张 OPT 截图。
+Phase 0 必须在实施完成后产出以下三张可复现截图，用于 implementation review 证据。Fixture 固定为 `2026-07-17`，按 ticker 过滤合约分别验证 Tang（SPY underlying）和沃德哥（QQQ underlying）。对比基线为 §1.3 三张 OPT 截图。
 
 | # | Surface | Viewport | Fixture | Required coverage |
 | --- | --- | --- | --- | --- |
 | V1 | Data Market days | desktop `1672x941` | SPY `2026-07-17` | progressive「最近」默认可见；可切换「按月」；不再铺满全部历史月芯片网格 |
-| V2 | Review 现实交易者点位 | desktop `1672x941` | SPY `2026-07-17` | Tang + 沃德哥卡片标题/方向/meta 密度；至少一个 expanded `Show legs/events` 状态；与 signal/date chrome 无字号断层 |
-| V3 | Review 现实交易者点位 | narrow `820x1180` | SPY `2026-07-17` | 长 display name 可 wrap、无横向溢出、卡片仍可读 |
+| V2 | Review 现实交易者点位 | desktop `1672x941` | QQQ `2026-07-17` | 沃德哥多卡（CALL + PUT）标题/方向/meta 密度；至少一个 expanded `Show legs/events` 状态；与 signal/date chrome 无字号断层 |
+| V3 | Review 现实交易者点位 | narrow `820x1180` | SPY `2026-07-17` | Tang 卡片在窄视口下无横向溢出、现有名称与 meta 可读 |
 
 截图建议存放 `output/` 目录（未跟踪产物，不 sweep 进 commit）。像素 token 以 §2.2 表为准。
 
@@ -188,7 +195,7 @@ Phase 1 必须在实施完成后产出以下三张可复现截图，用于 imple
 
 ### Phase 0 — Baseline, Implementation, And Verification
 
-- Entry gate: matching-revision design-review `approve` on `v3-review-foldback-2026-07-21` **and** explicit user activation + implementation-start.
+- Entry gate: matching-revision design-review `approve` on `v4-review-foldback-2026-07-21` **and** explicit user activation + implementation-start.
 - Work:
 
   **Baseline：**
@@ -221,7 +228,7 @@ Phase 1 必须在实施完成后产出以下三张可复现截图，用于 imple
   4. `python3 scripts/check-project-harness.py --root . --profile auto` green.
   5. Diff limited to the four implementation files in §3.1.
   6. Local `npm run dev` 交互验证：Data progressive 最近/按月可用；Review progressive 不变；Admin DateRail exhaustive + Admin 点位列表保持默认体量（由 scoped CSS diff + 合同测试证明）。
-  7. 拍摄 §2.3 三张截图（V1–V3），fixture SPY `2026-07-17`，存放 `output/` 目录。
+  7. 拍摄 §2.3 三张截图（V1–V3），按 ticker 使用对应的 `2026-07-17` fixture，存放 `output/` 目录。
 - Exit gate: 合同测试 + 两种 build + harness 全绿；截图完整；diff 仅限四文件。Next gate `implementation-review`.
 
 ### Phase 1 — Independent Implementation Review
@@ -249,7 +256,7 @@ Phase 1 必须在实施完成后产出以下三张可复现截图，用于 imple
 
 | Action | Authority required |
 | --- | --- |
-| Design review of v3 | independent reviewer; no activation |
+| Design review of v4 | independent reviewer; no activation |
 | Activation recording | explicit user activate instruction |
 | Phase 0 implementation & verification | explicit implementation-start after Active |
 | Local scoped commits (if any) | separate Git/checkpoint authority; never implied |
@@ -265,7 +272,7 @@ Phase 1 必须在实施完成后产出以下三张可复现截图，用于 imple
   - `cd frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews`
 - Focused checks:
   - Interactive Data/Review/Admin progressive vs exhaustive behavior
-  - V1–V3 screenshot matrix against OPT baselines (fixture: SPY `2026-07-17`)
+  - V1–V3 screenshot matrix against OPT baselines (fixture: `2026-07-17` split by ticker SPY/QQQ)
 - Expected state/handoff updates:
   - `PROGRESS.md` / `HANDOFF.md` at each lifecycle transition
   - Optimization records at Completed migration only
@@ -279,8 +286,8 @@ Phase 1 必须在实施完成后产出以下三张可复现截图，用于 imple
 ## 6. Review And Activation Gate
 
 - Review location: `docs/exec-plans/reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/`
-- Append-only prior evidence: `review-001.md@revise@v1-proposal-2026-07-21`, `review-002.md@revise@v2-review-foldback-2026-07-21`
-- Required next design verdict: independent `approve` on exact revision `v3-review-foldback-2026-07-21`
+- Append-only prior evidence: `review-001.md@revise@v1-proposal-2026-07-21`, `review-002.md@revise@v2-review-foldback-2026-07-21`, `review-003.md@revise@v3-review-foldback-2026-07-21`
+- Required next design verdict: independent `approve` on exact revision `v4-review-foldback-2026-07-21`
 - Required user approval for activation: yes — matching-revision approve does **not** activate
 - Activation is a separate lifecycle change: Proposed → Active at `phase-0:not-started` only
 - Implementation start requires a later explicit start/execute instruction after activation recording

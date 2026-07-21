@@ -14,7 +14,7 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Align Data page Market days rail with Review progressive date navigation | Data workspace / `DashboardPage` date rail | promoted-to-proposed | [plan](../../exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) revision `v3-review-foldback-2026-07-21` | User acceptance 2026-07-21 after Review progressive ship; `review-003: revise/high` requires real SPY/QQQ screenshot fixtures |
+| OPT-001 | Align Data page Market days rail with Review progressive date navigation | Data workspace / `DashboardPage` date rail | promoted-to-proposed | [plan](../../exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) revision `v4-review-foldback-2026-07-21` | User acceptance 2026-07-21 after Review progressive ship; `review-004: approve/high`; awaiting activation |
 
 ## Relationship To Prior Work
 

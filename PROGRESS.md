@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent revision review `review-004` on exact revision `v4-review-foldback-2026-07-21` returned `approve/high`. V4 closes `review-003`: screenshots remain three but now use real ticker fixtures (Data SPY, Review QQQ 沃德哥 desktop, Review SPY Tang narrow), and the unsupported long-name wrap requirement is removed. Canonical groups and tracked market days confirm both SPY/QQQ `2026-07-17` scenarios exist. Lifecycle stays lightweight v1; next gate `activation-recording`. Approval does not activate or authorize implementation, push, data, or remote actions.
 
 2026-07-21: Independent revision review `review-003` on exact revision `v3-review-foldback-2026-07-21` returned `revise/high`. V3 correctly closes all `review-002` process findings: one verification round, three screenshots, scoped CSS/test proof, and full-execution authority may cover closeout. Remaining blocker is the frozen fixture: SPY `2026-07-17` exposes Tang only, while 沃德哥 groups are QQQ and are filtered out of the SPY workspace. Split the three screenshots across real SPY/QQQ fixtures and drop the unsupported long-name wrap requirement. Draft v2 lifecycle metadata was reconciled back to v1 to preserve the small-plan path and valid historical reviews. Next gate `plan-revision`; no activation, implementation, push, data, or remote authority.
 
