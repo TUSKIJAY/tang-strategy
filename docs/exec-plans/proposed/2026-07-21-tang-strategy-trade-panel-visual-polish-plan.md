@@ -3,9 +3,9 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
 - Plan slug: `2026-07-21-tang-strategy-trade-panel-visual-polish-plan`
-- Revision: `v1-proposal-2026-07-21`
+- Revision: `v2-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-panel-polish`
-- Design reviews: `docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md@revise@v1-proposal-2026-07-21`
+- Design reviews: docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md@revise@v1-proposal-2026-07-21, docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-002.md@revise@v2-review-foldback-2026-07-21
 - Latest design verdict: revise
 - Review independence: attested
 - Activation evidence: none
@@ -40,41 +40,58 @@
 
 本计划是 **视觉 / 布局 polish**，不改 eligibility enum、B-chip 选择权威、export 文件内容、方向色 token 或数据契约。
 
-### 1.2 Visual evidence
+### 1.2 Review foldback closure map
+
+#### review-001 closure (v1 → v2)
+
+Independent `review-001` returned `revise/high` against frozen revision `v1-proposal-2026-07-21`. Revision `v2-review-foldback-2026-07-21` folds every finding into the operative contract:
+
+| Severity | Finding (summary) | V2 closure |
+| --- | --- | --- |
+| P1 | Custom Eligibility segments can pass screenshots while regressing single-select keyboard/state semantics; mock uses plain buttons | §1.3 + §2.2 criterion 2 freeze accessible single-selection: native radio inputs in a labelled fieldset (preferred) **or** a complete `radiogroup`/`radio` with exactly one selected and standard arrow-key focus/selection. §2.2 criterion 8 + §4 Phase 0 require a deterministic interaction receipt for `display` / `reported` / `calculated`, `onChange`/filtered results, on shared surfaces |
+| P2 | Drawer language left open to Phase 0; `tradeRecords.test.js` optional; QQQ fixture never enters `>=7` path | §1.3 freezes English drawer chrome **Edit / Select all / Clear** plus search/empty-state wording in this revision (not Phase 0). §3.1 makes `tradeRecords.test.js` mandatory. §2.2 criterion 4 + §4 require a deterministic synthetic `>=7` trader case (summary, open/close, search, select-all, clear) while preserving `TRADER_CHIP_INLINE_MAX = 6` |
+| P2 | Unscoped “must not contain `Download JSON + 3 CSV`” fails against docs/mock evidence; no four-file UI receipt after relocate | §2.2 criterion 3 scopes the negative assertion to **production** frontend control/consumer sources listed in §3.1; docs/OPT/mock/plan remain exempt. §2.2 criterion 8 + §4 require a focused UI/browser receipt that clicks short **Download**, proves JSON + 3 CSV filenames from the filtered selection, and confirms Review / Static / Admin share the same payload/groups/filters contract with **no** second Admin-header CTA |
+
+`review-001` is append-only v1 evidence and **cannot approve v2**. Next gate is independent design review of exact revision `v2-review-foldback-2026-07-21`.
+
+### 1.3 Visual evidence
 
 | 证据 | 位置 | 作用 |
 | --- | --- | --- |
 | Live Review trade tools + cards | `docs/optimization/2026-07-21-review-trade-panel-visual-polish/screenshots/2026-07-21-review-trade-panel-current.png` · SHA-256 `ce00fef17e4fd58a73b5c8de7415041bdc95aa651c6865e78f41347635db3765` | 当前 form-card 摩擦 |
-| Locked design mock | `docs/optimization/2026-07-21-review-trade-panel-visual-polish/mockups/trade-panel-v2.html` · SHA-256 `ddea8609c48c9f19c1d27f1f0d51ae5c1b5fa80ab3a0bcc5e67408c943d6e9bc` | 目标布局与 chrome 语汇 |
+| Locked design mock | `docs/optimization/2026-07-21-review-trade-panel-visual-polish/mockups/trade-panel-v2.html` · SHA-256 `ddea8609c48c9f19c1d27f1f0d51ae5c1b5fa80ab3a0bcc5e67408c943d6e9bc` | 目标布局与 chrome 语汇（visual only; a11y contract is §1.3/§2.2, not the mock’s plain buttons） |
 
-### 1.3 User scope locks (from optimization foldback)
+### 1.4 User scope locks (from optimization foldback + review-001)
 
 | Decision | Lock |
 | --- | --- |
 | Visual direction | Mock v2 terminal tool strip + clearer cards **accepted** |
 | Product chrome language | **Keep original English** for Eligibility / Display·Reported·Calculated / Download / Show legs/events / Verified — do not Chinese-translate product chrome |
 | Eligibility UI | Compact **segmented** control: **Display** / **Reported** / **Calculated** (short form of live options; enum values unchanged) |
+| Eligibility a11y (review-001 P1) | **Accessible single-selection only.** Prefer native radio inputs inside a labelled fieldset, styled as segments. Acceptable alternative: complete `role="radiogroup"` with `role="radio"` items, exactly one selected, `aria-checked`/`aria-labelledby` (or equivalent), and standard arrow-key focus/selection. **Forbidden:** plain uncoordinated buttons that only look like segments (as in the locked visual mock). |
 | Eligibility label | **Eligibility** |
-| Export UI | Corner/short **Download** only — remove full-width `Download JSON + 3 CSV` and any hover/title carrying that long string |
+| Export UI | Corner/short **Download** only — remove full-width `Download JSON + 3 CSV` and any hover/title carrying that long string **in production control/consumer sources** |
 | Export payload | Unchanged JSON + 3 CSV files under the hood |
-| Trader scale | ≤6 inline B chips; ≥7 summary + Edit drawer (existing contract) |
+| Trader scale | ≤6 inline B chips; ≥7 summary + Edit drawer (existing contract); `TRADER_CHIP_INLINE_MAX = 6` unchanged |
+| Drawer chrome language (review-001 P2) | **Frozen English** on all three surfaces: **Edit**, **Select all**, **Clear**; search label **Search traders**; search placeholder **Name or ID**; empty match **No matching traders**. Do not leave language to Phase 0. |
 | Surface scope | **Review + Static + Admin aligned** via shared components |
 | Prior locks retained | B chip multi-select; CALL/PUT direction colors only; name text never red; day-available traders only; no ticker/date mirror in filter panel |
 
-Rejected: Chinese label trials（显示/已报/计算；可见点位/手填收益/系统核算）for product chrome.
+Rejected: Chinese label trials（显示/已报/计算；可见点位/手填收益/系统核算）for product chrome. Rejected for drawer actions: keep live Chinese `编辑/全选/清空` as the ship target (tests that pin those strings must move to the frozen English set).
 
-### 1.4 Current repository facts
+### 1.5 Current repository facts
 
 - Shared components: `TraderFilters.jsx`, `TradeExportControls.jsx`, `TraderTradeList.jsx`.
 - Consumers:
   - `ReviewPage.jsx` / `StaticReviewsApp.jsx`: filters + export + list inside `.dr-sidebar`
   - `AdminTradersPage.jsx`: export currently in **page header**; filters + list below context (not `.dr-sidebar`)
-- `TraderFilters`: native `<select>` for Eligibility (`Display` / `Reported stats` / `Calculated stats`); B chips or summary+编辑 drawer.
+- `TraderFilters`: native `<select>` for Eligibility (`Display` / `Reported stats` / `Calculated stats`); B chips or summary+`编辑` drawer with Chinese search/actions.
 - `TradeExportControls`: button text `Download JSON + 3 CSV`.
 - `TraderTradeList`: summary grid + `trade-review-badge` + separate `Show legs/events` toggle; density already frozen under `.dr-sidebar` only.
-- Contract tests in `reviewWorkspace.test.js` pin some `.trade-filter-panel` / `.dr-sidebar` CSS shapes; any chrome restructure must update those assertions.
+- Contract tests in `reviewWorkspace.test.js` pin some `.trade-filter-panel` / `.dr-sidebar` CSS shapes; `tradeRecords.test.js` pins Chinese drawer copy (`编辑`/`全选`/`清空`) and `TRADER_CHIP_INLINE_MAX = 6`. Any chrome restructure **must** update those assertions.
+- Live QQQ `2026-07-17` has too few traders to enter the `>=7` drawer path; visual matrix cannot alone prove drawer behavior.
 
-### 1.5 Lane 3 classification
+### 1.6 Lane 3 classification
 
 Shared Review/Static/Admin trade chrome, source-contract tests, and multi-surface composition. Classified Coding Mode **Lane 3** (proposed Exec Plan). No backend, API, DB, content, market-data, provider/broker, or Pages workflow changes.
 
@@ -87,9 +104,9 @@ Shared Review/Static/Admin trade chrome, source-contract tests, and multi-surfac
 ### 2.2 Success criteria
 
 1. **Layout — no form card nest:** `.trade-filter-panel` no longer reads as a heavy bordered form slab against the sidebar; tools share the terminal surface language (padding/gaps/borders match mock intent). Exact CSS tokens frozen in Phase 0 baseline notes may refine mock numbers but must not reintroduce a double-box form look.
-2. **Eligibility:** native select replaced by a three-segment control with visible labels **Display**, **Reported**, **Calculated** bound to enum values `display` / `reported` / `calculated`. Row label remains **Eligibility**. Selecting a segment updates filters exactly as today’s select.
-3. **Download:** control label is **Download** (icon allowed). Source must **not** contain the substring `Download JSON + 3 CSV`. No `title`/`aria-label` may reintroduce that long string. Click still builds and downloads the same JSON + 3 CSV set.
-4. **Traders:** existing B-chip multi-select preserved; ≤6 inline; ≥7 summary + Edit drawer with search / select-all / clear. Drawer affordance may keep existing Chinese `编辑`/`全选`/`清空` only if already live, or use English **Edit** / **Select all** / **Clear** consistently with product English chrome — **freeze one language in Phase 0** and apply on all three surfaces (prefer English **Edit** for alignment with keep-English lock).
+2. **Eligibility (visual + a11y + behavior):** native select replaced by a three-segment control with visible labels **Display**, **Reported**, **Calculated** bound to enum values `display` / `reported` / `calculated`. Row label remains **Eligibility**. Selection is **single-select only** under the §1.4 accessible contract (native fieldset/radio preferred, or complete radiogroup). Selecting a segment updates filters exactly as today’s select. A deterministic component or browser receipt must exercise all three values, assert selected state, and prove `onChange`/filtered group results change accordingly on the shared control path used by Review/Static/Admin.
+3. **Download (label + production-scoped ban + four-file receipt):** control label is **Download** (icon allowed). **Production frontend sources** under §3.1 items 1–7 **must not** contain the substring `Download JSON + 3 CSV` (including `title` / `aria-label`). Historical docs, OPT record, mock, and this plan **remain exempt**. Click still builds and downloads the same JSON + 3 CSV set. A focused UI/browser receipt must click the short control and prove the four filenames are still emitted from the filtered selection; Review, Static, and Admin must share the same payload/groups/filters contract with **no** second Admin-header Download CTA.
+4. **Traders:** existing B-chip multi-select preserved; ≤6 inline; ≥7 summary + **Edit** drawer with **Search traders** / **Select all** / **Clear** / **No matching traders** (frozen English, §1.4). `TRADER_CHIP_INLINE_MAX = 6` unchanged. `tradeRecords.test.js` **must** be updated: replace Chinese drawer pins with the frozen English strings and add a **mandatory** deterministic synthetic case with ≥7 traders covering summary, open/close, search, select-all, and clear. V1–V3 screenshots alone are insufficient for the drawer path.
 5. **Cards:** group card hierarchy matches mock intent:
    - left direction rail + triangle glyph
    - title row: trader name (default text color) + CALL/PUT pill (direction color only)
@@ -98,8 +115,8 @@ Shared Review/Static/Admin trade chrome, source-contract tests, and multi-surfac
    - **Show legs/events** / **Hide legs/events** English drilldown, collapsible
 6. **Surfaces:** Review, Static, and Admin all render the polished shared tools + cards. Admin header must not retain a separate full-width long Download CTA; Admin uses the same short Download control in the shared tools strip.
 7. **Contracts unchanged:** eligibility filtering, trader set membership, export payload contents, direction color tokens, progressive DateRail consumers, and density px table under `.dr-sidebar` from the completed density plan remain valid unless a listed CSS rule is intentionally superseded for chrome structure (document any supersession in the phase evidence).
-8. **Tests/builds:** `npm run test:trade-records` green; normal + static Vite builds green; harness auto green.
-9. **Screenshots:** §2.3 matrix captured under `output/` (untracked).
+8. **Tests/builds/receipts:** `npm run test:trade-records` green (including mandatory Eligibility interaction, short Download production-source contracts, English drawer pins, and synthetic `>=7` case); normal + static Vite builds green; harness auto green; Download four-file UI/browser receipt recorded in phase evidence.
+9. **Screenshots:** §2.3 matrix captured under `output/` (untracked). Screenshots prove visual chrome only; they do not replace criteria 2–4 behavioral receipts.
 
 ### 2.3 Frozen visual acceptance matrix
 
@@ -109,7 +126,7 @@ Shared Review/Static/Admin trade chrome, source-contract tests, and multi-surfac
 | V2 | Static Review trade tools + cards | desktop `1672x941` | QQQ `2026-07-17` | Same shared chrome language as V1 (static shell) |
 | V3 | Admin traders workspace tools + cards | desktop `1672x941` | QQQ `2026-07-17` | Shared tools strip (no header long Download); cards aligned; filters functional |
 
-Compare against OPT live screenshot and mock `trade-panel-v2.html`.
+Compare against OPT live screenshot and mock `trade-panel-v2.html`. Drawer `>=7` coverage is **test-only** (synthetic fixture), not required in V1–V3.
 
 ## 3. Constraints And Invariants
 
@@ -117,15 +134,15 @@ Compare against OPT live screenshot and mock `trade-panel-v2.html`.
 
 **Modify (implementation):**
 
-1. `frontend/src/features/review/TraderFilters.jsx` — Eligibility segment UI; tools head layout; optional export slot composition; trader row structure.
-2. `frontend/src/features/review/TradeExportControls.jsx` — short **Download** label only; keep download behavior.
+1. `frontend/src/features/review/TraderFilters.jsx` — accessible Eligibility segment UI; tools head layout; optional export slot composition; trader row structure; frozen English drawer chrome.
+2. `frontend/src/features/review/TradeExportControls.jsx` — short **Download** label only; keep download behavior; no long-string title/aria-label.
 3. `frontend/src/features/review/TraderTradeList.jsx` — card markup hierarchy (rail, title, meta, status, drilldown).
 4. `frontend/src/styles.css` — shared trade filter/export/card chrome styles; keep prior direction tokens; reconcile with existing `.dr-sidebar` density rules so Review/Static stay dense and Admin also uses the polished structure (Admin may use the same shared classes; do not invent a third skin).
 5. `frontend/src/pages/ReviewPage.jsx` — compose export into tools strip if needed (remove sibling full-width export placement).
 6. `frontend/src/pages/StaticReviewsApp.jsx` — same composition as Review for shared strip.
 7. `frontend/src/pages/AdminTradersPage.jsx` — remove header long Download placement; use shared strip composition.
 8. `frontend/src/features/review/reviewWorkspace.test.js` — update CSS/source contracts that pin old filter-panel/export shapes.
-9. `frontend/src/features/review/tradeRecords.test.js` — only if any assertion pins export button copy or eligibility control shape (add/adjust minimal source contracts for `Download` short label and segment values).
+9. `frontend/src/features/review/tradeRecords.test.js` — **mandatory:** short **Download** production-source contracts; accessible Eligibility source/behavior contracts; English drawer string pins replacing `编辑`/`全选`/`清空`; synthetic `>=7` trader interaction coverage; keep `TRADER_CHIP_INLINE_MAX = 6`.
 
 **Lifecycle / evidence (later phases, separate authority):**
 
@@ -144,6 +161,10 @@ Compare against OPT live screenshot and mock `trade-panel-v2.html`.
 - Progressive DateRail / Data page work (already completed).
 - Unrelated dirty paths (existing frontend dirty files outside this manifest, `output/`, etc.) — preserve; do not stage into plan commits without authority.
 
+**Production-source scope for the long-Download ban (review-001 P2):**
+
+Negative substring scans apply only to the production paths in items 1–7 above (and any new production helper those files import under `frontend/src/`). Exempt: `docs/**`, mockups, optimization records, exec plans, reviews, and other non-runtime evidence.
+
 ### 3.2 Behavioral invariants
 
 - Empty trader selection continues to hide groups honestly.
@@ -155,23 +176,23 @@ Compare against OPT live screenshot and mock `trade-panel-v2.html`.
 
 ### Phase 0 — Baseline, Implementation, And Verification
 
-- Entry gate: matching-revision design-review `approve` on `v1-proposal-2026-07-21` **and** explicit user activation **and** separate implementation-start (or a single full-execution instruction that explicitly covers implementation through closeout).
+- Entry gate: matching-revision design-review `approve` on `v2-review-foldback-2026-07-21` **and** explicit user activation **and** separate implementation-start (or a single full-execution instruction that explicitly covers implementation through closeout).
 - Work:
 
   **Baseline:**
 
   1. Confirm harness auto green on entry.
   2. Freeze live hashes for the nine implementation paths in §3.1 if needed for evidence.
-  3. Decide once: drawer actions **Edit / Select all / Clear** (English) vs keep live Chinese `编辑/全选/清空` — prefer English for chrome lock; record choice in phase evidence.
+  3. Record frozen English drawer + Eligibility a11y choice (fieldset/native radio preferred) already decided in §1.4 — do **not** reopen language in Phase 0.
 
   **Implementation:**
 
-  4. Restructure `TraderFilters` into terminal tools strip: section title optional, Eligibility segments, Traders chips/drawer.
-  5. Shorten `TradeExportControls` to **Download**; place control in tools head on all three surfaces.
+  4. Restructure `TraderFilters` into terminal tools strip: section title optional, accessible Eligibility segments (§1.4), Traders chips/drawer with frozen English chrome.
+  5. Shorten `TradeExportControls` to **Download**; place control in tools head on all three surfaces; strip long copy from production sources only.
   6. Restyle/restructure `TraderTradeList` cards per §2.2.
   7. Update `styles.css` shared rules; keep density family; align Admin via shared classes.
   8. Wire Review / Static / Admin page composition; remove Admin header long Download.
-  9. Update contract tests.
+  9. Update contract tests in **both** `reviewWorkspace.test.js` and `tradeRecords.test.js` (mandatory), including synthetic `>=7` and Eligibility interaction coverage.
 
 - Verification (one round):
   1. `cd frontend && npm run test:trade-records`
@@ -180,7 +201,9 @@ Compare against OPT live screenshot and mock `trade-panel-v2.html`.
   4. `python3 scripts/check-project-harness.py --root . --profile auto` (or `python` equivalent on Windows)
   5. Diff limited to §3.1 implementation paths (+ authorized lifecycle files only when separately staging)
   6. Capture §2.3 V1–V3 screenshots under `output/`
-- Exit gate: tests + both builds + harness green; screenshots present; next gate `implementation-review`.
+  7. Record Download four-file UI/browser receipt (JSON + 3 CSV filenames from filtered selection; Review/Static/Admin composition; no Admin-header CTA)
+  8. Confirm Eligibility interaction receipt and synthetic `>=7` case are green inside `test:trade-records` (or equally strong browser receipts linked from phase evidence)
+- Exit gate: tests + both builds + harness green; screenshots present; behavioral receipts for Eligibility, Download, and `>=7` drawer present; next gate `implementation-review`.
 
 ### Phase 1 — Independent Implementation Review
 
@@ -198,9 +221,9 @@ Compare against OPT live screenshot and mock `trade-panel-v2.html`.
 ## 5. Evidence And Commit Plan
 
 - Baseline commands: harness auto; frontend trade-records tests; optional read-only screenshot of current UI.
-- Focused checks: §4 Phase 0 verification list.
+- Focused checks: §4 Phase 0 verification list (including production-scoped Download ban, Eligibility a11y/behavior, synthetic `>=7`, four-file receipt).
 - Full checks: same for this frontend-only plan; no backend suite required unless a future revision expands scope.
-- Expected state/handoff updates on activation, phase exits, and closeout only.
+- Expected state/handoff updates on activation, phase exits, and closeout only (plus this proposal-revision reconciliation).
 - Local commits: only under separate durable-checkpoint / user commit authority — this proposal grants none.
 - Push/PR/Pages/provider/broker/DB: never authorized by this plan alone.
 
@@ -208,7 +231,7 @@ Compare against OPT live screenshot and mock `trade-panel-v2.html`.
 
 | Action | Authorized by this proposal? |
 | --- | --- |
-| Independent design review | Yes (next gate) |
+| Independent design review of exact v2 | Yes (next gate) |
 | Activation | No — needs explicit user instruction after matching-revision `approve` |
 | Implementation | No — needs implementation-start (or full-execution) after activation |
 | Git stage/commit | No |
@@ -220,5 +243,6 @@ Compare against OPT live screenshot and mock `trade-panel-v2.html`.
 - Operating modes: [`docs/operating-modes.md`](../../operating-modes.md)
 - Optimization batch: [`docs/optimization/2026-07-21-review-trade-panel-visual-polish/2026-07-21-review-trade-panel-visual-polish.md`](../../optimization/2026-07-21-review-trade-panel-visual-polish/2026-07-21-review-trade-panel-visual-polish.md)
 - Mock: [`docs/optimization/2026-07-21-review-trade-panel-visual-polish/mockups/trade-panel-v2.html`](../../optimization/2026-07-21-review-trade-panel-visual-polish/mockups/trade-panel-v2.html)
+- Design review (v1, append-only): [`docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md`](../reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md)
 - Prior completed density plan: [`docs/exec-plans/completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md`](../completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md)
 - Prior completed filter fusion: [`docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`](../completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md)
