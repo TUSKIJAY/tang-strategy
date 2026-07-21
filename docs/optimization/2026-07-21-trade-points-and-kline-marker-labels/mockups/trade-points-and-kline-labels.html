@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trade points + K-line BUY/SELL · merged OPT mock</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-ui: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --surface-app: #141413;
+      --surface-panel: #1E1E1D;
+      --surface-control: #282827;
+      --surface-raised: #333331;
+      --border-subtle: #3B3B38;
+      --border-control: #74746E;
+      --text-primary: #E8E7E3;
+      --text-secondary: #C9C8C2;
+      --text-muted: #A7A69F;
+      --accent: #8B9A6D;
+      --accent-ink: #0F0F0E;
+      --status-success: #4CAF50;
+      --direction-call: #6F9F7A;
+      --direction-put: #E06B66;
+      --strike: #E4C77D;
+      --strike-bg: color-mix(in srgb, #E4C77D 14%, transparent);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0b0b0a;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+    }
+    .page { max-width: 1180px; margin: 0 auto; padding: 28px 24px 56px; }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1.25;
+    }
+    .lead {
+      margin: 0 0 22px;
+      max-width: 900px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .lead code,
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: var(--surface-control);
+      color: var(--text-secondary);
+    }
+
+    .section {
+      margin-top: 28px;
+    }
+    .section > h2 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .section > .sub {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .col-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .tag {
+      font-size: 10px;
+      letter-spacing: .04em;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+    .tag.bad {
+      color: var(--direction-put);
+      border-color: color-mix(in srgb, var(--direction-put) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--direction-put) 10%, transparent);
+    }
+    .tag.good {
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    .rail, .panel {
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface-app);
+    }
+    .rail-bar, .panel-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-panel);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .rail-bar strong, .panel-bar strong { color: var(--text-primary); }
+
+    /* tools strip */
+    .tools {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tools-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-title {
+      margin: 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font: 600 11px var(--font-ui);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+    .row .k { font-size: 10px; color: var(--text-muted); }
+    .seg {
+      display: flex;
+      gap: 3px;
+      padding: 2px;
+      border-radius: 7px;
+      background: var(--surface-control);
+      border: 1px solid var(--border-subtle);
+    }
+    .seg span {
+      flex: 1;
+      text-align: center;
+      border-radius: 5px;
+      padding: 5px 3px;
+      font: 600 10px/1.15 var(--font-ui);
+      color: var(--text-muted);
+    }
+    .seg span.on {
+      color: var(--text-primary);
+      background: var(--surface-raised);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .chips span {
+      border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border-subtle));
+      border-radius: 999px;
+      padding: 4px 11px;
+      font: 600 12px var(--font-ui);
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--accent) 14%, var(--surface-control));
+    }
+
+    /* cards */
+    .list {
+      padding: 10px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card {
+      position: relative;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: var(--surface-panel);
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--dir);
+    }
+    .card.put { --dir: var(--direction-put); }
+    .card.call { --dir: var(--direction-call); }
+    .card.active {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--border-subtle));
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    .body {
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr) auto;
+      gap: 8px;
+      padding: 9px 10px 9px 12px;
+    }
+    .glyph {
+      width: 14px;
+      height: 14px;
+      margin-top: 2px;
+      display: grid;
+      place-items: center;
+    }
+    .glyph i {
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+    }
+    .card.put .glyph i { border-top: 8px solid var(--direction-put); }
+    .card.call .glyph i { border-bottom: 8px solid var(--direction-call); }
+    .title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+    .name { font-size: 12px; font-weight: 700; }
+    .dir {
+      font: 700 10px/1 var(--font-mono);
+      letter-spacing: .06em;
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid color-mix(in srgb, var(--dir) 35%, var(--border-subtle));
+      color: var(--dir);
+      background: color-mix(in srgb, var(--dir) 10%, transparent);
+    }
+    .meta {
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .meta em { font-style: normal; color: var(--text-secondary); }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font: 600 10px/1 var(--font-mono);
+      text-transform: uppercase;
+      color: var(--status-success);
+      padding-top: 3px;
+      white-space: nowrap;
+    }
+    .status::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--status-success);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-success) 22%, transparent);
+    }
+    .foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px 8px 36px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .foot button {
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font: 600 11px var(--font-ui);
+      padding: 0;
+      cursor: pointer;
+    }
+    .legs {
+      margin: 0 10px 10px 36px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-control);
+      font: 11px/1.45 var(--font-mono);
+      color: var(--text-secondary);
+    }
+    .leg-head { font-weight: 700; margin-bottom: 6px; }
+    .event {
+      display: grid;
+      grid-template-columns: 44px 72px minmax(0, 1fr);
+      gap: 8px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .act-buy { color: var(--direction-call); font-weight: 700; }
+    .act-sell { color: var(--direction-put); font-weight: 700; }
+    .strike {
+      color: var(--strike);
+      background: var(--strike-bg);
+      border-radius: 3px;
+      padding: 0 3px;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--strike) 35%, transparent);
+    }
+
+    /* chart */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .legend .tri {
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+    }
+    .legend .tri.up { border-bottom: 7px solid var(--direction-call); }
+    .legend .tri.down { border-top: 7px solid var(--direction-put); }
+    .chart {
+      position: relative;
+      height: 300px;
+      background: linear-gradient(180deg, #171716 0%, #10100f 100%);
+    }
+    .chart svg { display: block; width: 100%; height: 100%; }
+    .axis-note {
+      position: absolute;
+      left: 12px;
+      bottom: 8px;
+      font: 10px/1 var(--font-mono);
+      color: #5A5A56;
+    }
+
+    .mapping {
+      margin-top: 18px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      background: var(--surface-panel);
+      padding: 14px 16px;
+    }
+    .mapping h2 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+    th {
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .keep {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 860px) {
+      .compare { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <p class="eyebrow">Optimization mock · record-only · merged batch · not live app</p>
+    <h1>两处做减法：卡片只留时间点位 · K 线标 BUY/SELL + vordinkkk</h1>
+    <p class="lead">
+      合并 OPT：<code>2026-07-21-trade-points-and-kline-marker-labels</code>。
+      <strong>① 交易卡片</strong>去掉金额 / 盈收比例，只留时间与价格点位；
+      <strong>② K 线标记</strong>不再写 CALL/PUT 文字（箭头颜色已区分方向），改为 BUY/SELL，
+      并显示英文昵称 <code>vordinkkk</code>（底层仍 <code>trader_id: vordin</code>）。
+    </p>
+
+    <!-- ========== OPT-001 CARDS ========== -->
+    <section class="section" aria-labelledby="sec-cards">
+      <h2 id="sec-cards">OPT-001 · Trade cards · points only</h2>
+      <p class="sub">对照 live 卡片噪声：meta 上的 % / $，腿事件里的 fees / PnL。提案只保留时间戳与 premium 点位。</p>
+
+      <div class="compare">
+        <div>
+          <div class="col-label"><span>Current</span><span class="tag bad">$ / % noise</span></div>
+          <section class="rail">
+            <div class="rail-bar"><span>Daily Review · <strong>QQQ 2026-07-17</strong></span></div>
+            <div class="tools">
+              <div class="tools-head">
+                <p class="section-title">Trade tools</p>
+                <span class="icon-btn">↓ Download</span>
+              </div>
+              <div class="row">
+                <span class="k">Eligibility</span>
+                <div class="seg"><span class="on">Display</span><span>Reported</span><span>Calculated</span></div>
+              </div>
+              <div class="row">
+                <span class="k">Traders</span>
+                <div class="chips"><span>沃德哥</span></div>
+              </div>
+            </div>
+            <div class="list">
+              <article class="card put active">
+                <div class="body">
+                  <span class="glyph"><i></i></span>
+                  <div>
+                    <div class="title"><span class="name">沃德哥</span><span class="dir">PUT</span></div>
+                    <div class="meta"><em>QQQ</em> · 07-17 · <span class="strike">reported −12.4% · calculated −11.8%</span></div>
+                  </div>
+                  <span class="status">Verified</span>
+                </div>
+                <div class="foot"><button type="button">Hide legs/events</button><span>1 leg</span></div>
+                <div class="legs">
+                  <div class="leg-head">07-17 · 681 PUT · ×150</div>
+                  <div class="event"><time>09:42</time><span class="act-buy">BUY_OPEN</span><span>150 @ 0.84 · <span class="strike">fees 42 · −$1,890</span></span></div>
+                  <div class="event"><time>10:43</time><span class="act-sell">SELL_CLOSE</span><span>? @ 0.15 · <span class="strike">fees 18 · PnL −$10,350</span></span></div>
+                </div>
+              </article>
+              <article class="card call">
+                <div class="body">
+                  <span class="glyph"><i></i></span>
+                  <div>
+                    <div class="title"><span class="name">沃德哥</span><span class="dir">CALL</span></div>
+                    <div class="meta"><em>QQQ</em> · 07-17 · <span class="strike">net $13,760 · return +205%</span></div>
+                  </div>
+                  <span class="status">Verified</span>
+                </div>
+                <div class="foot"><button type="button">Show legs/events</button><span>1 leg</span></div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <div class="col-label"><span>Proposed</span><span class="tag good">time + points</span></div>
+          <section class="rail">
+            <div class="rail-bar"><span>Daily Review · <strong>QQQ 2026-07-17</strong></span></div>
+            <div class="tools">
+              <div class="tools-head">
+                <p class="section-title">Trade tools</p>
+                <span class="icon-btn">↓ Download</span>
+              </div>
+              <div class="row">
+                <span class="k">Eligibility</span>
+                <div class="seg"><span class="on">Display</span><span>Reported</span><span>Calculated</span></div>
+              </div>
+              <div class="row">
+                <span class="k">Traders</span>
+                <div class="chips"><span>vordinkkk</span></div>
+              </div>
+            </div>
+            <div class="list">
+              <article class="card put active">
+                <div class="body">
+                  <span class="glyph"><i></i></span>
+                  <div>
+                    <div class="title"><span class="name">vordinkkk</span><span class="dir">PUT</span></div>
+                    <div class="meta"><em>QQQ</em> · 07-17 · <em>09:42 → 10:43</em></div>
+                  </div>
+                  <span class="status">Verified</span>
+                </div>
+                <div class="foot"><button type="button">Hide legs/events</button><span>1 leg</span></div>
+                <div class="legs">
+                  <div class="leg-head">07-17 · 681 PUT · ×150</div>
+                  <div class="event"><time>09:42</time><span class="act-buy">BUY_OPEN</span><span>150 @ 0.84</span></div>
+                  <div class="event"><time>10:43</time><span class="act-sell">SELL_CLOSE</span><span>? @ 0.15</span></div>
+                </div>
+              </article>
+              <article class="card call">
+                <div class="body">
+                  <span class="glyph"><i></i></span>
+                  <div>
+                    <div class="title"><span class="name">vordinkkk</span><span class="dir">CALL</span></div>
+                    <div class="meta"><em>QQQ</em> · 07-17 · <em>09:42 → 10:01</em></div>
+                  </div>
+                  <span class="status">Verified</span>
+                </div>
+                <div class="foot"><button type="button">Show legs/events</button><span>1 leg</span></div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== OPT-002 KLINE ========== -->
+    <section class="section" aria-labelledby="sec-kline">
+      <h2 id="sec-kline">OPT-002 · K-line markers · BUY/SELL + nickname</h2>
+      <p class="sub">对照 live：<code>vordin CALL</code> / <code>vordin PUT</code>。形状颜色继续表达方向；文字改为买卖动作 + <code>vordinkkk</code>。</p>
+
+      <div class="compare">
+        <div>
+          <div class="col-label"><span>Current</span><span class="tag bad">CALL/PUT + trader_id</span></div>
+          <section class="panel">
+            <div class="panel-bar">
+              <span>QQQ · <strong>2026-07-17</strong></span>
+              <div class="legend">
+                <span><i class="tri up"></i>CALL</span>
+                <span><i class="tri down"></i>PUT</span>
+                <span>text = 方向词</span>
+              </div>
+            </div>
+            <div class="chart">
+              <svg viewBox="0 0 560 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Current markers">
+                <rect width="560" height="300" fill="#141413"/>
+                <g stroke="#282827" stroke-dasharray="2 3">
+                  <line x1="16" y1="50" x2="544" y2="50"/>
+                  <line x1="16" y1="100" x2="544" y2="100"/>
+                  <line x1="16" y1="150" x2="544" y2="150"/>
+                  <line x1="16" y1="200" x2="544" y2="200"/>
+                </g>
+                <path d="M28 185 C 80 205, 120 225, 160 215 S 240 130, 300 115 S 390 125, 450 145 S 510 130, 540 120"
+                      fill="none" stroke="#E8A838" stroke-width="1.4" opacity=".7"/>
+                <path d="M28 170 C 90 150, 140 140, 200 148 S 300 165, 360 150 S 470 110, 540 115"
+                      fill="none" stroke="#5B9BD5" stroke-width="1.2" opacity=".5"/>
+                <g stroke-width="1.2">
+                  <line x1="80" y1="190" x2="80" y2="235" stroke="#E06B66"/><rect x="75" y="198" width="10" height="24" rx="1" fill="#E06B66"/>
+                  <line x1="140" y1="200" x2="140" y2="245" stroke="#6F9F7A"/><rect x="135" y="208" width="10" height="22" rx="1" fill="#6F9F7A"/>
+                  <line x1="210" y1="130" x2="210" y2="185" stroke="#6F9F7A"/><rect x="205" y="140" width="10" height="28" rx="1" fill="#6F9F7A"/>
+                  <line x1="280" y1="105" x2="280" y2="155" stroke="#6F9F7A"/><rect x="275" y="112" width="10" height="26" rx="1" fill="#6F9F7A"/>
+                  <line x1="350" y1="120" x2="350" y2="170" stroke="#E06B66"/><rect x="345" y="130" width="10" height="28" rx="1" fill="#E06B66"/>
+                  <line x1="420" y1="130" x2="420" y2="175" stroke="#6F9F7A"/><rect x="415" y="138" width="10" height="24" rx="1" fill="#6F9F7A"/>
+                  <line x1="490" y1="100" x2="490" y2="145" stroke="#E06B66"/><rect x="485" y="108" width="10" height="22" rx="1" fill="#E06B66"/>
+                </g>
+                <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" text-anchor="middle">
+                  <g transform="translate(80,185)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                    <rect x="-40" y="-28" width="80" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="-16" fill="#E06B66">vordin PUT</text>
+                  </g>
+                  <g transform="translate(140,250)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-48" y="12" width="96" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="24" fill="#6F9F7A">vordin CALL ×2</text>
+                  </g>
+                  <g transform="translate(210,190)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-40" y="12" width="80" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="24" fill="#6F9F7A">vordin CALL</text>
+                  </g>
+                  <g transform="translate(280,160)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-40" y="12" width="80" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="24" fill="#6F9F7A">vordin CALL</text>
+                  </g>
+                  <g transform="translate(490,96)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                    <rect x="-40" y="-28" width="80" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="-16" fill="#E06B66">vordin PUT</text>
+                  </g>
+                </g>
+              </svg>
+              <div class="axis-note">09:30 ··· 09:56 ··· 10:22 ··· 10:48</div>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <div class="col-label"><span>Proposed</span><span class="tag good">BUY/SELL + vordinkkk</span></div>
+          <section class="panel">
+            <div class="panel-bar">
+              <span>QQQ · <strong>2026-07-17</strong></span>
+              <div class="legend">
+                <span><i class="tri up"></i>CALL 形状</span>
+                <span><i class="tri down"></i>PUT 形状</span>
+                <span>text = 买卖</span>
+              </div>
+            </div>
+            <div class="chart">
+              <svg viewBox="0 0 560 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Proposed markers">
+                <rect width="560" height="300" fill="#141413"/>
+                <g stroke="#282827" stroke-dasharray="2 3">
+                  <line x1="16" y1="50" x2="544" y2="50"/>
+                  <line x1="16" y1="100" x2="544" y2="100"/>
+                  <line x1="16" y1="150" x2="544" y2="150"/>
+                  <line x1="16" y1="200" x2="544" y2="200"/>
+                </g>
+                <path d="M28 185 C 80 205, 120 225, 160 215 S 240 130, 300 115 S 390 125, 450 145 S 510 130, 540 120"
+                      fill="none" stroke="#E8A838" stroke-width="1.4" opacity=".7"/>
+                <path d="M28 170 C 90 150, 140 140, 200 148 S 300 165, 360 150 S 470 110, 540 115"
+                      fill="none" stroke="#5B9BD5" stroke-width="1.2" opacity=".5"/>
+                <g stroke-width="1.2">
+                  <line x1="80" y1="190" x2="80" y2="235" stroke="#E06B66"/><rect x="75" y="198" width="10" height="24" rx="1" fill="#E06B66"/>
+                  <line x1="140" y1="200" x2="140" y2="245" stroke="#6F9F7A"/><rect x="135" y="208" width="10" height="22" rx="1" fill="#6F9F7A"/>
+                  <line x1="210" y1="130" x2="210" y2="185" stroke="#6F9F7A"/><rect x="205" y="140" width="10" height="28" rx="1" fill="#6F9F7A"/>
+                  <line x1="280" y1="105" x2="280" y2="155" stroke="#6F9F7A"/><rect x="275" y="112" width="10" height="26" rx="1" fill="#6F9F7A"/>
+                  <line x1="350" y1="120" x2="350" y2="170" stroke="#E06B66"/><rect x="345" y="130" width="10" height="28" rx="1" fill="#E06B66"/>
+                  <line x1="420" y1="130" x2="420" y2="175" stroke="#6F9F7A"/><rect x="415" y="138" width="10" height="24" rx="1" fill="#6F9F7A"/>
+                  <line x1="490" y1="100" x2="490" y2="145" stroke="#E06B66"/><rect x="485" y="108" width="10" height="22" rx="1" fill="#E06B66"/>
+                </g>
+                <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" text-anchor="middle">
+                  <g transform="translate(80,185)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                    <rect x="-50" y="-28" width="100" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="-16" fill="#E06B66">vordinkkk BUY</text>
+                  </g>
+                  <g transform="translate(140,250)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-54" y="12" width="108" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="24" fill="#6F9F7A">vordinkkk BUY ×2</text>
+                  </g>
+                  <g transform="translate(210,190)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-52" y="12" width="104" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="24" fill="#6F9F7A">vordinkkk SELL</text>
+                  </g>
+                  <g transform="translate(280,160)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-50" y="12" width="100" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="24" fill="#6F9F7A">vordinkkk BUY</text>
+                  </g>
+                  <g transform="translate(490,96)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                    <rect x="-52" y="-28" width="104" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="-16" fill="#E06B66">vordinkkk SELL</text>
+                  </g>
+                </g>
+              </svg>
+              <div class="axis-note">09:30 ··· 09:56 ··· 10:22 ··· 10:48</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="mapping">
+      <h2>合并对照</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>面</th>
+            <th>Current</th>
+            <th>Proposed</th>
+            <th>保存层</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Trade cards meta / legs</td>
+            <td><code>reported −12.4%</code> · <code>net $13,760</code> · fees / PnL</td>
+            <td><code>09:42 → 10:43</code> · <code>150 @ 0.84</code>（仅时间 + 点位）</td>
+            <td>outcome / pnl 字段可仍存在，只是不展示</td>
+          </tr>
+          <tr>
+            <td>K-line marker text</td>
+            <td><code>vordin CALL</code> / <code>vordin PUT</code></td>
+            <td><code>vordinkkk BUY</code> / <code>vordinkkk SELL</code>（×N 可保留）</td>
+            <td>direction + action 字段不变；形状颜色继续表达 CALL/PUT</td>
+          </tr>
+          <tr>
+            <td>Trader name</td>
+            <td><code>沃德哥</code> / raw <code>vordin</code></td>
+            <td>UI <code>vordinkkk</code></td>
+            <td><code>trader_id: vordin</code>（沃德哥）映射不变</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="keep">
+        Record-only mock。不改 schema、API、DB 主键、历史 day 文件。卡片 CALL/PUT 徽章可继续用于方向；K 线文字槽留给买卖动作。
+      </p>
+    </section>
+  </div>
+</body>
+</html>
