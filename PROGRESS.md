@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent design review `review-002` on exact revision `v2-review-foldback-2026-07-21` returned `approve/high` with no findings. V2 closes review-001 P1 through replacement tracked runner `frontend/scripts/playwright/review-sidebar-spacing-and-selection-band-acceptance.mjs`, independent `groupBarSpan` / `eventFocusPayload` oracles, empty `getHighlightRanges()` assertions after group/event selection, viewport containment, measured Review/Static layout gaps, and exclusion of the historical blue-band runner from this plan's exit gate. The exact pre-reconciliation plan SHA-256 `145fd3e9...eaf` and all three evidence hashes matched at HEAD `f704dfd3...d7b`. Lifecycle remains Proposed; next gate `activation-recording`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 
 2026-07-21: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-21`. Closure: freeze replacement tracked Playwright runner `frontend/scripts/playwright/review-sidebar-spacing-and-selection-band-acceptance.mjs` for B-Sidebar-layout / B-Group-band-cancel / B-Event-focus-cancel; independent span/event oracles via pure `groupBarSpan` / `eventFocusPayload` (not highlight storage); empty `getHighlightRanges()` after group/event select; historical group-span runner out of this plan’s modify/exit set. `review-001` cannot approve v2. Next gate independent `design-review` of exact v2. No activation, implementation, content/DB, provider/broker, publication, push, or remote authority.
 
