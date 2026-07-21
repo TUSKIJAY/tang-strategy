@@ -4,19 +4,20 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation-recording`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
-- Current proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v3-review-foldback-2026-07-21`.
-- Design reviews: `review-001` revise@v1; `review-002` revise@v2; `review-003` approve/high@v3. Prior reviews remain append-only.
-- V3 approval verifies: deterministic TF first-paint oracle + `getViewportDebug`; mandatory event-row focus and card-span restore in B-Group-span; exact host `data-market-days-rail` including month bar/identity and full rail ≤420px; tracked browser runner path.
-- Next gate: `activation-recording`, requiring a separate explicit user activation instruction.
-- **Does not authorize** activation, implementation, push, PR, merge, Pages, provider/broker, or remote action.
+- Active plan: `docs/exec-plans/active/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v3-review-foldback-2026-07-21`.
+- Matching design approval: `review-003: approve/high`.
+- Activation: `user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan`.
+- State: `phase-0:not-started`; next gate `phase-0-start`.
+- Scope: session OPT-003…006 (Eligibility removal, group span+timeline, 5m first-paint, Data rail density).
+- **This activation does not start Phase 0** and does **not** authorize implementation, content/DB writes, push, PR, merge, Pages, provider/broker, or remote action.
 - Preserve untracked `output/` evidence trees; do not stage.
 - Stage only task-owned literal paths for lifecycle commits.
 
@@ -36,5 +37,5 @@
 
 1. Re-run startup Git status and preserve untracked `output/` trees.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. Next durable step is independent design review of exact v3.
+3. Active plan is parked at `phase-0-start`; do not begin Phase 0 without a separate explicit implementation-start / full-execution instruction.
 4. No remote actions without explicit user request.

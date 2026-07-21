@@ -31,11 +31,11 @@
 
 ## Active Plans
 
-None.
+- [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./active/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Active; revision `v3-review-foldback-2026-07-21`; `phase-0:not-started`; next gate `phase-0-start`; matching `review-003: approve/high`
 
 ## Proposed Plans
 
-- [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Proposed; revision `v3-review-foldback-2026-07-21`; `review-003` approve/high on exact v3; next gate `activation-recording`; session OPT-003…006 only
+None.
 
 ## Completed Plans
 

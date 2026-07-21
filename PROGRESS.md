@@ -4,11 +4,13 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation-recording`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
+
+2026-07-21: 用户以“然后把这个prop plan迁移到active”明确授权 Trade Tools, Group Span, Viewport, And Data Rail exact revision `v3-review-foldback-2026-07-21` 的 lifecycle activation，记录为 `user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan`。已且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap、optimization 回链与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。Matching design approval 为 `review-003: approve/high`。本次 activation 不启动 Phase 0，不授权实现、content/DB 写入、push、PR、merge、Pages、provider/broker 或任何远端动作。
 
 2026-07-21: Independent design review `review-003` on exact revision `v3-review-foldback-2026-07-21` returned `approve/high` with no findings. V3 closes every `review-002` item: deterministic QQQ `2026-07-17` first-render TF oracle with formula-derived viewport metrics and tracked browser seam; mandatory Review/Static event-row focus plus card-span restore; exact `data-market-days-rail` host with month bar/identity and full rail capped at `420px` while Review sidebar behavior is preserved. All six evidence hashes and pre-reconciliation plan SHA-256 `14dfeba9...34a9` matched at HEAD `b3abc262...071f`. Lifecycle remains Proposed; next gate `activation-recording`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 

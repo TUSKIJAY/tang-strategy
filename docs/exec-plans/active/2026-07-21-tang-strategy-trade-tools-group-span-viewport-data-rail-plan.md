@@ -1,18 +1,18 @@
 # Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Proposed
+- Status: Active
 - Plan slug: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
 - Revision: `v3-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-tools-group-span-viewport-data-rail`
 - Design reviews: ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-002.md@revise@v2-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-003.md@approve@v3-review-foldback-2026-07-21
 - Latest design verdict: approve
 - Review independence: attested
-- Activation evidence: none
-- Current phase: none
-- Phase state: none
-- Phase entry gate: none
-- Next gate: `activation-recording`
+- Activation evidence: user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan
+- Current phase: phase-0
+- Phase state: not-started
+- Phase entry gate: phase-0-start
+- Next gate: `phase-0-start`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -21,8 +21,8 @@
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md` session OPT-003…006
 - Proposal baseline: `codex/project-harness@5f7a4cce581f1a475d5dbadd2cb8cbac33b9bfb3`
-- Scope authority: review-only; this proposed plan does not authorize implementation, activation, push, or remote action
-- Local commit: task-scoped default; does not authorize activation, implementation, push, or remote action
+- Scope authority: lifecycle activation only under `user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan`. Matching design approval is `review-003: approve/high` on exact revision `v3-review-foldback-2026-07-21`. This activation does **not** start Phase 0 and does **not** authorize implementation, content/DB writes, push, PR, merge, Pages, provider/broker, or remote action.
+- Local commit: task-scoped default; does not authorize implementation, push, or remote action
 
 ## 1. Context And Evidence
 
@@ -305,11 +305,18 @@ Untracked `output/local-acceptance/`, `output/playwright/*` evidence trees — p
 
 | Action | Authorized now? |
 | --- | --- |
-| Independent design review of exact v3 | Yes (reviewer, not plan author) |
-| Lifecycle activation | No |
-| Implementation | No |
+| Independent design review of exact v3 | Completed by `review-003: approve/high` |
+| Lifecycle activation recording (Proposed → Active at `phase-0:not-started`) | Yes — consumed by `user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan` |
+| Phase 0 start / implementation | No — requires separate implementation-start or full-execution instruction |
 | Push / PR / merge / Pages | No |
 | Provider / broker / DB / content day files | No |
+
+### 6.2 Activation record
+
+- Instruction: user message authorizing move of the approved prop plan to active (`user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan`)
+- Matching-revision design approval: `review-003: approve/high` on exact `v3-review-foldback-2026-07-21`
+- Result: plan lives at `docs/exec-plans/active/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md`; state `phase-0:not-started`; next gate `phase-0-start`
+- Non-authorization: this activation does not start Phase 0 and does not grant implementation, content/DB mutation, push, PR, merge, Pages, provider/broker, hosted, or other remote actions
 
 ## 7. References
 
