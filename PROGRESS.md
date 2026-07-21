@@ -3,14 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
-- Lifecycle status: `Completed`
+- Current plan: `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `closed`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
 
-2026-07-21: Optimization record mode continued. Batch `docs/optimization/2026-07-21-review-trade-panel-type-scale/` OPT-001 **scope corrected** by user: friction is **现实交易者点位** list/card type scale only (not Eligibility / Download / full filter chrome). Two acceptance crops remain; record updated. Prior same-day batch `2026-07-21-data-page-progressive-date-nav` OPT-001 remains recorded. No implementation, no proposed plan, no Git/data/remote authority.
+2026-07-21: Data progressive date nav + real-trader point-card density was promoted to a small `operating-modes-v1` Proposed plan. Independent `review-001` returned `revise/high`: closeout must include implementation review, existing frontend contract tests/static build must enter scope, CSS must not leak into Admin unintentionally, and visual acceptance must be reproducible. Next gate `plan-revision`; the review lifecycle package is locally committed under standing review authority, with no activation, implementation, push, data, or remote authority.
 
 2026-07-21: User entered **optimization record mode**. New record-only batch `docs/optimization/2026-07-21-data-page-progressive-date-nav/` OPT-001: Data page Market days still uses exhaustive DateRail after Review progressive ship; align with Review 最近/按月. Evidence screenshot archived under batch `screenshots/`. No implementation, no proposed plan, no Git/data/remote authority.
 

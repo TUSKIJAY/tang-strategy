@@ -16,6 +16,12 @@ Preserve all unrelated user changes. Do not overwrite, revert, stage, or commit 
 
 Use [`docs/operating-modes.md`](./docs/operating-modes.md) as the single normative routing and lifecycle contract. Coding Mode and Data Update Mode are peer modes. Read-only/ambiguous work starts in Coding Lane 1; bounded maintenance is legal only when every Lane 2 criterion passes; governance, DB, market-data, publication, security, cross-contract, broad, or difficult-to-rollback changes require a reviewed Lane 3 Exec Plan. Routine use of existing fetch/rebuild/acceptance tooling uses Data Update Mode. Local acceptance never grants commit, push, or publication authority; the daily triggers below are the only standing publish triggers.
 
+## Hard Review Artifact Constraint
+
+- An explicit request to review, audit, or `审核` a governed plan automatically includes local creation of the next canonical review artifact under `docs/exec-plans/reviews/<plan-slug>/`, the review-only metadata/index reconciliation required by `docs/operating-modes.md`, and one strictly scoped local commit containing only that review lifecycle package. Chat-only findings or an uncommitted review artifact never count as a completed review deliverable.
+- For small, local, reversible UI or documentation plans, use the simplest valid lifecycle. Do not introduce or require checkpoint machinery solely to create a review document; create the review artifact directly unless the user explicitly requests a checkpoint or the plan already depends on one.
+- Review requests authorize only the local review artifact, its review-state reconciliation, exact-path staging, and that scoped local commit. If the reviewed proposal is not yet durable, the same commit may include its existing proposal artifact and directly linked lifecycle/source records without rewriting the plan body. This authority does not include activation, implementation/remediation, push, PR, merge, Pages, provider/broker, or other remote action.
+
 ## Project Structure & Module Organization
 
 This repo is a frontend/backend workspace for Tang Strategy.

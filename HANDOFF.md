@@ -3,21 +3,21 @@
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`
-- Lifecycle status: `Completed`
+- Current plan: `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `closed`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, status `Completed`, phase `none`, next gate `closed`. Implementation start `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan`. Independent `implementation-review-001: accept/high`. Verified implementation commit `b09e08156ea3efeeebc4fc9c21d53a72fac297c6`; freeze aggregate `ed19e6e70e5521156be218174e3524aee396bf66b1555569d5f48c9a35d98127`. Frontend 48/48; builds/harness/protected hashes pass. Push/PR/merge/Pages/data/remote unauthorized.
-- Operating mode: **optimization record mode** (user-enabled 2026-07-21). Record-only; no implementation/plan activation from intake alone.
-- Latest optimization intake: `docs/optimization/2026-07-21-review-trade-panel-type-scale/` **recorded** OPT-001 — **现实交易者点位** cards type too large (user-clarified; not filter/export). Also open: `docs/optimization/2026-07-21-data-page-progressive-date-nav/` OPT-001 (Data progressive date). Prior completed: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/` (implemented).
+- Current plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md`, revision `v1-proposal-2026-07-21`, status `Proposed`, phase `none`, next gate `plan-revision`. Independent `review-001: revise/high`; review lifecycle is eligible for its scoped local commit, with no activation, implementation, push, data, or remote authority.
+- Review findings: add the required implementation-review/closeout gate; include the existing frontend contract tests and static build; keep compact card CSS scoped to Review/Static unless Admin is explicitly included; pin reproducible visual targets; repair the final operating-modes link.
+- Optimization sources: both 2026-07-21 batches are `promoted-to-proposed` and linked to the current plan. The user clarified that the typography scope is **现实交易者点位**, not filter/export chrome.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
-- Latest completed plan (focus): `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, `implementation-review-001: accept/high`, next gate `closed`.
+- Latest completed plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, `implementation-review-001: accept/high`, next gate `closed`.
 - Previous completed plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md`, revision `v2-review-foldback-2026-07-20`, lifecycle schema `operating-modes-v1`, status `Completed`, exact packet 002, `implementation-review-002: accept/high`, next gate `closed`.
 - Durable governance authority: implementation and closeout completed under the named user instructions; verified implementation is `61ea580f0b284d835c79cd47130104b90a04d2f2`, v1 reconciliation boundary is `96166a51561ea75f4a6bcad9de9f97fdb7ff2e1d`, and standing local commit authority is consumed. No push/PR/merge, Pages/hosted, provider/broker, tracked data, or other remote authority was granted.
 - Previous completed governance plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-durable-checkpoint-and-scoped-auto-commit-governance-plan.md`, revision `v2-review-foldback-2026-07-20`, verified implementation `61ea580f0b284d835c79cd47130104b90a04d2f2`, `implementation-review-001: accept/high`, next gate `closed`.

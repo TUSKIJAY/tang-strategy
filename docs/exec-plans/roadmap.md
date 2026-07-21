@@ -44,7 +44,7 @@ None.
 
 ## Proposed Plans
 
-None.
+- [Tang Strategy Data Progressive Navigation And Trade Card Density](./proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
 
 ## Completed Plans
 

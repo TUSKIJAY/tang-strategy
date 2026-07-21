@@ -14,7 +14,7 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Align Data page Market days rail with Review progressive date navigation | Data workspace / `DashboardPage` date rail | recorded | none | User acceptance 2026-07-21 after Review progressive ship |
+| OPT-001 | Align Data page Market days rail with Review progressive date navigation | Data workspace / `DashboardPage` date rail | promoted-to-proposed | [plan](../../exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) | User acceptance 2026-07-21 after Review progressive ship |
 
 ## Relationship To Prior Work
 
