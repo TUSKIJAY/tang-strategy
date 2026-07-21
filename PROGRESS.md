@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent design review `review-001` on exact revision `v1-proposal-2026-07-21` returned `revise/high`. Product direction, OPT-001/002 boundary, evidence hashes, shared surfaces, QQQ fixture, and authority separation are sound. Required foldback: use the existing atomic canonical-registry + candidate SQLite projection path instead of a JSON-only display-name edit; freeze and test cross-leg chronological card time-range semantics; and make all user-visible annotation text (including K-line hover title) display-name + BUY/SELL with deterministic fail-closed action handling. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB write, provider/broker, publication, push, or remote authority.
 
 2026-07-21: User instruction promoting named OPT batch `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/` (session OPT-001 + OPT-002) to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md` revision `v1-proposal-2026-07-21`. Scope: card reading path points-only (drop $/%/fees); K-line marker labels `display_name BUY|SELL`; registry UI name `vordin` → `vordinkkk`. Session OPT-003…006 remain recorded-only. Indexes/roadmap/OPT back-links/state blocks reconciled. Next gate independent `design-review`. No activation, implementation, push, data pipeline, provider/broker, or remote authority.
 

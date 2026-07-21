@@ -7,13 +7,14 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
-- Current Proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md` revision `v1-proposal-2026-07-21`.
-- Next gate: independent `design-review` of exact v1. No activation or implementation authority.
+- Current Proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md` revision `v1-proposal-2026-07-21`; `review-001: revise/high`.
+- Next gate: fold review findings into a new stable plan revision, then independently review that exact revision. No activation or implementation authority.
+- Required foldback: existing atomic canonical-registry + candidate SQLite projection route for `vordin → vordinkkk`; executable cross-leg card time-range semantics; display-name + BUY/SELL for marker label and hover title with deterministic action fallback.
 - Promoted OPT scope: session OPT-001 (cards points-only) + OPT-002 (BUY/SELL + `vordinkkk`); OPT-003…006 remain recorded-only.
 - **Optimization record mode remains open** for non-promoted items under `docs/optimization/`.
 - Session batch: `docs/optimization/2026-07-21-review-trade-and-kline-session/`; named promotion source: `.../2026-07-21-trade-points-and-kline-marker-labels/`.
