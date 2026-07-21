@@ -44,7 +44,7 @@ None.
 
 ## Proposed Plans
 
-None.
+- [Tang Strategy Trade Panel Visual Polish](./proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
 
 ## Completed Plans
 

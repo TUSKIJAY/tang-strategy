@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Review 点位区视觉稿 · trade panel v2</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-ui: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --surface-app: #141413;
+      --surface-panel: #1E1E1D;
+      --surface-control: #282827;
+      --surface-raised: #333331;
+      --border-subtle: #3B3B38;
+      --border-control: #74746E;
+      --text-primary: #E8E7E3;
+      --text-secondary: #C9C8C2;
+      --text-muted: #A7A69F;
+      --accent: #8B9A6D;
+      --accent-ink: #0F0F0E;
+      --status-success: #4CAF50;
+      --direction-call: #6F9F7A;
+      --direction-put: #E06B66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0b0b0a;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+    }
+    .page { max-width: 1180px; margin: 0 auto; padding: 28px 24px 56px; }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 26px;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+    .lead {
+      margin: 0 0 22px;
+      max-width: 780px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .lead code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: var(--surface-control);
+      color: var(--text-secondary);
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 300px 300px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .col-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .col-label .tag {
+      font-size: 10px;
+      letter-spacing: .04em;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+    .col-label .tag.bad {
+      color: #E06B66;
+      border-color: color-mix(in srgb, #E06B66 40%, var(--border-subtle));
+      background: color-mix(in srgb, #E06B66 10%, transparent);
+    }
+    .col-label .tag.good {
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    /* shared rail chrome (context above trade block) */
+    .rail {
+      width: 300px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface-app);
+    }
+    .rail-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-panel);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .rail-bar strong { color: var(--text-primary); }
+    .ctx {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--surface-raised);
+      background: var(--surface-panel);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tabs { display: flex; gap: 4px; }
+    .tabs span {
+      flex: 1;
+      text-align: center;
+      border-radius: 6px;
+      padding: 7px 0;
+      font: 700 12px/1 var(--font-ui);
+      letter-spacing: .06em;
+      background: var(--surface-control);
+      color: var(--text-muted);
+    }
+    .tabs span.on { background: var(--accent); color: var(--accent-ink); }
+    .mode { display: flex; gap: 4px; }
+    .mode span {
+      flex: 1;
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 5px 0;
+      font: 700 11px/1 var(--font-ui);
+      letter-spacing: .06em;
+      color: var(--text-muted);
+    }
+    .mode span.on {
+      background: var(--surface-control);
+      color: var(--text-primary);
+      border-color: var(--border-control);
+    }
+    .chips-mini { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chips-mini span {
+      border-radius: 4px;
+      padding: 4px 7px;
+      font: 500 11px/1 var(--font-mono);
+      background: var(--surface-control);
+      color: var(--text-secondary);
+    }
+    .chips-mini span.on {
+      color: var(--text-primary);
+      box-shadow: inset 0 0 0 1px var(--accent);
+      background: color-mix(in srgb, var(--accent) 18%, var(--surface-control));
+    }
+    .field-mini {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 10px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .field-mini .box {
+      padding: 5px 8px;
+      font-size: 12px;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text-primary);
+      background: var(--surface-control);
+      border: 1px solid var(--border-control);
+      border-radius: 6px;
+    }
+    .hint {
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-app);
+    }
+
+    /* ========== CURRENT (as-shipped feel) ========== */
+    .current-block {
+      margin: 10px 12px 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-panel);
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .current-block label {
+      display: grid;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .current-block select,
+    .current-block .fake-select {
+      width: 100%;
+      padding: 7px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-control);
+      background: var(--surface-control);
+      color: var(--text-primary);
+      font: 12px var(--font-ui);
+    }
+    .current-chip {
+      display: inline-flex;
+      align-self: flex-start;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font: 600 12px var(--font-ui);
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--accent) 18%, var(--surface-control));
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    .current-export {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      justify-content: flex-start;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-control);
+      background: var(--surface-control);
+      color: var(--text-primary);
+      font: 600 12px var(--font-ui);
+    }
+    .current-list {
+      margin: 0 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .current-card {
+      border: 1px solid var(--border-subtle);
+      border-left: 5px solid var(--dir);
+      background: var(--surface-panel);
+      border-radius: 0;
+    }
+    .current-card.put { --dir: var(--direction-put); }
+    .current-card.call { --dir: var(--direction-call); }
+    .current-card .sum {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: start;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+    .current-card .tri {
+      width: 0; height: 0; margin-top: 4px;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+    }
+    .current-card.put .tri { border-top: 9px solid var(--direction-put); }
+    .current-card.call .tri { border-bottom: 9px solid var(--direction-call); }
+    .current-card .who { font-weight: 700; color: var(--text-primary); }
+    .current-card .side { font-weight: 700; letter-spacing: .04em; }
+    .current-card.put .side { color: var(--direction-put); }
+    .current-card.call .side { color: var(--direction-call); }
+    .current-card small {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .current-card .badge {
+      font: 600 10px var(--font-mono);
+      text-transform: uppercase;
+      padding: 3px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      background: var(--surface-raised);
+    }
+    .current-card .drill {
+      margin: 0 8px 8px 34px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ========== PROPOSED v2 ========== */
+    .v2-tools {
+      margin: 0;
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--surface-app);
+    }
+    .v2-tools-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .v2-section-title {
+      margin: 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .v2-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font: 600 11px var(--font-ui);
+      cursor: pointer;
+    }
+    .v2-icon-btn:hover {
+      border-color: var(--border-control);
+      color: var(--text-primary);
+      background: var(--surface-control);
+    }
+    .v2-icon-btn svg { width: 13px; height: 13px; flex: 0 0 auto; }
+    .v2-row {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+    .v2-row .k {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+    .v2-seg {
+      display: flex;
+      gap: 3px;
+      padding: 2px;
+      border-radius: 7px;
+      background: var(--surface-control);
+      border: 1px solid var(--border-subtle);
+    }
+    .v2-seg button {
+      flex: 1;
+      border: 0;
+      border-radius: 5px;
+      padding: 5px 3px;
+      font: 600 10px/1.15 var(--font-ui);
+      color: var(--text-muted);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .v2-seg button.on {
+      color: var(--text-primary);
+      background: var(--surface-raised);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+    .v2-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .v2-chips button {
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 4px 11px;
+      font: 600 12px var(--font-ui);
+      color: var(--text-muted);
+      background: transparent;
+      cursor: pointer;
+    }
+    .v2-chips button.on {
+      color: var(--text-primary);
+      border-color: color-mix(in srgb, var(--accent) 55%, var(--border-subtle));
+      background: color-mix(in srgb, var(--accent) 14%, var(--surface-control));
+    }
+    .v2-list-wrap {
+      padding: 10px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .v2-list-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .v2-list-head .count {
+      font: 500 11px var(--font-mono);
+      color: var(--text-muted);
+    }
+    .v2-card {
+      position: relative;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: var(--surface-panel);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .12s ease, background .12s ease;
+    }
+    .v2-card::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--dir);
+    }
+    .v2-card.put { --dir: var(--direction-put); }
+    .v2-card.call { --dir: var(--direction-call); }
+    .v2-card:hover {
+      border-color: var(--border-control);
+      background: color-mix(in srgb, var(--surface-control) 55%, var(--surface-panel));
+    }
+    .v2-card.active {
+      border-color: color-mix(in srgb, var(--accent) 45%, var(--border-subtle));
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    .v2-card .body {
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: start;
+      padding: 9px 10px 9px 12px;
+    }
+    .v2-card .glyph {
+      width: 14px;
+      height: 14px;
+      margin-top: 2px;
+      display: grid;
+      place-items: center;
+    }
+    .v2-card .glyph i {
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+    }
+    .v2-card.put .glyph i { border-top: 8px solid var(--direction-put); }
+    .v2-card.call .glyph i { border-bottom: 8px solid var(--direction-call); }
+    .v2-card .title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px;
+      min-width: 0;
+    }
+    .v2-card .name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .v2-card .dir {
+      font: 700 10px/1 var(--font-mono);
+      letter-spacing: .06em;
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid color-mix(in srgb, var(--dir) 35%, var(--border-subtle));
+      color: var(--dir);
+      background: color-mix(in srgb, var(--dir) 10%, transparent);
+    }
+    .v2-card .meta {
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+    .v2-card .meta em {
+      font-style: normal;
+      color: var(--text-secondary);
+    }
+    .v2-card .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font: 600 10px/1 var(--font-mono);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--status-success);
+      padding: 3px 0 0;
+      white-space: nowrap;
+    }
+    .v2-card .status::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--status-success);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-success) 22%, transparent);
+    }
+    .v2-card .status.pending {
+      color: var(--text-muted);
+    }
+    .v2-card .status.pending::before {
+      background: var(--text-muted);
+      box-shadow: none;
+    }
+    .v2-card .foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 10px 8px 36px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .v2-card .foot button {
+      border: 0;
+      background: transparent;
+      color: var(--text-muted);
+      font: 600 11px var(--font-ui);
+      padding: 0;
+      cursor: pointer;
+    }
+    .v2-card .foot button:hover { color: var(--text-secondary); }
+    .v2-card .legs {
+      display: none;
+      margin: 0 10px 10px 36px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-control);
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+    .v2-card.open .legs { display: block; }
+    .v2-card.open .foot button { color: var(--accent); }
+
+    /* notes column */
+    .notes {
+      display: grid;
+      gap: 12px;
+    }
+    .note {
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: var(--surface-panel);
+    }
+    .note h2 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .note ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .note li + li { margin-top: 4px; }
+    .note code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--surface-control);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .note .keep {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* multi-trader demo under proposed */
+    .scale-strip {
+      margin-top: 22px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      background: var(--surface-panel);
+      padding: 16px 18px;
+    }
+    .scale-strip h2 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .scale-strip p {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .scale-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .scale-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      background: var(--surface-app);
+      padding: 12px;
+    }
+    .scale-card h3 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+    .scale-card .v2-tools { padding: 0; border: 0; }
+    .scale-card .summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .scale-card .summary button {
+      border: 1px solid var(--border-control);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font: 600 11px var(--font-ui);
+      background: var(--surface-control);
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    @media (max-width: 980px) {
+      .compare { grid-template-columns: 1fr 1fr; }
+      .notes { grid-column: 1 / -1; }
+      .scale-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .compare { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <p class="eyebrow">Optimization mock · record-only · not live app</p>
+    <h1>Review 点位区：从“表单模块”收成终端工具条</h1>
+    <p class="lead">
+      对照 live 截图中的 <code>Eligibility</code> 下拉、<code>沃德哥</code> chip、
+      <code>Download JSON + 3 CSV</code> 与 group cards。右侧为 v2 提案（已折回用户锁定）：
+      去框套框、布局分层；产品控件文案<strong>保持原有英文</strong>
+     （Eligibility / Display·Reported·Calculated / Download / Show legs/events）；
+      导出缩短为 <code>Download</code>，去掉 JSON+3 CSV 长文案；交易者规模与现契约一致；
+      <strong>Review + Static + Admin</strong> 共享组件同批对齐。不改数据契约。
+    </p>
+
+    <div class="compare">
+      <!-- CURRENT -->
+      <div>
+        <div class="col-label">
+          <span>Current (live feel)</span>
+          <span class="tag bad">friction</span>
+        </div>
+        <section class="rail" aria-label="Current trade panel">
+          <div class="rail-bar">
+            <span>Daily Review · <strong>2026-07-17</strong></span>
+          </div>
+          <div class="ctx">
+            <div class="tabs"><span>SPY</span><span class="on">QQQ</span></div>
+            <div class="mode"><span class="on">最近</span><span>按月</span></div>
+            <div class="chips-mini">
+              <span class="on">07-17</span><span>07-16</span><span>07-15</span><span>07-14</span>
+            </div>
+            <div class="field-mini">Strategy<div class="box">tang-v4-4-slope-4-4</div></div>
+          </div>
+          <div class="hint">提示 (7 进场 · 9 启动 · 1 过期)</div>
+
+          <div class="current-block">
+            <label>
+              Eligibility
+              <div class="fake-select">Display ▾</div>
+            </label>
+            <div class="current-chip">沃德哥</div>
+            <div class="current-export">↓ Download JSON + 3 CSV</div>
+          </div>
+
+          <div class="current-list">
+            <article class="current-card put">
+              <div class="sum">
+                <span class="tri" aria-hidden="true"></span>
+                <div>
+                  <span class="who">沃德哥</span>
+                  <span class="side"> PUT</span>
+                  <small>QQQ 2026-07-17 · result unknown</small>
+                </div>
+                <span class="badge">Verified</span>
+              </div>
+              <div class="drill">Show legs/events</div>
+            </article>
+            <article class="current-card call">
+              <div class="sum">
+                <span class="tri" aria-hidden="true"></span>
+                <div>
+                  <span class="who">沃德哥</span>
+                  <span class="side"> CALL</span>
+                  <small>QQQ 2026-07-17 · result unknown</small>
+                </div>
+                <span class="badge">Verified</span>
+              </div>
+              <div class="drill">Show legs/events</div>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <!-- PROPOSED -->
+      <div>
+        <div class="col-label">
+          <span>Proposed v2</span>
+          <span class="tag good">mock</span>
+        </div>
+        <section class="rail" aria-label="Proposed trade panel">
+          <div class="rail-bar">
+            <span>Daily Review · <strong>2026-07-17</strong></span>
+          </div>
+          <div class="ctx">
+            <div class="tabs"><span>SPY</span><span class="on">QQQ</span></div>
+            <div class="mode"><span class="on">最近</span><span>按月</span></div>
+            <div class="chips-mini">
+              <span class="on">07-17</span><span>07-16</span><span>07-15</span><span>07-14</span>
+            </div>
+            <div class="field-mini">Strategy<div class="box">tang-v4-4-slope-4-4</div></div>
+          </div>
+          <div class="hint">提示 · 7 进场 · 9 启动 · 1 过期</div>
+
+          <div class="v2-tools">
+            <div class="v2-tools-head">
+              <p class="v2-section-title">Trade tools</p>
+              <button type="button" class="v2-icon-btn" id="exportBtn" aria-label="Download">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M12 3v12" />
+                  <path d="M7 10l5 5 5-5" />
+                  <path d="M5 21h14" />
+                </svg>
+                Download
+              </button>
+            </div>
+
+            <div class="v2-row">
+              <span class="k">Eligibility</span>
+              <div class="v2-seg" role="group" aria-label="Eligibility">
+                <button type="button" class="on" data-elig="display">Display</button>
+                <button type="button" data-elig="reported">Reported</button>
+                <button type="button" data-elig="calculated">Calculated</button>
+              </div>
+            </div>
+
+            <div class="v2-row">
+              <span class="k">Traders</span>
+              <div class="v2-chips" role="group" aria-label="Trader visibility">
+                <button type="button" class="on" data-trader="vordin">沃德哥</button>
+                <button type="button" data-trader="tang">唐</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="v2-list-wrap">
+            <div class="v2-list-head">
+              <p class="v2-section-title">Groups</p>
+              <span class="count" id="cardCount">2</span>
+            </div>
+
+            <article class="v2-card put active" data-trader="vordin" data-card>
+              <div class="body">
+                <span class="glyph" aria-hidden="true"><i></i></span>
+                <div>
+                  <div class="title">
+                    <span class="name">沃德哥</span>
+                    <span class="dir">PUT</span>
+                  </div>
+                  <div class="meta"><em>QQQ</em> · 07-17 · result <em>unknown</em></div>
+                </div>
+                <span class="status">Verified</span>
+              </div>
+              <div class="foot">
+                <button type="button" class="toggle-legs">Show legs/events</button>
+                <span>2 legs</span>
+              </div>
+              <div class="legs">
+                Entry 10:12 · Exit 10:41<br />
+                Events: activation → expired (sample)
+              </div>
+            </article>
+
+            <article class="v2-card call" data-trader="vordin" data-card>
+              <div class="body">
+                <span class="glyph" aria-hidden="true"><i></i></span>
+                <div>
+                  <div class="title">
+                    <span class="name">沃德哥</span>
+                    <span class="dir">CALL</span>
+                  </div>
+                  <div class="meta"><em>QQQ</em> · 07-17 · result <em>unknown</em></div>
+                </div>
+                <span class="status">Verified</span>
+              </div>
+              <div class="foot">
+                <button type="button" class="toggle-legs">Show legs/events</button>
+                <span>1 leg</span>
+              </div>
+              <div class="legs">
+                Entry 14:05 · open (sample)
+              </div>
+            </article>
+
+            <article class="v2-card put" data-trader="tang" data-card hidden>
+              <div class="body">
+                <span class="glyph" aria-hidden="true"><i></i></span>
+                <div>
+                  <div class="title">
+                    <span class="name">唐</span>
+                    <span class="dir">PUT</span>
+                  </div>
+                  <div class="meta"><em>QQQ</em> · 07-17 · result <em>unknown</em></div>
+                </div>
+                <span class="status pending">Pending</span>
+              </div>
+              <div class="foot">
+                <button type="button" class="toggle-legs">Show legs/events</button>
+                <span>1 leg</span>
+              </div>
+              <div class="legs">Sample: Tang group (hidden by default)</div>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <!-- NOTES -->
+      <div class="notes">
+        <section class="note">
+          <h2>当前丑在哪</h2>
+          <ul>
+            <li>点位区仍是<strong>套在侧栏里的表单卡片</strong>：外框 + 原生 select 语感 + 全宽 Download CTA。</li>
+            <li>英文标签 <code>Eligibility</code> / <code>Download JSON + 3 CSV</code> / <code>Show legs/events</code> 与上方中文终端控件两套语言。</li>
+            <li>交易者 chip 用强描边 active，像独立控件，不像同一工具条的一部分。</li>
+            <li>卡片信息挤在一行：名字、方向、日期、result、badge、drill 层级不清。</li>
+          </ul>
+        </section>
+        <section class="note">
+          <h2>v2 改什么</h2>
+          <ul>
+            <li><strong>去框套框</strong>：工具区与上方 context 同平面，仅用分区标题分隔。</li>
+            <li><strong>Eligibility 三段</strong>：保持英文 <code>Display</code> / <code>Reported</code> / <code>Calculated</code>
+             （对应 live option 语义；enum 不变）。</li>
+            <li><strong>Download 收角</strong>：图标 + 短文案 <code>Download</code>；去掉整行 <code>JSON + 3 CSV</code>，无 hover 说明。</li>
+            <li><strong>其它原英文</strong>：<code>Show legs/events</code>、<code>Verified</code> 等不译中文。</li>
+            <li><strong>交易者 pill</strong>：B chip 多选；≤6 inline，≥7 summary + Edit drawer。</li>
+            <li><strong>卡片分层</strong>：方向轨 + 名字/PUT·CALL 徽章 + meta + 绿点状态；腿/事件可展开。</li>
+            <li><strong>表面</strong>：Review + Static + Admin 共享组件同批对齐。</li>
+          </ul>
+          <div class="keep">
+            锁定不改：B chip 可见性权威、CALL/PUT 方向色、名字不染色、
+            当日可用交易者才出现、无 ticker/date 镜像、不碰 DB/export 文件内容契约。
+            中文仅保留人名/既有中文提示（如「提示 · 7 进场…」），不把产品英文 chrome 汉化。
+          </div>
+        </section>
+        <section class="note">
+          <h2>Eligibility 文案对照</h2>
+          <ul>
+            <li><code>Display</code> → <code>display_eligible</code>（live: Display）</li>
+            <li><code>Reported</code> → <code>reported_stats_eligible</code>（live: Reported stats；分段用短标签）</li>
+            <li><code>Calculated</code> → <code>calculated_stats_eligible</code>（live: Calculated stats；分段用短标签）</li>
+          </ul>
+          <div class="keep">
+            弃用：中文「显示/已报/计算」「可见点位/手填收益/系统核算」——用户要求 mock 保持原英文。
+          </div>
+        </section>
+        <section class="note">
+          <h2>已锁定 · 无待拍板</h2>
+          <ul>
+            <li>Mock 视觉方向认可。</li>
+            <li>产品控件保持英文：Eligibility / Display·Reported·Calculated / Download / Show legs/events。</li>
+            <li>Download：短标签 only，去掉 JSON + 3 CSV。</li>
+            <li>规模：≤6 inline pills；≥7 summary + Edit drawer。</li>
+            <li>表面：Review + Static + Admin 对齐。</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <div class="scale-strip">
+      <h2>Scale · multi-trader tools</h2>
+      <p>v2 不改规模规则：≤6 inline chips；≥7 summary + Edit。下面只示意工具条密度，不扩功能。</p>
+      <div class="scale-grid">
+        <div class="scale-card">
+          <h3>≤6 · inline chips</h3>
+          <div class="v2-tools">
+            <div class="v2-row">
+              <span class="k">Traders</span>
+              <div class="v2-chips">
+                <button type="button" class="on">沃德哥</button>
+                <button type="button" class="on">唐</button>
+                <button type="button">阿凯</button>
+                <button type="button">Lina</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scale-card">
+          <h3>≥7 · summary + Edit</h3>
+          <div class="v2-tools">
+            <div class="v2-row">
+              <span class="k">Traders</span>
+              <div class="summary">
+                <span>3 / 8 selected · 沃德哥, 唐, 阿凯…</span>
+                <button type="button">Edit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const seg = document.querySelectorAll('.v2-seg button');
+      seg.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          seg.forEach((b) => b.classList.remove('on'));
+          btn.classList.add('on');
+        });
+      });
+
+      const traderBtns = document.querySelectorAll('.v2-chips [data-trader]');
+      const cards = document.querySelectorAll('[data-card]');
+      const countEl = document.getElementById('cardCount');
+
+      function selectedTraders() {
+        return new Set(
+          Array.from(traderBtns)
+            .filter((b) => b.classList.contains('on'))
+            .map((b) => b.dataset.trader)
+        );
+      }
+
+      function refreshCards() {
+        const selected = selectedTraders();
+        let n = 0;
+        cards.forEach((card) => {
+          const show = selected.has(card.dataset.trader);
+          card.hidden = !show;
+          if (show) n += 1;
+        });
+        if (countEl) countEl.textContent = String(n);
+      }
+
+      traderBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('on');
+          // keep at least visual state; empty selection hides all cards honestly
+          refreshCards();
+        });
+      });
+
+      document.querySelectorAll('.v2-card').forEach((card) => {
+        card.addEventListener('click', (event) => {
+          if (event.target.closest('.toggle-legs')) return;
+          document.querySelectorAll('.v2-card').forEach((c) => c.classList.remove('active'));
+          card.classList.add('active');
+        });
+      });
+
+      document.querySelectorAll('.toggle-legs').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          const card = btn.closest('.v2-card');
+          const open = card.classList.toggle('open');
+          btn.textContent = open ? 'Hide legs/events' : 'Show legs/events';
+        });
+      });
+
+      const exportBtn = document.getElementById('exportBtn');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          exportBtn.textContent = 'Downloaded';
+          setTimeout(() => {
+            exportBtn.innerHTML = `
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 3v12" />
+                <path d="M7 10l5 5 5-5" />
+                <path d="M5 21h14" />
+              </svg>
+              Download`;
+          }, 900);
+        });
+      }
+
+      refreshCards();
+    })();
+  </script>
+</body>
+</html>

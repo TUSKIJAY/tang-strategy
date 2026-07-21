@@ -3,12 +3,20 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`
-- Lifecycle status: `Completed`
+- Current plan: `2026-07-21-tang-strategy-trade-panel-visual-polish-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `closed`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-21: User instruction `生成prop plan` promoted trade-panel polish OPT batch to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md` revision `v1-proposal-2026-07-21`. Scope: shared Trade tools + cards chrome for Review/Static/Admin; Eligibility segments Display/Reported/Calculated; short Download; English chrome; mock-accepted layout. Indexes/roadmap/optimization/state blocks reconciled. Next gate independent `design-review`. No activation, implementation, Git stage/commit/push, data, provider/broker, or remote authority.
+
+2026-07-21: Optimization foldback on trade-panel polish: mock direction **accepted**. Keep **original English** chrome (Eligibility / Display·Reported·Calculated / Download / Show legs/events); short **Download** only (drop JSON+3 CSV long copy); trader scale ≤6 inline / ≥7 summary+Edit; surface **Review + Static + Admin**. Earlier CN label trial (可见点位/…) withdrawn. Mock + record updated. Record-only; no implementation/plan/Git/data/remote.
+
+2026-07-21: Optimization record mode — new batch `docs/optimization/2026-07-21-review-trade-panel-visual-polish/` OPT-001: Review left trade tools + group cards still look form-bolted after density ship. Live screenshot archived; interactive mock `mockups/trade-panel-v2.html` proposes terminal tool strip + clearer card hierarchy. Record-only; no implementation, plan, Git, data, or remote authority.
+
+2026-07-21: User entered **optimization record mode** (`开启opt记录模式`). Record-only intake is open under `docs/optimization/` per `docs/optimization/SOP.md`. Authority: create/update optimization batches + index and keep `PROGRESS.md` / `HANDOFF.md` truthful. No implementation, no proposed plan, no Git stage/commit/push, no data/DB, no provider/broker, no Pages/remote. Unrelated dirty frontend/`output/` paths remain user-owned and untouched.
 
 2026-07-21: Data Progressive Navigation And Trade Card Density is **Completed**. Goal OBJECTIVE `active plan交给你全权执行` (`user-instruction:2026-07-21-execute-data-progressive-nav-and-trade-card-density-plan`) authorized implementation through closeout. Phase 0 landed WU-A (Data progressive DateRail) + WU-B (`.dr-sidebar` trade-card density) on the four frozen paths; frontend **49/49** `test:trade-records`, normal+static builds, harness auto, V1–V3 screenshots, and independent `implementation-review-001: accept/high` pass. Verified implementation commit `74334935a09f60c23748cdf0ecce5e52c1d643be`; freeze aggregate `f8caa351e78d890ea82a5ab32c65f443acf48c3123c82bb566194980d1fd159c`; implementation-review package commit `54e77c3d7b331cc87a3e938dd23e3845d1a703aa`. Push/PR/merge/Pages/provider/broker/DB/content remain unauthorized. Next gate: `closed`.
 

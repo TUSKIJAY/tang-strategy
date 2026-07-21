@@ -565,6 +565,7 @@ export function StaticReviewsApp() {
               workspace={workspace}
               onSwitchTicker={chooseTicker}
               onSelectDate={chooseDate}
+              dateNavigation="progressive"
             >
               <div className="review-context-actions">
                 <label className="review-context-field">

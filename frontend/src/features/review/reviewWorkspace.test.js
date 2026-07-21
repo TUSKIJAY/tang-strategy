@@ -358,7 +358,7 @@ test('static Review consumes shared workspace and trader contracts with one engi
   assert.match(styles, /--direction-put: #E06B66;/);
   assert.doesNotMatch(styles, /Space Grotesk|Newsreader|--trader-color/);
   assert.match(staticSource, /Review 工具/);
-  assert.doesNotMatch(staticSource, /dateNavigation=/);
+  assert.match(staticSource, /dateNavigation="progressive"/);
   assert.doesNotMatch(staticSource, />Rescan</);
   assert.doesNotMatch(staticSource, />Backtest</);
   assert.match(styles, /\.review-context-field select \{[^}]*background: var\(--surface-control\);[^}]*border: 1px solid var\(--border-control\);/);
@@ -479,7 +479,7 @@ test('progressive date navigation projects recent and month modes without fabric
   assert.deepEqual(missing.dates, []);
   assert.match(missing.meta, /全库 IWM 0/);
 
-  // Review + Data opt into progressive; Admin / editor / Static stay exhaustive.
+  // Review + Data + Static opt into progressive; Admin / editor stay exhaustive.
   const reviewSource = readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8');
   const dashboardSource = readFileSync(new URL('../../pages/DashboardPage.jsx', import.meta.url), 'utf8');
   const adminSource = readFileSync(new URL('../../pages/AdminTradersPage.jsx', import.meta.url), 'utf8');
@@ -487,7 +487,8 @@ test('progressive date navigation projects recent and month modes without fabric
   const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
   assert.match(reviewSource, /dateNavigation="progressive"/);
   assert.match(dashboardSource, /dateNavigation="progressive"/);
-  for (const source of [adminSource, editorSource, staticSource]) {
+  assert.match(staticSource, /dateNavigation="progressive"/);
+  for (const source of [adminSource, editorSource]) {
     assert.doesNotMatch(source, /dateNavigation=/);
   }
   assert.doesNotMatch(reviewSource + dashboardSource + staticSource, /跳转/);
