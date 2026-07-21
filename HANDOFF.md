@@ -15,7 +15,7 @@
 - No active or proposed plan.
 - **Optimization record mode is open** (user enabled). Record-only under `docs/optimization/`.
 - Latest recorded batch (no implementation authority):
-  - `docs/optimization/2026-07-21-review-trade-and-kline-session/` — OPT-001…005: cards points-only, K-line BUY/SELL + `vordinkkk`, remove Eligibility, 5m viewport, group span focus + legs timeline.
+  - `docs/optimization/2026-07-21-review-trade-and-kline-session/` — OPT-001…006 (incl. Data Market days stretched rail).
   - Mock: `.../review-trade-and-kline-session/mockups/review-trade-and-kline-session.html`
   - Same-session split batches all superseded.
 - Coding Mode repository mutations now include one task-scoped local commit by default. The only no-commit cases are an explicit user opt-out, draft/failed/incomplete work, or inability to separate task paths safely from unrelated dirty changes.

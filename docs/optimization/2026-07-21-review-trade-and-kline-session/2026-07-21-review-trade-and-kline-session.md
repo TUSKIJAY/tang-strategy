@@ -12,7 +12,8 @@
 | OPT-002 | K-line markers: BUY/SELL + nickname `vordinkkk` | Review / K-line + trader display | recorded | none | 方向靠颜色箭头；UI 昵称映射 `vordin` |
 | OPT-003 | Trade tools: remove Eligibility segment | Review / Trade tools | recorded | none | 取消 Display / Reported / Calculated 整行 |
 | OPT-004 | K-line 5m switch: first-paint viewport glitch | Review / Kline Engine | recorded | none | 点 5m 先坏图，滚轮后才正常 |
-| OPT-005 | Group focus span + legs/events timeline UI | Review / Cards ↔ Chart | recorded | none | 点卡片框整段交易；legs 紧凑时间线，可点单笔 |
+| OPT-005 | Group focus span + legs/events timeline UI | Review / Cards ↔ Chart | recorded | none | 点卡片框整段交易；legs 紧凑时间线，可点单笔（方向已认可） |
+| OPT-006 | Data page Market days: progressive rail stretched ugly | Data / Market days | recorded | none | 宽面板里被拉满的 QQQ/SPY、最近/按月 不伦不类 |
 
 ## Visual Reference
 
@@ -24,6 +25,7 @@
 | 5m switch broken first paint | [`screenshots/2026-07-21-kline-5m-switch-initial-viewport.png`](./screenshots/2026-07-21-kline-5m-switch-initial-viewport.png) |
 | Group select zooms first event only | [`screenshots/2026-07-21-trade-group-select-first-event-only.png`](./screenshots/2026-07-21-trade-group-select-first-event-only.png) |
 | Legs/events current expanded UI | [`screenshots/2026-07-21-trade-legs-events-current-ui.png`](./screenshots/2026-07-21-trade-legs-events-current-ui.png) |
+| Data Market days stretched controls | [`screenshots/2026-07-21-data-market-days-stretched-controls.png`](./screenshots/2026-07-21-data-market-days-stretched-controls.png) |
 | **Session mock (all UI items)** | [`mockups/review-trade-and-kline-session.html`](./mockups/review-trade-and-kline-session.html) |
 
 ## Supersedes (this session)
@@ -97,4 +99,23 @@
   - Live path today: `ReviewPage.jsx` `selectTradeGroup` + `TraderTradeList.jsx` expand block; annotations from `buildTradeRecordAnnotations`.
   - No schema change required for UI; span is derived from existing leg events’ timestamps / bar indices.
   - Admin editor forms out of scope unless they share the same list component.
+- User foldback (2026-07-21): 方向认可（“可以的”）— span fit + compact timeline locked for mock.
+- Lifecycle status: recorded
+
+## OPT-006 Data page Market days: progressive rail stretched / incongruous
+
+- Source evidence: [`screenshots/2026-07-21-data-market-days-stretched-controls.png`](./screenshots/2026-07-21-data-market-days-stretched-controls.png). User: Data 页 Market days 显示太奇怪，像把不合适的控件强行拉升，搞得不伦不类。
+- Current friction:
+  1. Data page reuses Review progressive `ReviewContextPanel` inside a **wide** panel (`DashboardPage` → `.panel`).
+  2. Shared CSS gives ticker tabs and mode buttons `flex: 1` (designed for **narrow** `.dr-sidebar` rail ~300px).
+  3. On the wide Data card, **QQQ / SPY** and **最近 / 按月** stretch into full-width “progress bar” slabs; month nav also spans the full card — controls look forced, not native to a dashboard panel.
+  4. Day chips remain small, so hierarchy feels broken (giant mode bars + tiny day pills).
+- Desired outcome: Market days on Data should feel like a **compact control strip** (or well-proportioned panel content), not stretched Review-sidebar chrome. Progressive IA (ticker → 最近/按月 → month nav → day chips) can stay; **layout density / max width / flex growth** must match the wide surface.
+- Design direction (for mock; plan freezes exact CSS):
+  1. Ticker + mode segments **content-sized or max-width** (no full-bleed `flex: 1` on wide panel).
+  2. Optional: wrap progressive rail in a left-aligned column (`max-width: ~360–420px`) so it reads like a tool, not a stretched banner.
+  3. Day chips keep compact mono pills; meta line stays secondary.
+  4. Prefer Data-scoped surface class (e.g. `.page .panel .review-context-panel` / density variant) over breaking Review sidebar where stretch is intentional.
+- Likely surface: `DashboardPage.jsx` + `ReviewContextPanel.jsx` + `styles.css` (`.ticker-tabs button { flex: 1 }`, `.date-rail-mode button { flex: 1 }`).
+- Boundary: No change to market-day inventory, ticker isolation, progressive browse state machine, or open-Review-on-date behavior unless plan expands; presentation/layout only.
 - Lifecycle status: recorded

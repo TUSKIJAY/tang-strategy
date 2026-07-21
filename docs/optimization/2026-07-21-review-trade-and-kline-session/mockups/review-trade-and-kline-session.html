@@ -323,23 +323,101 @@
       批次 <code>2026-07-21-review-trade-and-kline-session</code>：
       ① 卡片只留时间点位；② K 线 BUY/SELL + <code>vordinkkk</code>；
       ③ 取消 Eligibility；④ 5m 首帧视口；
-      <strong>⑤ 点卡片框整段交易 + legs 紧凑时间线</strong>。
+      ⑤ 点卡片框整段交易 + legs 紧凑时间线（已认可）；
+      <strong>⑥ Data · Market days 宽面板拉伸控件</strong>。
     </p>
 
     <div class="opinion">
-      <strong>关于「点 PUT 只放大第一笔，后面怎么办」：</strong>
-      不建议每笔交易各自再 zoom 一次（浪费空间、视口乱跳）。
-      推荐：选中 group 时按<strong>该组最早→最晚事件</strong>做一次 <em>span fit</em>；
-      展开 legs 用<strong>可点时间线</strong>点单笔时只做轻量定位/高亮，不再重开整日窗口。
+      <strong>OPT-005（已认可）：</strong>
+      选中 group → 一次 <em>span fit</em>（最早→最晚事件）；legs 可点时间线轻量定位，不每笔整日 zoom。
+      <br /><br />
+      <strong>OPT-006：</strong>
+      progressive 控件为窄侧栏设计了 <code>flex:1</code>；塞进 Data 宽面板后 QQQ/SPY、最近/按月 被拉成横条，不伦不类。
+      方向：宽面板用<strong>紧凑分段 + 左对齐限宽</strong>，不要全宽拉升。
     </div>
 
     <nav class="toc" aria-label="OPT sections">
+      <a href="#opt006">OPT-006 Data Market days</a>
       <a href="#opt005">OPT-005 组聚焦 + legs</a>
       <a href="#opt003">OPT-003 Eligibility</a>
       <a href="#opt001">OPT-001 卡片点位</a>
       <a href="#opt002">OPT-002 K 线标记</a>
       <a href="#opt004">OPT-004 5m 视口</a>
     </nav>
+
+    <!-- OPT-006 -->
+    <section class="section" id="opt006" aria-labelledby="h006">
+      <h2 id="h006">OPT-006 · Data · Market days 控件被拉升</h2>
+      <p class="sub">
+        Current：宽 panel 里复用侧栏 progressive rail，
+        <code>.ticker-tabs button { flex:1 }</code> 与
+        <code>.date-rail-mode button { flex:1 }</code> 把 QQQ/SPY、最近/按月 拉成全宽横条。
+        Proposed：内容宽分段 + 左对齐限宽列，日期 chip 保持紧凑。
+      </p>
+      <div class="compare">
+        <div>
+          <div class="col-label"><span>Current · wide panel stretch</span><span class="tag bad">forced flex</span></div>
+          <section class="panel" style="padding:14px">
+            <div style="font:700 14px var(--font-ui);margin-bottom:12px;color:var(--text-primary)">Market days</div>
+            <!-- stretched ticker -->
+            <div style="display:flex;gap:4px;margin-bottom:8px">
+              <span style="flex:1;text-align:center;padding:10px 0;border-radius:6px;border:1px solid var(--border-subtle);color:var(--text-muted);font:700 12px var(--font-ui)">QQQ</span>
+              <span style="flex:1;text-align:center;padding:10px 0;border-radius:6px;background:var(--accent);color:var(--surface-app);font:700 12px var(--font-ui)">SPY</span>
+            </div>
+            <!-- stretched mode -->
+            <div style="display:flex;gap:4px;margin-bottom:10px">
+              <span style="flex:1;text-align:center;padding:8px 0;border-radius:6px;border:1px solid var(--border-subtle);color:var(--text-muted);font:700 11px var(--font-ui)">最近</span>
+              <span style="flex:1;text-align:center;padding:8px 0;border-radius:6px;border:1px solid var(--border-control);background:var(--surface-control);color:var(--text-primary);font:700 11px var(--font-ui)">按月</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--text-muted);font:700 12px var(--font-mono)">
+              <span style="width:28px;height:28px;border:1px solid var(--border-control);border-radius:6px;display:grid;place-items:center;background:var(--surface-control)">‹</span>
+              <span style="flex:1;text-align:center;color:var(--text-primary)">2026-07</span>
+              <span style="width:28px;height:28px;border:1px solid var(--border-control);border-radius:6px;display:grid;place-items:center;background:var(--surface-control)">›</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;background:color-mix(in srgb,var(--accent) 18%,var(--surface-control));border:1px solid var(--accent);font:11px var(--font-mono)">17</span>
+              <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">16</span>
+              <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">15</span>
+              <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">14</span>
+              <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">13</span>
+              <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">10</span>
+            </div>
+            <div style="margin-top:8px;font-size:10px;color:var(--text-muted)">本月交易日 12 · 全库 SPY 46 — 巨型分段 + 小 chip，比例失调</div>
+          </section>
+        </div>
+        <div>
+          <div class="col-label"><span>Proposed · compact strip</span><span class="tag good">no stretch</span></div>
+          <section class="panel" style="padding:14px">
+            <div style="font:700 14px var(--font-ui);margin-bottom:12px;color:var(--text-primary)">Market days</div>
+            <!-- limited width column -->
+            <div style="max-width:360px">
+              <div style="display:inline-flex;gap:4px;margin-bottom:8px;padding:2px;border-radius:8px;background:var(--surface-control);border:1px solid var(--border-subtle)">
+                <span style="padding:5px 14px;border-radius:6px;color:var(--text-muted);font:700 12px var(--font-ui)">QQQ</span>
+                <span style="padding:5px 14px;border-radius:6px;background:var(--accent);color:var(--surface-app);font:700 12px var(--font-ui)">SPY</span>
+              </div>
+              <div style="display:inline-flex;gap:4px;margin-bottom:10px;padding:2px;border-radius:8px;background:var(--surface-control);border:1px solid var(--border-subtle)">
+                <span style="padding:5px 12px;border-radius:6px;color:var(--text-muted);font:700 11px var(--font-ui)">最近</span>
+                <span style="padding:5px 12px;border-radius:6px;background:var(--surface-raised);color:var(--text-primary);font:700 11px var(--font-ui);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent)">按月</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;max-width:280px;color:var(--text-muted);font:700 12px var(--font-mono)">
+                <span style="width:28px;height:28px;border:1px solid var(--border-control);border-radius:6px;display:grid;place-items:center;background:var(--surface-control);flex:0 0 auto">‹</span>
+                <span style="flex:1;text-align:center;color:var(--text-primary)">2026-07</span>
+                <span style="width:28px;height:28px;border:1px solid var(--border-control);border-radius:6px;display:grid;place-items:center;background:var(--surface-control);flex:0 0 auto">›</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px">
+                <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;background:color-mix(in srgb,var(--accent) 18%,var(--surface-control));border:1px solid var(--accent);font:11px var(--font-mono)">17</span>
+                <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">16</span>
+                <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">15</span>
+                <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">14</span>
+                <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">13</span>
+                <span style="min-width:28px;text-align:center;padding:5px 0;border-radius:4px;border:1px solid var(--border-subtle);font:11px var(--font-mono);color:var(--text-muted)">10</span>
+              </div>
+              <div style="margin-top:8px;font-size:10px;color:var(--text-muted)">本月交易日 12 · 全库 SPY 46 — 控件跟 chip 同一密度</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
 
     <!-- OPT-005 primary new -->
     <section class="section" id="opt005" aria-labelledby="h005">
@@ -716,13 +794,19 @@
           <tr>
             <td>005 Group + legs</td>
             <td>只 fit 第一笔；legs 糊字</td>
-            <td><strong>span fit 全组</strong> + 三列时间线可点</td>
+            <td><strong>span fit 全组</strong> + 三列时间线可点（已认可）</td>
             <td>不每笔单独 zoom 整图</td>
+          </tr>
+          <tr>
+            <td>006 Data Market days</td>
+            <td>宽 panel 全宽拉升 QQQ/SPY · 最近/按月</td>
+            <td>紧凑分段 + 左对齐限宽列</td>
+            <td>progressive IA 可保留；修密度/ flex</td>
           </tr>
         </tbody>
       </table>
       <p class="keep">
-        Record-only。推荐交互：group 选中 = 一次框住生命周期；单笔导航 = timeline 行，轻量 focus。
+        Record-only。OPT-005 方向用户已认可。OPT-006 根因：侧栏 <code>flex:1</code> 不适配 Data 宽卡片。
         不授权实现 / push / DB。
       </p>
     </section>
