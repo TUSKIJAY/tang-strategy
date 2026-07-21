@@ -3,12 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-21: User instruction promoting named OPT batch `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/` (session OPT-001 + OPT-002) to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md` revision `v1-proposal-2026-07-21`. Scope: card reading path points-only (drop $/%/fees); K-line marker labels `display_name BUY|SELL`; registry UI name `vordin` → `vordinkkk`. Session OPT-003…006 remain recorded-only. Indexes/roadmap/OPT back-links/state blocks reconciled. Next gate independent `design-review`. No activation, implementation, push, data pipeline, provider/broker, or remote authority.
 
 2026-07-21: Optimization record mode — **session-consolidated** batch `docs/optimization/2026-07-21-review-trade-and-kline-session/`: OPT-001…005 (cards, markers, Eligibility, 5m viewport, group span+legs; OPT-005 direction user-accepted) + **OPT-006** Data Market days progressive rail looks stretched/incongruous in wide panel. Mock updated. Record-only; no implementation, plan, push, data, or remote authority.
 

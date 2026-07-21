@@ -3,21 +3,20 @@
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
-- No active or proposed plan.
-- **Optimization record mode is open** (user enabled). Record-only under `docs/optimization/`.
-- Latest recorded batch (no implementation authority):
-  - `docs/optimization/2026-07-21-review-trade-and-kline-session/` — OPT-001…006 (incl. Data Market days stretched rail).
-  - Mock: `.../review-trade-and-kline-session/mockups/review-trade-and-kline-session.html`
-  - Same-session split batches all superseded.
+- Current Proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md` revision `v1-proposal-2026-07-21`.
+- Next gate: independent `design-review` of exact v1. No activation or implementation authority.
+- Promoted OPT scope: session OPT-001 (cards points-only) + OPT-002 (BUY/SELL + `vordinkkk`); OPT-003…006 remain recorded-only.
+- **Optimization record mode remains open** for non-promoted items under `docs/optimization/`.
+- Session batch: `docs/optimization/2026-07-21-review-trade-and-kline-session/`; named promotion source: `.../2026-07-21-trade-points-and-kline-marker-labels/`.
 - Coding Mode repository mutations now include one task-scoped local commit by default. The only no-commit cases are an explicit user opt-out, draft/failed/incomplete work, or inability to separate task paths safely from unrelated dirty changes.
 - Stage only task-owned literal paths. Never use repository-wide, directory, glob, `-A`, `commit -a`, or implicit staging.
 - A local commit never grants push, PR, merge, Pages, publication, provider/broker, hosted verification, or another remote action.

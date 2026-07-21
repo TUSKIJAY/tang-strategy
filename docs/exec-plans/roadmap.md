@@ -35,7 +35,7 @@ None.
 
 ## Proposed Plans
 
-None.
+- [Tang Strategy Trade Points And K-line Marker Labels](./proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) — Proposed revision `v1-proposal-2026-07-21`; next gate `design-review`; no activation/implementation authority.
 
 ## Completed Plans
 
