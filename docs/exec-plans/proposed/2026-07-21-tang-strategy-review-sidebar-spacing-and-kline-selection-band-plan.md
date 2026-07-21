@@ -3,16 +3,16 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
 - Plan slug: `2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan`
-- Revision: `v1-proposal-2026-07-21`
+- Revision: `v2-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-sidebar-spacing-selection-band`
 - Design reviews: ../reviews/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan/review-001.md@revise@v1-proposal-2026-07-21
-- Latest design verdict: revise
+- Latest design verdict: none
 - Review independence: attested
 - Activation evidence: none
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -46,7 +46,15 @@ Only these two OPTs from batch `2026-07-21-review-sidebar-spacing-and-kline-sele
 
 ### 1.2 Review foldback closure map
 
-None yet. First independent design review targets exact revision `v1-proposal-2026-07-21`.
+#### review-001 closure (v1 → v2)
+
+Independent `review-001` returned `revise/high` against exact revision `v1-proposal-2026-07-21` (plan SHA-256 `411e8887b6586f94fcdc7e2a7c637bef6fb2cd68e284ea2c92c0e643bef96819` at HEAD `93191ef38e7c75d77920739f0c8faf4e93613426`). Revision `v2-review-foldback-2026-07-21` folds the sole P1 finding:
+
+| Severity | Finding (summary) | V2 closure |
+| --- | --- | --- |
+| P1 | Mandatory B-* carriers were abstract; tracked group-span runner still requires non-empty blue highlight and uses highlight storage as span oracle; that runner path was absent from the modify manifest | §2.4 + §3.1 freeze **replacement** tracked runner `frontend/scripts/playwright/review-sidebar-spacing-and-selection-band-acceptance.mjs` as the **only** mandatory browser carrier for this plan’s B-Sidebar-layout / B-Group-band-cancel / B-Event-focus-cancel. Historical completed-plan runner `frontend/scripts/playwright/trade-tools-group-span-viewport-data-rail-acceptance.mjs` is **out of this plan’s modify set** (append-only historical evidence for the completed group-span plan; this plan does not re-run it as an exit gate). Independent oracles: pure `groupBarSpan(group, bars1m)` and `eventFocusPayload(event, bars1m)` (or fixture-precomputed start/end indices) — **never** stored highlight ranges. After group/event select: `getHighlightRanges()` must be empty/`[]`; viewport from `getViewportDebug()` must contain the independent expected indices; no post-fit recenter. Layout: measured ≈20px separation between explicit tools / traders / signals block wrappers with captions, hairlines, and Download absence on Review **and** Static. Screenshots V1–V3 remain supplemental. |
+
+`review-001` is append-only prior-revision evidence and **cannot approve v2**. Next gate is independent design review of exact revision `v2-review-foldback-2026-07-21`.
 
 ### 1.3 Visual evidence
 
@@ -79,6 +87,9 @@ Untracked informal `output/playwright/mock-*.png` trees are **not** batch eviden
 - `selectTradeGroup` on Review/Static: `setHighlightRanges({ timeframe:'1m', startIndex, endIndex, style:'blue' })` then `fitRange(...)` with no post-fit center (completed group-span plan).
 - `focusTradeEvent` uses `eventFocusPayload(...).style = 'blue'` and the same highlight + fitRange path for single-bar focus.
 - Engine `drawHighlightRanges` paints multi-bar translucent bands for `style: 'blue'` / `red`; that paint is the loud overlay users rejected.
+- Engine seams available for browser proof: `getHighlightRanges()`, `getViewportDebug()`, `fitRange`.
+- Pure oracles already exported: `groupBarSpan(group, bars)`, `eventFocusPayload(event, bars, options)`.
+- Historical tracked runner `frontend/scripts/playwright/trade-tools-group-span-viewport-data-rail-acceptance.mjs` **requires** non-empty blue highlights and uses highlight storage as the span oracle — incompatible with OPT-002 cancel; **not** this plan’s exit carrier.
 - Marker labels (`display_name` + BUY/SELL) already identify trade points on chart; user decided no replacement cue after band removal.
 - Strategy signal annotations may still use blue styles for non-trade flows; those paths are **out of scope** unless they share the exact trade-group/event select sequence this plan changes.
 
@@ -142,10 +153,20 @@ Compare against §1.3 live screenshots and `mock.html` proposal state.
 | **N-Highlight-source** | Node source inspection of Review/Static select paths | `selectTradeGroup` / `focusTradeEvent` do not call `setHighlightRanges` with `style: 'blue'` (or any paint style) for trade group/event select; they either skip highlight or clear via `setHighlightRanges(null)` / `[]` before/after fitRange; fitRange still present | Engine canvas pixels |
 | **N-Marker-regression** | Existing/updated pure marker tests | Marker label contract still holds after any shared edits | Band paint |
 | **N-Export-pure** | Existing pure download tests | `buildTradeRecordDownloads` / selection helpers still work; Admin may still import `TradeExportControls` | Review/Static Download UI presence |
-| **B-Sidebar-layout** | Playwright | Computed styles: gap between the three blocks ≈20px; captions/hairlines visible; Download control **absent** on Review and Static stacks; Admin Download still present if Admin page is opened in the same receipt suite (optional secondary assert) | Export payload bytes |
-| **B-Group-band-cancel** | Playwright | Group select: no highlight ranges painted (engine `getHighlightRanges()` empty / null equivalent, or canvas assert no band); fitRange window contains group span; no post-fit recenter regression | Marker redesign |
-| **B-Event-focus-cancel** | Playwright | Event-row click: no blue highlight paint; focused bar in view via fitRange | Full-day fit |
-| **V1–V3** | Screenshots under `output/` | Visual acceptance vs mock | Interaction semantics alone |
+| **N-Span-oracle** | Node pure tests on `groupBarSpan` / `eventFocusPayload` | Deterministic expected start/end indices for the frozen multi-event fixture group (and one named event) used by B-* carriers | That browser paint is empty |
+| **B-Sidebar-layout** | Tracked Playwright runner §3.1 item 8 | On Review **and** Static desktop `1672x941`: measure bounding-box vertical gap between the three explicit mid-stack wrappers (tools/filters, traders list, signals list) ≈20px (±2px); captions 交易者 / 策略讲解 and hairlines present; Download control **absent** in `.dr-sidebar` trade stack | Export payload bytes; Admin-only layout |
+| **B-Group-band-cancel** | Same tracked runner | Deterministic fixture group click: `getHighlightRanges()` empty; independent expected span from pure oracle (precomputed or injected via page.evaluate of known indices); `getViewportDebug()` window contains `[expectedStart, expectedEnd]`; no post-fit recenter that shrinks/moves off the span | Using highlight storage as the expected span |
+| **B-Event-focus-cancel** | Same tracked runner | Named timeline event-row click: `getHighlightRanges()` empty; independent single-bar expected index; focused bar inside `getViewportDebug()` window; window not full-day (`end-start+1 ≤ 120` on 1m) | Full-day fit; highlight-as-oracle |
+| **V1–V3** | Screenshots from same runner under `output/` | Visual acceptance vs mock | Interaction semantics alone |
+
+**Tracked runner (mandatory, review-001):** `frontend/scripts/playwright/review-sidebar-spacing-and-selection-band-acceptance.mjs`
+
+- Owns **B-Sidebar-layout**, **B-Group-band-cancel**, **B-Event-focus-cancel**, and V1–V3 screenshots.
+- Receipts under untracked `output/playwright/review-sidebar-spacing-selection-band-<timestamp>/`.
+- Fixture: Interactive Review + Static; prefer **SPY `2026-07-17`** for band screenshot parity, or **QQQ `2026-07-17`** multi-event group `tg_20260717_vordin_qqq_002` when multi-event timeline is required. Phase 0 freezes the exact group id + event row index and records the pure-oracle expected indices in the runner constants.
+- **Independent oracle rule:** expected span/event indices come from pure `groupBarSpan` / `eventFocusPayload` (Node **N-Span-oracle** and/or runner constants computed from the same helpers offline). **Forbidden:** reading `getHighlightRanges()` to define the expected range.
+- **Empty highlight rule:** after group select and after event focus, `getHighlightRanges()` length is `0` (or engine-equivalent clear).
+- Historical `trade-tools-group-span-viewport-data-rail-acceptance.mjs` is **not** a Phase 1 exit carrier for this plan.
 
 **Hard rule:** Missing any mandatory **B-*** receipt fails Phase 1 exit. Source-only proofs cannot substitute for band-cancel or gap measurement.
 
@@ -158,28 +179,33 @@ Compare against §1.3 live screenshots and `mock.html` proposal state.
 1. `frontend/src/features/review/TraderFilters.jsx` — remove `Trade tools` title head; stop rendering `exportControls` in the Review/Static tools stack (prop may remain for Admin backward-compat **or** Admin can pass null and mount Download beside filters itself — pick one approach in Phase 0 and document; default: keep optional `exportControls` slot but Review/Static pass `null` / omit).
 2. `frontend/src/pages/ReviewPage.jsx` — stop passing `TradeExportControls` into `TraderFilters`; cancel group/event highlight paint while keeping fitRange locate sequences.
 3. `frontend/src/pages/StaticReviewsApp.jsx` — same composition and highlight-cancel as Review.
-4. `frontend/src/features/review/TraderTradeList.jsx` and/or `ReviewSignalList.jsx` — add section captions + hairline structure for 交易者 / 策略讲解 if not introduced via wrapper in the list column.
+4. `frontend/src/features/review/TraderTradeList.jsx` and/or `ReviewSignalList.jsx` — add section captions + hairline structure for 交易者 / 策略讲解 if not introduced via wrapper in the list column; ensure three mid-stack blocks have stable, queryable wrappers for gap measurement.
 5. `frontend/src/styles.css` — inter-block gap ≈20px under `.dr-sidebar .dr-signal-list` (or equivalent scoped selectors); caption + hairline styles; ensure density in-card rules remain.
-6. `frontend/src/features/review/tradeRecords.js` — only if needed for eventFocusPayload comments/defaults; **do not** change marker label builder contracts. Optional: document that `style: 'blue'` is unused by Review/Static trade select after this plan.
-7. `frontend/src/features/review/tradeRecords.test.js` and/or `reviewWorkspace.test.js` — **N-Sidebar-source**, **N-Highlight-source**, retain **N-Export-pure** / **N-Marker-regression**.
+6. `frontend/src/features/review/tradeRecords.js` — only if needed for eventFocusPayload comments/defaults; **do not** change marker label builder contracts. Optional: document that `style: 'blue'` is unused by Review/Static trade select after this plan. Pure `groupBarSpan` / `eventFocusPayload` remain the independent span/event oracles.
+7. `frontend/src/features/review/tradeRecords.test.js` and/or `reviewWorkspace.test.js` — **N-Sidebar-source**, **N-Highlight-source**, **N-Span-oracle**, retain **N-Export-pure** / **N-Marker-regression**.
+8. `frontend/scripts/playwright/review-sidebar-spacing-and-selection-band-acceptance.mjs` — **new** tracked Playwright runner implementing **B-Sidebar-layout**, **B-Group-band-cancel**, **B-Event-focus-cancel**, and V1–V3. Uses independent oracles and empty-highlight assertions as frozen in §2.4. Does **not** reintroduce blue-band expectations.
 
 **May touch only if required for Admin composition safety:**
 
-8. `frontend/src/pages/AdminTradersPage.jsx` — only if removing default export slot behavior would hide Admin Download; restore Admin Download placement without reintroducing Review/Static Download.
+9. `frontend/src/pages/AdminTradersPage.jsx` — only if removing default export slot behavior would hide Admin Download; restore Admin Download placement without reintroducing Review/Static Download.
+
+**Explicitly out of modify set (historical only):**
+
+10. `frontend/scripts/playwright/trade-tools-group-span-viewport-data-rail-acceptance.mjs` — completed-plan historical runner; **not** this plan’s Phase 1 exit gate; do not treat its blue-highlight asserts as still authoritative for OPT-002.
 
 **Lifecycle / evidence (separate authority per phase):**
 
-9. Optimization record + `docs/optimization/index.md` status/lifecycle links.
-10. `PROGRESS.md` / `HANDOFF.md` state blocks.
-11. Plan file + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + roadmap.
-12. Screenshots / Playwright receipts under `output/` (untracked).
+11. Optimization record + `docs/optimization/index.md` status/lifecycle links.
+12. `PROGRESS.md` / `HANDOFF.md` state blocks.
+13. Plan file + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + roadmap.
+14. Screenshots / Playwright receipts under `output/` (untracked).
 
 **Out of manifest / must not change:**
 
 - Backend, API, tracked DB, seed, content day files, Pages workflow, daily runbook, provider/broker.
 - Progressive DateRail IA; App shell left nav.
 - Marker label/title vocabulary; direction colors; card density px table for in-card elements (except intentional inter-block gap rules documented in phase evidence).
-- TF first-paint / Data `data-market-days-rail` contracts from the completed group-span plan.
+- TF first-paint / Data `data-market-days-rail` contracts from the completed group-span plan (product code paths remain; only trade selection **paint** is cancelled).
 - Export file formats/columns from pure builders.
 - New product dependencies or test harnesses beyond existing Node suite + Playwright.
 
@@ -200,10 +226,11 @@ Untracked `output/playwright/**` and other `output/**` trees are user/evidence-o
 - Work:
   - Record HEAD baseline and re-hash §1.3 evidence.
   - Confirm green `npm run test:trade-records` and current group-select sequence on Review/Static.
-  - Freeze fixture day(s): SPY `2026-07-17` for band screenshot parity; QQQ `2026-07-17` acceptable if multi-trader needed for captions.
-  - Choose Admin Download composition approach (§3.1 item 1/8) and write it into phase evidence.
-  - Freeze exact CSS selector plan for 20px gaps and caption classes without undoing density pins.
-- Verification: manifest paths listed; no backend/DB paths; OPT-001/002 only.
+  - Freeze exact fixture group id + event-row index for B-* carriers; compute and record pure-oracle expected indices via `groupBarSpan` / `eventFocusPayload` into the new tracked runner constants.
+  - Choose Admin Download composition approach (§3.1 items 1/9) and write it into phase evidence.
+  - Freeze exact CSS selector / wrapper plan for 20px gaps and caption classes without undoing density pins.
+  - Scaffold or outline the new tracked runner path (item 8) so Phase 1 implements against a known file.
+- Verification: manifest paths listed including the new runner; no backend/DB paths; OPT-001/002 only; independent oracle constants non-empty.
 - Exit gate: `phase-0-exit` with baseline note under reviews evidence or untracked `output/`.
 
 ### Phase 1 — Implementation (OPT-001 + OPT-002)
@@ -212,8 +239,9 @@ Untracked `output/playwright/**` and other `output/**` trees are user/evidence-o
 - Work:
   - Apply spacing, captions, Traders-row dedupe, Review/Static Download removal.
   - Cancel group + event highlight paint; keep fitRange locate; keep markers.
-  - Update Node carriers; run Playwright **B-*** receipts; capture V1–V3.
-- Verification: all §2.2 criteria; all §2.4 carriers; normal + static builds; harness auto; `git diff --check` on task paths.
+  - Implement/update Node carriers including **N-Span-oracle**.
+  - Implement tracked runner §3.1 item 8; run **B-Sidebar-layout**, **B-Group-band-cancel**, **B-Event-focus-cancel**; capture V1–V3.
+- Verification: all §2.2 criteria; all §2.4 carriers via the frozen runner path; normal + static builds; harness auto; `git diff --check` on task paths.
 - Exit gate: `phase-1-exit` with implementation commit SHA + receipts.
 
 ### Phase 2 — Implementation Review And Closeout

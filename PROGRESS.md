@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-21`. Closure: freeze replacement tracked Playwright runner `frontend/scripts/playwright/review-sidebar-spacing-and-selection-band-acceptance.mjs` for B-Sidebar-layout / B-Group-band-cancel / B-Event-focus-cancel; independent span/event oracles via pure `groupBarSpan` / `eventFocusPayload` (not highlight storage); empty `getHighlightRanges()` after group/event select; historical group-span runner out of this plan’s modify/exit set. `review-001` cannot approve v2. Next gate independent `design-review` of exact v2. No activation, implementation, content/DB, provider/broker, publication, push, or remote authority.
 
 2026-07-21: Independent design review `review-001` on exact revision `v1-proposal-2026-07-21` returned `revise/high` with one P1 finding. The product locks, Review/Static parity, frozen Download removal, event-row band cancellation, live integration paths, authority boundaries, plan SHA-256 `411e8887...6819`, and all three evidence hashes are sound. Required foldback: add the exact tracked browser runner path to the manifest (or freeze a replacement), remove its contradictory non-empty blue-highlight assertions, and define an independent group-span/event-bar oracle plus measured three-block layout assertions for mandatory Review/Static browser proof. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 
