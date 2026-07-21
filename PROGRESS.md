@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent design review `review-001` on exact revision `v1-proposal-2026-07-21` returned `revise/high` with one P1 finding. The product locks, Review/Static parity, frozen Download removal, event-row band cancellation, live integration paths, authority boundaries, plan SHA-256 `411e8887...6819`, and all three evidence hashes are sound. Required foldback: add the exact tracked browser runner path to the manifest (or freeze a replacement), remove its contradictory non-empty blue-highlight assertions, and define an independent group-span/event-bar oracle plus measured three-block layout assertions for mandatory Review/Static browser proof. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 
 2026-07-21: User instruction converting OPT batch `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/` OPT-001 + OPT-002 to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md` revision `v1-proposal-2026-07-21`. Locks: Review+Static parity; ≈20px inter-block gaps + 交易者/策略讲解 captions/hairlines; remove `Trade tools` title; **Download removed from Review/Static stack (not relocated)**; cancel blue group/event selection band with **no** replacement cue; keep fitRange locate; marker labels unchanged. Next gate independent `design-review`. No activation, implementation, push, DB/content, provider/broker, or remote authority.
 

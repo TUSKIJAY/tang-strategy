@@ -35,7 +35,7 @@ None.
 
 ## Proposed Plans
 
-- [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) — Proposed; revision `v1-proposal-2026-07-21`; OPT-001 + OPT-002; next gate `design-review`
+- [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./proposed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) — Proposed; revision `v1-proposal-2026-07-21`; `review-001: revise/high`; OPT-001 + OPT-002; next gate `plan-revision`
 
 ## Completed Plans
 
