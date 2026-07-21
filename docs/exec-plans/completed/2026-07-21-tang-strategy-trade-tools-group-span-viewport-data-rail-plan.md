@@ -1,7 +1,7 @@
 # Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
 - Revision: `v3-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-tools-group-span-viewport-data-rail`
@@ -9,19 +9,19 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan
-- Current phase: phase-0
-- Phase state: not-started
-- Phase entry gate: phase-0-start
-- Next gate: `phase-0-start`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: a76b83680e80ab8bf7a857fa776146a2aa4f24aa
 - Lifecycle reconciliation commit: none
 - Owner: Grok
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md` session OPT-003…006
 - Proposal baseline: `codex/project-harness@5f7a4cce581f1a475d5dbadd2cb8cbac33b9bfb3`
-- Scope authority: lifecycle activation only under `user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan`. Matching design approval is `review-003: approve/high` on exact revision `v3-review-foldback-2026-07-21`. This activation does **not** start Phase 0 and does **not** authorize implementation, content/DB writes, push, PR, merge, Pages, provider/broker, or remote action.
+- Scope authority: full local execution under `user-instruction:2026-07-21-execute-trade-tools-group-span-viewport-data-rail-plan` (goal OBJECTIVE). Matching design approval `review-003: approve/high`. Implementation review `implementation-review-001: accept/high`. Product commit `a76b83680e80ab8bf7a857fa776146a2aa4f24aa`. No push/PR/merge/Pages/provider/broker/DB/content day-file/remote.
 - Local commit: task-scoped default; does not authorize implementation, push, or remote action
 
 ## 1. Context And Evidence

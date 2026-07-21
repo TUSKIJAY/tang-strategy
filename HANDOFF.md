@@ -3,39 +3,43 @@
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
-- Active plan: `docs/exec-plans/active/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v3-review-foldback-2026-07-21`.
+- Completed plan: `docs/exec-plans/completed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v3-review-foldback-2026-07-21`.
 - Matching design approval: `review-003: approve/high`.
-- Activation: `user-instruction:2026-07-21-activate-trade-tools-group-span-viewport-data-rail-plan`.
-- State: `phase-0:not-started`; next gate `phase-0-start`.
-- Scope: session OPT-003…006 (Eligibility removal, group span+timeline, 5m first-paint, Data rail density).
-- **This activation does not start Phase 0** and does **not** authorize implementation, content/DB writes, push, PR, merge, Pages, provider/broker, or remote action.
-- Preserve untracked `output/` evidence trees; do not stage.
-- Stage only task-owned literal paths for lifecycle commits.
+- Full-execution authority: `user-instruction:2026-07-21-execute-trade-tools-group-span-viewport-data-rail-plan`.
+- Verified implementation commit: `a76b83680e80ab8bf7a857fa776146a2aa4f24aa`.
+- Implementation review: `implementation-review-001: accept/high`.
+- State: closed; next gate `closed`.
+- Evidence (untracked): `output/playwright/trade-tools-group-span-20260721122508/` (V1–V6 + B-* receipts).
+- Preserve untracked `output/` trees; do not stage.
+- No push/PR/merge/Pages/provider/broker without explicit user request.
 
 ## Latest Completed Work
 
+- Trade Tools / Group Span / Viewport / Data Rail product commit: `a76b83680e80ab8bf7a857fa776146a2aa4f24aa`.
 - Trade Points And K-line Marker Labels product commit: `717ac8ae9bf5faf00ec6dff3b81d04c51c86b145`.
 - Trade Panel Visual Polish product commit: `35a007efbd9db2a99967fb007adff2415f243e0b`.
 
 ## Verification Baseline
 
-- `python scripts/check-operating-modes.py --root .`
-- `python -m unittest scripts.tests.test_operating_modes`
-- `python scripts/check-project-harness.py --root . --profile auto`
+- `cd frontend && npm run test:trade-records` (61/61)
+- `cd frontend && npm run build`
+- `cd frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews`
+- `python3 scripts/check-project-harness.py --root . --profile auto`
+- `node frontend/scripts/playwright/trade-tools-group-span-viewport-data-rail-acceptance.mjs`
 - `git diff --check`
 
 ## Resume Rules
 
 1. Re-run startup Git status and preserve untracked `output/` trees.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. Active plan is parked at `phase-0-start`; do not begin Phase 0 without a separate explicit implementation-start / full-execution instruction.
+3. No active plan; next work requires a new OPT/prop plan or explicit user task.
 4. No remote actions without explicit user request.

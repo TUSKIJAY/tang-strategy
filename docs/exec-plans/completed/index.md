@@ -4,6 +4,7 @@ Completed, terminated, rejected, superseded, or archived plans are indexed here 
 
 | Plan | Disposition | Verification | Final commit |
 | --- | --- | --- | --- |
+| [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/implementation-review-001.md) | a76b83680e80ab8bf7a857fa776146a2aa4f24aa |
 | [Tang Strategy Trade Points And K-line Marker Labels](./2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/implementation-review-001.md) | 717ac8ae9bf5faf00ec6dff3b81d04c51c86b145 |
 | [2026-07-18 Tang Strategy governed harness and data safety recovery](./2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/implementation-review-001.md) | a70be643a968cc24215fe508e69b3e0496d3c34a |
 | [2026-07-19 Tang Strategy Coding And Data Update Modes](./2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) | Completed | [implementation-review-013](../reviews/2026-07-19-tang-strategy-coding-and-data-update-modes-plan/implementation-review-013.md) | 994f9176eb74778f346710e62ec6dabde55bae9a |
