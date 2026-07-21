@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-- [Tang Strategy Trade Points And K-line Marker Labels](./active/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) — Active revision `v2-review-foldback-2026-07-21`; `review-002: approve/high`; `phase-0:not-started`; next gate `phase-0-start`. Activation only; no implementation start.
+None.
 
 ## Proposed Plans
 
@@ -39,6 +39,7 @@ None.
 
 ## Completed Plans
 
+- [Tang Strategy Trade Points And K-line Marker Labels](./completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Trade Panel Visual Polish](./completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Data Progressive Navigation And Trade Card Density](./completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Review Date Navigation And Trader Filter Fusion](./completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) — Completed; canonical details: [completed index](./completed/index.md)

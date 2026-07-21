@@ -3,12 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Trade Points And K-line Marker Labels is **Completed**. Goal OBJECTIVE accept-active-plan-until-complete authorized full local execution through closeout. Phase 0 baseline freeze; Phase 1 product commit `717ac8ae9bf5faf00ec6dff3b81d04c51c86b145` (card points-only, marker display_name BUY/SELL, dual-surface vordin display_name to vordinkkk); packet-001 + independent `implementation-review-001: accept/high`; migrated to completed/. Frontend 54/54 test:trade-records, normal+static builds, harness auto, N-Registry-dual, V1-V3 screenshots under untracked output/playwright/trade-points-marker-labels-20260721/. Push/PR/merge/Pages/provider/broker remain unauthorized. Next gate: closed.
 
 2026-07-21: 用户以“查看review002然后把prop plan迁移到active”明确授权 Trade Points And K-line Marker Labels exact revision `v2-review-foldback-2026-07-21` 的 lifecycle activation，记录为 `user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan`。已且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap、optimization 回链与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。Matching design approval 为 `review-002: approve/high`。本次 activation 不启动 Phase 0，不授权实现、content/DB 写入、Git stage/commit/push 以外的远端动作、provider/broker、Pages 或 hosted 动作。
 

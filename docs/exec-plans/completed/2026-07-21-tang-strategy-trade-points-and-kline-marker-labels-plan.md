@@ -1,7 +1,7 @@
 # Tang Strategy Trade Points And K-line Marker Labels
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`
 - Revision: `v2-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-points-kline-labels`
@@ -9,19 +9,19 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan
-- Current phase: phase-0
-- Phase state: not-started
-- Phase entry gate: phase-0-start
-- Next gate: `phase-0-start`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: 717ac8ae9bf5faf00ec6dff3b81d04c51c86b145
 - Lifecycle reconciliation commit: none
 - Owner: Grok
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/2026-07-21-trade-points-and-kline-marker-labels.md` (user-named; superseded pointer) with authoritative detail in session batch OPT-001/OPT-002 `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`
 - Proposal baseline: `codex/project-harness@6c62c2b1ff8314da36a5f2dad57a81451c720edb`
-- Scope authority: lifecycle activation only under `user-instruction:2026-07-21-activate-trade-points-and-kline-marker-labels-plan`. Stops at `phase-0:not-started` / next gate `phase-0-start`. Does **not** start Phase 0 or authorize implementation, content/DB write, push, PR, merge, Pages, provider/broker, publication, or any remote action. Matching design approval is `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-21`.
+- Scope authority: full local execution through closeout under goal OBJECTIVE / `user-instruction:2026-07-21-execute-trade-points-and-kline-marker-labels-plan`. Push/PR/merge/Pages/provider/broker/remote remain unauthorized. Matching design approval is `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-21`.
 
 ## 1. Context And Evidence
 
