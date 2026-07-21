@@ -10,9 +10,7 @@
 - Next gate: `none`
 <!-- operating-modes-state:end -->
 
-2026-07-21: Optimization record mode — batch `docs/optimization/2026-07-21-kline-5m-switch-viewport-glitch/` OPT-001: clicking K-line engine **5m** shows a broken first viewport (bars clustered left, empty right); mouse wheel then corrects display. Screenshot archived. Record-only; no implementation, plan, push, data, or remote authority.
-
-2026-07-21: Optimization record mode — merged batch `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/`: OPT-001 trade cards points-only (drop $/%); OPT-002 K-line BUY/SELL labels + UI nickname `vordinkkk` → `trader_id: vordin`. Single mock `mockups/trade-points-and-kline-labels.html`. Prior split batches `trade-card-simplify-points-only` and `kline-marker-action-and-trader-nickname` marked superseded. Record-only; no implementation, plan, push, data, or remote authority.
+2026-07-21: Optimization record mode — **session-consolidated** batch `docs/optimization/2026-07-21-review-trade-and-kline-session/`: OPT-001 cards points-only; OPT-002 K-line BUY/SELL + `vordinkkk`→`vordin`; OPT-003 remove Trade tools Eligibility (Display/Reported/Calculated); OPT-004 5m switch first-paint viewport glitch. Single mock `mockups/review-trade-and-kline-session.html`. All same-session split batches superseded. Record-only; no implementation, plan, push, data, or remote authority.
 
 2026-07-21: Lifecycle commit 语义已一次性收敛：用户授权的 Coding Mode 仓库写入在完成时默认形成一个仅含 task-owned literal paths 的本地 commit；用户明确说不 commit、任务未完成或路径归属冲突时不提交。OPT、prop plan、review/revision、activation、implementation 和 completed migration 均适用。push/PR/merge/Pages/provider/broker/remote 仍需单独授权。旧的多层提交协议、额外 authority 字段、receipt/trailer/ancestry 和 work-unit 状态机已从当前规范、模板、配置、CI 与执行入口删除；lifecycle checker 缩回基本一致性检查，并加入“keep small work small”防扩张规则。
 
