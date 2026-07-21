@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent design review `review-001` on exact revision `v1-proposal-2026-07-21` returned `revise/high`. The shared visual direction, nine-path production scope, QQQ 2026-07-17 PUT/CALL fixture, and authority boundary are sound. Required foldback: freeze accessible single-select keyboard/state semantics and behavioral proof for Eligibility segments; resolve the >=7 drawer to one language with mandatory deterministic coverage; scope the old Download-copy scan to production sources and prove the relocated short control still emits JSON + 3 CSV on Review/Static/Admin. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, push, data, provider/broker, Pages, or remote authority.
 
 2026-07-21: User instruction `生成prop plan` promoted trade-panel polish OPT batch to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md` revision `v1-proposal-2026-07-21`. Scope: shared Trade tools + cards chrome for Review/Static/Admin; Eligibility segments Display/Reported/Calculated; short Download; English chrome; mock-accepted layout. Indexes/roadmap/optimization/state blocks reconciled. Next gate independent `design-review`. No activation, implementation, Git stage/commit/push, data, provider/broker, or remote authority.
 

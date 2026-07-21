@@ -5,14 +5,14 @@
 - Plan slug: `2026-07-21-tang-strategy-trade-panel-visual-polish-plan`
 - Revision: `v1-proposal-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-panel-polish`
-- Design reviews: none
-- Latest design verdict: none
-- Review independence: none
+- Design reviews: `docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md@revise@v1-proposal-2026-07-21`
+- Latest design verdict: revise
+- Review independence: attested
 - Activation evidence: none
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: design-review
+- Next gate: plan-revision
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
