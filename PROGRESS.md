@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent design review `review-001` on exact revision `v1-proposal-2026-07-21` returned `revise/high` with four findings. Required foldback: make display-only list/availability/export behavior canonical after Eligibility chrome removal; freeze an executable group-span sequence that cannot be undone by post-fit centering and renders a real neutral band; select one mandatory first-frame timeframe carrier; and scope Data rail CSS with computed/visual Review-sidebar non-regression proof. All six evidence hashes matched. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 
 2026-07-21: User instruction converting session optimization batch `docs/optimization/2026-07-21-review-trade-and-kline-session/` to prop plan. Promoted **OPT-003…006 only** to Proposed plan `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v1-proposal-2026-07-21`. Scope: remove Eligibility tools row (default display filter); 5m first-paint viewport fix; group span-fit + compact legs timeline; Data progressive rail density. OPT-001/002 remain completed. Indexes/roadmap/OPT back-links/state blocks reconciled. Next gate independent `design-review`. No activation, implementation, push, data pipeline, provider/broker, or remote authority.
 
