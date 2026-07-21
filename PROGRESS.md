@@ -4,11 +4,15 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`
-- Lifecycle status: `Proposed`
+- Lifecycle status: `Completed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `activation-recording`
+- Next gate: `closed`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Data Progressive Navigation And Trade Card Density is **Completed**. Goal OBJECTIVE `active plan交给你全权执行` (`user-instruction:2026-07-21-execute-data-progressive-nav-and-trade-card-density-plan`) authorized implementation through closeout. Phase 0 landed WU-A (Data progressive DateRail) + WU-B (`.dr-sidebar` trade-card density) on the four frozen paths; frontend **49/49** `test:trade-records`, normal+static builds, harness auto, V1–V3 screenshots, and independent `implementation-review-001: accept/high` pass. Verified implementation commit `74334935a09f60c23748cdf0ecce5e52c1d643be`; freeze aggregate `f8caa351e78d890ea82a5ab32c65f443acf48c3123c82bb566194980d1fd159c`; implementation-review package commit `54e77c3d7b331cc87a3e938dd23e3845d1a703aa`. Push/PR/merge/Pages/provider/broker/DB/content remain unauthorized. Next gate: `closed`.
+
+2026-07-21: 用户以“把prop plan迁移到active”明确授权 Data Progressive Navigation And Trade Card Density exact revision `v4-review-foldback-2026-07-21` 的 lifecycle activation，记录为 `user-instruction:2026-07-21-activate-data-progressive-nav-and-trade-card-density-plan`。已且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap、optimization 回链与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。本次 activation 不启动 Phase 0，不授权实现、Git stage/commit/push、canonical data/DB、provider/broker、Pages、hosted 或任何远端动作。
 
 2026-07-21: Independent revision review `review-004` on exact revision `v4-review-foldback-2026-07-21` returned `approve/high`. V4 closes `review-003`: screenshots remain three but now use real ticker fixtures (Data SPY, Review QQQ 沃德哥 desktop, Review SPY Tang narrow), and the unsupported long-name wrap requirement is removed. Canonical groups and tracked market days confirm both SPY/QQQ `2026-07-17` scenarios exist. Lifecycle stays lightweight v1; next gate `activation-recording`. Approval does not activate or authorize implementation, push, data, or remote actions.
 

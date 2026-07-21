@@ -7,14 +7,13 @@
 > Put evidence images in the sibling `screenshots/` folder and link them as `./screenshots/<name>.png`.
 >
 > A finalized record is eligible for an `opt-record` durable checkpoint only under separate local Git authority and the exact scope/safety rules in `docs/operating-modes.md` §9. Draft status or this record alone grants no checkpoint authority.
-
 - Checkpoint authority: none
 - Checkpoint authority mode: none
 - Checkpoint authority kinds: none
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Align Data page Market days rail with Review progressive date navigation | Data workspace / `DashboardPage` date rail | promoted-to-proposed | [plan](../../exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) revision `v4-review-foldback-2026-07-21` | User acceptance 2026-07-21 after Review progressive ship; `review-004: approve/high`; awaiting activation |
+| OPT-001 | Align Data page Market days rail with Review progressive date navigation | Data workspace / `DashboardPage` date rail | completed | [completed plan](../../exec-plans/completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) revision `v4-review-foldback-2026-07-21` | Implemented; `implementation-review-001: accept/high`; verified `74334935a09f60c23748cdf0ecce5e52c1d643be` |
 
 ## Relationship To Prior Work
 

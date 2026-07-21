@@ -44,10 +44,11 @@ None.
 
 ## Proposed Plans
 
-- [Tang Strategy Data Progressive Navigation And Trade Card Density](./proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) — Proposed; canonical details: [proposed index](./proposed/index.md)
+None.
 
 ## Completed Plans
 
+- [Tang Strategy Data Progressive Navigation And Trade Card Density](./completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Review Date Navigation And Trader Filter Fusion](./completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [2026-07-18 Tang Strategy governed harness and data safety recovery](./completed/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [2026-07-19 Tang Strategy Coding And Data Update Modes](./completed/2026-07-19-tang-strategy-coding-and-data-update-modes-plan.md) — Completed; canonical details: [completed index](./completed/index.md)

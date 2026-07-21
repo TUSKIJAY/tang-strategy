@@ -1,27 +1,30 @@
 # Tang Strategy Data Progressive Navigation And Trade Card Density
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Proposed
+- Status: Completed
 - Plan slug: `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`
 - Revision: `v4-review-foldback-2026-07-21`
 - Plan author ID: `codex-plan-author-2026-07-21-data-nav-trade-density`
 - Design reviews: ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-002.md@revise@v2-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-003.md@revise@v3-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/review-004.md@approve@v4-review-foldback-2026-07-21
 - Latest design verdict: approve
 - Review independence: attested
-- Activation evidence: none
+- Activation evidence: user-instruction:2026-07-21-activate-data-progressive-nav-and-trade-card-density-plan
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `activation-recording`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
-- Lifecycle reconciliation commit: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: 74334935a09f60c23748cdf0ecce5e52c1d643be
+- Lifecycle reconciliation commit: 606f44fc1de4c506a038c1d5a74f43caf3bf4c25
+- Implementation start evidence: user-instruction:2026-07-21-execute-data-progressive-nav-and-trade-card-density-plan
+- Implementation reviews: ../reviews/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan/implementation-review-001.md@accept@74334935a09f60c23748cdf0ecce5e52c1d643be
+- Latest implementation verdict: accept
 - Owner: Codex
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-data-page-progressive-date-nav/2026-07-21-data-page-progressive-date-nav.md`, `docs/optimization/2026-07-21-review-trade-panel-type-scale/2026-07-21-review-trade-panel-type-scale.md`
 - Proposal baseline: `codex/project-harness@6eee7e3b9993f57c51d710d40fc988eb15b489ce`
-- Scope authority: review-only; this proposed plan does not authorize implementation, activation, commit, push, data mutation, or remote actions. `review-001` targets v1; `review-002` targets v2; `review-003` targets v3; v4 requires a new matching-revision design review before any activation.
+- Scope authority: fully executed under goal OBJECTIVE full-execution grant; push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote remain unauthorized.
 
 ## 1. Context And Evidence
 

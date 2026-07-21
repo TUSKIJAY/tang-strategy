@@ -14,7 +14,7 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Reduce **现实交易者点位** list/card type scale to match Review density | Review left column / `TraderTradeList` group cards | promoted-to-proposed | [plan](../../exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) revision `v4-review-foldback-2026-07-21` | User clarified 2026-07-21: 是现实交易者点位这部分，不是整块 filter/export; `review-004: approve/high`; awaiting activation |
+| OPT-001 | Reduce **现实交易者点位** list/card type scale to match Review density | Review left column / `TraderTradeList` group cards | completed | [completed plan](../../exec-plans/completed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md) revision `v4-review-foldback-2026-07-21` | Implemented under `.dr-sidebar` only; `implementation-review-001: accept/high`; verified `74334935a09f60c23748cdf0ecce5e52c1d643be` |
 
 ## Relationship To Prior Work
 
