@@ -35,7 +35,7 @@ None.
 
 ## Proposed Plans
 
-- [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Proposed; revision `v2-review-foldback-2026-07-21`; `review-002: revise/high` on exact v2; next gate `plan-revision`; session OPT-003…006 only
+- [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Proposed; revision `v3-review-foldback-2026-07-21`; `review-001`/`review-002` revise on prior revisions; next gate `design-review` of exact v3; session OPT-003…006 only
 
 ## Completed Plans
 

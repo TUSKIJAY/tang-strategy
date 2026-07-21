@@ -3,7 +3,7 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
 - Plan slug: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
-- Revision: `v2-review-foldback-2026-07-21`
+- Revision: `v3-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-tools-group-span-viewport-data-rail`
 - Design reviews: ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-002.md@revise@v2-review-foldback-2026-07-21
 - Latest design verdict: revise
@@ -12,7 +12,7 @@
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -63,7 +63,19 @@ Independent `review-001` returned `revise/high` against exact revision `v1-propo
 | P1 | TF first-paint carrier is optional pure-or-browser; V4 cannot prove first frame / no wheel | §2.4 freezes **only** mandatory **B-TF-first-paint** (Playwright). Exact fixture, no-wheel event log, TF click, first animation-frame boundary, assert rendered `start`/`end`/`count`/`zoomScale`/`followMode` for **1m→5m and 5m→1m**. V4 is supplemental visual only. Any tracked harness script path enters the manifest. |
 | P2 | Generic `.page .panel` CSS cannot prove Review sidebar safety | §1.4 freezes explicit host class **`data-market-days-rail`** on Data only. All flex/max-width overrides scoped under it. Carriers: **N-Data-rail-source** + **B-Data-rail-layout** computed styles (Data compact + Review sidebar unchanged) + screenshots V3 (Data) / V5 (Review desktop) / V6 (Review narrow). |
 
-`review-001` is append-only prior-revision evidence and **cannot approve v2**. Next gate is independent design review of exact revision `v2-review-foldback-2026-07-21`.
+`review-001` is append-only prior-revision evidence and **cannot approve v2**.
+
+#### review-002 closure (v2 → v3)
+
+Independent `review-002` returned `revise/high` against exact revision `v2-review-foldback-2026-07-21` (plan SHA-256 `513e44fe…737b` at HEAD `156df37d…7dba`). Revision `v3-review-foldback-2026-07-21` folds every finding:
+
+| Severity | Finding (summary) | V3 closure |
+| --- | --- | --- |
+| P1 | B-TF-first-paint lacks deterministic oracle (fixture, frame boundary, expected metrics, occupancy) | §1.5 + §2.4 freeze exact fixture **QQQ 2026-07-17**, desktop `1672x941`, Interactive Review; start on **1m** default load; observation = **first completed engine `render()` after TF click** with **zero** wheel/pinch/keyboard zoom events. Post-switch product rule: **`zoomScale` resets to `1`**. Expected `count = getWindowBarCount(chartWidth, destTf)` clamped by `getViewLimits` (i.e. `getResolvedViewCount` at zoomScale 1). Expected `start = clamp(mappedPreviousStartByTime, 0, maxStart)` with `maxStart = max(0, totalBars - count)`. Right empty: `(chartWidth - count * targetSlotWidth) <= targetSlotWidth` (≤1 empty slot; 5m slot 18px, 1m slot 14px). `followMode === (start >= maxStart)`. Public debug seam `getViewportDebug()` returns `{timeframe,start,end,count,base,zoomScale,followMode,chartWidth}`. Both 1m→5m and 5m→1m. Tracked runner path in §3.1. |
+| P1 | Event-row focus required but B-Group-span still optional | Delete optional wording. **B-Group-span mandatory steps** include: (1) multi-event card select span; (2) click a named timeline event row; (3) assert single-bar highlight + focused bar in view, not full-day; (4) re-click card restores primary span-fit. Review **and** Static. |
+| P2 | Host rename loophole; month bar not in layout carrier | Host class is **exactly** `data-market-days-rail` (no rename). Mounted as the unique wrapper around progressive rail inside Data Market days panel. **B-Data-rail-layout** asserts ticker, mode, **and** month bar/identity under that host have content-sized or max-width ≤ `420px` (or flex-grow 0 + width ≤ 420), while Review `.dr-sidebar` ticker/mode retain `flex-grow: 1` on desktop. |
+
+`review-001` and `review-002` are append-only prior-revision evidence and **cannot approve v3**. Next gate is independent design review of exact revision `v3-review-foldback-2026-07-21`.
 
 ### 1.3 Visual evidence
 
@@ -111,21 +123,23 @@ Independent `review-001` returned `revise/high` against exact revision `v1-propo
 | OPT-003 display-only authority | Pure **`canonicalizeTradeToolsFilters(filters)`** (name may vary) **always** sets `eligibility: 'display'` for shared tools consumers. **Every** list / availability / export call path uses the canonicalized object (or helpers themselves force-display). Stale `reported`/`calculated`/omitted inputs cannot widen the set. Export selection always has `display_only: true` on this path |
 | OPT-003 schema | Group eligibility **flags** + Admin editor fieldset **remain** |
 | OPT-003 Download / Traders | Keep |
-| OPT-004 outcome | First painted frame after TF switch is a correct full-window viewport without wheel |
-| OPT-004 carrier | **Mandatory B-TF-first-paint only** (no pure-or-browser fallback). Covers 1m→5m and 5m→1m |
+| OPT-004 outcome | First completed `render()` after TF switch matches §2.4 oracle without wheel |
+| OPT-004 carrier | **Mandatory B-TF-first-paint only** with deterministic oracle (§2.4). Covers 1m→5m and 5m→1m |
+| OPT-004 product rule | On every TF switch, **reset `zoomScale` to `1`** then recompute viewStart from mapped previous start time |
+| OPT-004 observation seam | Implementation adds `getViewportDebug()` (engine and UnifiedKlineEngine ref) returning `{timeframe,start,end,count,base,zoomScale,followMode,chartWidth}` |
 | OPT-004 data | No bars/assemble/seed/DB/publish changes |
 | OPT-005 group-select sequence | **Exact order (Review + Static identical):** (1) collect all mappable bar indices for the group on 1m (or active TF if annotations exist); (2) `setHighlightRanges({ timeframe, startIndex: min, endIndex: max, style: 'blue' })` — **`blue` is required** because it paints a real multi-bar band in live engine; do **not** use `marker`/`olive` for span; (3) one `fitRange` over that span with modest padding; (4) **forbidden** after group-select: `scrollTo` with `center: true` (or any recenter) that changes `viewStart`/`zoomScale` away from the fitted window |
 | OPT-005 single-event | min===max still uses blue band + tight fitRange |
-| OPT-005 event-row focus | **Required** secondary: timeline row click → single-bar highlight + center/focus that event **without** expanding to full day and **without** replacing the primary span-fit as the card-click behavior |
+| OPT-005 event-row focus | **Required** secondary with **mandatory browser step** inside **B-Group-span**: timeline row click → single-bar highlight (`start===end`) + focused bar in visible window; **not** full-day fit; re-click card restores primary span-fit. Pure **N-Event-focus** alone is insufficient |
 | OPT-005 `N pts` | Count of **complete-timed** events included in the span helper (`knownCount`); incomplete times excluded from both span and count |
 | OPT-005 expanded UI | `TIME \| ACTION \| QTY @ PX`; BUY/SELL/PART; no fees |
 | OPT-005 anti-pattern | No auto-fit each partial on group click |
-| OPT-006 host class | Explicit **`data-market-days-rail`** (or exact string frozen in Phase 0 if renamed once) on Data host only — **not** bare `.page .panel` |
-| OPT-006 CSS | All ticker/mode flex/max-width overrides under `.data-market-days-rail …` only |
+| OPT-006 host class | **Exactly** `data-market-days-rail` on the unique progressive-rail wrapper inside Data Market days panel — **no rename**, not bare `.page .panel` |
+| OPT-006 CSS | All Data-only flex/max-width rules (ticker, mode, **month bar/identity**, day-chip strip container) under `.data-market-days-rail …` only; progressive rail max-width **≤ 420px** |
 | OPT-006 IA | Progressive state machine, ticker isolation, open-Review-on-date unchanged |
 | Surfaces | OPT-003 tools: Review+Static+Admin. OPT-005: Review+Static parity. OPT-004: Review (+Static if same engine). OPT-006: Data host; Review sidebar must not regress |
 
-Rejected: reopening OPT-001/002; schema bumps; day-file rewrites; Pages/provider/broker; rubber-stamp pure defaults that leave export wide-open; `marker`/`olive` as span band; optional TF carrier wording; generic `.page .panel` density selector as the sole scope.
+Rejected: reopening OPT-001/002; schema bumps; day-file rewrites; Pages/provider/broker; rubber-stamp pure defaults that leave export wide-open; `marker`/`olive` as span band; optional TF or event-row carrier wording; host rename loophole; generic `.page .panel` density selector as the sole scope; subjective “sane viewport” without §2.4 formulas.
 
 ### 1.6 Lane 3 classification
 
@@ -147,12 +161,12 @@ Cross-surface frontend work: shared trade tools/list, K-line engine viewport + h
 1. **OPT-003 chrome gone:** Shared tools strip sources have no Eligibility / Display / Reported / Calculated segment. **N-Eligibility-removed-source**.
 2. **OPT-003 canonical display-only:** After canonicalization, `filterTradeGroups`, `displayableTradeGroups`, and `exportSelectionFromFilters` produce the same display-eligible group ID set for inputs with eligibility omitted, `'display'`, `'reported'`, or `'calculated'`, and export always has `display_only: true`. Non-display-eligible groups never appear. **N-Eligibility-default** fixtures cover all four inputs + at least one non-display group.
 3. **OPT-003 schema/editor intact:** Admin editor eligibility flags remain.
-4. **OPT-004 first-paint:** **B-TF-first-paint** green for 1m→5m and 5m→1m with no wheel events; asserts post-first-frame viewport metrics (visible start/end/count, zoomScale, followMode) are sane (no permanent left-crowd empty-right that only wheel repairs). V4 screenshot supplemental only.
+4. **OPT-004 first-paint:** **B-TF-first-paint** green for 1m→5m and 5m→1m with **zero** wheel/pinch/keyboard zoom; after **first completed `render()`**, `getViewportDebug()` matches §2.4 oracle (zoomScale===1, count/base formula, start clamp, ≤1 empty slot, followMode). V4 screenshot supplemental only.
 5. **OPT-005 span + band:** Pure **N-Group-span** computes min/max indices over all mappable complete events. Live select sequence matches §1.5. Highlight stored as blue multi-bar band. **B-Group-span** mandatory.
 6. **OPT-005 meta:** Span label + `· N pts` with N = complete-timed event count. **N-Card-meta**.
 7. **OPT-005 timeline:** Compact BUY/SELL/PART rows, no fees. **N-Timeline-source** + V1.
-8. **OPT-005 event focus:** Required row-click path; pure **N-Event-focus** + exercised in **B-Group-span** or a dedicated browser step on the same receipt.
-9. **OPT-006 density:** Host class present on Data only; computed layout proves compact Data controls and unchanged Review sidebar flex growth. **N-Data-rail-source** + **B-Data-rail-layout** + V3/V5/V6.
+8. **OPT-005 event focus:** Required row-click path; pure **N-Event-focus** **and** mandatory browser steps inside **B-Group-span** (row click + restore card span) on Review and Static. No optional wording.
+9. **OPT-006 density:** Host class exactly `data-market-days-rail` on Data only; computed layout proves ticker, mode, **and month bar** under host are compact (max-width ≤420px / no full-bleed flex-grow), and Review `.dr-sidebar` ticker/mode keep flex-grow 1. **N-Data-rail-source** + **B-Data-rail-layout** + V3/V5/V6.
 10. **Contracts preserved:** B-chip, Download four-file payload shape, marker BUY/SELL, points-only cards, direction colors, progressive date IA, open-Review-on-date.
 11. **Tests/builds:** `npm run test:trade-records` green for all **N-\***; all **B-\*** receipts green under `output/`; normal + static builds; harness auto; `git diff --check` on task paths.
 12. **Screenshots:** §2.3 under `output/` (untracked).
@@ -168,7 +182,7 @@ Cross-surface frontend work: shared trade tools/list, K-line engine viewport + h
 | V5 | Review sidebar progressive rail | desktop `1672x941` | Same | Sidebar stretch still intentional / not broken by Data overrides |
 | V6 | Review sidebar progressive rail | narrow `390x844` (or plan Phase-0 frozen narrow) | Same | Narrow sidebar still usable |
 
-### 2.4 Frozen verification carrier matrix (v2 — no fallbacks)
+### 2.4 Frozen verification carrier matrix (v3 — no fallbacks)
 
 | Carrier ID | Tool | Proves | Must not claim |
 | --- | --- | --- | --- |
@@ -179,9 +193,9 @@ Cross-surface frontend work: shared trade tools/list, K-line engine viewport + h
 | **N-Timeline-source** | Node source | Row structure; BUY/SELL/PART; no fees | Click chart |
 | **N-Event-focus** | Node pure | Event→single-bar focus payload; distinct from group span-fit | Playwright alone |
 | **N-Data-rail-source** | Node source/CSS | Host class `data-market-days-rail`; overrides scoped under it; no bare `.page .panel` sole selector | Computed layout |
-| **B-TF-first-paint** | **Mandatory** Playwright | 1m→5m and 5m→1m; no wheel; first rAF after switch; assert viewport start/end/count/zoomScale/followMode sane | V4 alone; source regex |
-| **B-Group-span** | **Mandatory** Playwright | Multi-event: highlight start/end match span; visible window contains full span; single-event tight; Review **and** Static; no post-fit center undo; optional event-row focus step | V2 alone |
-| **B-Data-rail-layout** | **Mandatory** Playwright (or equivalent computed-style harness) | Data host: ticker/mode buttons not full-bleed flex-grown; Review `.dr-sidebar` controls retain expected flex/growth | Screenshot alone |
+| **B-TF-first-paint** | **Mandatory** Playwright via tracked runner §3.1 | Fixture QQQ `2026-07-17` desktop `1672x941` Review. Start 1m default load. Click 5m; wait **first completed engine `render()`**; assert via `getViewportDebug()`: `timeframe==='5m'`, `zoomScale===1`, `count` equals destination default base window, `start` in `[0,maxStart]`, right empty ≤ one slot width (18px on 5m), `followMode===(start>=maxStart)`, **zero** wheel events. Reverse 5m→1m with slot 14px. | V4 alone; subjective "sane"; source regex |
+| **B-Group-span** | **Mandatory** Playwright via tracked runner §3.1 | **Required steps in order:** (A) multi-event card select → highlight start/end match span, blue band, visible window contains span, no post-fit center undo; (B) click named timeline event row → single-bar highlight, focused bar in view, not full-day; (C) re-click same card → primary span-fit restored. Also single-event tight path. Review **and** Static. | V2 alone; pure N-Event-focus alone |
+| **B-Data-rail-layout** | **Mandatory** Playwright via tracked runner §3.1 | Under `.data-market-days-rail`: ticker buttons, mode buttons, **and** month bar/identity computed width ≤ 420px and not stretched to full panel width; progressive rail container max-width ≤ 420px. Review `.dr-sidebar` ticker/mode `flex-grow` remains `1` on desktop; narrow V6 still usable. | Screenshot alone; ticker/mode-only without month bar |
 | **V1–V6** | Screenshots | Visual acceptance | Interaction semantics |
 
 **Hard rule:** Every interaction/canvas/computed-layout claim names a **B-\*** carrier. Every pure/source claim names an **N-\*** carrier. No “test or browser” wording.
@@ -198,19 +212,20 @@ Cross-surface frontend work: shared trade tools/list, K-line engine viewport + h
 4. `frontend/src/pages/ReviewPage.jsx` — group-select sequence §1.5; wire event-row focus; pass canonicalized filters into list/export.
 5. `frontend/src/pages/StaticReviewsApp.jsx` — same as Review for group-select + filters.
 6. `frontend/src/pages/AdminTradersPage.jsx` — tools path uses canonical display-only; no Eligibility tools chrome if shared component.
-7. `frontend/src/kline/kline-engine.js` — TF first-paint fix in `setTimeframe` / viewport helpers only as required. Highlight **band** for trade span uses existing `blue` style (no requirement to re-enable olive multi-bar teaching bands).
-8. `frontend/src/styles.css` — timeline styles; **only** `.data-market-days-rail …` density overrides; cleanup unused Eligibility tools styles if unreferenced.
-9. `frontend/src/pages/DashboardPage.jsx` — add host class `data-market-days-rail` on the Market days progressive rail wrapper.
-10. `frontend/src/features/review/ReviewContextPanel.jsx` — only if a density prop is required (prefer host class on Dashboard).
-11. `frontend/src/features/review/tradeRecords.test.js` and/or `reviewWorkspace.test.js` — all **N-\*** carriers; remove obsolete Eligibility tools chrome pins.
-12. Playwright (or committed frontend harness scripts under `frontend/` if added) for **B-TF-first-paint**, **B-Group-span**, **B-Data-rail-layout**. Default receipts under `output/playwright/trade-tools-group-span-<timestamp>/` (untracked). If a tracked runner script is added, list its exact path in Phase 0 evidence.
+7. `frontend/src/kline/kline-engine.js` — TF switch resets `zoomScale` to 1; first-paint viewStart mapping; public `getViewportDebug()`; highlight **band** for trade span uses existing `blue` style.
+8. `frontend/src/kline/UnifiedKlineEngine.jsx` — expose `getViewportDebug` on ref for Playwright.
+9. `frontend/src/styles.css` — timeline styles; **only** `.data-market-days-rail …` density overrides for ticker, mode, **month bar/identity**, rail max-width ≤420px; cleanup unused Eligibility tools styles if unreferenced.
+10. `frontend/src/pages/DashboardPage.jsx` — unique progressive-rail wrapper with class **`data-market-days-rail`** (exact string).
+11. `frontend/src/features/review/ReviewContextPanel.jsx` — only if required; prefer Dashboard host class.
+12. `frontend/src/features/review/tradeRecords.test.js` and/or `reviewWorkspace.test.js` — all **N-\*** carriers; remove obsolete Eligibility tools chrome pins.
+13. **Tracked** Playwright runner (exact path, required in repo): `frontend/scripts/playwright/trade-tools-group-span-viewport-data-rail-acceptance.mjs` implementing **B-TF-first-paint**, **B-Group-span**, and **B-Data-rail-layout**. Receipts under `output/playwright/trade-tools-group-span-<timestamp>/` (untracked).
 
 **Lifecycle / evidence:**
 
-13. Optimization batch + `docs/optimization/index.md`.
-14. `PROGRESS.md` / `HANDOFF.md`.
-15. Plan + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + roadmap.
-16. Screenshots under `output/` (untracked).
+14. Optimization batch + `docs/optimization/index.md`.
+15. `PROGRESS.md` / `HANDOFF.md`.
+16. Plan + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + roadmap.
+17. Screenshots under `output/` (untracked).
 
 **Out of manifest:**
 
@@ -251,9 +266,10 @@ Untracked `output/local-acceptance/`, `output/playwright/*` evidence trees — p
 - Entry gate: `phase-0-exit`.
 - Work units:
   1. **WU-A OPT-003:** Remove chrome; canonicalize display-only; **N-Eligibility-*** green.
-  2. **WU-B OPT-005:** Span helper; blue band; fitRange-only sequence; timeline; event focus; **N-\*** + **B-Group-span**.
-  3. **WU-C OPT-004:** Engine first-paint; **B-TF-first-paint** both directions.
-  4. **WU-D OPT-006:** `data-market-days-rail` + scoped CSS; **N-Data-rail-source** + **B-Data-rail-layout**.
+  2. **WU-B OPT-005:** Span helper; blue band; fitRange-only sequence; timeline; **mandatory** event-row browser steps in **B-Group-span** (including restore).
+  3. **WU-C OPT-004:** zoomScale reset + first-paint; `getViewportDebug`; **B-TF-first-paint** oracle both directions.
+  4. **WU-D OPT-006:** exact host class + month bar density; **N-Data-rail-source** + **B-Data-rail-layout**.
+  5. **WU-E carriers:** land tracked Playwright runner path §3.1 item 13.
 - Verification: all carriers; builds; harness; V1–V6.
 - Exit gate: `phase-1-exit`. Missing any **B-\*** fails exit.
 
@@ -267,7 +283,7 @@ Untracked `output/local-acceptance/`, `output/playwright/*` evidence trees — p
 
 - Baseline commands: operating-modes checker; lifecycle unittest; harness auto
 - Focused checks (implementation): `npm run test:trade-records`; normal + static builds; **B-\*** under `output/`; V1–V6
-- Expected state now: Proposed **v2** awaiting independent design review of exact `v2-review-foldback-2026-07-21`
+- Expected state now: Proposed **v3** awaiting independent design review of exact `v3-review-foldback-2026-07-21`
 - Task-owned commit paths for **this foldback**:
   - `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md`
   - `docs/exec-plans/proposed/index.md`
@@ -280,8 +296,8 @@ Untracked `output/local-acceptance/`, `output/playwright/*` evidence trees — p
 ## 6. Review And Activation Gate
 
 - Review location: `docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/`
-- Required verdict: independent design-review `approve` on exact revision `v2-review-foldback-2026-07-21` (or a later foldback)
-- `review-001` remains append-only and cannot approve v2
+- Required verdict: independent design-review `approve` on exact revision `v3-review-foldback-2026-07-21` (or a later foldback)
+- `review-001` and `review-002` remain append-only and cannot approve v3
 - Activation requires matching-revision approve **plus** explicit user activation instruction
 - Implementation requires later explicit start/execute after activation
 
@@ -289,7 +305,7 @@ Untracked `output/local-acceptance/`, `output/playwright/*` evidence trees — p
 
 | Action | Authorized now? |
 | --- | --- |
-| Independent design review of exact v2 | Yes (reviewer, not plan author) |
+| Independent design review of exact v3 | Yes (reviewer, not plan author) |
 | Lifecycle activation | No |
 | Implementation | No |
 | Push / PR / merge / Pages | No |

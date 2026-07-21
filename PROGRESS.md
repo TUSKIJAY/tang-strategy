@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Folded `review-002: revise/high` into Proposed revision `v3-review-foldback-2026-07-21`. Closures: deterministic **B-TF-first-paint** oracle (QQQ 2026-07-17, first completed render, zoomScale=1, count/start/occupancy/followMode formulas, `getViewportDebug`, tracked Playwright runner); **B-Group-span** mandatory event-row click + restore (no optional); host class exactly `data-market-days-rail` with month bar ≤420px in **B-Data-rail-layout**. Prior reviews cannot approve v3. Next gate independent `design-review` of exact v3. No activation, implementation, content/DB, provider/broker, publication, push, or remote authority.
 
 2026-07-21: Independent design review `review-002` on exact revision `v2-review-foldback-2026-07-21` returned `revise/high` with three findings. V2 closes display-only authority and the blue-band/fitRange sequence, but its first-frame TF carrier lacks a deterministic fixture/oracle, required event-row focus is still optional in the browser carrier row, and Data host naming/month-bar layout proof is not fully frozen. The exact pre-reconciliation plan SHA-256 and all six evidence hashes matched at HEAD `156df37d9f6b1f972f9c748e237412d1a4db7dba`. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 

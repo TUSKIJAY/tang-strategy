@@ -7,23 +7,22 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
-- Current proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v2-review-foldback-2026-07-21`.
-- Latest design review: `review-002.md` — `revise/high` on exact v2; three findings. `review-001.md` remains append-only v1 evidence.
-- Source OPT batch: `docs/optimization/2026-07-21-review-trade-and-kline-session/` **OPT-003…006** (`promoted`).
-- Review-002 verified closures: display-only canonicalize and blue band + fitRange-only group select. Remaining foldback: deterministic TF first-frame oracle; mandatory browser event-row focus; one exact Data host plus month-bar computed-layout proof.
-- Next gate: `plan-revision`; do not activate or implement v2.
+- Current proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v3-review-foldback-2026-07-21`.
+- Prior design reviews: `review-001` revise@v1; `review-002` revise@v2 (append-only; cannot approve v3).
+- V3 freezes: deterministic TF first-paint oracle + getViewportDebug; mandatory event-row steps in B-Group-span; exact host `data-market-days-rail` including month bar ≤420px; tracked Playwright runner path.
+- Next gate: independent `design-review` of exact `v3-review-foldback-2026-07-21`.
 - **Does not authorize** activation, implementation, push, PR, merge, Pages, provider/broker, or remote action.
-- Preserve untracked `output/local-acceptance/` and `output/playwright/*` evidence trees; do not stage.
-- Coding Mode repository mutations include one task-scoped local commit by default. Stage only task-owned literal paths.
+- Preserve untracked `output/` evidence trees; do not stage.
+- Stage only task-owned literal paths for lifecycle commits.
 
 ## Latest Completed Work
 
-- Trade Points And K-line Marker Labels product commit: `717ac8ae9bf5faf00ec6dff3b81d04c51c86b145`; `implementation-review-001: accept/high`.
+- Trade Points And K-line Marker Labels product commit: `717ac8ae9bf5faf00ec6dff3b81d04c51c86b145`.
 - Trade Panel Visual Polish product commit: `35a007efbd9db2a99967fb007adff2415f243e0b`.
 
 ## Verification Baseline
@@ -35,7 +34,7 @@
 
 ## Resume Rules
 
-1. Re-run startup Git status and preserve untracked `output/` evidence trees.
+1. Re-run startup Git status and preserve untracked `output/` trees.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. Next durable step is plan revision folding `review-002` into a later exact revision — not activation or implementation.
-4. Do not push or perform another remote action without a new explicit user request.
+3. Next durable step is independent design review of exact v3.
+4. No remote actions without explicit user request.
