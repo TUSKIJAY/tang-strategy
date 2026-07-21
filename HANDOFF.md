@@ -13,8 +13,8 @@
 - Last updated: 2026-07-21
 - Project: `Tang Strategy`
 - Harness profile: `governed`
-- Current plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md`, revision `v1-proposal-2026-07-21`, status `Proposed`, phase `none`, next gate `plan-revision`. Independent `review-001: revise/high`; review lifecycle is eligible for its scoped local commit, with no activation, implementation, push, data, or remote authority.
-- Review findings: add the required implementation-review/closeout gate; include the existing frontend contract tests and static build; keep compact card CSS scoped to Review/Static unless Admin is explicitly included; pin reproducible visual targets; repair the final operating-modes link.
+- Current plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan.md`, revision `v2-review-foldback-2026-07-21`, status `Proposed`, phase `none`, next gate `plan-revision`. Independent `review-002: revise/high`; no activation, implementation, push, data, or remote authority.
+- Review 002: all `review-001` technical findings are closed, but v2 over-corrected a four-file UI change into repeated build/test rounds, six mandatory screenshots, and an unconditional extra closeout prompt. Simplify to one baseline, one post-change verification set, 2–3 fixed-fixture screenshots, source-contract coverage for Admin/Static, and closeout authority satisfied by an explicit full-execution instruction when present.
 - Optimization sources: both 2026-07-21 batches are `promoted-to-proposed` and linked to the current plan. The user clarified that the typography scope is **现实交易者点位**, not filter/export chrome.
 - Optimization layout contract: each batch is `docs/optimization/<slug>/<slug>.md` plus sibling `screenshots/`; see `docs/optimization/SOP.md`.
 - Latest completed plan: `docs/exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md`, revision `v2-review-foldback-2026-07-20`, `implementation-review-001: accept/high`, next gate `closed`.
@@ -50,7 +50,7 @@
 1. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 2. Run the full startup Git commands; do not treat historical HEAD evidence above as live worktree truth.
 3. Preserve unrelated dirty paths (`.playwright-cli/`, `output/`).
-4. Optimization record mode is active. Continue intake under `docs/optimization/` only; do not implement from records. Open batches: `2026-07-21-review-trade-panel-type-scale` OPT-001 (**现实交易者点位** card type scale); `2026-07-21-data-page-progressive-date-nav` OPT-001 (Data progressive date nav).
+4. Current focus: Proposed plan `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan` revision `v2-review-foldback-2026-07-21`. Next gate independent `design-review` of v2. Do not activate or implement without new user instructions. Both 2026-07-21 OPT batches are `promoted-to-proposed` under this plan.
 5. Review Date Navigation And Trader Filter Fusion is **Completed** with `implementation-review-001: accept/high`. Verified implementation / phase-exit commit is `b09e08156ea3efeeebc4fc9c21d53a72fac297c6` (feat ship `064550c1…`); completed-migration is recorded. Push/PR/merge/Pages/data/remote remain unauthorized.
 6. Do not push/PR/merge/Pages/provider/broker/mutate tracked DB or canonical content without new authority.
 7. Terminal UI, multi-trader, operating-modes, Review Workspaces, and Durable Checkpoint plans remain Completed; their authorities cannot be reused.
