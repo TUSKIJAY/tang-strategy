@@ -3,16 +3,16 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
 - Plan slug: `2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan`
-- Revision: `v1-proposal-2026-07-21`
+- Revision: `v2-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-points-kline-labels`
-- Design reviews: `docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/review-001.md`
+- Design reviews: ../reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/review-001.md@revise@v1-proposal-2026-07-21
 - Latest design verdict: revise
 - Review independence: attested
 - Activation evidence: none
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -21,7 +21,7 @@
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/2026-07-21-trade-points-and-kline-marker-labels.md` (user-named; superseded pointer) with authoritative detail in session batch OPT-001/OPT-002 `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`
 - Proposal baseline: `codex/project-harness@6c62c2b1ff8314da36a5f2dad57a81451c720edb`
-- Scope authority: review-only; this proposed plan does not authorize activation, implementation, push, PR, merge, Pages, provider/broker, tracked-DB mutation beyond the single frozen registry display_name edit listed in §3.1, or any remote action
+- Scope authority: review-only; this proposed plan does not authorize activation, implementation, push, PR, merge, Pages, provider/broker, publication, or any remote action. A later authorized implementation of this revision may perform **one local governed registry display_name mutation** only through the frozen atomic content→SQLite projection path in §3.1 / §3.3 (no provider, publication, or remote authority).
 
 ## 1. Context And Evidence
 
@@ -42,7 +42,21 @@
 - Trade card density under `.dr-sidebar` — completed
 - Direction colors CALL/PUT tokens — completed fusion plan
 
-### 1.2 Visual evidence
+### 1.2 Review foldback closure map
+
+#### review-001 closure (v1 → v2)
+
+Independent `review-001` returned `revise/high` against exact revision `v1-proposal-2026-07-21`. Revision `v2-review-foldback-2026-07-21` folds every finding:
+
+| Severity | Finding (summary) | V2 closure |
+| --- | --- | --- |
+| P1 | JSON-only `content/traders/index.json` edit forbids tracked SQLite update and would drift from DB-first projection (`PUT /api/admin/traders` → `handle_trader_registry_admin_write` + `_sync_trade_projection`) | §1.4 Nickname + §3.1 + §3.3 freeze **one existing atomic registry-write + candidate trade projection** route. Manifest includes both `content/traders/index.json` and `data/sqlite/tang_strategy_live_extended.db`. Prove both surfaces resolve `vordin → vordinkkk`; fail closed leaves current DB unchanged. Local governed mutation only; no provider/publication/remote. |
+| P2 | Card first→last meta not executable; `N-Card-source` source scan can pass without correct cross-leg chronology | §1.4 + §2.2 + §2.4 freeze pure helper `groupEventTimeRange` over **all legs’ complete `occurred_at`** (chronological min/max, independent of array order). Exact zero / one / two-or-more renderings. Node pure tests cover multi-leg, out-of-order fixtures, incomplete times. Source scan limited to negative outcome/fees pins. |
+| P2 | Only `marker_label` changed; tooltip `title` still raw `trader_id CALL action`; action fallback fixture-dependent while schema has four actions | §1.4 + §2.2 + §2.4 freeze **all user-visible annotation text** (`marker_label` **and** `title`) to display-name + BUY/SELL vocabulary. Explicit map of all four schema actions; unrecognized/empty → **omit** marker (fail closed, no `?`). Node cases for four actions, missing/unknown, same-bar BUY/SELL separation, same-side `×N`, display-name fallback, absence of CALL/PUT and unnecessary raw id from both fields. |
+
+`review-001` is append-only prior-revision evidence and **cannot approve v2**. Next gate is independent design review of exact revision `v2-review-foldback-2026-07-21`.
+
+### 1.3 Visual evidence
 
 | 证据 | 路径 | SHA-256 | 作用 |
 | --- | --- | --- | --- |
@@ -53,7 +67,7 @@
 
 Named-batch mock 与 session 截图字节一致（同名 PNG 哈希相同）。
 
-### 1.3 Current repository facts
+### 1.4 Current repository facts
 
 **Trade cards (`TraderTradeList.jsx`):**
 
@@ -61,88 +75,96 @@ Named-batch mock 与 session 截图字节一致（同名 PNG 哈希相同）。
 - Expanded legs render `time | action | qty @ premium | fees {value|?}`.
 - Trader title uses `trader.display_name || trader_id` (live `vordin` → `沃德哥`).
 - CALL/PUT direction pill and glyph remain direction-owned.
+- Backend chronology is guaranteed **within each leg**, not as a pre-sorted cross-leg group array.
 
 **Markers (`tradeRecords.js` `buildTradeRecordAnnotations`):**
 
 - `marker_label: \`${group.trader_id} ${direction}\`` then optional ` ×N`.
+- `title: \`${group.trader_id} ${direction} ${event.action}\`` — user-visible in K-line annotation tooltip via `UnifiedKlineEngine` / engine (`title` field).
 - `void traders` — registry display names are intentionally unused for labels today.
 - Shape/color already direction-owned (`triangle_up`/`triangle_down`, `--direction-call` / `--direction-put`).
 - Live contract tests pin `marker_label === 'alice CALL ×2'`.
 
-**Registry (`content/traders/index.json`):**
+**Registry and projection:**
 
-- `trader_id: "vordin"`, `display_name: "沃德哥"`.
-- Day files and trade groups keep `trader_id: "vordin"`; no rename of stable id.
+- Canonical registry file: `content/traders/index.json` — live `trader_id: "vordin"`, `display_name: "沃德哥"`.
+- Admin path: `PUT /api/admin/traders` → `handle_trader_registry_admin_write(..., after_replace=_sync_trade_projection)`.
+- `_sync_trade_projection` candidate-projects the complete normalized trade repository, then atomically promotes tracked SQLite on success.
+- Tracked DB stores trader display names in `traders`; views such as `v_trade_group_performance` expose them. Day files keep `trader_id: "vordin"`.
 
-**Event actions (live QQQ/SPY day files):** `buy_open`, `sell_partial`, `sell_close` (lowercase snake).
+**Event actions (schema enum):** exactly `buy_open`, `buy_add`, `sell_partial`, `sell_close` (`content/schemas/trades-day.schema.json`). Live QQQ/SPY days currently exercise `buy_open`, `sell_partial`, `sell_close`.
 
-### 1.4 User scope locks
+### 1.5 User scope locks (v2; supersedes ambiguous v1 bullets)
 
 | Decision | Lock |
 | --- | --- |
 | Card reading path | **Presentation subtraction only** — timestamps + price points; no `$` amounts, no return/PnL `%`, no fees on the card UI path |
 | Card CALL/PUT | **Keep** direction pill / glyph / rail (direction remains visual) |
-| Card meta | `underlying · trade_date · first_event_time → last_event_time` when both ends exist; otherwise `underlying · trade_date` (no outcome %) |
+| Card meta time range | Pure helper over **all complete `occurred_at` across every leg** (chronological min/max; array order irrelevant). Render: **0** known → `underlying · trade_date`; **1** known → `underlying · trade_date · HH:MM`; **≥2** known → `underlying · trade_date · HH:MM → HH:MM`. Incomplete times ignored for the range |
 | Expanded legs | Keep compact rows: `TIME · ACTION · QTY @ PREMIUM`; **drop fees / PnL**. Action may stay schema action or uppercased; do **not** redesign into OPT-005 timeline table / row-click chart nav |
-| Marker text | **`{display_name} BUY|SELL`** (+ optional ` ×N`); **never** put CALL/PUT in `marker_label` |
-| Marker shape/color | Unchanged — CALL/PUT still own triangle direction and hue |
-| BUY/SELL derivation | From `event.action`: any action whose first token (split on `_`) is `buy` → **BUY**; first token `sell` → **SELL**. Unknown/empty → **omit marker** (same as incomplete time) or label `?` only if an event still has complete time — freeze as **omit incomplete action** for empty, and **`?` for non buy/sell first token** only if such events appear in fixtures (current live set is buy_*/sell_* only) |
-| Marker grouping | Group key must include action side so BUY and SELL on the same bar do not collapse: `bar_index|trader_id|direction|action_side`. Same-side multiples keep ` ×N` |
-| Nickname | UI display name for `vordin` is **`vordinkkk`** via registry `display_name` only. **`trader_id` remains `vordin`**. No day-file rewrite |
+| User-visible annotation text | **`marker_label` and `title`** both use `` `${displayName} ${BUY\|SELL}` `` (+ ` ×N` only on `marker_label` when grouped). **Never** put CALL/PUT in either field. Shape/color remain direction-owned |
+| BUY/SELL derivation | **Exact** schema map only: `buy_open`/`buy_add` → **BUY**; `sell_partial`/`sell_close` → **SELL**. Empty or any other action → **omit** that event’s marker (fail closed). No `?` label |
+| Marker grouping | Group key includes action side: `bar_index|trader_id|direction|action_side`. BUY and SELL on the same bar stay separate; same-side multiples keep ` ×N` on `marker_label` |
+| Nickname / registry write | UI name for `vordin` is **`vordinkkk`**. **`trader_id` remains `vordin`**. No day-file rewrite. Mutation uses **existing atomic registry write + candidate SQLite trade projection** so **both** canonical JSON and tracked DB resolve `vordin → vordinkkk` |
 | Surfaces | Shared `TraderTradeList` + `buildTradeRecordAnnotations` consumers: **Review + Static + Admin** (+ editor chart markers if they call the same builder) |
 | Language | Product chrome English remains as in polish plan; this plan does not re-translate Eligibility/Download |
 
-Rejected for this plan: Eligibility removal (OPT-003), 5m first-paint fix (OPT-004), group span-fit + timeline redesign (OPT-005), Data progressive rail density (OPT-006), backend/API/schema version bumps, Pages/publisher, provider/broker, tracked SQLite rebuild.
+Rejected for this plan: Eligibility removal (OPT-003), 5m first-paint fix (OPT-004), group span-fit + timeline redesign (OPT-005), Data progressive rail density (OPT-006), schema version bumps, Pages/publisher, provider/broker, day-file rewrites, JSON-only registry edit that leaves SQLite stale, tooltip left on raw `trader_id`/CALL/PUT/`buy_open` text.
 
-### 1.5 Lane 3 classification
+### 1.6 Lane 3 classification
 
-Shared Review/Static/Admin presentation + pure annotation builder contract tests + one registry display_name string. Classified Coding Mode **Lane 3** (proposed Exec Plan) because it changes multi-surface shared contracts and must not silently alter export/filter semantics. No market-data, DB rebuild, Pages, or provider work.
+Shared Review/Static/Admin presentation + pure annotation/time helpers + **one local governed registry display_name mutation** through the existing atomic content→SQLite projection path. Classified Coding Mode **Lane 3** (proposed Exec Plan). No market-data fetch, provider/broker, Pages publication, or day JSON rewrites. No new backend API; reuse the existing admin registry write / projection machinery (callable via the admin PUT path or the same service functions offline under implementation authority).
 
 ## 2. Objective And Success Criteria
 
 ### 2.1 Objective
 
-把 Review 交易卡片读路径收成「时间 + 点位」，并把 K 线 trade-record marker 文字从「trader_id + CALL/PUT」换成「display_name + BUY/SELL」，同时用 registry 把 `vordin` 的 UI 名显示为 `vordinkkk`，且不改 `trader_id`、不改 day JSON 结构、不改方向形状/颜色语义。
+把 Review 交易卡片读路径收成「时间 + 点位」，并把 K 线 trade-record **所有用户可见标注文字**（chart label 与 hover title）从「trader_id + CALL/PUT + raw action」换成「display_name + BUY/SELL」，同时通过 **原子 registry 写入 + candidate SQLite projection** 把 `vordin` 的 UI 名更新为 `vordinkkk`，且不改 `trader_id`、不改 day JSON 结构、不改方向形状/颜色语义。
 
 ### 2.2 Success criteria
 
 1. **Cards — no $ / % / fees on reading path:** For every group rendered by `TraderTradeList` on Review/Static/Admin:
    - collapsed meta does **not** contain `$`, `%`, `reported`, `calculated`, `net`, or `return` outcome strings;
    - expanded event rows do **not** render fees or PnL;
-   - rows still show time (HH:MM from `occurred_at`), action, and `quantity @ premium` (unknowns may stay `?`).
+   - rows still show time (HH:MM from `occurred_at`), action, and `quantity @ premium` (unknown quantity/premium may stay `?`).
 2. **Cards — direction retained:** CALL/PUT pill + glyph + direction rail classes remain.
-3. **Cards — time span meta:** When a group has ≥1 complete event times, meta includes first→last `HH:MM → HH:MM` (local slice of `occurred_at` as today). Empty legs keep `underlying · trade_date` only.
-4. **Markers — label shape:** `buildTradeRecordAnnotations` produces `marker_label` matching `` `${displayName} ${BUY|SELL}` `` with optional ` ×N`, where `displayName = trader.display_name || trader_id`.
-5. **Markers — no CALL/PUT in label:** Production annotation builder path must not put `CALL` or `PUT` inside `marker_label` (direction remains in `direction` / shape / color fields).
+3. **Cards — executable time-range meta:** A pure exported helper (name may be `groupEventTimeRange` or equivalent) computes chronological min/max of complete `occurred_at` across **all legs**. Rendering matches §1.5 zero / one / two-or-more rules. Proven by **N-Card-time-range**, not by JSX string presence alone.
+4. **Markers — label and title shape:** `buildTradeRecordAnnotations` produces both `marker_label` and `title` matching `` `${displayName} ${BUY|SELL}` `` (with optional ` ×N` only on `marker_label`), where `displayName = trader.display_name || trader_id`.
+5. **Markers — no CALL/PUT / raw direction words in user-visible text:** Neither `marker_label` nor `title` contains `CALL` or `PUT`. Direction remains only in `direction` / shape / color fields.
 6. **Markers — traders map used:** Stop `void traders`; resolve display name from the traders list / registry map.
-7. **Nickname:** After implementation, registry shows `vordin.display_name === "vordinkkk"`; chips/cards/markers that use `display_name` show `vordinkkk` for that trader. `trader_id` in content trades remains `vordin`.
-8. **Grouping:** BUY and SELL events on the same bar index for the same trader/direction are **separate** markers; same BUY (or same SELL) multiples may group with ` ×N`.
-9. **Contracts preserved:** Eligibility filtering, B-chip selection, export download contents (`buildTradeRecordDownloads` columns may still include return/fees fields — export is not the card reading path), density CSS, Eligibility/Download chrome from polish plan, direction color tokens.
-10. **Tests/builds:** `npm run test:trade-records` green with updated marker contracts; normal + static Vite builds green; `python scripts/check-project-harness.py --root . --profile auto` green; `git diff --check` clean on task paths.
-11. **Screenshots:** §2.3 matrix under `output/` (untracked).
+7. **Markers — fail-closed actions:** Only the four schema actions emit markers; unknown/empty actions are omitted. Proven by **N-Action-map** including missing/unknown cases.
+8. **Nickname dual surface:** After authorized implementation, **both**:
+   - `content/traders/index.json` has `vordin.display_name === "vordinkkk"`;
+   - tracked SQLite `traders` (and any view used for display that reads trader display name, e.g. join to `traders` / `v_trade_group_performance`) resolves `vordin` → `vordinkkk`.
+   `trader_id` in content trades remains `vordin`. Mutation used the atomic registry-write + projection path; a failed projection leaves the **current** tracked DB unchanged.
+9. **Grouping:** BUY and SELL events on the same bar index for the same trader/direction are **separate** markers; same BUY (or same SELL) multiples may group with ` ×N` on `marker_label`.
+10. **Contracts preserved:** Eligibility filtering, B-chip selection, export download contents (`buildTradeRecordDownloads` columns may still include return/fees fields — export is not the card reading path), density CSS, Eligibility/Download chrome from polish plan, direction color tokens, market-day / strategy / teaching / bar / non-target trade facts in the projected DB.
+11. **Tests/builds:** `npm run test:trade-records` green with updated marker/time/action contracts; normal + static Vite builds green; `python scripts/check-project-harness.py --root . --profile auto` green; SQLite integrity + foreign-key checks green after the registry projection; `git diff --check` clean on task paths.
+12. **Screenshots:** §2.3 matrix under `output/` (untracked).
 
 ### 2.3 Frozen visual acceptance matrix
 
 | # | Surface | Viewport | Fixture | Required coverage |
 | --- | --- | --- | --- | --- |
-| V1 | Interactive Review trade cards | desktop `1672x941` | QQQ `2026-07-17` | 沃德哥→vordinkkk card(s); meta without %/$; ≥1 expanded legs without fees |
-| V2 | Interactive Review K-line markers | desktop `1672x941` | QQQ `2026-07-17` | Visible marker text `vordinkkk BUY` and/or `vordinkkk SELL` (×N ok); no `CALL`/`PUT` in marker text |
+| V1 | Interactive Review trade cards | desktop `1672x941` | QQQ `2026-07-17` | vordinkkk card(s); meta without %/$; time span or single time when events exist; ≥1 expanded legs without fees |
+| V2 | Interactive Review K-line markers | desktop `1672x941` | QQQ `2026-07-17` | Visible marker text `vordinkkk BUY` and/or `vordinkkk SELL` (×N ok); no `CALL`/`PUT` in marker text; hover title uses same BUY/SELL vocabulary (no raw `buy_open` / CALL / PUT) |
 | V3 | Static Review (shared list + chart if present) | desktop `1672x941` | QQQ `2026-07-17` | Same card subtraction + marker label language as V1/V2 |
 
-Compare against §1.2 live screenshots and named-batch mock.
+Compare against §1.3 live screenshots and named-batch mock.
 
 ### 2.4 Frozen verification carrier matrix
 
 | Carrier ID | Tool | Proves | Must not claim |
 | --- | --- | --- | --- |
-| **N-Marker-label** | Node `npm run test:trade-records` | Pure `buildTradeRecordAnnotations`: display_name + BUY/SELL; ×N; no CALL/PUT in label; BUY≠SELL grouping | Browser paint |
-| **N-Action-map** | Node same suite | `buy_open`→BUY, `sell_partial`/`sell_close`→SELL (and any exported pure helper) | UI |
-| **N-Card-source** | Node source inspection of `TraderTradeList.jsx` | No `outcomeLabel` % path on card; no fees span in legs; meta uses time span helper | Visual polish judgment |
-| **N-Registry-vordin** | Node or trivial file assert in tests / phase evidence | `content/traders/index.json` has `vordin` → `vordinkkk`; `trader_id` still `vordin` | Day-file rewrites |
+| **N-Marker-label** | Node `npm run test:trade-records` | Pure `buildTradeRecordAnnotations`: display_name + BUY/SELL on **both** `marker_label` and `title`; ×N on label; no CALL/PUT in either; BUY≠SELL grouping; display-name fallback; no raw `vordin` when display_name present | Browser paint |
+| **N-Action-map** | Node same suite | Exact map of `buy_open`/`buy_add`→BUY and `sell_partial`/`sell_close`→SELL; empty/unknown omit; no `?` path | UI |
+| **N-Card-time-range** | Node pure helper tests | Cross-leg min/max; multi-leg; deliberately out-of-order arrays; incomplete times ignored; zero/one/two-or-more results | JSX aesthetics |
+| **N-Card-source** | Node source inspection of `TraderTradeList.jsx` | Negative only: no outcome `%` / fees span on the card reading path; consumes the pure time-range helper | Time-range correctness (use **N-Card-time-range**) |
+| **N-Registry-dual** | Implementation evidence + focused checks | Canonical JSON **and** tracked SQLite resolve `vordin → vordinkkk`; integrity/FK pass; non-target inventory preserved | Day-file rewrites; remote/provider |
 | **N-Pure-filter-export** | Existing pure tests | Eligibility/export unchanged | Marker visuals |
-| **V1–V3** | Screenshots under `output/` | Visual acceptance | Interaction semantics beyond paint |
+| **V1–V3** | Screenshots under `output/` | Visual acceptance including tooltip vocabulary on V2 where hover is captured or noted | Interaction beyond paint |
 
-No mandatory Playwright matrix for this plan: acceptance is pure-function + source contracts + three screenshots. If implementation review later demands a click receipt, add it as a foldback rather than inventing ceremony now.
+No mandatory Playwright matrix for this plan: acceptance is pure-function + dual-surface registry evidence + three screenshots. If implementation review later demands a browser tooltip receipt, add it as a foldback rather than inventing ceremony now.
 
 ## 3. Constraints And Invariants
 
@@ -150,35 +172,41 @@ No mandatory Playwright matrix for this plan: acceptance is pure-function + sour
 
 **Modify (implementation):**
 
-1. `frontend/src/features/review/tradeRecords.js` — marker label uses display_name + BUY/SELL; action-side grouping; export pure helper(s) as needed; **do not** change filter/export column semantics except if a shared helper rename is required (keep download fields).
-2. `frontend/src/features/review/TraderTradeList.jsx` — remove outcome % meta and fees row; add first→last time span meta; keep CALL/PUT chrome and Show/Hide legs.
-3. `frontend/src/features/review/tradeRecords.test.js` — update marker label expectations; add action mapping + grouping cases; pin card source contracts if asserted here (or in `reviewWorkspace.test.js`).
+1. `frontend/src/features/review/tradeRecords.js` — action map helper; marker `marker_label` + `title` use display_name + BUY/SELL; action-side grouping; pure `groupEventTimeRange` (or equivalent) for card meta; **do not** change filter/export column semantics except shared pure helpers.
+2. `frontend/src/features/review/TraderTradeList.jsx` — remove outcome % meta and fees row; render meta via pure time-range helper; keep CALL/PUT chrome and Show/Hide legs.
+3. `frontend/src/features/review/tradeRecords.test.js` — **N-Marker-label**, **N-Action-map**, **N-Card-time-range** (and card source negatives if co-located).
 4. `frontend/src/features/review/reviewWorkspace.test.js` — only if existing source pins reference outcome/fees/marker strings that this plan changes.
-5. `content/traders/index.json` — **only** change `vordin.display_name` from `沃德哥` to `vordinkkk`. No other registry fields; no trade day files.
+5. `content/traders/index.json` — `vordin.display_name` becomes `vordinkkk` **only as the product of the atomic registry-write path** (not a lone hand-edit that skips projection). No other registry fields; no trade day files.
+6. `data/sqlite/tang_strategy_live_extended.db` — updated **only** via the existing candidate-first trade projection that runs after successful registry replace (`_sync_trade_projection` / same machinery as admin PUT). Failure leaves the current DB file unchanged.
 
-**Lifecycle / evidence (this proposal package and later transitions):**
+**Implementation write path (frozen):**
 
-6. Optimization records + `docs/optimization/index.md` status/lifecycle links for promoted OPT-001/002 surfaces.
-7. `PROGRESS.md` / `HANDOFF.md` state blocks.
-8. Plan file + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + `docs/exec-plans/roadmap.md` as lifecycle requires.
-9. Screenshots under `output/` (untracked; do not sweep into commits).
+7. Use the repository’s existing atomic route: full-registry validation → atomic replace of `content/traders/index.json` → candidate project complete normalized trade repository → integrity/FK + non-shrink gates → atomic promote of tracked SQLite. Prefer calling the same service entry used by `PUT /api/admin/traders` (`handle_trader_registry_admin_write` with `after_replace=_sync_trade_projection`), either through a local admin-authenticated request or an offline invocation of those functions under implementation authority. **Forbidden:** editing only the JSON file, or hand-editing the SQLite blob without the candidate/promote path.
+
+**Lifecycle / evidence (this revision package and later transitions):**
+
+8. Optimization records + `docs/optimization/index.md` status/lifecycle links for promoted OPT-001/002 surfaces.
+9. `PROGRESS.md` / `HANDOFF.md` state blocks.
+10. Plan file + `docs/exec-plans/{proposed,active,completed,reviews}/index.md` + `docs/exec-plans/roadmap.md` as lifecycle requires.
+11. Screenshots under `output/` (untracked; do not sweep into commits).
 
 **Out of manifest / must not change:**
 
-- Backend, API routes, tracked SQLite, seed market data, Pages workflows, daily runbook, provider/broker.
+- New backend APIs, schema enum changes, seed market-data history, Pages workflows, daily runbook, provider/broker.
 - `content/trades/*.json` day payloads (no trader_id renames, no field deletes).
 - Eligibility UI, Download four-file behavior, B-chip threshold, direction color tokens, density px table under `.dr-sidebar`.
 - OPT-003…006 work items.
-- Kline engine timeframe/viewport code (OPT-004).
+- Kline engine timeframe/viewport code (OPT-004) — tooltip **text content** is fixed by annotation builder fields; do not rework engine layout for this plan.
 
 ### 3.2 Unrelated dirty paths to preserve
 
-At proposal time, untracked `output/local-acceptance/` and `output/playwright/trade-panel-polish-20260721/` are user/evidence-owned. Do not stage, delete, or mix them into this lifecycle commit.
+Untracked `output/local-acceptance/` and `output/playwright/trade-panel-polish-20260721/` are user/evidence-owned. Do not stage, delete, or mix them into this lifecycle commit.
 
 ### 3.3 Safety / data boundaries
 
-- Registry edit is display metadata only; projection/admin PUT already treat `display_name` as mutable UI label.
-- No `--allow-date-loss`, no DB promote, no content trade mutation.
+- Registry mutation is **display metadata only** (`display_name`), applied through the **existing** atomic content + projection path.
+- Candidate-first: validate full registry + trade repository; preserve market-day, strategy, teaching, bar, dataset, and non-target trade facts; integrity + foreign-key pass required; projection failure rolls back / leaves current tracked DB unchanged.
+- No `--allow-date-loss`. No provider fetch. No Pages publish. No push/PR/remote.
 - Export CSV/JSON may still contain return/fees columns for analysis; card UI is the subtraction surface.
 
 ## 4. Phases
@@ -186,50 +214,47 @@ At proposal time, untracked `output/local-acceptance/` and `output/playwright/tr
 ### Phase 0 — Baseline And Scope Freeze
 
 - Entry gate: plan Active + explicit implementation-start instruction (not granted by this proposal).
-- Work: confirm HEAD baseline; re-hash §1.2 evidence; note current green `test:trade-records` marker pins; freeze visual fixture **QQQ `2026-07-17`**.
-- Verification: list §3.1 paths; confirm no OPT-003…006 leakage in branch plan text.
+- Work: confirm HEAD baseline; re-hash §1.3 evidence; note current green `test:trade-records` marker pins; freeze visual fixture **QQQ `2026-07-17`**; record current SQLite integrity/FK and `vordin` display name in both JSON and DB.
+- Verification: list §3.1 paths; confirm atomic write path is the only registry mutation route; confirm no OPT-003…006 leakage.
 - Exit gate: `phase-0-exit` with baseline note in phase evidence (may live in plan appendix or untracked `output/`).
 
 ### Phase 1 — Implementation
 
 - Entry gate: `phase-0-exit`.
-- Work: implement §2.2 items 1–8 on manifest paths 1–5 only.
-- Verification: **N-*** carriers green; normal + static builds; harness auto; V1–V3 screenshots captured under `output/`.
+- Work: implement §2.2 items 1–10 on manifest paths 1–6 using the frozen write path in §3.1 item 7.
+- Verification: **N-*** carriers green including **N-Registry-dual**; normal + static builds; harness auto; SQLite integrity/FK; V1–V3 screenshots under `output/`.
 - Exit gate: `phase-1-exit`.
 
 ### Phase 2 — Closeout Package
 
 - Entry gate: `phase-1-exit`.
-- Work: implementation-review packet (screenshots + command receipts); independent implementation review; on `accept`, migrate plan to `completed/` under separate closeout authority rules in operating-modes; back-link OPT records to completed plan.
+- Work: implementation-review packet (screenshots + command receipts + dual-surface registry proof); independent implementation review; on `accept`, migrate plan to `completed/` under separate closeout authority rules in operating-modes; back-link OPT records to completed plan.
 - Verification: implementation review `accept`; indexes/roadmap/state blocks agree.
 - Exit gate: `closed` after completed migration.
 
 ## 5. Evidence And Commit Plan
 
 - Baseline commands: `python scripts/check-operating-modes.py --root .`; `python scripts/check-project-harness.py --root . --profile auto`
-- Focused checks (implementation): `cd frontend && npm run test:trade-records`; `npm run build`; `npm run build:static-reviews` (or project’s static script as used by prior plans)
+- Focused checks (implementation): `cd frontend && npm run test:trade-records`; `npm run build`; static build as used by prior plans; SQLite integrity/FK after projection; prove JSON + DB `vordin → vordinkkk`
 - Full checks: harness auto; `git diff --check` on staged paths
-- Expected state/handoff updates: Proposed now; Active only after matching design approve + user activation instruction
-- Task-owned commit paths for **this proposal step**:
+- Expected state/handoff updates: Proposed now at v2 awaiting matching design review; Active only after matching design approve + user activation instruction
+- Task-owned commit paths for **this plan-revision step**:
   - `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md`
   - `docs/exec-plans/proposed/index.md`
   - `docs/exec-plans/roadmap.md`
-  - `docs/optimization/index.md`
-  - `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/2026-07-21-trade-points-and-kline-marker-labels.md`
-  - `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`
-  - `docs/optimization/2026-07-21-trade-card-simplify-points-only/2026-07-21-trade-card-simplify-points-only.md` (if present and still linked)
-  - `docs/optimization/2026-07-21-kline-marker-action-and-trader-nickname/2026-07-21-kline-marker-action-and-trader-nickname.md` (if present and still linked)
+  - `docs/exec-plans/reviews/index.md`
   - `PROGRESS.md`
   - `HANDOFF.md`
-- No-commit condition: none for a complete proposal package
+- No-commit condition: none for a complete revision package
 
 ## 6. Review And Activation Gate
 
 - Review location: `docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/`
-- Required design verdict: `approve` on **exact** revision `v1-proposal-2026-07-21` (or a later foldback revision id)
+- Required design verdict: `approve` on **exact** revision `v2-review-foldback-2026-07-21` (or a later foldback revision id)
+- `review-001` remains append-only evidence against v1 and **cannot** approve v2
 - Required user approval for activation: explicit instruction after matching approve (e.g. move prop plan to active)
 - Activation is a separate lifecycle change before implementation
 - Implementation start requires a later explicit start/execute instruction after activation recording
-- Creating this durable plan is committed locally by default under `docs/operating-modes.md` §2; no push/PR/remote authority
+- Revising this durable plan is committed locally by default under `docs/operating-modes.md` §2; no push/PR/remote authority
 
 The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../../operating-modes.md) for state invariants, review paths, gate-token syntax, manual transitions, and closeout fields.

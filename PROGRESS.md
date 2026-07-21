@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-21`. Closures: atomic registry write + candidate SQLite projection for `vordin → vordinkkk` (manifest includes tracked DB; no JSON-only edit); pure cross-leg `groupEventTimeRange` with zero/one/two-or-more render + Node multi-leg/out-of-order/incomplete cases; all user-visible annotation text (`marker_label` + tooltip `title`) uses display-name + BUY/SELL; exact four-action schema map with fail-closed omit. `review-001` remains append-only v1 evidence and cannot approve v2. Next gate independent `design-review` of exact v2. No activation, implementation, content/DB write, provider/broker, publication, push, or remote authority.
 
 2026-07-21: Independent design review `review-001` on exact revision `v1-proposal-2026-07-21` returned `revise/high`. Product direction, OPT-001/002 boundary, evidence hashes, shared surfaces, QQQ fixture, and authority separation are sound. Required foldback: use the existing atomic canonical-registry + candidate SQLite projection path instead of a JSON-only display-name edit; freeze and test cross-leg chronological card time-range semantics; and make all user-visible annotation text (including K-line hover title) display-name + BUY/SELL with deterministic fail-closed action handling. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB write, provider/broker, publication, push, or remote authority.
 
