@@ -7,11 +7,11 @@
 > Evidence images live in `./screenshots/`.
 >
 > Mode entered: 2026-07-21 by user instruction `这里可以把交易的数量加上，而不是写一个*2`.
-> A finalized record and its direct index update are committed locally by default under `docs/operating-modes.md` §2. This does not authorize implementation or remote action.
+> **Superseded.** Consolidated into session batch [`../2026-07-22-review-date-rail-and-trade-quantity-session/`](../2026-07-22-review-date-rail-and-trade-quantity-session/2026-07-22-review-date-rail-and-trade-quantity-session.md) as OPT-002.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | K-line marker labels should display trade quantity instead of count `×N` | Review / Static K-line markers (`tradeRecords.js` + `kline-engine`) | recorded | none | User 反馈：K 线标注不应写 `×2`，而应加交易数量 |
+| OPT-001 | K-line marker labels should display trade quantity instead of count `×N` | Review / Static K-line markers | superseded | → session OPT-002 | Merged into `2026-07-22-review-date-rail-and-trade-quantity-session` |
 
 ## Visual Reference
 

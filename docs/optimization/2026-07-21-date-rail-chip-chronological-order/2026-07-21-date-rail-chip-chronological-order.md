@@ -7,11 +7,11 @@
 > Evidence images live in `./screenshots/`.
 >
 > Mode entered: 2026-07-21 by user instruction `进入opt记录模式`.
-> A finalized record and its direct index update are committed locally by default under `docs/operating-modes.md` §2. This does not authorize implementation or remote action.
+> **Superseded.** Consolidated into session batch [`../2026-07-22-review-date-rail-and-trade-quantity-session/`](../2026-07-22-review-date-rail-and-trade-quantity-session/2026-07-22-review-date-rail-and-trade-quantity-session.md) as OPT-001.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Progressive date chips must sort ascending (正序) | Shared `DateRail` progressive mode (Review / Data / Static) | recorded | none | User 验收：最近 + 按月 均为倒序，要求正序 |
+| OPT-001 | Progressive date chips must sort ascending (正序) | Shared `DateRail` progressive mode | superseded | → session OPT-001 | Merged into `2026-07-22-review-date-rail-and-trade-quantity-session` |
 
 ## Visual Reference
 

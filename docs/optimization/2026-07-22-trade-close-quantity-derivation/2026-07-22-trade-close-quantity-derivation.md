@@ -7,11 +7,11 @@
 > Evidence images live in `./screenshots/`.
 >
 > Mode entered: 2026-07-22 by user instruction `这种开头交易就显示了总数，结尾的时候自然而然就可以计算出总和，不应该出现最后显示为？的情况`.
-> A finalized record and its direct index update are committed locally by default under `docs/operating-modes.md` §2. This does not authorize implementation or remote action.
+> **Superseded.** Consolidated into session batch [`../2026-07-22-review-date-rail-and-trade-quantity-session/`](../2026-07-22-review-date-rail-and-trade-quantity-session/2026-07-22-review-date-rail-and-trade-quantity-session.md) as OPT-003.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Derive missing closing event quantity when opening quantity is known | Review / Static trade timeline & K-line markers (`tradeRecords.js`) | recorded | none | User 反馈：开仓已填数量时，清仓事件不应显示 `?`，应按初始量 - 部分平仓量推导剩余数量 |
+| OPT-001 | Derive missing closing event quantity when opening quantity is known | Review / Static trade timeline & K-line markers | superseded | → session OPT-003 | Merged into `2026-07-22-review-date-rail-and-trade-quantity-session` |
 
 ## Visual Reference
 
