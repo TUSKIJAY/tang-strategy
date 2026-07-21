@@ -325,6 +325,9 @@ export function groupBarSpan(group, bars = []) {
 
 /**
  * Event-row focus payload: single-bar highlight, not full-day span.
+ * The returned `style` field is retained for pure-helper tests only; after
+ * OPT-002 the Review/Static live integrations must not paint selection
+ * chrome — they consume the indices for fitRange and clear highlights.
  */
 export function eventFocusPayload(event, bars = [], options = {}) {
   if (!event?.occurred_at || event.time_incomplete) return null;

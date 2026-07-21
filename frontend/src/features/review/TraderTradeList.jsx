@@ -12,6 +12,7 @@ export function TraderTradeList({
   const registry = new Map(traders.map((trader) => [trader.trader_id, trader]));
   return (
     <section className="trade-record-list" aria-label="Normalized trade groups">
+      <div className="stack-caption">交易者 · Trades</div>
       {!groups.length && <div className="trade-record-empty">No normalized trades for this filter.</div>}
       {groups.map((group) => {
         const trader = registry.get(group.trader_id) || {};

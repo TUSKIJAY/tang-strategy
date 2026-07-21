@@ -5,7 +5,6 @@ import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/re
 import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
 import { ReviewContextPanel } from '../features/review/ReviewContextPanel.jsx';
 import { ReviewSignalList } from '../features/review/ReviewSignalList.jsx';
-import { TradeExportControls } from '../features/review/TradeExportControls.jsx';
 import { TraderFilters } from '../features/review/TraderFilters.jsx';
 import { TraderTradeList } from '../features/review/TraderTradeList.jsx';
 import {
@@ -402,13 +401,9 @@ export function ReviewPage({ state, setState }) {
     if (!bars1m.length) return;
     const span = groupBarSpan(group, bars1m);
     if (span.startIndex == null || span.endIndex == null) return;
-    // Exact OPT-005 sequence: blue multi-bar band → fitRange only → no post-fit center.
-    engineRef.current?.setHighlightRanges({
-      timeframe: '1m',
-      startIndex: span.startIndex,
-      endIndex: span.endIndex,
-      style: 'blue',
-    });
+    // OPT-002: selection band cancelled — clear any stale highlight paint, then
+    // keep the completed group-span fitRange contract with no post-fit center.
+    engineRef.current?.setHighlightRanges(null);
     engineRef.current?.fitRange({
       timeframe: '1m',
       startIndex: span.startIndex,
@@ -423,12 +418,8 @@ export function ReviewPage({ state, setState }) {
     const focus = eventFocusPayload(row, bars1m, { timeframe: '1m' });
     if (!focus) return;
     setActiveSignalId('');
-    engineRef.current?.setHighlightRanges({
-      timeframe: focus.timeframe,
-      startIndex: focus.startIndex,
-      endIndex: focus.endIndex,
-      style: focus.style,
-    });
+    // OPT-002: no blue band/dot overlay for event focus; fitRange locate only.
+    engineRef.current?.setHighlightRanges(null);
     engineRef.current?.fitRange({
       timeframe: focus.timeframe,
       startIndex: focus.startIndex,
@@ -546,7 +537,6 @@ export function ReviewPage({ state, setState }) {
                 onChange={setTradeFilters}
                 context={{ ticker: tradeRecords.ticker, tradeDate: tradeRecords.trade_date }}
                 availableTraderIds={traderAvailability.availableTraderIds}
-                exportControls={<TradeExportControls payload={tradeRecords} groups={filteredTradeGroups} filters={tradeFilters} />}
               />
             )}
             <TraderTradeList

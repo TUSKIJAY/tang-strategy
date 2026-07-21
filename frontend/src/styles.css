@@ -1262,17 +1262,8 @@ main { padding: 36px; overflow: auto; }
 .trade-tools-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px;
-}
-
-.trade-tools-title {
-  margin: 0;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
 }
 
 .trade-tools-row {
@@ -1395,6 +1386,36 @@ main { padding: 36px; overflow: auto; }
 .dr-sidebar .trade-trader-name { font-size: 12px; font-weight: 700; }
 .dr-sidebar .trade-group-meta { font-size: 11px; }
 .dr-sidebar .trade-drilldown-toggle { font-size: 11px; }
+
+/* OPT-001 inter-block rhythm: stable 20px separation between the three
+   mid-stack wrappers (filters panel, trade list, signal stack). In-block
+   card density rules above are unchanged. */
+.dr-sidebar .dr-signal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stack-caption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 2px 8px;
+  font: 700 10px/1 var(--font-ui);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.stack-caption::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Caption sits inside the trade-list grid: keep total caption-to-card
+   spacing at 8px (6px grid gap + 2px margin). */
+.trade-record-list > .stack-caption { margin-bottom: 2px; }
 
 .trade-record-list { display: grid; gap: 8px; }
 .trade-record-empty { padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-subtle); text-align: center; }

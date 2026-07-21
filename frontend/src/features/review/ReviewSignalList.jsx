@@ -345,34 +345,37 @@ export function ReviewSignalList({ annotations1m = [], annotations5m = [], setup
   const [expandedKey, setExpandedKey] = useState('');
   const toggleExpanded = (key) => setExpandedKey((current) => current === key ? '' : key);
 
-  if (!items.length) {
-    return (
-      <div className="dr-empty">
-        <div className="dr-empty-icon">K</div>
-        <div>{emptyTitle}</div>
-        <small>{emptyHint}</small>
-      </div>
-    );
-  }
-
-  return items.map((item) => {
-    if (item.kind === 'lifecycle') {
-      const active = item.annotations.some((annotation) => annotation.id === activeSignal?.id);
-      return <LifecycleCard key={item.key} group={item} active={active} expanded={expandedKey === item.key} onSelect={onSelect} onToggle={() => toggleExpanded(item.key)} bars1m={bars1m} bars5m={bars5m} setups={setups} />;
-    }
-    const itemKey = `anno:${item.annotation.id}`;
-    return (
-      <RegularCard
-        key={itemKey}
-        annotation={item.annotation}
-        active={item.annotation.id === activeSignal?.id}
-        expanded={expandedKey === itemKey}
-        onSelect={onSelect}
-        onToggle={() => toggleExpanded(itemKey)}
-        bars1m={bars1m}
-        bars5m={bars5m}
-        setups={setups}
-      />
-    );
-  });
+  return (
+    <section className="dr-signal-stack" aria-label="策略讲解信号">
+      <div className="stack-caption">策略讲解 · Signals</div>
+      {!items.length ? (
+        <div className="dr-empty">
+          <div className="dr-empty-icon">K</div>
+          <div>{emptyTitle}</div>
+          <small>{emptyHint}</small>
+        </div>
+      ) : (
+        items.map((item) => {
+          if (item.kind === 'lifecycle') {
+            const active = item.annotations.some((annotation) => annotation.id === activeSignal?.id);
+            return <LifecycleCard key={item.key} group={item} active={active} expanded={expandedKey === item.key} onSelect={onSelect} onToggle={() => toggleExpanded(item.key)} bars1m={bars1m} bars5m={bars5m} setups={setups} />;
+          }
+          const itemKey = `anno:${item.annotation.id}`;
+          return (
+            <RegularCard
+              key={itemKey}
+              annotation={item.annotation}
+              active={item.annotation.id === activeSignal?.id}
+              expanded={expandedKey === itemKey}
+              onSelect={onSelect}
+              onToggle={() => toggleExpanded(itemKey)}
+              bars1m={bars1m}
+              bars5m={bars5m}
+              setups={setups}
+            />
+          );
+        })
+      )}
+    </section>
+  );
 }

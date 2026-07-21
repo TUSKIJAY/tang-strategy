@@ -1157,6 +1157,8 @@ test('N-Event-focus single-bar payload distinct from group span (N-Event-focus)'
   assert.ok(focus);
   assert.equal(focus.startIndex, focus.endIndex);
   assert.equal(focus.startIndex, 1);
+  // Pure helper retains a style field for tests only; live Review/Static
+  // trade select must not paint it (OPT-002, see N-Highlight-source).
   assert.equal(focus.style, 'blue');
   assert.equal(focus.timeframe, '1m');
   assert.equal(focus.event_id, 'e2');
@@ -1182,10 +1184,127 @@ test('N-Event-focus single-bar payload distinct from group span (N-Event-focus)'
   for (const source of [reviewSource, staticSource]) {
     assert.match(source, /groupBarSpan/);
     assert.match(source, /eventFocusPayload/);
-    assert.match(source, /style: 'blue'/);
     assert.match(source, /onEventFocus/);
     assert.doesNotMatch(source, /center:\s*true/);
   }
+});
+
+test('N-Highlight-source trade group/event select never paints a selection band (N-Highlight-source)', () => {
+  const reviewSource = readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8');
+  const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
+  for (const source of [reviewSource, staticSource]) {
+    for (const fnName of ['selectTradeGroup', 'focusTradeEvent']) {
+      const body = source.match(new RegExp(`function ${fnName}[\\s\\S]*?\\n  \\}`))?.[0] || '';
+      assert.ok(body, `${fnName} body found`);
+      // Clear-or-skip contract: stale paint cleared, no painted range set.
+      assert.match(body, /setHighlightRanges\(null\)/);
+      assert.doesNotMatch(body, /setHighlightRanges\(\{/);
+      assert.doesNotMatch(body, /style:\s*['"]blue['"]/);
+      // fitRange locate retained on both paths.
+      assert.match(body, /fitRange\(/);
+    }
+    const selectBody = source.match(/function selectTradeGroup[\s\S]*?\n  \}/)?.[0] || '';
+    assert.match(selectBody, /paddingRatio: 0\.2/);
+    assert.match(selectBody, /minPadding: 4/);
+    const focusBody = source.match(/function focusTradeEvent[\s\S]*?\n  \}/)?.[0] || '';
+    assert.match(focusBody, /paddingRatio: 0\.35/);
+    assert.match(focusBody, /minPadding: 8/);
+  }
+});
+
+test('N-Sidebar-source Review/Static mid-stack spacing, captions, and Download disposition (N-Sidebar-source)', () => {
+  const reviewSource = readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8');
+  const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
+  const filtersSource = readFileSync(new URL('./TraderFilters.jsx', import.meta.url), 'utf8');
+  const listSource = readFileSync(new URL('./TraderTradeList.jsx', import.meta.url), 'utf8');
+  const signalSource = readFileSync(new URL('./ReviewSignalList.jsx', import.meta.url), 'utf8');
+  const adminSource = readFileSync(new URL('../../pages/AdminTradersPage.jsx', import.meta.url), 'utf8');
+  const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
+
+  // Download disposition: Review/Static never mount TradeExportControls; Admin may.
+  for (const source of [reviewSource, staticSource]) {
+    assert.doesNotMatch(source, /TradeExportControls/);
+    assert.doesNotMatch(source, /exportControls=/);
+  }
+  assert.match(adminSource, /TradeExportControls/);
+
+  // TraderFilters: no visible Trade tools title; head row only when a slot is passed.
+  assert.doesNotMatch(filtersSource, /Trade tools/);
+  assert.doesNotMatch(filtersSource, /trade-tools-title/);
+  assert.match(filtersSource, /exportControls \? \(/);
+
+  // Section captions + stable wrappers on both mid-stack list blocks.
+  assert.match(listSource, /className="stack-caption">交易者 · Trades</);
+  assert.match(signalSource, /className="stack-caption">策略讲解 · Signals</);
+  assert.match(signalSource, /className="dr-signal-stack"/);
+
+  // Inter-block rhythm: 20px gap scoped to the Review/Static sidebar column.
+  assert.match(styles, /\.dr-sidebar \.dr-signal-list \{\s*display: flex;\s*flex-direction: column;\s*gap: 20px;\s*\}/);
+  assert.match(styles, /\.stack-caption \{/);
+  assert.match(styles, /\.stack-caption::after \{/);
+  assert.doesNotMatch(styles, /\.trade-tools-title/);
+});
+
+test('N-Span-oracle frozen fixture indices for B carriers (N-Span-oracle)', () => {
+  // Phase 0 frozen fixture: QQQ 2026-07-17 tg_20260717_vordin_qqq_002,
+  // RTH window 1m bars (390 bars 09:30→15:59). Indices computed from the
+  // same pure helpers must match the tracked runner constants.
+  const rthBars = [];
+  let minutes = 9 * 60 + 30;
+  for (let index = 0; index < 390; index += 1) {
+    const hh = String(Math.floor(minutes / 60)).padStart(2, '0');
+    const mm = String(minutes % 60).padStart(2, '0');
+    rthBars.push({ t: `${hh}:${mm}` });
+    minutes += 1;
+  }
+  assert.equal(rthBars.length, 390);
+  assert.equal(rthBars[0].t, '09:30');
+  assert.equal(rthBars[389].t, '15:59');
+
+  const frozenGroup = {
+    trade_group_id: 'tg_20260717_vordin_qqq_002',
+    trader_id: 'vordin',
+    direction: 'CALL',
+    legs: [{
+      leg_id: 'tg_20260717_vordin_qqq_002_l1',
+      events: [
+        { event_id: 'tg_20260717_vordin_qqq_002_l1_e1', action: 'buy_open', occurred_at: '2026-07-17T09:42-04:00', time_incomplete: false },
+        { event_id: 'tg_20260717_vordin_qqq_002_l1_e2', action: 'sell_partial', occurred_at: '2026-07-17T09:50-04:00', time_incomplete: false },
+        { event_id: 'tg_20260717_vordin_qqq_002_l1_e3', action: 'sell_partial', occurred_at: '2026-07-17T09:50-04:00', time_incomplete: false },
+        { event_id: 'tg_20260717_vordin_qqq_002_l1_e4', action: 'sell_partial', occurred_at: '2026-07-17T09:57-04:00', time_incomplete: false },
+        { event_id: 'tg_20260717_vordin_qqq_002_l1_e5', action: 'sell_partial', occurred_at: '2026-07-17T09:57-04:00', time_incomplete: false },
+        { event_id: 'tg_20260717_vordin_qqq_002_l1_e6', action: 'sell_close', occurred_at: '2026-07-17T10:01-04:00', time_incomplete: false },
+      ],
+    }],
+  };
+
+  const span = groupBarSpan(frozenGroup, rthBars);
+  assert.equal(span.knownCount, 6);
+  assert.equal(span.startIndex, 12);
+  assert.equal(span.endIndex, 31);
+  assert.equal(rthBars[span.startIndex].t, '09:42');
+  assert.equal(rthBars[span.endIndex].t, '10:01');
+
+  const timeline = groupTimelineEvents(frozenGroup);
+  assert.equal(timeline.length, 6);
+  const frozenRow = timeline[1];
+  assert.equal(frozenRow.event_id, 'tg_20260717_vordin_qqq_002_l1_e2');
+  const focus = eventFocusPayload(frozenRow, rthBars, { timeframe: '1m' });
+  assert.equal(focus.barIndex, 20);
+  assert.equal(focus.startIndex, 20);
+  assert.equal(focus.endIndex, 20);
+  assert.equal(rthBars[focus.barIndex].t, '09:50');
+
+  // The tracked Playwright runner must carry the same frozen constants.
+  const runner = readFileSync(
+    new URL('../../../scripts/playwright/review-sidebar-spacing-and-selection-band-acceptance.mjs', import.meta.url),
+    'utf8',
+  );
+  assert.match(runner, /GROUP_ID = 'tg_20260717_vordin_qqq_002'/);
+  assert.match(runner, /EVENT_ROW_INDEX = 1/);
+  assert.match(runner, /EXPECTED_SPAN_START = 12/);
+  assert.match(runner, /EXPECTED_SPAN_END = 31/);
+  assert.match(runner, /EXPECTED_EVENT_BAR = 20/);
 });
 
 test('N-Data-rail-source host class data-market-days-rail scoped density (N-Data-rail-source)', () => {

@@ -100,10 +100,11 @@ export function TraderFilters({
 
   return (
     <section className="trade-filter-panel" aria-label="Trade record filters">
-      <div className="trade-tools-head">
-        <span className="trade-tools-title">Trade tools</span>
-        {exportControls}
-      </div>
+      {exportControls ? (
+        <div className="trade-tools-head">
+          {exportControls}
+        </div>
+      ) : null}
 
       {!context && (
         <div className="trade-tools-row trade-context-selects">
