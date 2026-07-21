@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Date rail 正序 + marker 数量 + 平仓量推导 · OPT mock</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-ui: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --surface-app: #141413;
+      --surface-panel: #1E1E1D;
+      --surface-control: #282827;
+      --surface-raised: #333331;
+      --border-subtle: #3B3B38;
+      --border-control: #74746E;
+      --text-primary: #E8E7E3;
+      --text-secondary: #C9C8C2;
+      --text-muted: #A7A69F;
+      --accent: #8B9A6D;
+      --status-success: #4CAF50;
+      --direction-call: #6F9F7A;
+      --direction-put: #E06B66;
+      --part: #E4C77D;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0b0b0a;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+    }
+    .page { max-width: 1180px; margin: 0 auto; padding: 28px 24px 56px; }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 0 0 10px; font-size: 24px; font-weight: 500; line-height: 1.25; }
+    .lead {
+      margin: 0 0 22px;
+      max-width: 920px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: var(--surface-control);
+      color: var(--text-secondary);
+    }
+
+    .section { margin-top: 32px; }
+    .section > h2 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .section > .sub {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 920px;
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .col-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .tag {
+      font-size: 10px;
+      letter-spacing: .04em;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+    .tag.bad {
+      color: var(--direction-put);
+      border-color: color-mix(in srgb, var(--direction-put) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--direction-put) 10%, transparent);
+    }
+    .tag.good {
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    .rail, .panel {
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface-app);
+    }
+    .rail + .rail { margin-top: 12px; }
+    .rail-bar, .panel-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-panel);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .rail-bar strong, .panel-bar strong { color: var(--text-primary); }
+
+    /* ---- date rail ---- */
+    .rail-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .seg {
+      display: flex;
+      gap: 3px;
+      padding: 2px;
+      border-radius: 8px;
+      background: var(--surface-control);
+      border: 1px solid var(--border-subtle);
+    }
+    .seg span {
+      flex: 1;
+      text-align: center;
+      border-radius: 6px;
+      padding: 7px 3px;
+      font: 600 12px/1.15 var(--font-ui);
+      color: var(--text-muted);
+    }
+    .seg span.on {
+      color: var(--text-primary);
+      background: var(--surface-raised);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+    .seg.ticker span.on {
+      background: var(--accent);
+      color: #0F0F0E;
+      box-shadow: none;
+    }
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2px;
+    }
+    .month-nav .chev {
+      width: 26px; height: 26px;
+      display: grid; place-items: center;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font: 600 13px var(--font-ui);
+    }
+    .month-nav .m { font: 600 13px var(--font-mono); color: var(--text-primary); letter-spacing: .04em; }
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .chips span {
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+      border-radius: 7px;
+      padding: 7px 2px;
+      font: 600 12px var(--font-mono);
+      color: var(--text-secondary);
+      background: var(--surface-panel);
+    }
+    .chips span.sel {
+      border-color: var(--accent);
+      color: var(--text-primary);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface-panel));
+    }
+    .chips span.first { position: relative; }
+    .rail-foot {
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 0 2px;
+    }
+    .flow-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .flow-note em { font-style: normal; color: var(--accent); }
+
+    /* ---- kline chart ---- */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .legend .tri {
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+    }
+    .legend .tri.up { border-bottom: 7px solid var(--direction-call); }
+    .legend .tri.down { border-top: 7px solid var(--direction-put); }
+    .chart {
+      position: relative;
+      height: 300px;
+      background: linear-gradient(180deg, #171716 0%, #10100f 100%);
+    }
+    .chart svg { display: block; width: 100%; height: 100%; }
+    .axis-note {
+      position: absolute;
+      left: 12px;
+      bottom: 8px;
+      font: 10px/1 var(--font-mono);
+      color: #5A5A56;
+    }
+
+    /* ---- trade cards ---- */
+    .list { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .card {
+      position: relative;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: var(--surface-panel);
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--dir);
+    }
+    .card.put { --dir: var(--direction-put); }
+    .card.call { --dir: var(--direction-call); }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 10px 0 12px;
+    }
+    .title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .glyph { width: 12px; height: 12px; display: grid; place-items: center; }
+    .glyph i { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; }
+    .card.put .glyph i { border-top: 8px solid var(--direction-put); }
+    .card.call .glyph i { border-bottom: 8px solid var(--direction-call); }
+    .name { font-size: 12px; font-weight: 700; }
+    .dir {
+      font: 700 10px/1 var(--font-mono);
+      letter-spacing: .06em;
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid color-mix(in srgb, var(--dir) 35%, var(--border-subtle));
+      color: var(--dir);
+      background: color-mix(in srgb, var(--dir) 10%, transparent);
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font: 600 10px/1 var(--font-mono);
+      text-transform: uppercase;
+      color: var(--status-success);
+      white-space: nowrap;
+    }
+    .status::before {
+      content: "";
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--status-success);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-success) 22%, transparent);
+    }
+    .meta {
+      padding: 3px 10px 0 30px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .meta em { font-style: normal; color: var(--text-secondary); }
+    .toggle {
+      padding: 6px 10px 8px 30px;
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .events {
+      margin: 0 10px 10px 30px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-control);
+      font: 11px/1.5 var(--font-mono);
+      color: var(--text-secondary);
+    }
+    .event {
+      display: grid;
+      grid-template-columns: 40px 44px minmax(0, 1fr);
+      gap: 8px;
+      margin-top: 3px;
+    }
+    .event:first-child { margin-top: 0; }
+    .event time { color: var(--text-muted); }
+    .act-buy { color: var(--direction-call); font-weight: 700; }
+    .act-sell { color: var(--direction-put); font-weight: 700; }
+    .act-part { color: var(--part); font-weight: 700; }
+    .q-miss { color: var(--direction-put); font-weight: 700; }
+    .q-derived { color: var(--accent); font-weight: 700; }
+    .derived-pill {
+      font: 700 9px/1 var(--font-mono);
+      letter-spacing: .04em;
+      padding: 2px 5px;
+      border-radius: 999px;
+      margin-left: 6px;
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border-subtle));
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      vertical-align: 1px;
+    }
+    .formula {
+      margin: -4px 10px 10px 30px;
+      font: 10px/1.5 var(--font-mono);
+      color: var(--text-muted);
+    }
+    .formula em { font-style: normal; color: var(--accent); }
+
+    /* ---- mapping table ---- */
+    .mapping {
+      margin-top: 32px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      background: var(--surface-panel);
+      padding: 14px 16px;
+    }
+    .mapping h2 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+    th {
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .keep { margin: 10px 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+    @media (max-width: 860px) {
+      .compare { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <p class="eyebrow">Optimization mock · record-only · not live app</p>
+    <h1>日期轨道正序 · K 线标记写数量 · 清仓量推导</h1>
+    <p class="lead">
+      对应 OPT batch：<code>2026-07-22-review-date-rail-and-trade-quantity-session</code>（scope lock 用户确认 2026-07-22）。
+      <strong>OPT-001</strong> DateRail 最近 / 按月 chips 改<strong>正序</strong>（旧左新右）；
+      <strong>OPT-002</strong> K 线标记把事件数 <code>×N</code> 换成实际数量 <code>*QTY</code>；
+      <strong>OPT-003</strong> 开仓量已知时推导清仓剩余量，消灭时间线与标记上的 <code>?</code>。
+      证据截图见 <code>./screenshots/</code>。
+    </p>
+
+    <!-- ========== OPT-001 DATE RAIL ========== -->
+    <section class="section" aria-labelledby="sec-rail">
+      <h2 id="sec-rail">OPT-001 · Progressive date chips · 正序 ascending</h2>
+      <p class="sub">
+        Scope lock：<strong>正序 = chronological ascending</strong>（较早日期在左，较晚在右），最近与按月两种模式一致，
+        适用 Review / Data / Static progressive rails。同一批 12 个交易日，仅渲染顺序反转；选中日 <code>07-17</code> 从首位移到末位。
+      </p>
+
+      <div class="compare">
+        <div>
+          <div class="col-label"><span>Current</span><span class="tag bad">倒序 newest → oldest</span></div>
+
+          <section class="rail">
+            <div class="rail-bar"><span>DateRail · <strong>最近</strong></span><span>QQQ</span></div>
+            <div class="rail-body">
+              <div class="seg ticker"><span class="on">QQQ</span><span>SPY</span></div>
+              <div class="seg"><span class="on">最近</span><span>按月</span></div>
+              <div class="chips">
+                <span class="sel">07-17</span><span>07-16</span><span>07-15</span><span>07-14</span>
+                <span>07-13</span><span>07-10</span><span>07-09</span><span>07-08</span>
+                <span>07-07</span><span>07-06</span><span>07-02</span><span>07-01</span>
+              </div>
+              <div class="rail-foot">显示最近 12 · 全库 QQQ 46</div>
+            </div>
+          </section>
+
+          <section class="rail">
+            <div class="rail-bar"><span>DateRail · <strong>按月</strong></span><span>QQQ</span></div>
+            <div class="rail-body">
+              <div class="seg ticker"><span class="on">QQQ</span><span>SPY</span></div>
+              <div class="seg"><span>最近</span><span class="on">按月</span></div>
+              <div class="month-nav"><span class="chev">‹</span><span class="m">2026-07</span><span class="chev">›</span></div>
+              <div class="chips">
+                <span class="sel">17</span><span>16</span><span>15</span><span>14</span>
+                <span>13</span><span>10</span><span>09</span><span>08</span>
+                <span>07</span><span>06</span><span>02</span><span>01</span>
+              </div>
+              <div class="rail-foot">本月交易日 12 · 全库 QQQ 46</div>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <div class="col-label"><span>Proposed</span><span class="tag good">正序 oldest → newest</span></div>
+
+          <section class="rail">
+            <div class="rail-bar"><span>DateRail · <strong>最近</strong></span><span>QQQ</span></div>
+            <div class="rail-body">
+              <div class="seg ticker"><span class="on">QQQ</span><span>SPY</span></div>
+              <div class="seg"><span class="on">最近</span><span>按月</span></div>
+              <div class="chips">
+                <span>07-01</span><span>07-02</span><span>07-06</span><span>07-07</span>
+                <span>07-08</span><span>07-09</span><span>07-10</span><span>07-13</span>
+                <span>07-14</span><span>07-15</span><span>07-16</span><span class="sel">07-17</span>
+              </div>
+              <div class="rail-foot">显示最近 12 · 全库 QQQ 46</div>
+            </div>
+          </section>
+
+          <section class="rail">
+            <div class="rail-bar"><span>DateRail · <strong>按月</strong></span><span>QQQ</span></div>
+            <div class="rail-body">
+              <div class="seg ticker"><span class="on">QQQ</span><span>SPY</span></div>
+              <div class="seg"><span>最近</span><span class="on">按月</span></div>
+              <div class="month-nav"><span class="chev">‹</span><span class="m">2026-07</span><span class="chev">›</span></div>
+              <div class="chips">
+                <span>01</span><span>02</span><span>06</span><span>07</span>
+                <span>08</span><span>09</span><span>10</span><span>13</span>
+                <span>14</span><span>15</span><span>16</span><span class="sel">17</span>
+              </div>
+              <div class="rail-foot">本月交易日 12 · 全库 QQQ 46</div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <p class="flow-note">数据集、选中态、footer 计数均不变；<em>仅 chip 渲染顺序反转</em>。按月导航（‹ 2026-07 ›）与月份切换逻辑不变。</p>
+    </section>
+
+    <!-- ========== OPT-002 KLINE MARKER QUANTITY ========== -->
+    <section class="section" aria-labelledby="sec-kline">
+      <h2 id="sec-kline">OPT-002 · K-line markers · 数量替换事件数 ×N</h2>
+      <p class="sub">
+        Scope lock：同 bar 多事件聚合显示数量求和 <code>${displayName} ${side}*${totalQty}</code>（如 <code>vordinkkk SELL*24</code>）；
+        单事件有数量则带数量（<code>vordinkkk BUY*70</code>）；缺数量省略后缀（<code>vordinkkk SELL</code>）。
+        形状/颜色继续表达买卖与方向：下方 ▲ = BUY，上方 ▼ = SELL；绿 = CALL 腿，红 = PUT 腿。
+      </p>
+
+      <div class="compare">
+        <div>
+          <div class="col-label"><span>Current</span><span class="tag bad">×N = 事件数</span></div>
+          <section class="panel">
+            <div class="panel-bar">
+              <span>QQQ · <strong>2026-07-17</strong> · 1m</span>
+              <div class="legend">
+                <span><i class="tri up"></i>BUY</span>
+                <span><i class="tri down"></i>SELL</span>
+                <span>label = name SIDE ×N</span>
+              </div>
+            </div>
+            <div class="chart">
+              <svg viewBox="0 0 560 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Current markers">
+                <rect width="560" height="300" fill="#141413"/>
+                <g stroke="#282827" stroke-dasharray="2 3">
+                  <line x1="16" y1="60" x2="544" y2="60"/>
+                  <line x1="16" y1="110" x2="544" y2="110"/>
+                  <line x1="16" y1="160" x2="544" y2="160"/>
+                  <line x1="16" y1="210" x2="544" y2="210"/>
+                  <line x1="16" y1="260" x2="544" y2="260"/>
+                </g>
+                <path d="M28 150 C 90 130, 105 195, 150 180 S 240 125, 330 105 S 450 78, 540 90"
+                      fill="none" stroke="#E8A838" stroke-width="1.4" opacity=".7"/>
+                <path d="M28 132 C 100 122, 140 145, 210 138 S 380 100, 540 96"
+                      fill="none" stroke="#5B9BD5" stroke-width="1.2" opacity=".5"/>
+                <g stroke-width="1.2">
+                  <line x1="45" y1="105" x2="45" y2="140" stroke="#E06B66"/><rect x="40" y="112" width="10" height="20" rx="1" fill="#E06B66"/>
+                  <line x1="85" y1="150" x2="85" y2="205" stroke="#E06B66"/><rect x="80" y="158" width="10" height="40" rx="1" fill="#E06B66"/>
+                  <line x1="118" y1="165" x2="118" y2="210" stroke="#6F9F7A"/><rect x="113" y="170" width="10" height="30" rx="1" fill="#6F9F7A"/>
+                  <line x1="150" y1="140" x2="150" y2="185" stroke="#6F9F7A"/><rect x="145" y="146" width="10" height="28" rx="1" fill="#6F9F7A"/>
+                  <line x1="175" y1="135" x2="175" y2="170" stroke="#6F9F7A"/><rect x="170" y="140" width="10" height="24" rx="1" fill="#6F9F7A"/>
+                  <line x1="215" y1="120" x2="215" y2="155" stroke="#6F9F7A"/><rect x="210" y="125" width="10" height="24" rx="1" fill="#6F9F7A"/>
+                  <line x1="260" y1="112" x2="260" y2="148" stroke="#E06B66"/><rect x="255" y="116" width="10" height="26" rx="1" fill="#E06B66"/>
+                  <line x1="300" y1="105" x2="300" y2="135" stroke="#6F9F7A"/><rect x="295" y="108" width="10" height="22" rx="1" fill="#6F9F7A"/>
+                  <line x1="335" y1="95" x2="335" y2="125" stroke="#6F9F7A"/><rect x="330" y="98" width="10" height="22" rx="1" fill="#6F9F7A"/>
+                  <line x1="380" y1="88" x2="380" y2="115" stroke="#E06B66"/><rect x="375" y="90" width="10" height="20" rx="1" fill="#E06B66"/>
+                  <line x1="425" y1="80" x2="425" y2="108" stroke="#6F9F7A"/><rect x="420" y="83" width="10" height="18" rx="1" fill="#6F9F7A"/>
+                  <line x1="470" y1="72" x2="470" y2="98" stroke="#6F9F7A"/><rect x="465" y="75" width="10" height="16" rx="1" fill="#6F9F7A"/>
+                  <line x1="515" y1="75" x2="515" y2="105" stroke="#E06B66"/><rect x="510" y="80" width="10" height="20" rx="1" fill="#E06B66"/>
+                </g>
+                <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" text-anchor="middle">
+                  <!-- 09:42 PUT BUY 150 @ 0.84 -->
+                  <g transform="translate(108,212)">
+                    <polygon points="0,0 -6,10 6,10" fill="#E06B66"/>
+                    <rect x="-46" y="14" width="92" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="26" fill="#E06B66">vordinkkk BUY</text>
+                  </g>
+                  <!-- 09:42 CALL BUY 70 @ 1.8 (同 bar，错开) -->
+                  <line x1="150" y1="240" x2="124" y2="216" stroke="#6F9F7A" stroke-width="1" stroke-dasharray="2 2" opacity=".5"/>
+                  <g transform="translate(150,240)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-46" y="14" width="92" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="26" fill="#6F9F7A">vordinkkk BUY</text>
+                  </g>
+                  <!-- 09:50 CALL PART 12 + PART 12 -->
+                  <g transform="translate(175,135)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
+                    <rect x="-53" y="-32" width="106" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL ×2</text>
+                  </g>
+                  <!-- 09:57 CALL PART 22 + PART 12 -->
+                  <g transform="translate(260,112)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
+                    <rect x="-53" y="-32" width="106" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL ×2</text>
+                  </g>
+                  <!-- 10:01 CALL SELL_CLOSE qty null -->
+                  <g transform="translate(335,95)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
+                    <rect x="-49" y="-32" width="98" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL</text>
+                  </g>
+                  <!-- 10:43 PUT SELL_CLOSE qty null -->
+                  <g transform="translate(470,72)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                    <rect x="-49" y="-32" width="98" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="-20" fill="#E06B66">vordinkkk SELL</text>
+                  </g>
+                </g>
+              </svg>
+              <div class="axis-note">09:30 ··· 09:56 ··· 10:22 ··· 10:48 · 两笔 BUY 同在 09:42，标签纵向错开防重叠</div>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <div class="col-label"><span>Proposed</span><span class="tag good">*QTY = 合约数量</span></div>
+          <section class="panel">
+            <div class="panel-bar">
+              <span>QQQ · <strong>2026-07-17</strong> · 1m</span>
+              <div class="legend">
+                <span><i class="tri up"></i>BUY</span>
+                <span><i class="tri down"></i>SELL</span>
+                <span>label = name SIDE*QTY</span>
+              </div>
+            </div>
+            <div class="chart">
+              <svg viewBox="0 0 560 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Proposed markers">
+                <rect width="560" height="300" fill="#141413"/>
+                <g stroke="#282827" stroke-dasharray="2 3">
+                  <line x1="16" y1="60" x2="544" y2="60"/>
+                  <line x1="16" y1="110" x2="544" y2="110"/>
+                  <line x1="16" y1="160" x2="544" y2="160"/>
+                  <line x1="16" y1="210" x2="544" y2="210"/>
+                  <line x1="16" y1="260" x2="544" y2="260"/>
+                </g>
+                <path d="M28 150 C 90 130, 105 195, 150 180 S 240 125, 330 105 S 450 78, 540 90"
+                      fill="none" stroke="#E8A838" stroke-width="1.4" opacity=".7"/>
+                <path d="M28 132 C 100 122, 140 145, 210 138 S 380 100, 540 96"
+                      fill="none" stroke="#5B9BD5" stroke-width="1.2" opacity=".5"/>
+                <g stroke-width="1.2">
+                  <line x1="45" y1="105" x2="45" y2="140" stroke="#E06B66"/><rect x="40" y="112" width="10" height="20" rx="1" fill="#E06B66"/>
+                  <line x1="85" y1="150" x2="85" y2="205" stroke="#E06B66"/><rect x="80" y="158" width="10" height="40" rx="1" fill="#E06B66"/>
+                  <line x1="118" y1="165" x2="118" y2="210" stroke="#6F9F7A"/><rect x="113" y="170" width="10" height="30" rx="1" fill="#6F9F7A"/>
+                  <line x1="150" y1="140" x2="150" y2="185" stroke="#6F9F7A"/><rect x="145" y="146" width="10" height="28" rx="1" fill="#6F9F7A"/>
+                  <line x1="175" y1="135" x2="175" y2="170" stroke="#6F9F7A"/><rect x="170" y="140" width="10" height="24" rx="1" fill="#6F9F7A"/>
+                  <line x1="215" y1="120" x2="215" y2="155" stroke="#6F9F7A"/><rect x="210" y="125" width="10" height="24" rx="1" fill="#6F9F7A"/>
+                  <line x1="260" y1="112" x2="260" y2="148" stroke="#E06B66"/><rect x="255" y="116" width="10" height="26" rx="1" fill="#E06B66"/>
+                  <line x1="300" y1="105" x2="300" y2="135" stroke="#6F9F7A"/><rect x="295" y="108" width="10" height="22" rx="1" fill="#6F9F7A"/>
+                  <line x1="335" y1="95" x2="335" y2="125" stroke="#6F9F7A"/><rect x="330" y="98" width="10" height="22" rx="1" fill="#6F9F7A"/>
+                  <line x1="380" y1="88" x2="380" y2="115" stroke="#E06B66"/><rect x="375" y="90" width="10" height="20" rx="1" fill="#E06B66"/>
+                  <line x1="425" y1="80" x2="425" y2="108" stroke="#6F9F7A"/><rect x="420" y="83" width="10" height="18" rx="1" fill="#6F9F7A"/>
+                  <line x1="470" y1="72" x2="470" y2="98" stroke="#6F9F7A"/><rect x="465" y="75" width="10" height="16" rx="1" fill="#6F9F7A"/>
+                  <line x1="515" y1="75" x2="515" y2="105" stroke="#E06B66"/><rect x="510" y="80" width="10" height="20" rx="1" fill="#E06B66"/>
+                </g>
+                <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" text-anchor="middle">
+                  <!-- 09:42 PUT BUY 150 @ 0.84 -->
+                  <g transform="translate(108,212)">
+                    <polygon points="0,0 -6,10 6,10" fill="#E06B66"/>
+                    <rect x="-58" y="14" width="116" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="26" fill="#E06B66">vordinkkk BUY*150</text>
+                  </g>
+                  <!-- 09:42 CALL BUY 70 @ 1.8 (同 bar，错开) -->
+                  <line x1="150" y1="240" x2="124" y2="216" stroke="#6F9F7A" stroke-width="1" stroke-dasharray="2 2" opacity=".5"/>
+                  <g transform="translate(150,240)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-55" y="14" width="110" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="26" fill="#6F9F7A">vordinkkk BUY*70</text>
+                  </g>
+                  <!-- 09:50 CALL PART 12 + PART 12 → sum 24 -->
+                  <g transform="translate(159,138)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
+                    <rect x="-56" y="-32" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL*24</text>
+                  </g>
+                  <!-- 09:57 CALL PART 22 + PART 12 → sum 34 -->
+                  <g transform="translate(197,120)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
+                    <rect x="-56" y="-32" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL*34</text>
+                  </g>
+                  <!-- 10:01 CALL SELL_CLOSE derived 12 (OPT-003) -->
+                  <g transform="translate(235,112)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
+                    <rect x="-56" y="-32" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL*12</text>
+                  </g>
+                  <!-- 10:43 PUT SELL_CLOSE derived 150 (OPT-003) -->
+                  <g transform="translate(463,72)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                    <rect x="-59" y="-32" width="118" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="-20" fill="#E06B66">vordinkkk SELL*150</text>
+                  </g>
+                </g>
+              </svg>
+              <div class="axis-note">09:30 ··· 09:56 ··· 10:22 ··· 10:48 · SELL*12 / SELL*150 来自 OPT-003 推导量</div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <p class="flow-note">同 bar 聚合按数量求和：<em>09:50 PART 12+12 → SELL*24</em>，<em>09:57 PART 22+12 → SELL*34</em>；原始缺数量的事件仍省略后缀（如 <code>vordinkkk SELL</code>）。</p>
+    </section>
+
+    <!-- ========== OPT-003 CLOSE QUANTITY DERIVATION ========== -->
+    <section class="section" aria-labelledby="sec-close">
+      <h2 id="sec-close">OPT-003 · 清仓量推导 · 消灭 SELL ?</h2>
+      <p class="sub">
+        Scope lock：腿的开仓量已知（<code>BUY 150</code> / <code>BUY 70</code>）时，<code>quantity: null</code> 的清仓事件推导剩余量
+        <code>derived = opening − Σ(prior partial close)</code>。时间线渲染 <code>SELL 150 @ 0.15</code> 与 <code>SELL 12 @ 5.5</code>，并供量给 OPT-002 标记（<code>SELL*150</code> / <code>SELL*12</code>）。
+      </p>
+
+      <div class="compare">
+        <div>
+          <div class="col-label"><span>Current</span><span class="tag bad">quantity: null → ?</span></div>
+          <section class="panel">
+            <div class="panel-bar"><span>交易者 · <strong>TRADES</strong></span><span>QQQ 2026-07-17</span></div>
+            <div class="list">
+              <article class="card put">
+                <div class="card-head">
+                  <div class="title"><span class="glyph"><i></i></span><span class="name">vordinkkk</span><span class="dir">PUT</span></div>
+                  <span class="status">Verified</span>
+                </div>
+                <div class="meta"><em>QQQ</em> · 2026-07-17 · 09:42 → 10:43 · 2 pts</div>
+                <div class="toggle">Hide legs/events</div>
+                <div class="events">
+                  <div class="event"><time>09:42</time><span class="act-buy">BUY</span><span>150 @ 0.84</span></div>
+                  <div class="event"><time>10:43</time><span class="act-sell">SELL</span><span><span class="q-miss">?</span> @ 0.15</span></div>
+                </div>
+              </article>
+              <article class="card call">
+                <div class="card-head">
+                  <div class="title"><span class="glyph"><i></i></span><span class="name">vordinkkk</span><span class="dir">CALL</span></div>
+                  <span class="status">Verified</span>
+                </div>
+                <div class="meta"><em>QQQ</em> · 2026-07-17 · 09:42 → 10:01 · 6 pts</div>
+                <div class="toggle">Hide legs/events</div>
+                <div class="events">
+                  <div class="event"><time>09:42</time><span class="act-buy">BUY</span><span>70 @ 1.8</span></div>
+                  <div class="event"><time>09:50</time><span class="act-part">PART</span><span>12 @ 2.3</span></div>
+                  <div class="event"><time>09:50</time><span class="act-part">PART</span><span>12 @ 2.9</span></div>
+                  <div class="event"><time>09:57</time><span class="act-part">PART</span><span>22 @ 3.8</span></div>
+                  <div class="event"><time>09:57</time><span class="act-part">PART</span><span>12 @ 4.3</span></div>
+                  <div class="event"><time>10:01</time><span class="act-sell">SELL</span><span><span class="q-miss">?</span> @ 5.5</span></div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <div>
+          <div class="col-label"><span>Proposed</span><span class="tag good">derived = open − Σpartial</span></div>
+          <section class="panel">
+            <div class="panel-bar"><span>交易者 · <strong>TRADES</strong></span><span>QQQ 2026-07-17</span></div>
+            <div class="list">
+              <article class="card put">
+                <div class="card-head">
+                  <div class="title"><span class="glyph"><i></i></span><span class="name">vordinkkk</span><span class="dir">PUT</span></div>
+                  <span class="status">Verified</span>
+                </div>
+                <div class="meta"><em>QQQ</em> · 2026-07-17 · 09:42 → 10:43 · 2 pts</div>
+                <div class="toggle">Hide legs/events</div>
+                <div class="events">
+                  <div class="event"><time>09:42</time><span class="act-buy">BUY</span><span>150 @ 0.84</span></div>
+                  <div class="event"><time>10:43</time><span class="act-sell">SELL</span><span><span class="q-derived">150</span> @ 0.15<span class="derived-pill">derived</span></span></div>
+                </div>
+                <div class="formula">derived = open <em>150</em> − closed <em>0</em> = <em>150</em> → marker SELL*150</div>
+              </article>
+              <article class="card call">
+                <div class="card-head">
+                  <div class="title"><span class="glyph"><i></i></span><span class="name">vordinkkk</span><span class="dir">CALL</span></div>
+                  <span class="status">Verified</span>
+                </div>
+                <div class="meta"><em>QQQ</em> · 2026-07-17 · 09:42 → 10:01 · 6 pts</div>
+                <div class="toggle">Hide legs/events</div>
+                <div class="events">
+                  <div class="event"><time>09:42</time><span class="act-buy">BUY</span><span>70 @ 1.8</span></div>
+                  <div class="event"><time>09:50</time><span class="act-part">PART</span><span>12 @ 2.3</span></div>
+                  <div class="event"><time>09:50</time><span class="act-part">PART</span><span>12 @ 2.9</span></div>
+                  <div class="event"><time>09:57</time><span class="act-part">PART</span><span>22 @ 3.8</span></div>
+                  <div class="event"><time>09:57</time><span class="act-part">PART</span><span>12 @ 4.3</span></div>
+                  <div class="event"><time>10:01</time><span class="act-sell">SELL</span><span><span class="q-derived">12</span> @ 5.5<span class="derived-pill">derived</span></span></div>
+                </div>
+                <div class="formula">derived = open <em>70</em> − (12+12+22+12) = <em>12</em> → marker SELL*12</div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </div>
+      <p class="flow-note">推导仅发生在渲染层：<em>原始 day JSON 的 <code>quantity: null</code> 不回写</em>；开仓量未知或 Σpartial 超过开仓量时仍回退 <code>?</code>。</p>
+    </section>
+
+    <!-- ========== MAPPING ========== -->
+    <section class="mapping">
+      <h2>对照总表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>OPT</th>
+            <th>Current</th>
+            <th>Proposed (scope lock)</th>
+            <th>影响面</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OPT-001</td>
+            <td>chips 倒序：<code>07-17 … 07-01</code> / <code>17 … 01</code></td>
+            <td>chips 正序：<code>07-01 … 07-17</code> / <code>01 … 17</code>，选中项移至末位；数据与计数不变</td>
+           <td>Shared <code>DateRail</code> progressive mode（Review / Data / Static）</td>
+          </tr>
+          <tr>
+            <td>OPT-002</td>
+            <td><code>vordinkkk SELL ×2</code>（事件数）；单事件不带数量</td>
+            <td><code>vordinkkk SELL*24</code>（同 bar 求和）· <code>BUY*70</code>（单笔）· 缺量省略后缀</td>
+            <td><code>tradeRecords.js</code> + <code>kline-engine</code>（Review / Static）</td>
+          </tr>
+          <tr>
+            <td>OPT-003</td>
+            <td><code>SELL ? @ 0.15</code> / <code>SELL ? @ 5.5</code>（<code>quantity: null</code>）</td>
+            <td><code>SELL 150 @ 0.15</code> / <code>SELL 12 @ 5.5</code>，derived = opening − Σpartial；供量给标记 <code>SELL*150</code> / <code>SELL*12</code></td>
+            <td><code>tradeRecords.js</code> 时间线 + K 线标记；渲染层推导，不回写源数据</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="keep">
+        Record-only mock：仅表达三条 recorded OPT 的目标形态，不授权实现、不改 schema / API / DB / day JSON。
+        证据截图：<code>screenshots/2026-07-21-date-rail-recent-desc.png</code> · <code>screenshots/2026-07-21-date-rail-month-desc.png</code> · <code>screenshots/2026-07-21-kline-marker-quantity-desc.png</code> · <code>screenshots/2026-07-22-trade-close-quantity-question-mark.png</code>。
+      </p>
+    </section>
+  </div>
+</body>
+</html>
