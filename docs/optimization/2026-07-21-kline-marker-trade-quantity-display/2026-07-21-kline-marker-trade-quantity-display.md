@@ -19,24 +19,26 @@
 | --- | --- | --- |
 | [`./screenshots/2026-07-21-kline-marker-quantity-desc.png`](./screenshots/2026-07-21-kline-marker-quantity-desc.png) | K-line trade markers | `vordinkkk SELL ×2` displays transaction count `×2` rather than contract/share quantity |
 
-## Scope Lock (draft)
+## Scope Lock (user-confirmed 2026-07-21)
 
 | Decision | Lock |
 | --- | --- |
 | Friction | Current marker aggregation displays event count `×N` (e.g., `vordinkkk SELL ×2`) when multiple events land on the same bar |
-| Desired display | Display trade quantity (e.g., contract/share quantity) instead of event count `×N` |
-| Quantity aggregation | Sum event `quantity` fields for same-bar aggregated events when quantity is available |
-| Fallback behavior | If quantity is unknown (`null`), omit quantity suffix or use fallback count |
+| Multi-event quantity | Sum event `quantity` fields for same-bar aggregated events when quantity is available; format as `${displayName} ${actionSide}*${totalQuantity}` (e.g., `vordinkkk SELL*24`) |
+| Single-event quantity | Also include quantity when present for single events (e.g., `vordinkkk BUY*70`) |
+| Missing quantity fallback | If `quantity` is unknown (`null` / missing), omit the quantity suffix entirely (e.g., `vordinkkk SELL`) |
 
 ## OPT-001 K-line Marker Labels Should Display Trade Quantity
 
 - Source evidence:
   - User feedback screenshot: [`./screenshots/2026-07-21-kline-marker-quantity-desc.png`](./screenshots/2026-07-21-kline-marker-quantity-desc.png)
   - User instruction (2026-07-21): 「这里可以把交易的数量加上，而不是写一个*2」
+  - User Scope Lock (2026-07-21): 「1、显示为数量总和 vordinkkk SELL*24 2、同样带上数量 如 vordinkkk BUY*70 3、仅显示 vordinkkk SELL（省略数量后缀）」
 - Current friction:
   - `buildTradeRecordAnnotations` appends `×${count}` when multiple events group on a bar (e.g. `vordinkkk SELL ×2`)
-  - Does not reflect actual contract/share quantities traded (e.g. 12 + 12 = 24 contracts)
+  - Single events do not display quantity (e.g. `vordinkkk BUY` without 70)
 - Desired outcome:
-  - Replace `×N` count suffix with actual trade quantity (e.g. `24` / `24张` / sum of quantities)
+  - Replace event count `×N` with actual trade quantity suffix `*QTY` (e.g. `vordinkkk SELL*24`, `vordinkkk BUY*70`)
+  - If `quantity` is unknown (`null`), omit quantity suffix entirely (`vordinkkk SELL`)
   - Keep marker labels clean and readable across Review and Static pages
 - Lifecycle status: recorded
