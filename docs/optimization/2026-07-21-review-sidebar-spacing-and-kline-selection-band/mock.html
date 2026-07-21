@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Mock · Review Sidebar Spacing + K-line Selection Band (2026-07-21)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  Visual mock for:
+  docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/
+    2026-07-21-review-sidebar-spacing-and-kline-selection-band.md
+
+  OPT-001  Sidebar Trade tools / trader cards / strategy detail stack needs gaps
+  OPT-002  Trader select blue K-line band overlay is too loud
+
+  Mock only — not an implementation. Chart data is pseudo-random.
+-->
+<style>
+  :root {
+    --font-ui: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Noto Sans SC", sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --surface-app: #141413;
+    --surface-panel: #1E1E1D;
+    --surface-control: #282827;
+    --surface-raised: #333331;
+    --border-subtle: #3B3B38;
+    --border-control: #74746E;
+    --text-primary: #E8E7E3;
+    --text-secondary: #C9C8C2;
+    --text-muted: #A7A69F;
+    --accent: #8B9A6D;
+    --accent-ink: #0F0F0E;
+    --up: #3E9E77;
+    --down: #C64F45;
+    --sel: rgba(120, 165, 220, 1);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0E0E0D; color: var(--text-primary); font-family: var(--font-ui); font-size: 13px; }
+  button { font-family: var(--font-ui); cursor: pointer; }
+
+  /* ================= mock control bar (not part of the replica) ================= */
+  .mock-bar {
+    margin: 14px auto 0;
+    max-width: 1440px;
+    padding: 12px 16px;
+    border: 1px dashed var(--border-control);
+    border-radius: 10px;
+    background: #191918;
+    display: grid;
+    gap: 10px;
+  }
+  .mock-bar .mock-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font: 700 10px/1.6 var(--font-ui);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .mock-bar .mock-title { font-weight: 700; }
+  .mock-bar .mock-src { color: var(--text-muted); font-size: 12px; font-family: var(--font-mono); }
+  .mock-controls { display: flex; flex-wrap: wrap; gap: 18px; }
+  .mock-group { display: grid; gap: 6px; align-content: start; }
+  .mock-group > label { font: 700 10px/1 var(--font-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+  .seg { display: inline-flex; border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    border: 0;
+    border-right: 1px solid var(--border-subtle);
+    background: var(--surface-control);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button.active { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  .mock-status { color: var(--text-muted); font-size: 12px; }
+  .mock-status strong { color: var(--text-secondary); font-weight: 600; }
+
+  /* ================= replica shell ================= */
+  .dr-shell { max-width: 1440px; margin: 12px auto 40px; padding: 0 0; }
+  .dr-app {
+    background: var(--surface-app);
+    border: 1px solid #242423;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* topbar */
+  .dr-topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #242423;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .dr-title { font-size: 15px; font-weight: 700; }
+  .dr-divider { width: 1px; height: 18px; background: var(--border-subtle); }
+  .dr-stat span { color: #5A5A56; margin-right: 4px; }
+  .dr-stat strong { color: var(--text-primary); font-weight: 600; }
+  .dr-stat.green strong { color: #4CAF50; }
+  .dr-stat.red strong { color: #C94040; }
+  .dr-strategy-badge {
+    margin-left: auto;
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 15%, var(--surface-panel));
+    border-radius: 4px;
+    font-family: var(--font-mono);
+  }
+  .dr-utility {
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-control);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .dr-body { display: flex; align-items: stretch; min-height: 720px; }
+
+  /* ================= sidebar ================= */
+  .dr-sidebar {
+    flex: 0 0 384px;
+    background: var(--surface-panel);
+    border-right: 1px solid var(--surface-raised);
+    display: flex;
+    flex-direction: column;
+  }
+  .ctx { padding: 10px 12px 8px; display: grid; gap: 8px; border-bottom: 1px solid var(--surface-control); }
+  .ticker-tabs, .mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .ticker-tabs button, .mode-tabs button {
+    padding: 8px 0;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: var(--surface-control);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .ticker-tabs button.active { background: var(--accent); color: var(--accent-ink); }
+  .mode-tabs button.active { color: var(--text-primary); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface-control)); }
+  .date-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .date-grid button {
+    padding: 5px 0;
+    font-size: 11px;
+    border-radius: 5px;
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-control);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+  }
+  .date-grid button.active { color: var(--text-primary); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface-control)); }
+  .ctx-meta { color: var(--text-muted); font-size: 11px; }
+  .ctx-strategy label { display: block; font: 700 10px/1 var(--font-ui); letter-spacing: .1em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+  .ctx-strategy .fake-select {
+    border: 1px solid var(--border-control);
+    background: var(--surface-control);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ctx-status { color: #6FA46F; font-size: 11px; font-family: var(--font-mono); }
+
+  .dr-sidebar-header {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    border-bottom: 1px solid var(--surface-control);
+  }
+
+  /* --- mid-stack: the three blocks this OPT is about --- */
+  .dr-signal-list { display: flex; flex-direction: column; padding: 4px 12px 16px; }
+
+  /* OPT-001 · current: blocks sit edge-to-edge */
+  .mock-root[data-opt001="current"] .dr-signal-list { gap: 3px; }
+  .mock-root[data-opt001="current"] .stack-caption { display: none; }
+
+  /* OPT-001 · proposal: stable visible separation + section captions; in-block density unchanged */
+  .mock-root[data-opt001="fixed"] .dr-signal-list { gap: 20px; padding-top: 12px; }
+  .stack-caption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 2px 8px;
+    font: 700 10px/1 var(--font-ui);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .stack-caption::after { content: ""; flex: 1; border-top: 1px solid var(--border-subtle); }
+
+  .trade-tools-panel {
+    display: grid;
+    gap: 10px;
+    padding: 10px 12px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--surface-app);
+  }
+  .trade-traders-row { display: grid; grid-template-columns: 60px 1fr; gap: 8px; align-items: start; padding-top: 1px; }
+  .trade-filter-label { font-size: 10px; color: var(--text-muted); padding-top: 6px; }
+  .trade-trader-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .trade-trader-chip {
+    justify-self: start;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+  }
+  .trade-trader-chip.active {
+    color: var(--text-primary);
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--border-subtle));
+    background: color-mix(in srgb, var(--accent) 14%, var(--surface-control));
+  }
+
+  .trade-group-card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--surface-app);
+    padding: 8px 10px;
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .trade-group-card.active { border-left: 3px solid var(--accent); }
+  .stack-trades .trade-group-card + .trade-group-card { margin-top: 6px; }
+  .tg-head { display: flex; align-items: center; gap: 8px; }
+  .tg-name { font-weight: 700; }
+  .tg-glyph.call { color: #6F9F7A; }
+  .tg-glyph.put { color: #E06B66; }
+  .tg-side {
+    font: 700 10px/1 var(--font-mono);
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: #6F9F7A;
+    border: 1px solid color-mix(in srgb, #6F9F7A 45%, transparent);
+  }
+  .tg-side.put { color: #E06B66; border-color: color-mix(in srgb, #E06B66 45%, transparent); }
+  .tg-verified { margin-left: auto; font-size: 10px; font-weight: 700; color: #6FA46F; letter-spacing: .04em; }
+  .tg-meta { color: var(--text-muted); font-size: 11px; }
+  .tg-drill { color: var(--text-muted); font-size: 11px; cursor: pointer; }
+  .tg-drill:hover { color: var(--text-secondary); }
+  .tg-timeline { display: grid; gap: 2px; border-top: 1px dashed var(--border-subtle); padding-top: 6px; margin-top: 2px; }
+  .tg-timeline[hidden] { display: none; }
+  .tl-row { display: grid; grid-template-columns: 42px 40px 1fr; gap: 6px; align-items: center; font-size: 11px; padding: 2px 4px; border-radius: 4px; }
+  .tl-row:hover { background: var(--surface-control); }
+  .tl-row time { font-family: var(--font-mono); color: var(--text-muted); }
+  .tl-act { font-weight: 700; font-size: 10px; letter-spacing: .04em; }
+  .tl-act.buy { color: #6F9F7A; }
+  .tl-act.sell, .tl-act.part { color: #E06B66; }
+  .tl-px { font-family: var(--font-mono); color: var(--text-secondary); text-align: right; }
+  .stack-note { margin: 6px 2px 0; font-size: 10px; color: var(--text-muted); line-height: 1.5; }
+
+  .stack-signals { display: grid; gap: 8px; align-content: start; }
+  .signal-card {
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--down);
+    border-radius: 8px;
+    background: var(--surface-app);
+    padding: 8px 10px;
+    display: grid;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .signal-card.tf5 { border-left-color: #4A7FB5; }
+  .sc-meta { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 11px; font-family: var(--font-mono); }
+  .sc-badge { font: 700 10px/1 var(--font-ui); padding: 2px 5px; border-radius: 4px; background: color-mix(in srgb, var(--down) 22%, var(--surface-control)); color: #E08A80; }
+  .sc-badge.in { background: color-mix(in srgb, var(--up) 22%, var(--surface-control)); color: #7FC98F; }
+  .sc-title { font-size: 14px; font-weight: 700; }
+  .sc-flow { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 11px; flex-wrap: wrap; }
+  .sc-dot { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; font-size: 9px; font-weight: 700; color: #0F0F0E; }
+  .sc-dot.b { background: #6FA3D8; } .sc-dot.o { background: #D8A45C; } .sc-dot.g { background: #6FBF8F; }
+  .sc-desc { color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+  .sc-grid { display: grid; grid-template-columns: 62px 1fr; gap: 3px 8px; font-size: 11px; line-height: 1.5; }
+  .sc-grid dt { color: var(--text-muted); }
+  .sc-grid dd { margin: 0; color: var(--text-secondary); }
+  .sc-fail {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #E08A80;
+    background: color-mix(in srgb, var(--down) 14%, var(--surface-app));
+    border-radius: 5px;
+    padding: 5px 8px;
+  }
+  .sc-more { color: var(--text-muted); font-size: 11px; }
+
+  /* ================= chart area ================= */
+  .dr-chart-area { flex: 1; padding: 14px; min-width: 0; }
+  .chart-panel {
+    border: 1px solid #2A2A28;
+    border-radius: 10px;
+    background: #1A1A19;
+    padding: 12px 14px;
+    display: grid;
+    gap: 10px;
+  }
+  .chart-head h2 { margin: 0; font-size: 15px; letter-spacing: .04em; }
+  .chart-head p { margin: 2px 0 0; color: var(--text-muted); font-size: 11px; font-family: var(--font-mono); }
+  .chart-tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .pill {
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-control);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 11px;
+  }
+  .pill.active { border-color: #4A7FB5; color: #9FC6F7; background: color-mix(in srgb, #4A7FB5 18%, var(--surface-control)); }
+  .pill.legend { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); cursor: default; }
+  .pill.legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .chart-wrap { position: relative; }
+  svg#chart { display: block; width: 100%; height: auto; border-radius: 6px; background: #171716; }
+
+  /* OPT-002 overlay switching: band = current; none = 取消高亮（2026-07-21 用户决策） */
+  .mock-root[data-opt002="none"] .ov-band { display: none; }
+
+  .chart-hint {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-hint kbd {
+    font-family: var(--font-ui);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 1px 6px;
+    background: var(--surface-control);
+    color: var(--text-secondary);
+  }
+
+  /* ================= mock notes ================= */
+  .mock-notes {
+    max-width: 1440px;
+    margin: 0 auto 60px;
+    padding: 14px 16px;
+    border: 1px dashed var(--border-control);
+    border-radius: 10px;
+    background: #191918;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .mock-notes h3 { margin: 0 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+  .mock-notes code { font-family: var(--font-mono); font-size: 11px; color: var(--text-primary); background: var(--surface-control); padding: 1px 5px; border-radius: 4px; }
+  .mock-notes ul { margin: 6px 0 0; padding-left: 18px; }
+</style>
+</head>
+<body>
+<div class="mock-root" data-opt001="fixed" data-opt002="none">
+
+  <!-- ================= mock controls ================= -->
+  <div class="mock-bar">
+    <div>
+      <span class="mock-tag">Mock</span>
+      <span class="mock-title"> OPT-001 侧边栏三段间距 · OPT-002 选区蓝色带取消（不加替代提示）</span>
+      <div class="mock-src">docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/2026-07-21-review-sidebar-spacing-and-kline-selection-band.md · 仅供视觉评审，未授权实现 · K 线为伪随机数据</div>
+    </div>
+    <div class="mock-controls">
+      <div class="mock-group">
+        <label>OPT-001 · Sidebar stack</label>
+        <div class="seg" id="seg-opt001">
+          <button data-v="current">当前 · 三段贴死</button>
+          <button data-v="fixed" class="active">方案 · 分段间距 + 小节标（已确认）</button>
+        </div>
+      </div>
+      <div class="mock-group">
+        <label>OPT-002 · Trader select highlight</label>
+        <div class="seg" id="seg-opt002">
+          <button data-v="band">当前 · 蓝色透明带</button>
+          <button data-v="none" class="active">方案 · 取消高亮（名称已标注，已决策）</button>
+        </div>
+      </div>
+    </div>
+    <div class="mock-status" id="mock-status"></div>
+  </div>
+
+  <!-- ================= replica ================= -->
+  <section class="dr-shell">
+    <div class="dr-app">
+      <header class="dr-topbar">
+        <div class="dr-title">Daily Review</div>
+        <div class="dr-divider"></div>
+        <div class="dr-stat"><span>日期</span><strong>2026-07-17</strong></div>
+        <div class="dr-stat"><span>进场</span><strong>4</strong></div>
+        <div class="dr-stat red"><span>空</span><strong>3</strong></div>
+        <div class="dr-stat green"><span>多</span><strong>1</strong></div>
+        <div class="dr-stat green"><span>涨跌</span><strong>+0.15%</strong></div>
+        <div class="dr-stat"><span>窗口</span><strong>4</strong></div>
+        <div class="dr-stat green"><span>MFE中位</span><strong>+0.04%</strong></div>
+        <div class="dr-stat"><span>持续中位</span><strong>16.5m</strong></div>
+        <div class="dr-stat red"><span>MAE中位</span><strong>-0.11%</strong></div>
+        <div class="dr-strategy-badge">Tang v4.4 Activation Wick v4.4-activation</div>
+        <button class="dr-utility" type="button">Review 工具</button>
+      </header>
+
+      <div class="dr-body">
+        <!-- ============ sidebar ============ -->
+        <aside class="dr-sidebar">
+          <div class="ctx">
+            <div class="ticker-tabs">
+              <button type="button">QQQ</button>
+              <button type="button" class="active">SPY</button>
+            </div>
+            <div class="mode-tabs">
+              <button type="button" class="active">最近</button>
+              <button type="button">按月</button>
+            </div>
+            <div class="date-grid">
+              <button type="button" class="active">07-17</button>
+              <button type="button">07-16</button>
+              <button type="button">07-15</button>
+              <button type="button">07-14</button>
+              <button type="button">07-13</button>
+              <button type="button">07-10</button>
+              <button type="button">07-09</button>
+              <button type="button">07-08</button>
+              <button type="button">07-07</button>
+              <button type="button">07-06</button>
+              <button type="button">07-02</button>
+              <button type="button">07-01</button>
+            </div>
+            <div class="ctx-meta">显示最近 12 · 全库 SPY 46</div>
+            <div class="ctx-strategy">
+              <label>Strategy</label>
+              <div class="fake-select">Tang v4.4 Activation Wick v4.4-activation</div>
+            </div>
+            <div class="ctx-status">SQLite review assembled automatically</div>
+          </div>
+
+          <div class="dr-sidebar-header">提示 (4 进场 · 5 启动 / 1 过期)</div>
+
+          <div class="dr-signal-list">
+            <!-- block 1: trader filter（2026-07-21 迭代：文字去重，只留单个 Traders 标签，移除 Download 按钮） -->
+            <section class="stack stack-tools">
+              <div class="trade-tools-panel">
+                <div class="trade-traders-row">
+                  <span class="trade-filter-label">Traders</span>
+                  <div class="trade-trader-chips">
+                    <button class="trade-trader-chip active" type="button">Tang</button>
+                    <button class="trade-trader-chip" type="button">vordinkkk</button>
+                    <button class="trade-trader-chip" type="button">Momo</button>
+                    <button class="trade-trader-chip" type="button">Jay</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- block 2: trader cards（vordinkkk 双买 = QQQ 2026-07-17 真实数据，预览多卡片排版） -->
+            <section class="stack stack-trades">
+              <div class="stack-caption">交易者 · Trades</div>
+              <div class="trade-group-card active" id="tg-card" title="点击 = 选中交易组，图表定位到交易点">
+                <div class="tg-head">
+                  <span class="tg-glyph call">▲</span><span class="tg-name">Tang</span>
+                  <span class="tg-side">CALL</span>
+                  <span class="tg-verified">● VERIFIED</span>
+                </div>
+                <div class="tg-meta">SPY · 2026-07-17 · 11:27 · 1 pts</div>
+                <div class="tg-drill">Show legs/events</div>
+              </div>
+
+              <div class="trade-group-card" data-g="vordin-put">
+                <div class="tg-head">
+                  <span class="tg-glyph put">▼</span><span class="tg-name">vordinkkk</span>
+                  <span class="tg-side put">PUT</span>
+                  <span class="tg-verified">● VERIFIED</span>
+                </div>
+                <div class="tg-meta">QQQ · 2026-07-17 · 09:42 → 10:43 · 2 pts</div>
+                <div class="tg-drill" data-target="tl-vordin-put">Show legs/events</div>
+                <div class="tg-timeline" id="tl-vordin-put" hidden>
+                  <div class="tl-row"><time>09:42</time><span class="tl-act buy">BUY</span><span class="tl-px">150 @ 0.84</span></div>
+                  <div class="tl-row"><time>10:43</time><span class="tl-act sell">SELL</span><span class="tl-px">? @ 0.15</span></div>
+                </div>
+              </div>
+
+              <div class="trade-group-card" data-g="vordin-call">
+                <div class="tg-head">
+                  <span class="tg-glyph call">▲</span><span class="tg-name">vordinkkk</span>
+                  <span class="tg-side">CALL</span>
+                  <span class="tg-verified">● VERIFIED</span>
+                </div>
+                <div class="tg-meta">QQQ · 2026-07-17 · 09:42 → 10:01 · 6 pts</div>
+                <div class="tg-drill" data-target="tl-vordin-call">Hide legs/events</div>
+                <div class="tg-timeline" id="tl-vordin-call">
+                  <div class="tl-row"><time>09:42</time><span class="tl-act buy">BUY</span><span class="tl-px">70 @ 1.8</span></div>
+                  <div class="tl-row"><time>09:50</time><span class="tl-act part">PART</span><span class="tl-px">12 @ 2.3</span></div>
+                  <div class="tl-row"><time>09:50</time><span class="tl-act part">PART</span><span class="tl-px">12 @ 2.9</span></div>
+                  <div class="tl-row"><time>09:57</time><span class="tl-act part">PART</span><span class="tl-px">22 @ 3.8</span></div>
+                  <div class="tl-row"><time>09:57</time><span class="tl-act part">PART</span><span class="tl-px">12 @ 4.3</span></div>
+                  <div class="tl-row"><time>10:01</time><span class="tl-act sell">SELL</span><span class="tl-px">? @ 5.5</span></div>
+                </div>
+              </div>
+              <p class="stack-note">vordinkkk 双买为 QQQ 2026-07-17 真实数据（09:42 同开 PUT 681 + CALL 691），此处仅预览多卡片/时间线排版；选中态仍演示 Tang → 图表定位。</p>
+            </section>
+
+            <!-- block 3: strategy detail -->
+            <section class="stack stack-signals">
+              <div class="stack-caption">策略讲解 · Signals</div>
+
+              <article class="signal-card">
+                <div class="sc-meta"><span>#1</span><span>09:33</span><span>·</span><span>1m</span>
+                  <span class="sc-badge">PUT</span><span class="sc-badge in">已进场</span>
+                </div>
+                <div class="sc-title">普通 PUT 启动观察流程</div>
+                <div class="sc-flow">
+                  <span class="sc-dot b">启</span> 启动 09:33 -&gt;
+                  <span class="sc-dot o">观</span> 观察 1min -&gt;
+                  <span class="sc-dot g">进</span>
+                </div>
+                <div class="sc-desc">进场 09:34<br>启动后观察 1min，收盘跌破进场确认线 741.28 后进场</div>
+                <dl class="sc-grid">
+                  <dt>路径</dt><dd>启动 09:33 -&gt; 观察 1min -&gt; 进场 09:34</dd>
+                  <dt>观察用时</dt><dd>1 min / 8 根</dd>
+                  <dt>进场确认线</dt><dd>PUT 收盘跌破 741.28</dd>
+                  <dt>解释</dt><dd>这是进场确认线，不是目标价/止盈价</dd>
+                  <dt>原始信号</dt><dd>put_normal</dd>
+                </dl>
+                <div class="sc-fail">-1.85&nbsp;&nbsp;信号失效 · 13m · → 09:48</div>
+                <div class="sc-more">▸ 展开详情</div>
+              </article>
+
+              <article class="signal-card tf5">
+                <div class="sc-meta"><span>10:40</span><span>·</span><span>5m</span></div>
+                <div class="sc-title">5m: 空头 -&gt; 多头</div>
+                <div class="sc-desc">5m 趋势切换： 空头 -&gt; 多头</div>
+                <div class="sc-more">▸ 展开详情</div>
+              </article>
+
+              <article class="signal-card tf5">
+                <div class="sc-meta"><span>14:10</span><span>·</span><span>5m</span></div>
+                <div class="sc-title">5m: 多头 -&gt; 空头</div>
+                <div class="sc-desc">5m 趋势切换： 多头 -&gt; 空头</div>
+                <div class="sc-more">▸ 展开详情</div>
+              </article>
+            </section>
+          </div>
+        </aside>
+
+        <!-- ============ chart ============ -->
+        <main class="dr-chart-area">
+          <div class="chart-panel">
+            <div class="chart-head">
+              <h2>KLINE ENGINE V2</h2>
+              <p>SPY 2026-07-17 Full Day | 2026-07-17 | tf=1m</p>
+            </div>
+            <div class="chart-tools">
+              <button class="pill active" type="button">1m</button>
+              <button class="pill" type="button">5m</button>
+              <button class="pill" type="button">◀◀</button>
+              <button class="pill" type="button">▶</button>
+              <button class="pill" type="button">▶▶</button>
+              <button class="pill" type="button">0.5x</button>
+              <button class="pill active" type="button">1x</button>
+              <button class="pill" type="button">2x</button>
+              <button class="pill" type="button">4x</button>
+              <button class="pill" type="button">− Zoom</button>
+              <button class="pill" type="button">+ Zoom</button>
+              <button class="pill" type="button">Follow</button>
+              <button class="pill" type="button">Overview</button>
+              <span class="pill legend"><i style="background:#E0A458"></i>MA5 746.218</span>
+              <span class="pill legend"><i style="background:#D6C95C"></i>MA20 745.830</span>
+            </div>
+            <div class="chart-tools">
+              <span class="pill legend"><i style="background:#C95C6E"></i>MA120 745.562</span>
+              <span class="pill legend"><i style="background:#6E9E5C"></i>MA200 744.548</span>
+              <span class="pill legend"><i style="background:#7C86D8"></i>VWAP 744.182</span>
+              <button class="pill" type="button">HA</button>
+              <button class="pill" type="button">Hollow</button>
+              <button class="pill" type="button">☀ Light</button>
+            </div>
+            <div class="chart-wrap">
+              <svg id="chart" viewBox="0 0 940 600" role="img" aria-label="SPY 2026-07-17 1m kline mock"></svg>
+            </div>
+            <div class="chart-hint">
+              <kbd>Tang</kbd> 卡片已选中 → 图表快速定位到 11:27，交易点由「Tang BUY」名称标注（display_name + BUY/SELL）指示，无额外高亮
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= implementation touch points ================= -->
+  <div class="mock-notes">
+    <h3>对应真实代码（实现时参考，本 mock 不代表已授权改动）</h3>
+    <ul>
+      <li>OPT-001（2026-07-21 用户确认方案）：间距归属 <code>frontend/src/styles.css</code> 的 <code>.dr-signal-list</code> / trade-record 密度段（约 styles.css:1390-1397）。方案 = 三个块之间稳定间距（≈20px）+ 交易者/策略讲解小节标与分隔线；块内卡片密度不动。Review 与 Static（<code>StaticReviewsApp.jsx</code>）共用该样式，需保持两侧一致。同日迭代：trader 筛选块文字去重——移除 TRADE TOOLS 面板标题与 Download 按钮，只留单个 Traders 标签 + trader chip；注意 Download 属 export 入口（原 OPT-001 boundary 含 filter/export），实现评审需确认导出入口去向。</li>
+      <li>OPT-002（2026-07-21 用户决策）：蓝色带、锚点 marker、细描边三方案均被否决，<strong>直接取消选区高亮</strong>，不加替代视觉提示——交易点已由 marker 标签（display_name + BUY/SELL）标出。当前实现：<code>frontend/src/pages/ReviewPage.jsx:406</code> 选中交易组时 <code>setHighlightRanges({ style: 'blue' })</code>（渲染 <code>kline-engine.js:2857 drawHighlightRanges</code>，dark 主题 blue fill <code>rgba(120,165,220,0.28)</code>）；取消后保留 <code>fitRange</code> 点击定位（ReviewPage.jsx:412），marker 标签契约不变。</li>
+      <li>注意：drilldown 单行事件聚焦 <code>eventFocusPayload</code>（<code>frontend/src/features/review/tradeRecords.js:339</code>）同样返回 <code>style: 'blue'</code>，是否一并取消留待实现评审确认，不在本 mock 范围。</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------- seeded pseudo-random walk so the mock renders identically every load ----------
+  var W = 940;
+  var plot = { x0: 8, x1: W - 8, y0: 14, y1: 426 };
+  var volPane = { y0: 452, y1: 552 };
+  var PRE = 200, VIS = 66;
+  var SLOT = (plot.x1 - plot.x0) / VIS;
+  var seed = 20260717;
+  function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+
+  var bars = [], prev = 749.2;
+  for (var i = 0; i < PRE + VIS; i++) {
+    var v = i - PRE, drift;
+    if (v < 0) drift = -0.022;
+    else if (v < 14) drift = -0.018;
+    else if (v < 30) drift = -0.052;
+    else if (v < 46) drift = -0.008;
+    else if (v < 58) drift = 0.048;
+    else drift = 0.02;
+    var noise = (rnd() - 0.5) * 0.24;
+    var o = prev;
+    var c = +(o + drift + noise).toFixed(3);
+    var h = +(Math.max(o, c) + rnd() * 0.10).toFixed(3);
+    var l = +(Math.min(o, c) - rnd() * 0.10).toFixed(3);
+    var volume = 30 + rnd() * 70;
+    if (v === 56) volume = 120; else if (v === 57) volume = 230; else if (v === 58) volume = 140;
+    bars.push({ o: o, h: h, l: l, c: c, v: volume });
+    prev = c;
+  }
+  var vis = bars.slice(PRE);
+  var mn = Infinity, mx = -Infinity, viMin = 0;
+  vis.forEach(function (b, vi) {
+    if (b.l < mn) { mn = b.l; viMin = vi; }
+    if (b.h > mx) mx = b.h;
+  });
+  var pad = (mx - mn) * 0.08; mn -= pad; mx += pad;
+  function y(p) { return plot.y1 - (p - mn) / (mx - mn) * (plot.y1 - plot.y0); }
+  function x(vi) { return plot.x0 + vi * SLOT + SLOT / 2; }
+
+  var closes = bars.map(function (b) { return b.c; });
+  function ma(n, i) { if (i + 1 < n) return null; var s = 0; for (var k = i - n + 1; k <= i; k++) s += closes[k]; return s / n; }
+  function maPath(n) {
+    var d = '';
+    for (var vi = 0; vi < VIS; vi++) {
+      var val = ma(n, PRE + vi);
+      if (val == null) continue;
+      d += (d ? ' L' : 'M') + x(vi).toFixed(1) + ',' + y(val).toFixed(1);
+    }
+    return d;
+  }
+
+  var UP = '#3E9E77', DOWN = '#C64F45';
+  var s = '';
+
+  // grid + time axis
+  var times = [{ vi: 24, t: '10:54' }, { vi: 35, t: '11:05' }, { vi: 46, t: '11:16' }, { vi: 57, t: '11:27' }];
+  for (var g = 0; g < 5; g++) {
+    var gy = plot.y0 + (plot.y1 - plot.y0) * g / 4;
+    s += '<line x1="' + plot.x0 + '" x2="' + plot.x1 + '" y1="' + gy + '" y2="' + gy + '" stroke="#242423" stroke-width="1"/>';
+  }
+  times.forEach(function (m) {
+    s += '<line x1="' + x(m.vi) + '" x2="' + x(m.vi) + '" y1="' + plot.y0 + '" y2="' + volPane.y1 + '" stroke="#222221" stroke-width="1"/>';
+    s += '<text x="' + x(m.vi) + '" y="580" fill="#7A7973" font-size="11" text-anchor="middle" font-family="ui-monospace,Menlo,monospace">' + m.t + '</text>';
+  });
+  s += '<text x="' + (plot.x0 + 2) + '" y="' + (volPane.y0 - 8) + '" fill="#A7A69F" font-size="11">成交量</text>';
+
+  // OPT-002 · current: translucent blue band behind candles + dot at top
+  var SPAN_A = 55, SPAN_B = 59;
+  var xL = x(SPAN_A) - SLOT / 2, xR = x(SPAN_B) + SLOT / 2, cx = (xL + xR) / 2;
+  s += '<g class="ov ov-band">'
+    + '<rect x="' + xL.toFixed(1) + '" y="' + plot.y0 + '" width="' + (xR - xL).toFixed(1) + '" height="' + (plot.y1 - plot.y0) + '" fill="rgba(120,165,220,0.28)"/>'
+    + '</g>';
+
+  // volume bars
+  vis.forEach(function (b, vi) {
+    var vh = b.v / 230 * (volPane.y1 - volPane.y0);
+    s += '<rect x="' + (x(vi) - SLOT * 0.32).toFixed(1) + '" y="' + (volPane.y1 - vh).toFixed(1) + '" width="' + (SLOT * 0.64).toFixed(1) + '" height="' + vh.toFixed(1) + '" fill="' + (b.c >= b.o ? UP : DOWN) + '" opacity="0.8"/>';
+  });
+
+  // candles
+  vis.forEach(function (b, vi) {
+    var col = b.c >= b.o ? UP : DOWN;
+    var cxv = x(vi);
+    s += '<line x1="' + cxv + '" x2="' + cxv + '" y1="' + y(b.h).toFixed(1) + '" y2="' + y(b.l).toFixed(1) + '" stroke="' + col + '" stroke-width="1"/>';
+    var top = y(Math.max(b.o, b.c)), bot = y(Math.min(b.o, b.c));
+    s += '<rect x="' + (cxv - SLOT * 0.32).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + (SLOT * 0.64).toFixed(1) + '" height="' + Math.max(1, bot - top).toFixed(1) + '" fill="' + col + '"/>';
+  });
+
+  // MA lines
+  s += '<path d="' + maPath(200) + '" fill="none" stroke="#6E9E5C" stroke-width="1.4" opacity="0.9"/>';
+  s += '<path d="' + maPath(120) + '" fill="none" stroke="#C95C6E" stroke-width="1.4" opacity="0.9"/>';
+  s += '<path d="' + maPath(60) + '" fill="none" stroke="#5C7EC9" stroke-width="1.4" opacity="0.9"/>';
+  s += '<path d="' + maPath(20) + '" fill="none" stroke="#D6C95C" stroke-width="1.4" opacity="0.95"/>';
+  s += '<path d="' + maPath(5) + '" fill="none" stroke="#E0A458" stroke-width="1.4" opacity="0.95"/>';
+
+  // session low price label
+  var lowP = vis[viMin].l;
+  s += '<line x1="' + x(viMin) + '" y1="' + y(lowP) + '" x2="' + (x(viMin) + 30) + '" y2="' + (y(lowP) + 22) + '" stroke="#8A8A84" stroke-width="1"/>'
+    + '<text x="' + (x(viMin) + 34) + '" y="' + (y(lowP) + 26) + '" fill="#C9C8C2" font-size="11" font-family="ui-monospace,Menlo,monospace">' + lowP.toFixed(3) + '</text>';
+
+  // trade marker label (unchanged contract: display_name + BUY/SELL)
+  var buyVi = 57, buyY = y(vis[buyVi].l) + 16;
+  s += '<g>'
+    + '<path d="M' + (x(buyVi) - 6) + ',' + (buyY + 5) + ' L' + x(buyVi) + ',' + (buyY - 5) + ' L' + (x(buyVi) + 6) + ',' + (buyY + 5) + ' Z" fill="' + UP + '"/>'
+    + '<rect x="' + (x(buyVi) + 9) + '" y="' + (buyY - 9) + '" width="72" height="19" rx="4" fill="#1E1E1D" stroke="#3B3B38"/>'
+    + '<text x="' + (x(buyVi) + 16) + '" y="' + (buyY + 4) + '" fill="#E8E7E3" font-size="11">Tang BUY</text>'
+    + '</g>';
+
+  // OPT-002 overlay (front layer): current band also shows a small dot at the
+  // top of the chart. 方案态（data-opt002="none"）整组隐藏，不加任何替代提示。
+  s += '<g class="ov ov-band">'
+    + '<circle cx="' + cx.toFixed(1) + '" cy="' + (plot.y0 + 12) + '" r="9" fill="rgba(120,165,220,0.28)"/>'
+    + '<circle cx="' + cx.toFixed(1) + '" cy="' + (plot.y0 + 12) + '" r="3.5" fill="#9FC6F7" stroke="#141413" stroke-width="1.5"/>'
+    + '</g>';
+
+  document.getElementById('chart').innerHTML = s;
+
+  // ---------- toggles ----------
+  var root = document.querySelector('.mock-root');
+  var status = document.getElementById('mock-status');
+  var STATUS_TEXT = {
+    'opt001:current': '<strong>OPT-001 当前</strong>：Trade tools → 交易者卡片 → 策略讲解三块仅 ~3px 列表间距，视觉上贴死（见截图 2026-07-21-review-sidebar-stack-no-gap.png）。',
+    'opt001:fixed': '<strong>OPT-001 方案（2026-07-21 已确认）</strong>：三块之间 20px 稳定间距；交易者/策略讲解两块加小节标与细分隔线；trader 筛选块文字去重——只留单个 Traders 标签，移除 Trade tools 标题与 Download 按钮。块内卡片密度、字号不动。Review 与 Static 同步生效。',
+    'opt002:band': '<strong>OPT-002 当前</strong>：选中 Tang 后图表正确定位到 11:27，但半透明蓝色带（rgba(120,165,220,0.28)）覆盖选区 K 线，视觉过脏（见截图 2026-07-21-review-kline-selection-blue-band.png）。',
+    'opt002:none': '<strong>OPT-002 方案（2026-07-21 已决策）</strong>：直接取消蓝色选区高亮，不加替代视觉提示——交易点已由「Tang BUY」名称标注（display_name + BUY/SELL）标出；点击定位 / fitRange 行为保留。'
+  };
+  function refreshStatus() {
+    status.innerHTML = STATUS_TEXT['opt001:' + root.dataset.opt001] + '<br>' + STATUS_TEXT['opt002:' + root.dataset.opt002];
+  }
+  function wire(segId, key) {
+    var seg = document.getElementById(segId);
+    seg.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('button[data-v]');
+      if (!btn) return;
+      seg.querySelectorAll('button').forEach(function (b) { b.classList.toggle('active', b === btn); });
+      root.dataset[key] = btn.dataset.v;
+      refreshStatus();
+    });
+  }
+  wire('seg-opt001', 'opt001');
+  wire('seg-opt002', 'opt002');
+  refreshStatus();
+
+  // drilldown toggles (mirrors TraderTradeList expand/collapse)
+  document.querySelectorAll('.tg-drill[data-target]').forEach(function (el) {
+    el.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      var panel = document.getElementById(el.dataset.target);
+      var willOpen = panel.hasAttribute('hidden');
+      panel.toggleAttribute('hidden', !willOpen);
+      el.textContent = willOpen ? 'Hide legs/events' : 'Show legs/events';
+    });
+  });
+
+  // trader card click re-asserts the selection (mock: always selected; keeps the "click to locate" story visible)
+  document.getElementById('tg-card').addEventListener('click', function () {
+    this.classList.add('active');
+  });
+})();
+</script>
+</body>
+</html>
