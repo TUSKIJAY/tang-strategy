@@ -132,7 +132,7 @@ Detailed operating-modes evidence is under `docs/exec-plans/reviews/2026-07-19-t
 
 ## Next Gate
 
-Data Progressive Navigation And Trade Card Density is **Completed**; next gate is \closed\. Verified implementation commit ǣ34935a09f60c23748cdf0ecce5e52c1d643be\; independent \implementation-review-001: accept/high\; lifecycle reconciliation -b25ffc5b741103fd7c6fd4a7f724e7c49ada70\. Full-execution authority for this plan is consumed. Push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
+Data Progressive Navigation And Trade Card Density is **Completed**; next gate is `closed`. Verified implementation commit `74334935a09f60c23748cdf0ecce5e52c1d643be`; independent `implementation-review-001: accept/high`; lifecycle reconciliation `55b25ffc5b741103fd7c6fd4a7f724e7c49ada70`. Full-execution authority for this plan is consumed. Push/PR/merge, Pages/hosted verification, provider/broker, tracked DB/canonical data, and other remote actions remain unauthorized.
 
 ## Handoff Boundary
 
