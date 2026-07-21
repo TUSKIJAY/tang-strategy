@@ -18,6 +18,7 @@
 - Live K-line marker screenshot: [`screenshots/2026-07-21-kline-marker-buysell-trader-nickname.png`](./screenshots/2026-07-21-kline-marker-buysell-trader-nickname.png)
   - Visible labels: `vordin PUT`, `vordin CALL`, `vordin CALL ×2` (green up / red down triangles already encode direction).
   - No BUY/SELL action text; nickname shown as raw `trader_id` (`vordin`) rather than English nickname `vordinkkk`.
+- Interactive mockup (current vs proposed): [`mockups/kline-marker-buysell-nickname.html`](./mockups/kline-marker-buysell-nickname.html)
 - Live marker label contract today (source): `frontend/src/features/review/tradeRecords.js` builds `marker_label` as `` `${trader_id} ${CALL|PUT}` `` (with optional `×N` aggregation). Direction owns triangle shape + color; action is not shown on the label.
 
 ## OPT-001 K-Line Point Markers: Display Buy/Sell Action

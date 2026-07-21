@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>K-line markers · BUY/SELL + vordinkkk · OPT mock</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-ui: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --surface-app: #141413;
+      --surface-panel: #1E1E1D;
+      --surface-control: #282827;
+      --surface-raised: #333331;
+      --border-subtle: #3B3B38;
+      --text-primary: #E8E7E3;
+      --text-secondary: #C9C8C2;
+      --text-muted: #A7A69F;
+      --accent: #8B9A6D;
+      --direction-call: #6F9F7A;
+      --direction-put: #E06B66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0b0b0a;
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+    }
+    .page { max-width: 1180px; margin: 0 auto; padding: 28px 24px 48px; }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1.25;
+    }
+    .lead {
+      margin: 0 0 20px;
+      max-width: 860px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .lead code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: var(--surface-control);
+      color: var(--text-secondary);
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .col-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .tag {
+      font-size: 10px;
+      letter-spacing: .04em;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+    .tag.bad {
+      color: var(--direction-put);
+      border-color: color-mix(in srgb, var(--direction-put) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--direction-put) 10%, transparent);
+    }
+    .tag.good {
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 40%, var(--border-subtle));
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    .panel {
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface-app);
+    }
+    .panel-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-panel);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .panel-bar strong { color: var(--text-primary); }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .legend .tri {
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+    }
+    .legend .tri.up { border-bottom: 7px solid var(--direction-call); }
+    .legend .tri.down { border-top: 7px solid var(--direction-put); }
+
+    .chart {
+      position: relative;
+      height: 340px;
+      background: linear-gradient(180deg, #171716 0%, #10100f 100%);
+    }
+    .chart svg { display: block; width: 100%; height: 100%; }
+    .axis-note {
+      position: absolute;
+      left: 14px;
+      bottom: 8px;
+      font: 10px/1 var(--font-mono);
+      color: #5A5A56;
+    }
+
+    .mapping {
+      margin-top: 16px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      background: var(--surface-panel);
+      padding: 14px 16px;
+    }
+    .mapping h2,
+    .note h2 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+    th {
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--surface-control);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+    .keep {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .notes {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .note {
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: var(--surface-panel);
+    }
+    .note ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .note li + li { margin-top: 4px; }
+
+    @media (max-width: 900px) {
+      .compare, .notes { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <p class="eyebrow">Optimization mock · record-only · not live app</p>
+    <h1>K 线点位：CALL/PUT 文本 → BUY/SELL，昵称 vordinkkk</h1>
+    <p class="lead">
+      对照 live 截图中的 <code>vordin CALL</code> / <code>vordin PUT</code> / <code>vordin CALL ×2</code>。
+      左：现状。右：提案——箭头颜色/方向继续表达期权方向；标签改为
+      <code>vordinkkk BUY</code> / <code>vordinkkk SELL</code>（可选 <code>×N</code>）。
+      底层仍保存 <code>trader_id: vordin</code>。不改数据契约。
+    </p>
+
+    <div class="compare">
+      <!-- CURRENT -->
+      <div>
+        <div class="col-label">
+          <span>Current (live feel)</span>
+          <span class="tag bad">CALL/PUT + trader_id</span>
+        </div>
+        <section class="panel" aria-label="Current markers">
+          <div class="panel-bar">
+            <span>QQQ · <strong>2026-07-17</strong></span>
+            <div class="legend">
+              <span><i class="tri up" aria-hidden="true"></i>CALL 绿上</span>
+              <span><i class="tri down" aria-hidden="true"></i>PUT 红下</span>
+              <span>text = 方向词</span>
+            </div>
+          </div>
+          <div class="chart">
+            <svg viewBox="0 0 560 340" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Current K-line markers">
+              <defs>
+                <linearGradient id="shade" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#1c1c1a"/>
+                  <stop offset="100%" stop-color="#121211"/>
+                </linearGradient>
+              </defs>
+              <rect width="560" height="340" fill="url(#shade)"/>
+              <g stroke="#282827" stroke-dasharray="2 3">
+                <line x1="20" y1="60" x2="540" y2="60"/>
+                <line x1="20" y1="120" x2="540" y2="120"/>
+                <line x1="20" y1="180" x2="540" y2="180"/>
+                <line x1="20" y1="240" x2="540" y2="240"/>
+              </g>
+              <!-- MAs -->
+              <path d="M30 210 C 80 230, 120 255, 160 245 S 240 150, 300 135 S 390 145, 450 165 S 510 150, 540 140"
+                    fill="none" stroke="#E8A838" stroke-width="1.4" opacity=".7"/>
+              <path d="M30 195 C 90 170, 140 160, 200 168 S 300 190, 360 170 S 470 125, 540 130"
+                    fill="none" stroke="#5B9BD5" stroke-width="1.2" opacity=".55"/>
+              <path d="M30 175 C 120 168, 220 160, 320 158 S 450 150, 540 148"
+                    fill="none" stroke="#8B9A6D" stroke-width="1.1" opacity=".45"/>
+              <!-- candles -->
+              <g stroke-width="1.2">
+                <line x1="80" y1="215" x2="80" y2="265" stroke="#E06B66"/><rect x="75" y="225" width="10" height="28" rx="1" fill="#E06B66"/>
+                <line x1="140" y1="230" x2="140" y2="275" stroke="#6F9F7A"/><rect x="135" y="238" width="10" height="24" rx="1" fill="#6F9F7A"/>
+                <line x1="200" y1="155" x2="200" y2="215" stroke="#6F9F7A"/><rect x="195" y="165" width="10" height="32" rx="1" fill="#6F9F7A"/>
+                <line x1="270" y1="125" x2="270" y2="175" stroke="#6F9F7A"/><rect x="265" y="132" width="10" height="28" rx="1" fill="#6F9F7A"/>
+                <line x1="340" y1="140" x2="340" y2="195" stroke="#E06B66"/><rect x="335" y="150" width="10" height="30" rx="1" fill="#E06B66"/>
+                <line x1="410" y1="150" x2="410" y2="200" stroke="#6F9F7A"/><rect x="405" y="158" width="10" height="26" rx="1" fill="#6F9F7A"/>
+                <line x1="480" y1="120" x2="480" y2="170" stroke="#E06B66"/><rect x="475" y="128" width="10" height="24" rx="1" fill="#E06B66"/>
+              </g>
+
+              <!-- CURRENT labels match screenshot style -->
+              <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="700" text-anchor="middle">
+                <!-- PUT down @ left -->
+                <g transform="translate(80,210)">
+                  <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                  <rect x="-40" y="-28" width="80" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                  <text x="0" y="-16" fill="#E06B66">vordin PUT</text>
+                </g>
+                <!-- CALL up ×2 -->
+                <g transform="translate(140,280)">
+                  <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                  <rect x="-48" y="12" width="96" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                  <text x="0" y="24" fill="#6F9F7A">vordin CALL ×2</text>
+                </g>
+                <!-- CALL up -->
+                <g transform="translate(200,220)">
+                  <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                  <rect x="-40" y="12" width="80" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                  <text x="0" y="24" fill="#6F9F7A">vordin CALL</text>
+                </g>
+                <!-- CALL up mid -->
+                <g transform="translate(270,180)">
+                  <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                  <rect x="-40" y="12" width="80" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                  <text x="0" y="24" fill="#6F9F7A">vordin CALL</text>
+                </g>
+                <!-- PUT top right -->
+                <g transform="translate(480,116)">
+                  <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                  <rect x="-40" y="-28" width="80" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                  <text x="0" y="-16" fill="#E06B66">vordin PUT</text>
+                </g>
+              </g>
+            </svg>
+            <div class="axis-note">09:30 ··· 09:56 ··· 10:22 ··· 10:48</div>
+          </div>
+        </section>
+      </div>
+
+      <!-- PROPOSED -->
+      <div>
+        <div class="col-label">
+          <span>Proposed mock</span>
+          <span class="tag good">BUY/SELL + nickname</span>
+        </div>
+        <section class="panel" aria-label="Proposed markers">
+          <div class="panel-bar">
+            <span>QQQ · <strong>2026-07-17</strong></span>
+            <div class="legend">
+              <span><i class="tri up" aria-hidden="true"></i>CALL 形状</span>
+              <span><i class="tri down" aria-hidden="true"></i>PUT 形状</span>
+              <span>text = 买卖动作</span>
+            </div>
+          </div>
+          <div class="chart">
+            <svg viewBox="0 0 560 340" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Proposed K-line markers">
+              <rect width="560" height="340" fill="url(#shade)"/>
+              <g stroke="#282827" stroke-dasharray="2 3">
+                <line x1="20" y1="60" x2="540" y2="60"/>
+                <line x1="20" y1="120" x2="540" y2="120"/>
+                <line x1="20" y1="180" x2="540" y2="180"/>
+                <line x1="20" y1="240" x2="540" y2="240"/>
+              </g>
+              <path d="M30 210 C 80 230, 120 255, 160 245 S 240 150, 300 135 S 390 145, 450 165 S 510 150, 540 140"
+                    fill="none" stroke="#E8A838" stroke-width="1.4" opacity=".7"/>
+              <path d="M30 195 C 90 170, 140 160, 200 168 S 300 190, 360 170 S 470 125, 540 130"
+                    fill="none" stroke="#5B9BD5" stroke-width="1.2" opacity=".55"/>
+              <path d="M30 175 C 120 168, 220 160, 320 158 S 450 150, 540 148"
+                    fill="none" stroke="#8B9A6D" stroke-width="1.1" opacity=".45"/>
+              <g stroke-width="1.2">
+                <line x1="80" y1="215" x2="80" y2="265" stroke="#E06B66"/><rect x="75" y="225" width="10" height="28" rx="1" fill="#E06B66"/>
+                <line x1="140" y1="230" x2="140" y2="275" stroke="#6F9F7A"/><rect x="135" y="238" width="10" height="24" rx="1" fill="#6F9F7A"/>
+                <line x1="200" y1="155" x2="200" y2="215" stroke="#6F9F7A"/><rect x="195" y="165" width="10" height="32" rx="1" fill="#6F9F7A"/>
+                <line x1="270" y1="125" x2="270" y2="175" stroke="#6F9F7A"/><rect x="265" y="132" width="10" height="28" rx="1" fill="#6F9F7A"/>
+                <line x1="340" y1="140" x2="340" y2="195" stroke="#E06B66"/><rect x="335" y="150" width="10" height="30" rx="1" fill="#E06B66"/>
+                <line x1="410" y1="150" x2="410" y2="200" stroke="#6F9F7A"/><rect x="405" y="158" width="10" height="26" rx="1" fill="#6F9F7A"/>
+                <line x1="480" y1="120" x2="480" y2="170" stroke="#E06B66"/><rect x="475" y="128" width="10" height="24" rx="1" fill="#E06B66"/>
+              </g>
+
+              <!-- PROPOSED: nickname + BUY/SELL; shape/color still CALL/PUT -->
+              <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="700" text-anchor="middle">
+                <!-- PUT buy_open -->
+                <g transform="translate(80,210)">
+                  <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                  <rect x="-50" y="-28" width="100" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                  <text x="0" y="-16" fill="#E06B66">vordinkkk BUY</text>
+                </g>
+                <!-- CALL buy_open ×2 -->
+                <g transform="translate(140,280)">
+                  <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                  <rect x="-54" y="12" width="108" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                  <text x="0" y="24" fill="#6F9F7A">vordinkkk BUY ×2</text>
+                </g>
+                <!-- CALL sell_close -->
+                <g transform="translate(200,220)">
+                  <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                  <rect x="-52" y="12" width="104" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                  <text x="0" y="24" fill="#6F9F7A">vordinkkk SELL</text>
+                </g>
+                <!-- CALL buy_open -->
+                <g transform="translate(270,180)">
+                  <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                  <rect x="-50" y="12" width="100" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                  <text x="0" y="24" fill="#6F9F7A">vordinkkk BUY</text>
+                </g>
+                <!-- PUT sell_close -->
+                <g transform="translate(480,116)">
+                  <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                  <rect x="-52" y="-28" width="104" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                  <text x="0" y="-16" fill="#E06B66">vordinkkk SELL</text>
+                </g>
+              </g>
+            </svg>
+            <div class="axis-note">09:30 ··· 09:56 ··· 10:22 ··· 10:48</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="mapping">
+      <h2>标签对照 · 一眼能看懂什么</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>仍由形状/颜色表达</th>
+            <th>Current 文本</th>
+            <th>Proposed 文本</th>
+            <th>用户一眼得到</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>红 ↓ = PUT</td>
+            <td><code>vordin PUT</code></td>
+            <td><code>vordinkkk BUY</code></td>
+            <td>谁 · 在这个时间点 · 买了（方向看箭头）</td>
+          </tr>
+          <tr>
+            <td>绿 ↑ = CALL</td>
+            <td><code>vordin CALL</code></td>
+            <td><code>vordinkkk SELL</code></td>
+            <td>谁 · 在这个时间点 · 卖了</td>
+          </tr>
+          <tr>
+            <td>同 bar 聚合</td>
+            <td><code>vordin CALL ×2</code></td>
+            <td><code>vordinkkk BUY ×2</code></td>
+            <td>同一动作聚合计数保留</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="keep">
+        昵称映射：UI <code>vordinkkk</code> → 保存 <code>trader_id: vordin</code>（沃德哥）。
+        不新建第二身份，不改历史 day 文件主键。
+      </p>
+    </section>
+
+    <div class="notes">
+      <section class="note">
+        <h2>OPT-001 规则</h2>
+        <ul>
+          <li>去掉 marker 上的 CALL/PUT 文字（颜色 + 箭头已够）。</li>
+          <li>改写 BUY / SELL，来自 event action（如 <code>buy_open</code> / <code>sell_close</code>）。</li>
+          <li>方向色：CALL <code>#6F9F7A</code> 上三角 · PUT <code>#E06B66</code> 下三角。</li>
+        </ul>
+      </section>
+      <section class="note">
+        <h2>边界</h2>
+        <ul>
+          <li>卡片上的 CALL/PUT 徽章可继续保留（本 mock 只管 K 线 marker）。</li>
+          <li>数据层 option type / action 字段不变。</li>
+          <li>record-only 提案，不授权实现。</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
