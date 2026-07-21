@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent design review `review-002` on exact revision `v2-review-foldback-2026-07-21` returned `revise/high` with three findings. V2 closes display-only authority and the blue-band/fitRange sequence, but its first-frame TF carrier lacks a deterministic fixture/oracle, required event-row focus is still optional in the browser carrier row, and Data host naming/month-bar layout proof is not fully frozen. The exact pre-reconciliation plan SHA-256 and all six evidence hashes matched at HEAD `156df37d9f6b1f972f9c748e237412d1a4db7dba`. Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 
 2026-07-21: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-21`. Closures: pure `canonicalizeTradeToolsFilters` forces display-only for list/availability/export (fixtures for omitted/reported/calculated); group-select sequence uses blue multi-bar band + fitRange without post-fit center scrollTo; event-row focus required; `N pts` = complete-timed count; mandatory **B-TF-first-paint** (1m↔5m, no wheel); host class `data-market-days-rail` + **B-Data-rail-layout**; mandatory **B-Group-span**. `review-001` remains append-only and cannot approve v2. Next gate independent `design-review` of exact v2. No activation, implementation, content/DB write, provider/broker, publication, push, or remote authority.
 

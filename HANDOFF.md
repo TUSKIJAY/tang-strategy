@@ -7,16 +7,16 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
 - Current proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v2-review-foldback-2026-07-21`.
-- Prior design review: `review-001.md` — `revise/high` on v1 (append-only; cannot approve v2).
+- Latest design review: `review-002.md` — `revise/high` on exact v2; three findings. `review-001.md` remains append-only v1 evidence.
 - Source OPT batch: `docs/optimization/2026-07-21-review-trade-and-kline-session/` **OPT-003…006** (`promoted`).
-- V2 freezes: display-only canonicalize; blue band + fitRange-only group select; required event-row focus; mandatory B-TF-first-paint; `data-market-days-rail` + B-Data-rail-layout; mandatory B-Group-span.
-- Next gate: independent `design-review` of exact `v2-review-foldback-2026-07-21`.
+- Review-002 verified closures: display-only canonicalize and blue band + fitRange-only group select. Remaining foldback: deterministic TF first-frame oracle; mandatory browser event-row focus; one exact Data host plus month-bar computed-layout proof.
+- Next gate: `plan-revision`; do not activate or implement v2.
 - **Does not authorize** activation, implementation, push, PR, merge, Pages, provider/broker, or remote action.
 - Preserve untracked `output/local-acceptance/` and `output/playwright/*` evidence trees; do not stage.
 - Coding Mode repository mutations include one task-scoped local commit by default. Stage only task-owned literal paths.
@@ -37,5 +37,5 @@
 
 1. Re-run startup Git status and preserve untracked `output/` evidence trees.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. Next durable step is independent design review of exact v2 — not activation or implementation.
+3. Next durable step is plan revision folding `review-002` into a later exact revision — not activation or implementation.
 4. Do not push or perform another remote action without a new explicit user request.
