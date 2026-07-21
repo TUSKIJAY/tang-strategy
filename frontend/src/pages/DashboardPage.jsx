@@ -90,13 +90,15 @@ export function DashboardPage({ state, setState, onNavigate }) {
       )}
       <div className="panel">
         <h3>Market days</h3>
-        <ReviewContextPanel
-          days={workspaceDays}
-          workspace={workspace}
-          onSwitchTicker={handleSwitchTicker}
-          onSelectDate={openReviewDay}
-          dateNavigation="progressive"
-        />
+        <div className="data-market-days-rail">
+          <ReviewContextPanel
+            days={workspaceDays}
+            workspace={workspace}
+            onSwitchTicker={handleSwitchTicker}
+            onSelectDate={openReviewDay}
+            dateNavigation="progressive"
+          />
+        </div>
       </div>
     </section>
   );

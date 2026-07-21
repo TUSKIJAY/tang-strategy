@@ -81,19 +81,31 @@ export function initialTradeRecordFilters(traders = []) {
   };
 }
 
+/**
+ * Shared Trade tools path always forces display-only eligibility.
+ * Stale or omitted eligibility cannot widen list / availability / export.
+ */
+export function canonicalizeTradeToolsFilters(filters = {}) {
+  return {
+    ...filters,
+    eligibility: 'display',
+  };
+}
+
 export function canEditTradeRecords(role) {
   return role === 'admin';
 }
 
 export function exportSelectionFromFilters(payload, filters = {}) {
-  const traderIds = array(filters.traderIds);
+  const canonical = canonicalizeTradeToolsFilters(filters);
+  const traderIds = array(canonical.traderIds);
   return {
-    ticker: String(filters.ticker || payload?.ticker || '').toUpperCase(),
-    trade_date: String(filters.tradeDate || payload?.trade_date || ''),
+    ticker: String(canonical.ticker || payload?.ticker || '').toUpperCase(),
+    trade_date: String(canonical.tradeDate || payload?.trade_date || ''),
     trader_ids: [...new Set(traderIds.map(String))].sort(),
-    statuses: [...new Set(array(filters.statuses).map(String))].sort(),
-    review_statuses: [...new Set(array(filters.reviewStatuses).map(String))].sort(),
-    display_only: filters.eligibility === 'display',
+    statuses: [...new Set(array(canonical.statuses).map(String))].sort(),
+    review_statuses: [...new Set(array(canonical.reviewStatuses).map(String))].sort(),
+    display_only: true,
   };
 }
 
@@ -144,24 +156,21 @@ export function reviewHashRoute(ticker, tradeDate, sessionMode = 'extended') {
 }
 
 export function filterTradeGroups(payload, filters = {}) {
-  const hasTraderSelection = Array.isArray(filters.traderIds);
-  const traderIds = new Set(array(filters.traderIds));
-  const statuses = new Set(array(filters.statuses).length ? filters.statuses : RECORD_STATUSES);
+  const canonical = canonicalizeTradeToolsFilters(filters);
+  const hasTraderSelection = Array.isArray(canonical.traderIds);
+  const traderIds = new Set(array(canonical.traderIds));
+  const statuses = new Set(array(canonical.statuses).length ? canonical.statuses : RECORD_STATUSES);
   const reviewStatuses = new Set(
-    array(filters.reviewStatuses).length ? filters.reviewStatuses : REVIEW_STATUSES,
+    array(canonical.reviewStatuses).length ? canonical.reviewStatuses : REVIEW_STATUSES,
   );
-  const eligibilityField = {
-    display: 'display_eligible',
-    reported: 'reported_stats_eligible',
-    calculated: 'calculated_stats_eligible',
-  }[filters.eligibility];
+  // Shared tools path is always display-only after canonicalize.
   return array(payload?.trade_groups).filter((group) => (
-    (!filters.ticker || group.underlying === filters.ticker) &&
-    (!filters.tradeDate || group.trade_date === filters.tradeDate) &&
+    (!canonical.ticker || group.underlying === canonical.ticker) &&
+    (!canonical.tradeDate || group.trade_date === canonical.tradeDate) &&
     (!hasTraderSelection || traderIds.has(group.trader_id)) &&
     statuses.has(group.status) &&
     reviewStatuses.has(group.review_status) &&
-    (!eligibilityField || Boolean(group[eligibilityField]))
+    Boolean(group.display_eligible)
   ));
 }
 
@@ -201,6 +210,15 @@ export function tradeEventActionSide(action) {
   return null;
 }
 
+/** Compact timeline action: BUY / SELL / PART (sell_partial → PART). */
+export function tradeEventActionLabel(action) {
+  const value = String(action || '');
+  if (value === 'buy_open' || value === 'buy_add') return 'BUY';
+  if (value === 'sell_close') return 'SELL';
+  if (value === 'sell_partial') return 'PART';
+  return null;
+}
+
 /**
  * Chronological min/max of complete leg event times across a group.
  * Incomplete/missing times are ignored; array order is irrelevant.
@@ -226,6 +244,102 @@ export function groupEventTimeRange(group) {
     return { knownCount: 1, start, end: start, label: start };
   }
   return { knownCount: stamps.length, start, end, label: `${start} → ${end}` };
+}
+
+/** Card meta: span label + complete-timed point count (`N pts`). */
+export function groupCardMeta(group) {
+  const range = groupEventTimeRange(group);
+  const pointsLabel = range.knownCount > 0 ? `${range.knownCount} pts` : null;
+  return {
+    ...range,
+    pointsLabel,
+    metaSuffix: range.label
+      ? (pointsLabel ? `${range.label} · ${pointsLabel}` : range.label)
+      : null,
+  };
+}
+
+/**
+ * Compact complete-timed timeline rows for expanded card UI.
+ * Shape: TIME | ACTION | QTY @ PX with BUY/SELL/PART; no fees.
+ */
+export function groupTimelineEvents(group) {
+  const rows = [];
+  array(group?.legs).forEach((leg) => {
+    array(leg?.events).forEach((event) => {
+      if (!event?.occurred_at || event.time_incomplete) return;
+      const hhmm = timePart(event.occurred_at);
+      if (!hhmm) return;
+      const actionLabel = tradeEventActionLabel(event.action);
+      if (!actionLabel) return;
+      rows.push({
+        event_id: event.event_id,
+        leg_id: leg.leg_id,
+        trade_group_id: group.trade_group_id,
+        occurred_at: String(event.occurred_at),
+        time: hhmm,
+        action: event.action,
+        actionLabel,
+        quantity: event.quantity,
+        premium: event.premium,
+      });
+    });
+  });
+  rows.sort((left, right) => left.occurred_at.localeCompare(right.occurred_at));
+  return rows;
+}
+
+/**
+ * Min/max bar indices for all complete-timed events on the given bars.
+ * Incomplete times ignored; single event → min===max.
+ */
+export function groupBarSpan(group, bars = []) {
+  const barList = array(bars);
+  const indices = [];
+  array(group?.legs).forEach((leg) => {
+    array(leg?.events).forEach((event) => {
+      if (!event?.occurred_at || event.time_incomplete) return;
+      if (!timePart(event.occurred_at)) return;
+      indices.push(barIndexForEvent(event, barList));
+    });
+  });
+  if (!indices.length) {
+    return {
+      knownCount: 0,
+      startIndex: null,
+      endIndex: null,
+      minIndex: null,
+      maxIndex: null,
+    };
+  }
+  const minIndex = Math.min(...indices);
+  const maxIndex = Math.max(...indices);
+  return {
+    knownCount: indices.length,
+    startIndex: minIndex,
+    endIndex: maxIndex,
+    minIndex,
+    maxIndex,
+  };
+}
+
+/**
+ * Event-row focus payload: single-bar highlight, not full-day span.
+ */
+export function eventFocusPayload(event, bars = [], options = {}) {
+  if (!event?.occurred_at || event.time_incomplete) return null;
+  if (!timePart(event.occurred_at)) return null;
+  const barList = array(bars);
+  const index = barIndexForEvent(event, barList);
+  const timeframe = options.timeframe === '5m' ? '5m' : '1m';
+  return {
+    timeframe,
+    startIndex: index,
+    endIndex: index,
+    style: 'blue',
+    barIndex: index,
+    event_id: event.event_id || null,
+  };
 }
 
 export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []) {
@@ -407,24 +521,19 @@ export function buildTradeRecordDownloads(
 // 3. derive ordered available trader IDs from those groups and the registry order;
 // 4. a registry entry without a displayable group is never a visible option.
 
-const ELIGIBILITY_FIELDS = {
-  display: 'display_eligible',
-  reported: 'reported_stats_eligible',
-  calculated: 'calculated_stats_eligible',
-};
-
 export function displayableTradeGroups(payload, filters = {}) {
-  const statuses = new Set(array(filters.statuses).length ? filters.statuses : ['active']);
+  const canonical = canonicalizeTradeToolsFilters(filters);
+  const statuses = new Set(array(canonical.statuses).length ? canonical.statuses : ['active']);
   const reviewStatuses = new Set(
-    array(filters.reviewStatuses).length ? filters.reviewStatuses : ['verified'],
+    array(canonical.reviewStatuses).length ? canonical.reviewStatuses : ['verified'],
   );
-  const eligibilityField = ELIGIBILITY_FIELDS[filters.eligibility || 'display'];
+  // Shared tools path is always display-only after canonicalize.
   return array(payload?.trade_groups).filter((group) => (
     (!payload?.ticker || group.underlying === payload.ticker)
     && (!payload?.trade_date || group.trade_date === payload.trade_date)
     && statuses.has(group.status)
     && reviewStatuses.has(group.review_status)
-    && (!eligibilityField || Boolean(group[eligibilityField]))
+    && Boolean(group.display_eligible)
   ));
 }
 

@@ -41,12 +41,17 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
     if (!containerRef.current || engineRef.current || !window.KlineEngine) return undefined;
     const engine = new window.KlineEngine({ container: containerRef.current, options: engineOptionsRef.current || {} });
     engineRef.current = engine;
+    // Playwright / acceptance seam: query `.unified-kline-engine` then read `__klineEngine`.
+    containerRef.current.__klineEngine = engine;
     const offAnno = engine.on?.('annotation:click', (annotation) => onAnnotationClickRef.current?.(annotation));
     const offBar = engine.on?.('bar:click', (event) => onBarClickRef.current?.(event));
     onReadyRef.current?.(engine);
     return () => {
       offAnno?.();
       offBar?.();
+      if (containerRef.current) {
+        try { delete containerRef.current.__klineEngine; } catch (_) { /* ignore */ }
+      }
       engine.destroy?.();
       engineRef.current = null;
     };
@@ -85,6 +90,8 @@ export const UnifiedKlineEngine = forwardRef(function UnifiedKlineEngine({ paylo
     setRevealCutoff: (input) => engineRef.current?.setRevealCutoff?.(input),
     setReplayReveal: (input) => engineRef.current?.setReplayReveal?.(input),
     setHighlightRanges: (input) => engineRef.current?.setHighlightRanges?.(input),
+    getHighlightRanges: () => engineRef.current?.getHighlightRanges?.(),
+    getViewportDebug: () => engineRef.current?.getViewportDebug?.(),
     setMAVisibility: (next) => {
       const engine = engineRef.current;
       if (!engine) return;

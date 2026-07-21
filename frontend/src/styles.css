@@ -234,6 +234,30 @@ main { padding: 36px; overflow: auto; }
 .dr-sidebar .date-rail-dates button { background: var(--surface-control); border-color: transparent; color: var(--text-secondary); }
 .dr-sidebar .date-rail-dates button.active { color: var(--text-primary); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface-control)); }
 
+/* OPT-006: Data Market days progressive rail density (host exact class only).
+   Review .dr-sidebar keeps intentional flex-grow:1 on ticker/mode. */
+.data-market-days-rail {
+  max-width: 420px;
+  width: 100%;
+}
+.data-market-days-rail .ticker-tabs button,
+.data-market-days-rail .date-rail-mode button {
+  flex: 0 1 auto;
+  flex-grow: 0;
+  padding-left: 12px;
+  padding-right: 12px;
+  min-width: 0;
+  max-width: 420px;
+}
+.data-market-days-rail .date-rail-month-bar,
+.data-market-days-rail .date-rail-month-identity {
+  max-width: 420px;
+}
+.data-market-days-rail .date-rail--progressive,
+.data-market-days-rail .review-context-panel {
+  max-width: 420px;
+}
+
 .review-context-actions { display: flex; flex-direction: column; gap: 8px; }
 .review-context-field {
   display: flex;
@@ -1277,70 +1301,6 @@ main { padding: 36px; overflow: auto; }
   min-width: 60px;
 }
 
-/* Eligibility segmented radios */
-.trade-eligibility-fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 60px minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-}
-
-.trade-eligibility-fieldset legend {
-  float: left;
-  padding: 0;
-  margin: 0;
-  font-size: 10px;
-  color: var(--text-muted);
-  line-height: 1.2;
-}
-
-.trade-eligibility-seg {
-  display: flex;
-  gap: 3px;
-  padding: 2px;
-  border-radius: 7px;
-  background: var(--surface-control);
-  border: 1px solid var(--border-subtle);
-  flex: 1;
-}
-
-.trade-eligibility-option {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  padding: 5px 3px;
-  font: 600 10px/1.15 var(--font-ui);
-  color: var(--text-muted);
-  background: transparent;
-  cursor: pointer;
-  user-select: none;
-}
-
-.trade-eligibility-option input[type="radio"] {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-.trade-eligibility-option.active {
-  color: var(--text-primary);
-  background: var(--surface-raised);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
-}
-
-.trade-eligibility-option:focus-within {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
 .trade-traders-row {
   display: grid;
   grid-template-columns: 60px minmax(0, 1fr);
@@ -1604,6 +1564,56 @@ main { padding: 36px; overflow: auto; }
 }
 .trade-leg { margin-bottom: 6px; }
 .trade-leg:last-child { margin-bottom: 0; }
+
+/* OPT-005 compact trade timeline (BUY/SELL/PART rows) */
+.trade-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+}
+.trade-timeline-row {
+  display: grid;
+  grid-template-columns: 46px 44px minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: 600 11px/1.2 var(--font-mono);
+  text-align: left;
+  cursor: pointer;
+}
+.trade-timeline-row:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.trade-timeline-time {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.trade-timeline-action {
+  font: 700 10px/1 var(--font-ui);
+  letter-spacing: .04em;
+  color: var(--text-secondary);
+}
+.trade-timeline-action.buy { color: var(--direction-call); }
+.trade-timeline-action.sell,
+.trade-timeline-action.part { color: var(--direction-put); }
+.trade-timeline-px {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trade-timeline-empty {
+  font: 600 11px var(--font-ui);
+  color: var(--text-muted);
+  padding: 4px 6px;
+}
 
 .trade-stat-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 .trade-stat-grid span { padding: 8px 10px; border: 1px solid var(--border-subtle); }

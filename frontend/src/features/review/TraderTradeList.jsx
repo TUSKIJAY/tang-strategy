@@ -1,7 +1,13 @@
 import { useState } from 'react';
-import { groupEventTimeRange } from './tradeRecords.js';
+import { groupCardMeta, groupTimelineEvents } from './tradeRecords.js';
 
-export function TraderTradeList({ groups = [], traders = [], activeGroupId = '', onSelect }) {
+export function TraderTradeList({
+  groups = [],
+  traders = [],
+  activeGroupId = '',
+  onSelect,
+  onEventFocus,
+}) {
   const [expanded, setExpanded] = useState({});
   const registry = new Map(traders.map((trader) => [trader.trader_id, trader]));
   return (
@@ -12,11 +18,13 @@ export function TraderTradeList({ groups = [], traders = [], activeGroupId = '',
         const isExpanded = Boolean(expanded[group.trade_group_id]);
         const direction = String(group.direction || '').toUpperCase() === 'PUT' ? 'PUT' : 'CALL';
         const directionClass = direction.toLowerCase();
-        const timeRange = groupEventTimeRange(group);
+        const cardMeta = groupCardMeta(group);
+        const timeline = groupTimelineEvents(group);
         return (
           <article
             key={group.trade_group_id}
             className={`trade-group-card ${directionClass} ${activeGroupId === group.trade_group_id ? 'active' : ''}`}
+            data-trade-group-id={group.trade_group_id}
           >
             <button type="button" className="trade-group-summary" onClick={() => onSelect?.(group)}>
               <span className="trade-direction-glyph" aria-hidden="true">
@@ -29,7 +37,7 @@ export function TraderTradeList({ groups = [], traders = [], activeGroupId = '',
                 </span>
                 <small className="trade-group-meta">
                   <em>{group.underlying}</em> · {group.trade_date}
-                  {timeRange.label ? <> · {timeRange.label}</> : null}
+                  {cardMeta.metaSuffix ? <> · {cardMeta.metaSuffix}</> : null}
                 </small>
               </span>
               <span className={`trade-review-badge ${group.review_status}`}>{group.review_status}</span>
@@ -48,19 +56,28 @@ export function TraderTradeList({ groups = [], traders = [], activeGroupId = '',
               </button>
             </div>
             {isExpanded && (
-              <div className="trade-legs">
-                {group.legs.map((leg) => (
-                  <div className="trade-leg" key={leg.leg_id}>
-                    <strong>{leg.expiry} · {leg.strike ?? '--'} {leg.option_type} · ×{leg.contract_multiplier}</strong>
-                    {leg.events.map((event) => (
-                      <div className="trade-event" key={event.event_id}>
-                        <time>{event.occurred_at?.slice(11, 16) || '--:--'}</time>
-                        <span>{event.action}</span>
-                        <span>{event.quantity ?? '?'} @ {event.premium ?? '?'}</span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
+              <div className="trade-legs trade-timeline" aria-label="Trade timeline">
+                {timeline.length === 0 ? (
+                  <div className="trade-timeline-empty">No complete-timed events.</div>
+                ) : (
+                  timeline.map((row) => (
+                    <button
+                      key={row.event_id}
+                      type="button"
+                      className="trade-timeline-row"
+                      data-event-id={row.event_id}
+                      onClick={() => onEventFocus?.(row, group)}
+                    >
+                      <time className="trade-timeline-time">{row.time}</time>
+                      <span className={`trade-timeline-action ${row.actionLabel.toLowerCase()}`}>
+                        {row.actionLabel}
+                      </span>
+                      <span className="trade-timeline-px">
+                        {row.quantity ?? '?'} @ {row.premium ?? '?'}
+                      </span>
+                    </button>
+                  ))
+                )}
               </div>
             )}
           </article>

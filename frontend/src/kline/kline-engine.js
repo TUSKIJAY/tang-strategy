@@ -2974,11 +2974,21 @@
             nextIndex = tfCutoff;
           }
           this._updateToolbarState();
+          // OPT-004: every TF switch resets zoomScale to 1, then remaps start by time.
+          this.viewportManager.zoomScale = 1;
           const nextBars = this.dataManager.getBars(this.currentTimeframe);
-          const viewInfo = this.viewportManager.getResolvedViewCount(nextBars.length, this.currentTimeframe, this._getChartWidth());
+          const chartWidth = this._getChartWidth();
+          const viewInfo = this.viewportManager.getResolvedViewCount(
+            nextBars.length,
+            this.currentTimeframe,
+            chartWidth,
+          );
           const maxStart = Math.max(0, nextBars.length - viewInfo.count);
           const mappedStart = previousStartBar
-            ? this.dataManager.findNearestIndexByTime(this.currentTimeframe, this.dataManager._timeValue(previousStartBar))
+            ? this.dataManager.findNearestIndexByTime(
+              this.currentTimeframe,
+              this.dataManager._timeValue(previousStartBar),
+            )
             : 0;
           this.currentIndex = clamp(nextIndex, 0, Math.max(0, nextBars.length - 1));
           this.viewportManager.viewStart = clamp(mappedStart, 0, maxStart);
@@ -2986,6 +2996,31 @@
           this.emit('viewport:changed', this._getViewportPayload());
           this.scheduleRender();
           return result;
+        }
+
+        /**
+         * Public viewport debug seam for first-paint TF oracle carriers.
+         * Returns {timeframe,start,end,count,base,zoomScale,followMode,chartWidth}.
+         */
+        getViewportDebug() {
+          const chartWidth = this._getChartWidth();
+          const bars = this.dataManager.getBars(this.currentTimeframe);
+          const visible = this.viewportManager.getVisibleWindow({
+            totalBars: bars.length,
+            currentIndex: this.currentIndex,
+            timeframe: this.currentTimeframe,
+            chartWidth,
+          });
+          return {
+            timeframe: this.currentTimeframe,
+            start: visible.start,
+            end: visible.end,
+            count: visible.count,
+            base: visible.base,
+            zoomScale: this.viewportManager.zoomScale,
+            followMode: this.viewportManager.followMode,
+            chartWidth,
+          };
         }
 
         scheduleRender() {

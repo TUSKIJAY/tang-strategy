@@ -7,15 +7,20 @@ import {
   buildTradeRecordAnnotations,
   buildTradeRecordDownloads,
   canEditTradeRecords,
+  canonicalizeTradeToolsFilters,
   deriveAvailableTraders,
   DIRECTION_CALL_COLOR,
   DIRECTION_PUT_COLOR,
   displayableTradeGroups,
+  eventFocusPayload,
   exportSelectionFromFilters,
   filtersMatchWorkspace,
   filterTradeGroups,
   flattenTradeRecords,
+  groupBarSpan,
+  groupCardMeta,
   groupEventTimeRange,
+  groupTimelineEvents,
   initialTradeRecordFilters,
   mirrorWorkspaceContext,
   reconcileTraderSelection,
@@ -23,6 +28,7 @@ import {
   reviewHashRoute,
   sameTraderIdSet,
   summarizeTradeGroups,
+  tradeEventActionLabel,
   tradeEventActionSide,
   traderSelectionSummary,
   TRADER_CHIP_INLINE_MAX,
@@ -237,14 +243,14 @@ test('asymmetric ticker history controls date availability and preserves hash ro
   assert.equal(reviewHashRoute('QQQ', '2026-07-17', 'extended'), '#qqq-2026-07-17-extended');
 });
 
-test('multi-select, status, review, and eligibility filter at group level without focus override', () => {
+test('multi-select, status, review filter at group level without focus override', () => {
   const selected = filterTradeGroups(payload, {
     ticker: 'SPY',
     tradeDate: '2026-07-17',
     traderIds: ['alice'],
     statuses: ['active'],
     reviewStatuses: ['verified'],
-    eligibility: 'reported',
+    eligibility: 'reported', // ignored — always display-only after canonicalize
   });
   assert.deepEqual(selected.map((item) => item.trade_group_id), ['tg_20260717_alice_spy_001']);
   assert.deepEqual(filterTradeGroups(payload, { traderIds: [] }), []);
@@ -463,9 +469,10 @@ test('N-Card-time-range pure cross-leg chronology (N-Card-time-range)', () => {
   assert.equal(range.label, '09:35 → 14:30');
 });
 
-test('N-Card-source reading path drops outcome/fees and uses time helper (N-Card-source)', () => {
+test('N-Card-source reading path drops outcome/fees and uses card meta (N-Card-source)', () => {
   const listSource = readFileSync(new URL('./TraderTradeList.jsx', import.meta.url), 'utf8');
-  assert.match(listSource, /groupEventTimeRange/);
+  assert.match(listSource, /groupCardMeta/);
+  assert.match(listSource, /groupTimelineEvents/);
   assert.match(listSource, /from '\.\/tradeRecords\.js'/);
   assert.doesNotMatch(listSource, /outcomeLabel/);
   assert.doesNotMatch(listSource, /reported_outcome|calculated_outcome/);
@@ -476,10 +483,10 @@ test('N-Card-source reading path drops outcome/fees and uses time helper (N-Card
   // CALL/PUT chrome retained
   assert.match(listSource, /trade-direction-word/);
   assert.match(listSource, /trade-direction-shape/);
-  // Expanded legs keep time/action/qty@premium shape without fees span
-  assert.match(listSource, /event\.quantity \?\? '\?'\} @ \{event\.premium \?\? '\?'\}/);
-  assert.match(listSource, /event\.action/);
-  assert.match(listSource, /event\.occurred_at\?\.slice\(11, 16\)/);
+  // Compact timeline: TIME | BUY/SELL/PART | QTY @ PX
+  assert.match(listSource, /trade-timeline-row/);
+  assert.match(listSource, /row\.actionLabel/);
+  assert.match(listSource, /row\.quantity \?\? '\?'\} @ \{row\.premium \?\? '\?'\}/);
 });
 
 test('kline renderer exposes only normalized trade color and shape hooks', () => {
@@ -755,11 +762,13 @@ test('trader filter component pins B chips, availability, and no focus override'
   assert.match(source, /Search traders/);
   assert.match(source, /Name or ID/);
   assert.match(source, /No matching traders/);
-  assert.match(source, /trade-eligibility-fieldset/);
-  assert.match(source, /type="radio"\s+name="eligibility"/);
-  assert.match(source, />Display</);
-  assert.match(source, />Reported</);
-  assert.match(source, />Calculated</);
+  // OPT-003: Eligibility tools chrome removed from shared TraderFilters.
+  assert.doesNotMatch(source, /trade-eligibility-fieldset/);
+  assert.doesNotMatch(source, /name="eligibility"/);
+  assert.doesNotMatch(source, />Eligibility</);
+  assert.doesNotMatch(source, />Display</);
+  assert.doesNotMatch(source, />Reported</);
+  assert.doesNotMatch(source, />Calculated</);
   assert.equal(TRADER_CHIP_INLINE_MAX, 6);
   assert.equal(TRADER_CHIP_SUMMARY_MIN, 7);
   const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
@@ -968,4 +977,228 @@ test('no live focusedTraderId or shared registry-hue chip/card binding remains',
     readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8'),
     />Focus</,
   );
+});
+
+// --- OPT-003…006 carriers (trade-tools / group-span / viewport / data-rail) ---
+
+test('N-Eligibility-removed-source tools strip has no Eligibility chrome', () => {
+  const filtersSource = readFileSync(new URL('./TraderFilters.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(filtersSource, /<legend[^>]*>Eligibility|trade-eligibility|name="eligibility"|aria-label="Eligibility"/);
+  assert.doesNotMatch(filtersSource, />Display</);
+  assert.doesNotMatch(filtersSource, />Reported</);
+  assert.doesNotMatch(filtersSource, />Calculated</);
+  // Admin editor group flags remain (schema editor, not tools strip).
+  const editorSource = readFileSync(new URL('./TraderPointEditor.jsx', import.meta.url), 'utf8');
+  assert.match(editorSource, /<legend>Eligibility<\/legend>/);
+  assert.match(editorSource, /display_eligible/);
+  assert.match(editorSource, /reported_stats_eligible/);
+  assert.match(editorSource, /calculated_stats_eligible/);
+});
+
+test('N-Eligibility-default canonicalize forces display-only for list/availability/export', () => {
+  const hidden = {
+    ...group({
+      id: 'tg_hidden_not_display',
+      traderId: 'alice',
+      direction: 'CALL',
+      reported: 10,
+      events: [event('h1', 1, '2026-07-17T10:05:00-04:00')],
+    }),
+    display_eligible: false,
+    reported_stats_eligible: true,
+  };
+  const mixedPayload = {
+    ...payload,
+    trade_groups: [...groups, hidden],
+  };
+  const baseFilters = {
+    ticker: 'SPY',
+    tradeDate: '2026-07-17',
+    traderIds: ['alice', 'bob'],
+    statuses: ['active'],
+    reviewStatuses: ['verified'],
+  };
+  const variants = [
+    { ...baseFilters }, // omitted eligibility
+    { ...baseFilters, eligibility: 'display' },
+    { ...baseFilters, eligibility: 'reported' },
+    { ...baseFilters, eligibility: 'calculated' },
+  ];
+  const expectedIds = ['tg_20260717_alice_spy_001', 'tg_20260717_bob_spy_001'];
+  for (const filters of variants) {
+    const canonical = canonicalizeTradeToolsFilters(filters);
+    assert.equal(canonical.eligibility, 'display');
+    const filtered = filterTradeGroups(mixedPayload, filters).map((g) => g.trade_group_id).sort();
+    const displayable = displayableTradeGroups(mixedPayload, filters).map((g) => g.trade_group_id).sort();
+    const exportSel = exportSelectionFromFilters(mixedPayload, filters);
+    assert.deepEqual(filtered, expectedIds);
+    assert.deepEqual(displayable, expectedIds);
+    assert.equal(exportSel.display_only, true);
+    assert.ok(!filtered.includes('tg_hidden_not_display'));
+  }
+});
+
+test('N-Group-span min/max bar indices over complete events (N-Group-span)', () => {
+  const bars = [
+    { t: '09:35' }, { t: '09:36' }, { t: '09:42' }, { t: '10:00' }, { t: '11:15' }, { t: '14:30' },
+  ];
+  const multi = {
+    trade_group_id: 'g_span',
+    legs: [
+      {
+        leg_id: 'l2',
+        events: [
+          event('late', 1, '2026-07-17T14:30:00-04:00', 'sell_close'),
+          {
+            ...event('incomplete', 2, '2026-07-17T11:00:00-04:00', 'buy_add'),
+            time_incomplete: true,
+          },
+        ],
+      },
+      {
+        leg_id: 'l1',
+        events: [
+          event('mid', 1, '2026-07-17T11:15:00-04:00', 'buy_add'),
+          event('early', 2, '2026-07-17T09:35:00-04:00', 'buy_open'),
+        ],
+      },
+    ],
+  };
+  const span = groupBarSpan(multi, bars);
+  assert.equal(span.knownCount, 3);
+  assert.equal(span.minIndex, 0);
+  assert.equal(span.maxIndex, 5);
+  assert.equal(span.startIndex, 0);
+  assert.equal(span.endIndex, 5);
+
+  const single = group({
+    id: 'g1',
+    traderId: 'alice',
+    direction: 'CALL',
+    events: [event('e1', 1, '2026-07-17T09:42:00-04:00', 'buy_open')],
+  });
+  const one = groupBarSpan(single, bars);
+  assert.equal(one.knownCount, 1);
+  assert.equal(one.startIndex, one.endIndex);
+  assert.equal(one.minIndex, 2);
+
+  const empty = groupBarSpan({ legs: [] }, bars);
+  assert.equal(empty.knownCount, 0);
+  assert.equal(empty.startIndex, null);
+});
+
+test('N-Card-meta span + N pts equals complete-timed count (N-Card-meta)', () => {
+  const multi = {
+    trade_group_id: 'g_meta',
+    legs: [{
+      leg_id: 'l1',
+      events: [
+        event('e1', 1, '2026-07-17T09:42:00-04:00', 'buy_open'),
+        event('e2', 2, '2026-07-17T10:01:00-04:00', 'sell_partial'),
+        {
+          ...event('e3', 3, '2026-07-17T10:30:00-04:00', 'sell_close'),
+          time_incomplete: true,
+        },
+      ],
+    }],
+  };
+  const meta = groupCardMeta(multi);
+  assert.equal(meta.knownCount, 2);
+  assert.equal(meta.pointsLabel, '2 pts');
+  assert.equal(meta.label, '09:42 → 10:01');
+  assert.equal(meta.metaSuffix, '09:42 → 10:01 · 2 pts');
+  assert.doesNotMatch(meta.metaSuffix, /\$|%/);
+
+  const listSource = readFileSync(new URL('./TraderTradeList.jsx', import.meta.url), 'utf8');
+  assert.match(listSource, /cardMeta\.metaSuffix/);
+  assert.doesNotMatch(listSource, /return_pct|reported_outcome|calculated_outcome|net_pnl/);
+  assert.doesNotMatch(listSource, /\$\d|%\s/);
+});
+
+test('N-Timeline-source compact BUY/SELL/PART rows without fees (N-Timeline-source)', () => {
+  assert.equal(tradeEventActionLabel('buy_open'), 'BUY');
+  assert.equal(tradeEventActionLabel('buy_add'), 'BUY');
+  assert.equal(tradeEventActionLabel('sell_close'), 'SELL');
+  assert.equal(tradeEventActionLabel('sell_partial'), 'PART');
+  assert.equal(tradeEventActionLabel('unknown'), null);
+
+  const rows = groupTimelineEvents({
+    trade_group_id: 'g_tl',
+    legs: [{
+      leg_id: 'l1',
+      events: [
+        event('e1', 1, '2026-07-17T09:42:00-04:00', 'buy_open'),
+        event('e2', 2, '2026-07-17T09:50:00-04:00', 'sell_partial'),
+        event('e3', 3, '2026-07-17T10:01:00-04:00', 'sell_close'),
+        {
+          ...event('e4', 4, '2026-07-17T10:10:00-04:00', 'buy_add'),
+          time_incomplete: true,
+        },
+      ],
+    }],
+  });
+  assert.equal(rows.length, 3);
+  assert.deepEqual(rows.map((r) => r.actionLabel), ['BUY', 'PART', 'SELL']);
+  assert.deepEqual(rows.map((r) => r.time), ['09:42', '09:50', '10:01']);
+
+  const listSource = readFileSync(new URL('./TraderTradeList.jsx', import.meta.url), 'utf8');
+  assert.match(listSource, /trade-timeline-row/);
+  assert.match(listSource, /actionLabel/);
+  assert.doesNotMatch(listSource, /fees/);
+  assert.doesNotMatch(listSource, /buy_open|sell_partial|sell_close/);
+});
+
+test('N-Event-focus single-bar payload distinct from group span (N-Event-focus)', () => {
+  const bars = [
+    { t: '09:42' }, { t: '09:50' }, { t: '09:57' }, { t: '10:01' },
+  ];
+  const focusEvent = event('e2', 2, '2026-07-17T09:50:00-04:00', 'sell_partial');
+  const focus = eventFocusPayload(focusEvent, bars, { timeframe: '1m' });
+  assert.ok(focus);
+  assert.equal(focus.startIndex, focus.endIndex);
+  assert.equal(focus.startIndex, 1);
+  assert.equal(focus.style, 'blue');
+  assert.equal(focus.timeframe, '1m');
+  assert.equal(focus.event_id, 'e2');
+
+  const multiGroup = {
+    trade_group_id: 'g_focus',
+    legs: [{
+      leg_id: 'l1',
+      events: [
+        event('e1', 1, '2026-07-17T09:42:00-04:00', 'buy_open'),
+        focusEvent,
+        event('e3', 3, '2026-07-17T10:01:00-04:00', 'sell_close'),
+      ],
+    }],
+  };
+  const span = groupBarSpan(multiGroup, bars);
+  assert.notEqual(span.startIndex, span.endIndex);
+  assert.notEqual(focus.startIndex, span.startIndex);
+  assert.notEqual(focus.endIndex, span.endIndex);
+
+  const reviewSource = readFileSync(new URL('../../pages/ReviewPage.jsx', import.meta.url), 'utf8');
+  const staticSource = readFileSync(new URL('../../pages/StaticReviewsApp.jsx', import.meta.url), 'utf8');
+  for (const source of [reviewSource, staticSource]) {
+    assert.match(source, /groupBarSpan/);
+    assert.match(source, /eventFocusPayload/);
+    assert.match(source, /style: 'blue'/);
+    assert.match(source, /onEventFocus/);
+    assert.doesNotMatch(source, /center:\s*true/);
+  }
+});
+
+test('N-Data-rail-source host class data-market-days-rail scoped density (N-Data-rail-source)', () => {
+  const dashboard = readFileSync(new URL('../../pages/DashboardPage.jsx', import.meta.url), 'utf8');
+  assert.match(dashboard, /className="data-market-days-rail"/);
+  const styles = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
+  assert.match(styles, /\.data-market-days-rail\s*\{/);
+  assert.match(styles, /\.data-market-days-rail\s+\.ticker-tabs\s+button/);
+  assert.match(styles, /\.data-market-days-rail\s+\.date-rail-mode\s+button/);
+  assert.match(styles, /\.data-market-days-rail\s+\.date-rail-month-bar/);
+  assert.match(styles, /max-width:\s*420px/);
+  // Must not use bare .page .panel as the sole density selector.
+  assert.doesNotMatch(styles, /\.page\s+\.panel\s+\.ticker-tabs\s+button\s*\{[^}]*flex:\s*0/);
+  // Review sidebar intentionally keeps flex growth on ticker/mode.
+  assert.match(styles, /\.ticker-tabs\s+button\s*\{[\s\S]*?flex:\s*1/);
 });

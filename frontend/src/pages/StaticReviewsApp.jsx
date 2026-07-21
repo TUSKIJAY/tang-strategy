@@ -10,7 +10,9 @@ import { TraderTradeList } from '../features/review/TraderTradeList.jsx';
 import {
   buildTradeRecordAnnotations,
   deriveAvailableTraders,
+  eventFocusPayload,
   filterTradeGroups,
+  groupBarSpan,
   initialTradeRecordFilters,
   reconcileTraderSelection,
 } from '../features/review/tradeRecords.js';
@@ -450,34 +452,44 @@ export function StaticReviewsApp() {
 
   function selectTradeGroup(group) {
     if (!group) return;
-    const annotation = tradeRecordAnnotations1m.find((item) => item.trade_group_ids?.includes(group.trade_group_id));
     setActiveTradeGroupId(group.trade_group_id);
     setActiveSignalId('');
-    if (!annotation) return;
-    const targetIndex = resolveAnnotationIndex(annotation, bars1m);
+    if (!bars1m.length) return;
+    const span = groupBarSpan(group, bars1m);
+    if (span.startIndex == null || span.endIndex == null) return;
+    // Exact OPT-005 sequence: blue multi-bar band → fitRange only → no post-fit center.
     engineRef.current?.setHighlightRanges({
       timeframe: '1m',
-      startIndex: targetIndex,
-      endIndex: targetIndex,
-      style: 'marker',
+      startIndex: span.startIndex,
+      endIndex: span.endIndex,
+      style: 'blue',
     });
-    if (bars1m.length) {
-      const radius = targetIndex < 16 ? 12 : 10;
-      engineRef.current?.fitRange({
-        timeframe: '1m',
-        startIndex: Math.max(0, targetIndex - radius),
-        endIndex: Math.min(bars1m.length - 1, targetIndex + radius),
-        paddingRatio: 0,
-        minPadding: 0,
-      });
-    }
-    engineRef.current?.scrollTo({
-      barIndex: targetIndex,
+    engineRef.current?.fitRange({
       timeframe: '1m',
-      ts: annotation.ts,
-      time: annotation.t,
-      highlight: true,
-      center: true,
+      startIndex: span.startIndex,
+      endIndex: span.endIndex,
+      paddingRatio: 0.2,
+      minPadding: 4,
+    });
+  }
+
+  function focusTradeEvent(row) {
+    if (!row || !bars1m.length) return;
+    const focus = eventFocusPayload(row, bars1m, { timeframe: '1m' });
+    if (!focus) return;
+    setActiveSignalId('');
+    engineRef.current?.setHighlightRanges({
+      timeframe: focus.timeframe,
+      startIndex: focus.startIndex,
+      endIndex: focus.endIndex,
+      style: focus.style,
+    });
+    engineRef.current?.fitRange({
+      timeframe: focus.timeframe,
+      startIndex: focus.startIndex,
+      endIndex: focus.endIndex,
+      paddingRatio: 0.35,
+      minPadding: 8,
     });
   }
 
@@ -598,6 +610,7 @@ export function StaticReviewsApp() {
                 traders={tradeRecords?.traders}
                 activeGroupId={activeTradeGroupId}
                 onSelect={selectTradeGroup}
+                onEventFocus={focusTradeEvent}
               />
               <ReviewSignalList
                 annotations1m={displayComputed.annotations1m}

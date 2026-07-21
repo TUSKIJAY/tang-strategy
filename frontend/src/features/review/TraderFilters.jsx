@@ -11,6 +11,7 @@ import {
 // - When `context` is supplied, resolved-context mirror is omitted; workspace owns day.
 // - availableTraderIds drives chips; empty availability shows one neutral message.
 // - <=6 chips inline; >=7 summary + Edit drawer with search/Select all/Clear.
+// - Shared tools path is always display-only (no eligibility segment chrome).
 
 export function TraderFilters({
   traders = [],
@@ -126,44 +127,6 @@ export function TraderFilters({
           </label>
         </div>
       )}
-
-      <div className="trade-tools-row">
-        <fieldset className="trade-eligibility-fieldset">
-          <legend className="trade-filter-label">Eligibility</legend>
-          <div className="trade-eligibility-seg" role="radiogroup" aria-label="Eligibility">
-            <label className={`trade-eligibility-option ${filters.eligibility === 'display' ? 'active' : ''}`}>
-              <input
-                type="radio"
-                name="eligibility"
-                value="display"
-                checked={filters.eligibility === 'display'}
-                onChange={(event) => update({ eligibility: event.target.value })}
-              />
-              <span>Display</span>
-            </label>
-            <label className={`trade-eligibility-option ${filters.eligibility === 'reported' ? 'active' : ''}`}>
-              <input
-                type="radio"
-                name="eligibility"
-                value="reported"
-                checked={filters.eligibility === 'reported'}
-                onChange={(event) => update({ eligibility: event.target.value })}
-              />
-              <span>Reported</span>
-            </label>
-            <label className={`trade-eligibility-option ${filters.eligibility === 'calculated' ? 'active' : ''}`}>
-              <input
-                type="radio"
-                name="eligibility"
-                value="calculated"
-                checked={filters.eligibility === 'calculated'}
-                onChange={(event) => update({ eligibility: event.target.value })}
-              />
-              <span>Calculated</span>
-            </label>
-          </div>
-        </fieldset>
-      </div>
 
       <div className="trade-tools-row trade-traders-row">
         <span className="trade-filter-label">Traders</span>
