@@ -5,14 +5,14 @@
 - Plan slug: `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan`
 - Revision: `v3-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-tools-group-span-viewport-data-rail`
-- Design reviews: ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-002.md@revise@v2-review-foldback-2026-07-21
-- Latest design verdict: revise
+- Design reviews: ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-002.md@revise@v2-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-003.md@approve@v3-review-foldback-2026-07-21
+- Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: none
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none

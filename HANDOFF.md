@@ -7,15 +7,15 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-21
 - Branch: `codex/project-harness`
 - Current proposed plan: `docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md` revision `v3-review-foldback-2026-07-21`.
-- Prior design reviews: `review-001` revise@v1; `review-002` revise@v2 (append-only; cannot approve v3).
-- V3 freezes: deterministic TF first-paint oracle + getViewportDebug; mandatory event-row steps in B-Group-span; exact host `data-market-days-rail` including month bar ≤420px; tracked Playwright runner path.
-- Next gate: independent `design-review` of exact `v3-review-foldback-2026-07-21`.
+- Design reviews: `review-001` revise@v1; `review-002` revise@v2; `review-003` approve/high@v3. Prior reviews remain append-only.
+- V3 approval verifies: deterministic TF first-paint oracle + `getViewportDebug`; mandatory event-row focus and card-span restore in B-Group-span; exact host `data-market-days-rail` including month bar/identity and full rail ≤420px; tracked browser runner path.
+- Next gate: `activation-recording`, requiring a separate explicit user activation instruction.
 - **Does not authorize** activation, implementation, push, PR, merge, Pages, provider/broker, or remote action.
 - Preserve untracked `output/` evidence trees; do not stage.
 - Stage only task-owned literal paths for lifecycle commits.

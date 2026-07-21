@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Independent design review `review-003` on exact revision `v3-review-foldback-2026-07-21` returned `approve/high` with no findings. V3 closes every `review-002` item: deterministic QQQ `2026-07-17` first-render TF oracle with formula-derived viewport metrics and tracked browser seam; mandatory Review/Static event-row focus plus card-span restore; exact `data-market-days-rail` host with month bar/identity and full rail capped at `420px` while Review sidebar behavior is preserved. All six evidence hashes and pre-reconciliation plan SHA-256 `14dfeba9...34a9` matched at HEAD `b3abc262...071f`. Lifecycle remains Proposed; next gate `activation-recording`. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 
 2026-07-21: Folded `review-002: revise/high` into Proposed revision `v3-review-foldback-2026-07-21`. Closures: deterministic **B-TF-first-paint** oracle (QQQ 2026-07-17, first completed render, zoomScale=1, count/start/occupancy/followMode formulas, `getViewportDebug`, tracked Playwright runner); **B-Group-span** mandatory event-row click + restore (no optional); host class exactly `data-market-days-rail` with month bar ≤420px in **B-Data-rail-layout**. Prior reviews cannot approve v3. Next gate independent `design-review` of exact v3. No activation, implementation, content/DB, provider/broker, publication, push, or remote authority.
 
