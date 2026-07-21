@@ -1,27 +1,27 @@
 # Tang Strategy Trade Panel Visual Polish
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Proposed
+- Status: Completed
 - Plan slug: `2026-07-21-tang-strategy-trade-panel-visual-polish-plan`
 - Revision: `v3-review-foldback-2026-07-21`
 - Plan author ID: `grok-plan-author-2026-07-21-trade-panel-polish`
-- Design reviews: docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md@revise@v1-proposal-2026-07-21, docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-002.md@revise@v2-review-foldback-2026-07-21, docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-003.md@approve@v3-review-foldback-2026-07-21
+- Design reviews: ../reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md@revise@v1-proposal-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-002.md@revise@v2-review-foldback-2026-07-21, ../reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-003.md@approve@v3-review-foldback-2026-07-21
 - Latest design verdict: approve
 - Review independence: attested
-- Activation evidence: none
+- Activation evidence: user-instruction:2026-07-21-activate-trade-panel-visual-polish-plan
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: activation-recording
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: 35a007efbd9db2a99967fb007adff2415f243e0b
 - Lifecycle reconciliation commit: none
 - Owner: Grok
 - Created: 2026-07-21
 - Optimization source: `docs/optimization/2026-07-21-review-trade-panel-visual-polish/2026-07-21-review-trade-panel-visual-polish.md`
 - Proposal baseline: `codex/project-harness@34179ea6947bb1345c17c42a1e4d3a1482b8d85d`
-- Scope authority: review-only; this proposed plan does not authorize implementation, activation, Git stage/commit/push, data/DB, provider/broker, Pages, or remote actions
+- Scope authority: local implementation, verification, review, and closeout under `user-instruction:2026-07-21-execute-trade-panel-visual-polish-plan`; push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote remain unauthorized
 
 ## 1. Context And Evidence
 
@@ -268,19 +268,34 @@ Negative substring scans apply only to the production paths in items 1–7 above
 - Focused checks: §4 Phase 0 verification list — **N-\*** Node suite + **B-\*** Playwright receipts + V1–V3.
 - Full checks: same for this frontend-only plan; no backend suite required unless a future revision expands scope.
 - Expected state/handoff updates on activation, phase exits, and closeout only (plus this proposal-revision reconciliation).
-- Local commits: only under separate durable-checkpoint / user commit authority — this proposal grants none.
+- Local commits: product implementation `35a007efbd9db2a99967fb007adff2415f243e0b`; deterministic browser acceptance script `680981f`.
 - Push/PR/Pages/provider/broker/DB: never authorized by this plan alone.
 
 ## 6. Authority Boundary
 
-| Action | Authorized by this proposal? |
+| Action | Authorized now? |
 | --- | --- |
 | Independent design review of exact v3 | Completed by `review-003: approve/high` |
-| Activation | No — needs explicit user instruction after matching-revision `approve` |
-| Implementation | No — needs implementation-start (or full-execution) after activation |
-| Git stage/commit | No |
+| Lifecycle activation recording (Proposed → Active at `phase-0:not-started`) | Yes — consumed by `user-instruction:2026-07-21-activate-trade-panel-visual-polish-plan` |
+| Phase 0 start / implementation | Completed under full-execution instruction |
+| Git stage/commit | Completed for task-owned local paths |
 | Push / PR / merge / Pages | No |
 | Provider / broker / tracked DB / content | No |
+
+### 6.1 Activation record
+
+- Instruction: user message authorizing move of the approved prop plan to active (`user-instruction:2026-07-21-activate-trade-panel-visual-polish-plan`)
+- Matching-revision design approval: `review-003: approve/high` on exact `v3-review-foldback-2026-07-21`
+- Result: plan lives at `docs/exec-plans/active/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`; state `phase-0:not-started`; next gate `phase-0-start`
+- Non-authorization: this activation does not start Phase 0 and does not grant implementation, Git stage/commit/push, data/DB, provider/broker, Pages, hosted, or other remote actions
+
+### 6.2 Execution and closeout record
+
+- Full-execution instruction: `user-instruction:2026-07-21-execute-trade-panel-visual-polish-plan`
+- Product implementation: `35a007efbd9db2a99967fb007adff2415f243e0b`
+- Reproducible browser acceptance: `680981f`
+- Independent implementation review: `implementation-review-001: accept/high`
+- Result: all phases closed; plan migrated to `completed/`; next gate `closed`
 
 ## 7. References
 

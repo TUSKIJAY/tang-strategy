@@ -4,11 +4,17 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-21-tang-strategy-trade-panel-visual-polish-plan`
-- Lifecycle status: `Proposed`
+- Lifecycle status: `Completed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `activation-recording`
+- Next gate: `closed`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Phase 0、Phase 1、Phase 2 全部完成。50/50 Node 测试、Vite 正常与静态构建、check-project-harness 全部通过。Playwright 真实浏览器模拟捕获 B-Eligibility-interaction、B-Drawer-scale（合成 >=7 交易者）、B-Download-four-file 交互收据及 V1-V3 桌面截图。出具 implementation-review-packet-001 与 implementation-review-001 (accept)，计划已移至 completed/ 并完成全局索引同步。
+
+2026-07-21: 用户以“/goal ... 交给你全权执行这个plan”发出全权执行指令，记录为 `user-instruction:2026-07-21-execute-trade-panel-visual-polish-plan`。Phase 0 进入 `in-progress`，next gate 为 `phase-0-exit`。
+
+2026-07-21: 用户以“把prop plan转移到active”明确授权 Trade Panel Visual Polish exact revision `v3-review-foldback-2026-07-21` 的 lifecycle activation，记录为 `user-instruction:2026-07-21-activate-trade-panel-visual-polish-plan`。已且仅将该 plan 从 `proposed/` 迁移到 `active/`，同步 proposed/active/reviews indexes、roadmap、optimization 回链与两个 state block，并停在 `phase-0:not-started` / next gate `phase-0-start`。Matching design approval 为 `review-003: approve/high`。本次 activation 不启动 Phase 0，不授权实现、Git stage/commit/push、canonical data/DB、provider/broker、Pages、hosted 或任何远端动作。
 
 2026-07-21: Independent revision review `review-003` on exact revision `v3-review-foldback-2026-07-21` returned `approve/high` with no findings. V3 closes the sole `review-002` blocker by assigning pure/source proof to mandatory Node **N-*** carriers and real selection/focus/filter, synthetic `>=7` drawer, and four-file Download behavior to mandatory Playwright **B-*** carriers; the same IDs govern success criteria, manifest, Phase 0 verification, and exit. Existing Playwright dev dependency, 49/49 frontend baseline, governed harness, in-memory fixture boundary, nine-path scope, and authority separation were independently verified. Lifecycle remains Proposed; next gate `activation-recording`. Approval does not activate or authorize implementation, further Git, push, data, provider/broker, Pages, or remote action.
 

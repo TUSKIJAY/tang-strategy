@@ -14,7 +14,7 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Polish shared trade tools + group cards (Review / Static / Admin) | Shared trade filter/export/list chrome | proposed-approved | [proposed plan](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) revision `v3-review-foldback-2026-07-21`; [review-003](../../exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-003.md): `approve/high` | Mock accepted; review-001/002 folded into v3; approval does not activate or authorize implementation |
+| OPT-001 | Polish shared trade tools + group cards (Review / Static / Admin) | Shared trade filter/export/list chrome | completed | [completed plan](../../exec-plans/completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md); [implementation review](../../exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/implementation-review-001.md): `accept/high` | Verified implementation `35a007efbd9db2a99967fb007adff2415f243e0b` |
 
 ## Relationship To Prior Work
 
@@ -85,9 +85,9 @@ Open the mockup in a browser. Paths are relative to this record.
   - B chip selection model and eligibility enum values (`display` / `reported` / `calculated`)
   - Export payload contents (JSON + 3 CSV), only presentation of the control
   - Direction color semantics from completed fusion plan
-- Lifecycle status: promoted-to-proposed
+- Lifecycle status: completed
 - Mock proposal: [`./mockups/trade-panel-v2.html`](./mockups/trade-panel-v2.html)
-- Proposed plan: [`docs/exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`](../../exec-plans/proposed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) revision `v3-review-foldback-2026-07-21`; `review-003: approve/high`; next gate `activation-recording`
+- Completed plan: [`docs/exec-plans/completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`](../../exec-plans/completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md) revision `v3-review-foldback-2026-07-21`; verified `35a007efbd9db2a99967fb007adff2415f243e0b`; next gate `closed`
 
 ## Record Mode Session
 
@@ -100,4 +100,5 @@ Open the mockup in a browser. Paths are relative to this record.
 - Design review-002: 2026-07-21 `revise/high` on `v2-review-foldback-2026-07-21`; product closures accepted, verification carrier must be made executable and unambiguous
 - Plan revision foldback: 2026-07-21 → `v3-review-foldback-2026-07-21` (Node N-* pure/source vs Playwright B-* interaction matrix; no fallback)
 - Design review-003: 2026-07-21 `approve/high` on exact `v3-review-foldback-2026-07-21`; no findings; next gate `activation-recording`
-- Next: explicit lifecycle activation instruction; approval alone does not activate or authorize implementation
+- Activated: 2026-07-21 by user instruction transferring prop plan to active → `user-instruction:2026-07-21-activate-trade-panel-visual-polish-plan`; parked at `phase-0:not-started` / `phase-0-start`
+- Executed and closed: 2026-07-21 under full-execution instruction; `implementation-review-001: accept/high`; no push or remote action
