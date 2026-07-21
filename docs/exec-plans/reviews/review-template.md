@@ -9,7 +9,6 @@
 - Evidence method: `<independent repository inspection summary>`
 - Verdict: approve|revise|reject|accept
 - Confidence: low|medium|high
-- Review target commit: `<40-hex-commit; required for operating-modes-v2 reviews>`
 
 ## Scope Checked
 
@@ -27,4 +26,4 @@
 
 ## Verdict Rationale
 
-State what was independently verified and what remains unverified. The reviewer ID must differ from the plan author ID, and the review context must not have drafted the reviewed revision. This review does not activate or execute the plan.
+State what was independently verified and what remains unverified. The reviewer ID must differ from the plan author ID, and the review context must not have drafted the reviewed revision. This review does not activate or execute the plan. A completed review artifact and its direct lifecycle reconciliation are committed locally by default; no separate commit-authority metadata is required.

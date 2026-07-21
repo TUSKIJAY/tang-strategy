@@ -16,14 +16,13 @@
 - [`teaching-system.md`](./teaching-system.md) — teaching content semantics and case-review guidance.
 - [`kline-engine.md`](./kline-engine.md) — shared frontend chart engine and payload contract.
 - [`daily-publish-runbook.md`](./daily-publish-runbook.md) — TV-first daily fetch, safe DB rebuild, and Pages publication SOP.
-- [`operating-modes.md`](./operating-modes.md) — normative Coding/Data Update routing, lifecycle formats, reviewer evidence, authority gates, and durable checkpoint contract (§§9–10).
+- [`operating-modes.md`](./operating-modes.md) — normative Coding/Data Update routing, lifecycle formats, task-scoped local commit default, reviewer evidence, and authority gates.
 
 ## Governed Lifecycle Docs
 
 - [`exec-plans/roadmap.md`](./exec-plans/roadmap.md) — execution-plan lifecycle and proposed/active/completed/review indexes.
 - [`decisions/index.md`](./decisions/index.md) — persistent decisions; accepted decisions do not automatically execute work.
 - [`decisions/2026-07-19-operating-modes-and-lifecycle-source.md`](./decisions/2026-07-19-operating-modes-and-lifecycle-source.md) — accepted source-ownership and peer-mode decision; non-executing by itself.
-- [`decisions/2026-07-20-durable-checkpoint-governance.md`](./decisions/2026-07-20-durable-checkpoint-governance.md) — accepted local-checkpoint safety, authority, and non-circular evidence decision; non-executing by itself.
 - [`optimization/index.md`](./optimization/index.md) — record-only improvement intake; records do not authorize implementation.
 - [`progress-archive/index.md`](./progress-archive/index.md) — indexed historical lifecycle/evidence redirected out of startup files.
 

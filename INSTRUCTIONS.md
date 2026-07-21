@@ -17,6 +17,7 @@ The lifecycle is:
 `optimization intake -> proposed plan -> independent review -> explicit activation -> active implementation/verification -> independent implementation review -> completed plan`
 
 Optimization records, decisions, proposed plans, and reviews do not grant execution authority by themselves.
+Each user-authorized mutating lifecycle step becomes durable in one task-scoped local commit by default. The user may opt out; push, PR, merge, Pages, provider/broker, and other remote actions always require separate authority.
 
 ## Authority And Directory Map
 
@@ -58,11 +59,12 @@ Generated review JSON belongs in `frontend/public/reviews`, the Vite build belon
 
 1. Read the startup chain, `docs/operating-modes.md`, and the current active plan before modifying files.
 2. Use repository evidence; do not invent architecture, completion, decisions, test results, or authority.
-3. Preserve unrelated user changes. Do not reset, restore, stash, checkout, stage, commit, or push them.
+3. Preserve unrelated user changes. Stage and commit only task-owned literal paths; do not reset, restore, stash, checkout, stage, commit, or push unrelated work.
 4. Keep `PROGRESS.md` truthful when lifecycle state changes; keep `HANDOFF.md` limited to the latest resume point.
 5. Keep detailed evidence behind governed indexes so startup documents remain bounded.
 6. A green local/GitHub check is verification evidence, not merge or publication authority.
 7. Do not fetch, publish, connect to a broker, push, open/merge a PR, or change remote settings without the exact authority required by `AGENTS.md` and the active request.
+8. Keep small work small. Do not turn an adjacent observation into a new implementation, plan, reviewer, commit protocol, state machine, or remediation round unless the user asks or a hard safety boundary requires it.
 
 ## Verification Commands
 
@@ -81,7 +83,6 @@ The script resolves the repository root independently of the caller's current di
 - `python3 scripts/check-project-harness.py --root . --profile governed`
 - `python3 scripts/check-operating-modes.py --root .`
 - `python3 -m unittest scripts.tests.test_operating_modes`
-- `python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated`
 - `python3 scripts/check-startup-doc-budget.py`
 - `cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'`
 - `cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests`

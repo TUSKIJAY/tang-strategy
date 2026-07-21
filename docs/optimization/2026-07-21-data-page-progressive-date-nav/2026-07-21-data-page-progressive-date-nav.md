@@ -6,10 +6,7 @@
 > `docs/optimization/2026-07-21-data-page-progressive-date-nav/2026-07-21-data-page-progressive-date-nav.md`
 > Put evidence images in the sibling `screenshots/` folder and link them as `./screenshots/<name>.png`.
 >
-> A finalized record is eligible for an `opt-record` durable checkpoint only under separate local Git authority and the exact scope/safety rules in `docs/operating-modes.md` §9. Draft status or this record alone grants no checkpoint authority.
-- Checkpoint authority: none
-- Checkpoint authority mode: none
-- Checkpoint authority kinds: none
+> This completed historical record does not authorize new implementation or remote action. New OPT work follows the task-scoped local commit default in `docs/operating-modes.md` §2.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |

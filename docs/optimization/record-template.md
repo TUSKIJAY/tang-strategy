@@ -6,11 +6,7 @@
 > `docs/optimization/<YYYY-MM-DD-batch-slug>/<YYYY-MM-DD-batch-slug>.md`
 > Put evidence images in the sibling `screenshots/` folder and link them as `./screenshots/<name>.png`.
 >
-> A finalized record is eligible for an `opt-record` durable checkpoint only under separate local Git authority and the exact scope/safety rules in `docs/operating-modes.md` §9. Draft status or this template alone grants no checkpoint authority.
-
-- Checkpoint authority: none
-- Checkpoint authority mode: none
-- Checkpoint authority kinds: none
+> A finalized record and its direct index update are committed locally by default under `docs/operating-modes.md` §2. A draft, failed/incomplete record, explicit no-commit instruction, or unclear path ownership prevents that commit. This does not authorize implementation or remote action.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |

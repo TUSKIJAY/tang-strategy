@@ -6,11 +6,7 @@
 > `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md`
 > Evidence images live in `./screenshots/`. Interactive HTML mockups live in `./mockups/` and are the locked visual proposal for later plan promotion.
 >
-> A finalized record is eligible for an `opt-record` durable checkpoint only under separate local Git authority and the exact scope/safety rules in `docs/operating-modes.md` §9. This record alone grants no checkpoint, implementation, commit, push, data, or remote authority.
-
-- Checkpoint authority: none
-- Checkpoint authority mode: none
-- Checkpoint authority kinds: none
+> This completed historical record does not authorize new implementation or remote action. New OPT work follows the task-scoped local commit default in `docs/operating-modes.md` §2.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |

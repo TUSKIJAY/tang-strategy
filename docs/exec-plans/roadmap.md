@@ -14,15 +14,6 @@
 
 `proposed`、`active`、`completed` 与 `review` 是不同状态，不得仅靠措辞相互替代。
 
-Schema migration follows the deterministic compatibility policy in
-[`docs/operating-modes.md` §10](../operating-modes.md): a Proposed v1 plan may
-migrate at its next revision or activation, an Active v1 plan at its next phase
-transition, and existing Completed v1 plans remain frozen. Migration retains
-all v1 keys, derives live state from the normative state table, and defaults
-checkpoint authority to `none` without an explicit matching user instruction.
-The Durable Checkpoint governance plan is the bootstrap exception and remains
-v1 through implementation review and closeout.
-
 ## Directory Rules
 
 - [`proposed/index.md`](./proposed/index.md)：草案或 review-only 计划，无实施权限。

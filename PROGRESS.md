@@ -3,12 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-21-tang-strategy-trade-panel-visual-polish-plan`
-- Lifecycle status: `Completed`
+- Current plan: `none`
+- Lifecycle status: `None`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `closed`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
+
+2026-07-21: Lifecycle commit 语义已一次性收敛：用户授权的 Coding Mode 仓库写入在完成时默认形成一个仅含 task-owned literal paths 的本地 commit；用户明确说不 commit、任务未完成或路径归属冲突时不提交。OPT、prop plan、review/revision、activation、implementation 和 completed migration 均适用。push/PR/merge/Pages/provider/broker/remote 仍需单独授权。旧的多层提交协议、额外 authority 字段、receipt/trailer/ancestry 和 work-unit 状态机已从当前规范、模板、配置、CI 与执行入口删除；lifecycle checker 缩回基本一致性检查，并加入“keep small work small”防扩张规则。
 
 2026-07-21: Phase 0、Phase 1、Phase 2 全部完成。50/50 Node 测试、Vite 正常与静态构建、check-project-harness 全部通过。Playwright 真实浏览器模拟捕获 B-Eligibility-interaction、B-Drawer-scale（合成 >=7 交易者）、B-Download-four-file 交互收据及 V1-V3 桌面截图。出具 implementation-review-packet-001 与 implementation-review-001 (accept)，计划已移至 completed/ 并完成全局索引同步。
 

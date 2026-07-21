@@ -37,10 +37,7 @@ GOVERNED = (
     "docs/optimization/record-template.md",
     "docs/progress-archive/index.md",
     "scripts/check-startup-doc-budget.py",
-    "scripts/check-durable-checkpoint.py",
 )
-
-DURABLE_AUDIT_COMMAND = "python3 scripts/check-durable-checkpoint.py --root . --mode audit --legacy-tolerated"
 
 LINK_SURFACES = (
     "docs/README.md",
@@ -106,8 +103,6 @@ def load_config(root: Path, profile: str, errors: list[str]) -> dict[str, Any]:
     commands = config.get("verification_commands")
     if not isinstance(commands, list) or not commands or not all(isinstance(item, str) and item for item in commands):
         errors.append("config: verification_commands must be a non-empty string list")
-    elif profile == "governed" and DURABLE_AUDIT_COMMAND not in commands:
-        errors.append(f"config: missing governed durable checkpoint command: {DURABLE_AUDIT_COMMAND}")
     return config
 
 
@@ -276,45 +271,6 @@ def check_operating_modes_contract(root: Path, errors: list[str]) -> dict[str, A
     return payload
 
 
-def check_durable_checkpoint_contract(root: Path, errors: list[str]) -> dict[str, Any]:
-    checker = Path(__file__).resolve().with_name("check-durable-checkpoint.py")
-    try:
-        completed = subprocess.run(
-            [
-                sys.executable,
-                str(checker),
-                "--root",
-                str(root),
-                "--mode",
-                "audit",
-                "--legacy-tolerated",
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=30,
-        )
-    except (OSError, subprocess.SubprocessError) as exc:
-        errors.append(f"durable checkpoint: checker invocation failed: {type(exc).__name__}: {exc}")
-        return {}
-    try:
-        payload = json.loads(completed.stdout.splitlines()[0])
-    except (IndexError, json.JSONDecodeError) as exc:
-        errors.append(
-            f"durable checkpoint: checker returned invalid JSON: {type(exc).__name__}: {exc}; "
-            f"stderr={completed.stderr.strip()!r}"
-        )
-        return {}
-    nested_errors = payload.get("errors")
-    if isinstance(nested_errors, list):
-        errors.extend(f"durable checkpoint: {item}" for item in nested_errors if isinstance(item, str))
-    if completed.returncode != 0 and not nested_errors:
-        errors.append(f"durable checkpoint: checker failed with code {completed.returncode}")
-    return payload
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
@@ -332,10 +288,9 @@ def main(argv: list[str] | None = None) -> int:
     github_contract = check_github_contract(root, config, errors) if config else {}
     markdown_links = check_markdown_contracts(root, errors) if profile == "governed" else {}
     operating_modes = check_operating_modes_contract(root, errors) if profile == "governed" else {}
-    durable_checkpoint = check_durable_checkpoint_contract(root, errors) if profile == "governed" else {}
 
     payload = {
-        "schema_version": "project-local-harness-check-v2",
+        "schema_version": "project-local-harness-check-v3",
         "root": str(root),
         "profile": profile,
         "files": files,
@@ -343,7 +298,6 @@ def main(argv: list[str] | None = None) -> int:
         "github_contract": github_contract,
         "markdown_links": markdown_links,
         "operating_modes": operating_modes,
-        "durable_checkpoint": durable_checkpoint,
         "errors": errors,
         "passed": not errors,
     }

@@ -14,13 +14,15 @@ Preserve all unrelated user changes. Do not overwrite, revert, stage, or commit 
 
 ## Operating Modes Router
 
-Use [`docs/operating-modes.md`](./docs/operating-modes.md) as the single normative routing and lifecycle contract. Coding Mode and Data Update Mode are peer modes. Read-only/ambiguous work starts in Coding Lane 1; bounded maintenance is legal only when every Lane 2 criterion passes; governance, DB, market-data, publication, security, cross-contract, broad, or difficult-to-rollback changes require a reviewed Lane 3 Exec Plan. Routine use of existing fetch/rebuild/acceptance tooling uses Data Update Mode. Local acceptance never grants commit, push, or publication authority; the daily triggers below are the only standing publish triggers.
+Use [`docs/operating-modes.md`](./docs/operating-modes.md) as the single normative routing and lifecycle contract. Coding Mode and Data Update Mode are peer modes. Read-only/ambiguous work starts in Coding Lane 1; bounded maintenance is legal only when every Lane 2 criterion passes; governance, DB, market-data, publication, security, cross-contract, broad, or difficult-to-rollback changes require a reviewed Lane 3 Exec Plan. Routine use of existing fetch/rebuild/acceptance tooling uses Data Update Mode. A user-authorized Coding Mode mutation includes one scoped local commit by default; it never includes push, PR, merge, Pages, publication, provider/broker, or another remote action. Data Update Mode keeps its separate publish-gate rules.
 
-## Hard Review Artifact Constraint
+## Task-Scoped Local Commit Default
 
-- An explicit request to review, audit, or `审核` a governed plan automatically includes local creation of the next canonical review artifact under `docs/exec-plans/reviews/<plan-slug>/`, the review-only metadata/index reconciliation required by `docs/operating-modes.md`, and one strictly scoped local commit containing only that review lifecycle package. Chat-only findings or an uncommitted review artifact never count as a completed review deliverable.
-- For small, local, reversible UI or documentation plans, use the simplest valid lifecycle. Do not introduce or require checkpoint machinery solely to create a review document; create the review artifact directly unless the user explicitly requests a checkpoint or the plan already depends on one.
-- Review requests authorize only the local review artifact, its review-state reconciliation, exact-path staging, and that scoped local commit. If the reviewed proposal is not yet durable, the same commit may include its existing proposal artifact and directly linked lifecycle/source records without rewriting the plan body. This authority does not include activation, implementation/remediation, push, PR, merge, Pages, provider/broker, or other remote action.
+- When a user authorizes a task that mutates repository files, completing that task includes staging only its task-owned literal paths and creating one local commit. This covers OPT records, proposed plans, plan revisions, reviews, activation, implementation, implementation review, and completed migration.
+- Do not commit when the user explicitly says not to commit, when the result is still a draft/failure/incomplete, or when task-owned paths cannot be separated safely from unrelated user changes. Never use `git add .`, `git add -A`, directory staging, or implicit staging.
+- A local commit never grants push, PR, merge, Pages, publication, provider/broker, hosted verification, branch administration, or any other remote action.
+- Keep small work small: one requested outcome, proportionate verification, one scoped commit. Record adjacent issues without recursively creating extra plans, reviewers, commit protocols, state machines, or remediation loops unless a hard Lane 3 boundary or the user explicitly requires them.
+- An explicit governed-plan review still creates the canonical review artifact and reconciles its direct lifecycle surfaces. Do not invoke another agent merely as ceremony for a small task; use independent review only where the governed Lane 3 lifecycle genuinely requires it and the user has not directed otherwise.
 
 ## Project Structure & Module Organization
 
@@ -62,7 +64,7 @@ Use concise conventional commits (`feat:`, `fix:`, `docs:`, `chore:`). PRs shoul
 - Data-impacted files or directories.
 - How to verify (`rebuild`, day selection, screenshots or endpoint output).
 
-Lifecycle-product local commits follow the durable checkpoint contract in [`docs/operating-modes.md`](./docs/operating-modes.md#9-durable-checkpoint-contract). The checker is read-only; only a separately authorized human or agent may stage literal manifest paths and create the scoped local commit. Checkpoint authority never grants push, PR, merge, Pages, or other remote authority.
+Completed Coding Mode work follows the task-scoped local commit default in [`docs/operating-modes.md`](./docs/operating-modes.md#2-authority-and-task-scoped-local-commit): stage task-owned literal paths, run staged diff checks, and create one concise conventional local commit unless the user opted out or safe ownership cannot be proven.
 
 GitHub integration:
 
