@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
+
+2026-07-22: Independent design review `review-001` on exact revision `v1-proposal-2026-07-22` returned `revise/high` with one P1 finding. Product locks, date projection, positive 150/12 oracles, render-only boundary, manifest bounds, and authority wording are sound; plan SHA-256 `edce9b64…6138` and all five §1.2 evidence hashes matched at HEAD `3844973…77a2`. Required foldback: freeze completeness rule so any unknown prior `buy_open`/`buy_add`/`sell_partial` quantity yields unknown close (not sum-of-knowns only); emit marker `*QTY` only when every same-side same-bar contributing event has known qty; change “multi-bar sum” to “same-side, same-bar sum”; add adversarial pure fixtures (known open+unknown add, unknown prior partial, mixed known/unknown same-bar). Lifecycle remains Proposed; next gate `plan-revision`. No activation, implementation, content/DB, push, PR, merge, Pages, provider/broker, or remote authority.
 
 2026-07-22: User instruction `升级成prop plan` promoted session OPT batch `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/` OPT-001…003 to Proposed plan `docs/exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md` revision `v1-proposal-2026-07-22`. Scope: progressive DateRail chip ascending order (membership unchanged); marker `*QTY` replaces `×N`; render-only close-qty derivation (150/12 fixtures). Next gate independent `design-review`. No activation, implementation, content/DB, push, PR, merge, Pages, provider/broker, or remote authority.
 
