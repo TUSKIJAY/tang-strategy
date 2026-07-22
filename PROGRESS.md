@@ -7,8 +7,10 @@
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 <!-- operating-modes-state:end -->
+
+2026-07-22: Independent design review `review-002` on exact revision `v2-review-foldback-2026-07-22` returned `approve/high` with no findings. V2 closes review-001 P1 (qty completeness + same-side same-bar marker rules + adversarial fixtures). Exact plan SHA-256 `67ae3c06…4f22` matched at HEAD `17ebee5…46ad`; all five §1.3 evidence hashes matched. Lifecycle remains **Proposed**; next gate `activation-recording`. Approval does **not** activate. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 
 2026-07-22: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-22`. Closures: OPT-003 completeness rule (derive null close only when every prior `buy_open`/`buy_add`/`sell_partial` qty is finite; unknown prior → unknown); OPT-002 marker completeness (same-side same-bar `*QTY` only when every contributor known); “multi-bar sum” → “same-side, same-bar sum”; adversarial pure fixtures for known-open+unknown-add, unknown prior partial, mixed same-bar aggregation. `review-001` cannot approve v2. Next gate independent `design-review` of exact v2. No activation, implementation, content/DB, provider/broker, publication, push, or remote authority.
 

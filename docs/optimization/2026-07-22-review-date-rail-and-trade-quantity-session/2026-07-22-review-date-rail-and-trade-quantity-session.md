@@ -105,5 +105,6 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 ## Record / promotion history
 
 - 2026-07-22: Independent acceptance; Scope Lock foldback; mock direction-legend fix `f408871`.
+- 2026-07-22: Independent design `review-002: approve/high` on exact `v2-review-foldback-2026-07-22`. Next gate `activation-recording` (approve does not activate). No activation/implementation/remote authority.
 - 2026-07-22: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-22` (qty completeness + same-bar marker rules). Next gate independent `design-review` of exact v2. No activation/implementation/remote authority.
 - 2026-07-22: User instruction `升级成prop plan` promoted OPT-001…003 to Proposed plan `docs/exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md` revision `v1-proposal-2026-07-22`. Next gate independent `design-review`. No activation, implementation, content/DB mutation, push, PR, merge, Pages, or remote authority.

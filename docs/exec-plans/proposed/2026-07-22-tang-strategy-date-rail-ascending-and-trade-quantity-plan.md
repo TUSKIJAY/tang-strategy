@@ -5,14 +5,14 @@
 - Plan slug: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
 - Revision: `v2-review-foldback-2026-07-22`
 - Plan author ID: `grok-plan-author-2026-07-22-date-rail-quantity`
-- Design reviews: ../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/review-001.md@revise@v1-proposal-2026-07-22
-- Latest design verdict: revise
+- Design reviews: ../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/review-001.md@revise@v1-proposal-2026-07-22, ../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/review-002.md@approve@v2-review-foldback-2026-07-22
+- Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: none
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `design-review`
+- Next gate: `activation-recording`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
