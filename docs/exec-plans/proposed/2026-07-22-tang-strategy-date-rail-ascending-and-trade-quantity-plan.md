@@ -3,7 +3,7 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Proposed
 - Plan slug: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
-- Revision: `v1-proposal-2026-07-22`
+- Revision: `v2-review-foldback-2026-07-22`
 - Plan author ID: `grok-plan-author-2026-07-22-date-rail-quantity`
 - Design reviews: ../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/review-001.md@revise@v1-proposal-2026-07-22
 - Latest design verdict: revise
@@ -12,7 +12,7 @@
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `plan-revision`
+- Next gate: `design-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -42,7 +42,19 @@
 - Marker vocabulary `display_name` + BUY/SELL；shape/color/anchor **direction-owned** (CALL up / PUT down); same-bar grouping key `bar|trader|direction|action_side` — completed trade-points / marker-labels plan. OPT-002 **replaces count `×N` with quantity `*QTY`** on that label surface only.
 - Compact timeline `TIME | ACTION | QTY @ PX` with `?` for null — completed points-only / panel density work. OPT-003 fills **missing close qty on the read path** only.
 
-### 1.2 Visual evidence
+### 1.2 Review foldback closure map
+
+#### review-001 closure (v1 → v2)
+
+Independent `review-001` returned `revise/high` against exact revision `v1-proposal-2026-07-22` (plan SHA-256 `edce9b64a163178661c8da8eaa037e45092683c4c44ac71f2a4ca07d9e446138` at HEAD `384497334ebd46b1bd73c49f406168f8ba4777a2`). Revision `v2-review-foldback-2026-07-22` folds the sole P1 finding:
+
+| Severity | Finding (summary) | V2 closure |
+| --- | --- | --- |
+| P1 | Fail-closed qty oracle incomplete: formula summed only *known* opens/partials and fallback covered only unknown open or over-partial sum; null `buy_add` / null prior `sell_partial` could still fabricate a derived close. Marker aggregation had the same mixed-known/unknown gap. Carrier text said “multi-bar sum,” contradicting same-side same-bar grouping. | §1.4 **OPT-003 completeness**: derive a null `sell_close` only when **every** prior quantity-bearing `buy_open`, `buy_add`, and `sell_partial` on that leg has a finite valid quantity; any unknown prior position-changing qty → unknown (timeline `?`, omit marker suffix). Opening qty = sum of **all** those open/add quantities only after completeness passes. “Prior” = validated event/sequence order on the leg before the close event. Numeric raw close still preferred as-is. §1.4 **OPT-002 marker completeness**: for a same-side same-bar group, emit `*QTY` on `marker_label` **and** `title` only when **every** contributing event has a known raw or derived quantity; otherwise omit suffix on both. §2.2 / §2.4: replace “multi-bar sum” with **same-side, same-bar sum**; expand **N-Qty-derive** / **N-Marker-qty** / **N-Timeline-qty** and Phase 0 fixtures to include adversarial cases: known open + unknown add → unknown; unknown prior partial → unknown; mixed known/unknown same-bar aggregation → omit `*QTY`; keep 150/12, raw-preferred, unknown-open, and over-partial. |
+
+`review-001` is append-only prior-revision evidence and **cannot approve v2**. Next gate is independent design review of exact revision `v2-review-foldback-2026-07-22`.
+
+### 1.3 Visual evidence
 
 | 证据 | 路径 | SHA-256 | 作用 |
 | --- | --- | --- | --- |
@@ -54,7 +66,7 @@
 
 Mock is illustrative; **OPT Scope Lock + this plan** are authoritative over any residual mock pedagogy (e.g. teaching-only `derived` pill).
 
-### 1.3 Current repository facts
+### 1.4 Current repository facts
 
 **OPT-001 — progressive chips newest-first:**
 
@@ -76,25 +88,27 @@ Mock is illustrative; **OPT Scope Lock + this plan** are authoritative over any 
   - `tg_20260717_vordin_qqq_001` PUT: open `150`, `sell_close` `null` → expected derived **150**.
   - `tg_20260717_vordin_qqq_002` CALL: open `70`, partials `12+12+22+12`, `sell_close` `null` → expected derived **12**.
 
-### 1.4 User scope locks (frozen)
+### 1.5 User scope locks (frozen)
 
 | Topic | Lock |
 | --- | --- |
 | **OPT-001 order** | Chip rows **ascending** by `trade_date` (earlier left, later right) in **最近** and **按月** on Review / Data / Static progressive rails |
 | **OPT-001 recent membership** | 最近 still = newest `N` dates (`PROGRESSIVE_RECENT_LIMIT`, 12). Membership set unchanged; **only display order** flips to ascending within that set |
 | **OPT-001 month chrome** | Month switcher, newest-first month inventory, ticker tabs, selection authority, footer meta semantics unchanged |
-| **OPT-002 quantity text** | Same-bar multi-event aggregation shows sum: `` `${displayName} ${actionSide}*${totalQuantity}` `` (e.g. `vordinkkk SELL*24`). Single event with known qty: `… BUY*70`. Unknown after derivation: **omit suffix** (`… SELL`). Replace `×N` entirely — never both |
+| **OPT-002 quantity text** | Same-side **same-bar** multi-event aggregation shows sum: `` `${displayName} ${actionSide}*${totalQuantity}` `` (e.g. `vordinkkk SELL*24`). Single event with known qty: `… BUY*70`. Unknown after derivation **or incomplete group**: **omit suffix** (`… SELL`). Replace `×N` entirely — never both |
+| **OPT-002 marker completeness** | For a grouped marker (same `bar\|trader\|direction\|action_side`), emit `*QTY` on **both** `marker_label` and `title` only when **every** contributing event has a known raw or derived quantity; if any contributing qty is unknown, omit the suffix from both fields |
 | **OPT-002 surfaces** | Apply quantity form to **both** `marker_label` and `title` on the merged annotation object (post-group). No CALL/PUT text; no raw `trader_id` when `display_name` exists; no raw schema actions |
 | **OPT-002 shape/color** | Unchanged direction-owned contract |
-| **OPT-003 derivation** | Per **leg**, for `sell_close` with `quantity: null`: `derived = opening_qty − Σ(prior sell_partial qty with known numbers on that leg before this event)`. Opening qty = sum of known numeric `buy_open` + `buy_add` quantities on the leg. Example: PUT 150; CALL 12 |
-| **OPT-003 raw preferred** | If close event already has a numeric `quantity`, use it as-is (no overwrite) |
-| **OPT-003 fallback** | Opening unknown **or** prior partials sum **>** opening → keep timeline `?` and omit marker qty suffix. Do not invent |
+| **OPT-003 derivation** | Per **leg**, for `sell_close` with `quantity: null`: only when the **completeness rule** passes, `derived = opening_qty − Σ(prior sell_partial quantities on that leg before this event)`. Opening qty = sum of all `buy_open` + `buy_add` quantities on the leg (every such event must be known). “Prior” = events earlier in the validated event/sequence order on that leg. Example: PUT 150; CALL 12 |
+| **OPT-003 completeness** | Derive a null close **only** when every prior quantity-bearing `buy_open`, `buy_add`, and `sell_partial` on that leg has a finite valid numeric quantity. Any unknown among those prior position-changing quantities → remaining position is unknowable → return unknown. Do **not** sum only the known subset and invent a close |
+| **OPT-003 raw preferred** | If close event already has a numeric `quantity`, use it as-is (no overwrite), even if prior chain is incomplete |
+| **OPT-003 fallback** | Unknown open, unknown prior add/partial, incomplete open/add/partial chain, **or** known prior partials sum **>** opening → keep timeline `?` and omit marker qty suffix. Do not invent |
 | **OPT-003 render-only** | Presentation/read path only. **No** day JSON / content / DB / provenance rewrite |
 | **OPT-003 chrome** | No product `derived` pill/badge |
 | **Surfaces** | Review + Static aligned; prefer shared pure helpers (`reviewWorkspace` / `tradeRecords`) over page forks |
 | **Out of scope** | Schema/API; provider/broker; DB rebuild; Pages; Admin editor UX redesign; month inventory reordering; fitRange/highlight contracts; marker shape redesign |
 
-### 1.5 Lane 3 classification
+### 1.6 Lane 3 classification
 
 Shared progressive date projection + shared trade-record pure helpers + Review/Static list/marker consumers. Coding Mode **Lane 3** (proposed Exec Plan). Frontend presentation only — no backend, market-data, content day writes, provider, or Pages.
 
@@ -111,12 +125,12 @@ Shared progressive date projection + shared trade-record pure helpers + Review/S
 3. **Month inventory unchanged (OPT-001):** `listMonthsForTicker` / `stepBrowsedMonth` / month bar still treat months newest-first; chip order **within** the browsed month is ascending.
 4. **Marker quantity (OPT-002):** After implementation, `buildTradeRecordAnnotations`:
    - never emits `×` count suffixes on `marker_label`;
-   - emits `*QTY` on `marker_label` and `title` when the (post-derivation) quantity for the marker is known;
-   - multi same-side same-bar events sum quantities (e.g. two PART 12 → `SELL*24`);
+   - emits `*QTY` on `marker_label` and `title` when the (post-derivation) quantity for the marker is known **and** every same-side same-bar contributor is known;
+   - multi same-side **same-bar** events sum quantities (e.g. two PART 12 → `SELL*24`); mixed known/unknown contributors omit suffix on both fields;
    - shape/color/anchor/grouping key family unchanged; no CALL/PUT in label text.
-5. **Close derivation (OPT-003):** Pure helper(s) derive remaining close qty for the QQQ `2026-07-17` vordin cases (150 / 12). `groupTimelineEvents` (or consumer of the helper) exposes the derived number so the list shows `SELL 150 @ 0.15` / `SELL 12 @ 5.5` without a product derived pill.
+5. **Close derivation (OPT-003):** Pure helper(s) derive remaining close qty for the QQQ `2026-07-17` vordin cases (150 / 12) only under the completeness rule. `groupTimelineEvents` (or consumer of the helper) exposes the derived number so the list shows `SELL 150 @ 0.15` / `SELL 12 @ 5.5` without a product derived pill.
 6. **Marker consumes derivation (OPT-002←003):** Close markers for those fixtures show `SELL*150` / `SELL*12` (not bare `SELL` and not `×1`).
-7. **Fallback (OPT-003):** Fixtures with unknown open or over-closed partials still render timeline `?` and omit marker qty suffix.
+7. **Fallback (OPT-003):** Fixtures with unknown open, unknown prior add/partial, incomplete open/add/partial chain, or over-closed partials still render timeline `?` and omit marker qty suffix.
 8. **No source write:** Implementation does not modify `content/trades/**`, tracked DB, or provenance fields.
 9. **Tests/builds:** `npm run test:trade-records` green with updated carriers; normal + static Vite builds green; harness auto green; `git diff --check` clean on task paths.
 10. **Screenshots:** §2.3 under untracked `output/` (optional Playwright; pure carriers are mandatory).
@@ -135,9 +149,9 @@ Shared progressive date projection + shared trade-record pure helpers + Review/S
 | --- | --- | --- | --- |
 | **N-Date-asc** | Node `reviewWorkspace.test.js` | `projectProgressiveDateRail` recent + month `dates` ascending; pressedDate still correct | Browser CSS |
 | **N-Date-membership** | Node same | Recent set equals newest-N; month inventory / stepBrowsedMonth still newest-first months | Chip paint |
-| **N-Qty-derive** | Node `tradeRecords.test.js` | Pure derive helper: PUT 150; CALL 12 from partial chain; raw close qty preferred; unknown open / over-partial → null/`?` path | DOM |
-| **N-Marker-qty** | Node same | No `×N`; `*QTY` on label+title; multi-bar sum; omit when unknown; direction shape fields unchanged; no CALL/PUT in text | Canvas pixels |
-| **N-Timeline-qty** | Node same + list source pin if needed | Timeline rows expose derived qty for close null cases; still `?` on unsafe cases | Product derived pill |
+| **N-Qty-derive** | Node `tradeRecords.test.js` | Pure derive helper: PUT 150; CALL 12 from complete partial chain; raw close qty preferred; unknown open / over-partial / known-open+unknown-add / unknown prior partial → null/`?` path | DOM |
+| **N-Marker-qty** | Node same | No `×N`; `*QTY` on label+title; **same-side same-bar** sum; omit when any contributor unknown (mixed known/unknown same-bar); direction shape fields unchanged; no CALL/PUT in text | Canvas pixels |
+| **N-Timeline-qty** | Node same + list source pin if needed | Timeline rows expose derived qty for complete safe close-null cases; still `?` on incomplete-chain and other unsafe cases | Product derived pill |
 | **N-Surface-source** | Node source pin | Progressive still used on Review/Data/Static; no day-file write paths introduced | Runtime DB |
 | **V1–V3** | Screenshots under `output/` | Visual acceptance vs mock / live friction shots | Semantics alone |
 
@@ -188,7 +202,7 @@ Untracked `output/**` trees are evidence-owned. Do not stage or delete them as p
 - Work:
   - Record HEAD baseline; re-hash §1.2 evidence if needed.
   - Confirm green `npm run test:trade-records` baseline.
-  - Freeze pure fixture objects for N-Qty-derive (mirror `content/trades/2026-07-17.json` vordin groups or load via existing test helpers).
+  - Freeze pure fixture objects for N-Qty-derive / N-Marker-qty / N-Timeline-qty: (1) QQQ `2026-07-17` vordin PUT 150 and CALL 12 complete chains (mirror `content/trades/2026-07-17.json` or load via existing test helpers); (2) raw numeric close preferred; (3) unknown open → unknown; (4) over-partial sum > open → unknown; (5) **adversarial** known open + null `buy_add` → unknown; (6) **adversarial** null prior `sell_partial` → unknown; (7) **adversarial** same-bar mixed known/unknown contributor quantities → omit `*QTY` on label+title.
   - Confirm projection-only date reverse strategy vs any deeper `datesForTicker` change; document chosen approach in phase evidence.
 - Verification: manifest paths only; OPT-001…003 only; no content/DB paths.
 - Exit gate: `phase-0-exit` with baseline note under reviews evidence or untracked `output/`.

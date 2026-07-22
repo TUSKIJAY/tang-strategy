@@ -35,7 +35,7 @@ None.
 
 ## Proposed Plans
 
-- [Tang Strategy Date Rail Ascending And Trade Quantity](./proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) — Proposed; revision `v1-proposal-2026-07-22`; next gate `design-review`; OPT-001…003 from `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/`
+- [Tang Strategy Date Rail Ascending And Trade Quantity](./proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) — Proposed; revision `v2-review-foldback-2026-07-22`; next gate `design-review`; OPT-001…003 from `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/`; `review-001: revise` on v1
 
 ## Completed Plans
 

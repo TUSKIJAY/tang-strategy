@@ -82,7 +82,7 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: Chip rows render ascending by `trade_date` (left → right) in both modes across Review / Data / Static. For 最近, keep the same newest-`N` set and only reverse display order.
 - Boundary that must not change:
   - Recent-window membership rule and limit; month switcher / newest-first month list; ticker selection; which day is selected; footer meta semantics; non-progressive rails if any remain; no Data/Review workspace contract rewrite beyond chip order.
-- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v1-proposal-2026-07-22`
+- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22`
 
 ## OPT-002 K-line Marker Labels Should Display Trade Quantity
 
@@ -91,7 +91,7 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: Replace event count `×N` with quantity suffix `*QTY` (sum when aggregated; e.g. `vordinkkk SELL*24`, `vordinkkk BUY*70`). Omit suffix when quantity remains unknown. Consume OPT-003 derived qty when present so close markers can show `SELL*150` / `SELL*12`.
 - Boundary that must not change:
   - Direction-owned marker shape/color/anchor; grouping key family (bar + trader + direction + action side); BUY/SELL vocabulary; display_name preference; fitRange / selection-band contracts; no CALL/PUT text regression on labels.
-- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v1-proposal-2026-07-22`
+- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22`
 
 ## OPT-003 Derive Missing Closing Event Quantity
 
@@ -100,9 +100,10 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: On the read path, derive remaining close quantity when open qty is known (`derived = open − Σ prior partials`); show concrete numbers on timeline rows and feed the same qty into OPT-002 marker labels. Keep `?` / omit-suffix when derivation is unsafe.
 - Boundary that must not change:
   - Source day JSON / DB facts and provenance; schema validation allowing null quantity; Admin editing semantics; no automatic backfill write; no requirement for a product `derived` pill.
-- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v1-proposal-2026-07-22`
+- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22`
 
 ## Record / promotion history
 
 - 2026-07-22: Independent acceptance; Scope Lock foldback; mock direction-legend fix `f408871`.
+- 2026-07-22: Folded `review-001: revise/high` into Proposed revision `v2-review-foldback-2026-07-22` (qty completeness + same-bar marker rules). Next gate independent `design-review` of exact v2. No activation/implementation/remote authority.
 - 2026-07-22: User instruction `升级成prop plan` promoted OPT-001…003 to Proposed plan `docs/exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md` revision `v1-proposal-2026-07-22`. Next gate independent `design-review`. No activation, implementation, content/DB mutation, push, PR, merge, Pages, or remote authority.
