@@ -5,9 +5,9 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Current phase: `phase-1`
+- Phase state: `complete`
+- Next gate: `implementation-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-22
@@ -16,16 +16,19 @@
 - Revision: `v2-review-foldback-2026-07-22`
 - Design reviews: `review-001.md` → `revise/high` @ v1; `review-002.md` → `approve/high` @ v2
 - Activation evidence: `user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan`
-- Phase: `phase-0` / `not-started`
-- Next gate: `phase-0-start` — requires a **separate explicit implementation-start / execute instruction**
+- Execute evidence: `user-instruction:2026-07-22-execute-date-rail-ascending-and-trade-quantity-plan`
+- Phase: `phase-1` / `complete`
+- Next gate: `implementation-review` — Phase 2 packet + independent implementation review
 - Source OPT: `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/` OPT-001…003 `promoted-to-proposed`
-- Proposal baseline HEAD: `f40887100a7b4f832c59da32ac1607dc47b05854`
-- Design mock: `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/mock.html`
-- Activation does **not** start Phase 0 or authorize product implementation, content/DB, push, PR, merge, Pages, provider/broker
+- Baseline HEAD: `4f508782006d3ed8d46ce3c05b8c478247fe1241`
+- Phase 0 note: `output/date-rail-ascending-trade-quantity-20260722/phase-0-baseline.md` (untracked)
+- V1–V3 receipts: `output/playwright/date-rail-qty-20260722023705/` (untracked)
+- Tests: frontend `test:trade-records` 69/69; normal + static builds green; harness auto green
 - Preserve untracked `output/` trees; do not stage
 
 ## Latest Completed Work
 
+- 2026-07-22: Phase 0 + Phase 1 executed (OPT-001…003): ascending progressive chips, marker `*QTY`, close-qty derivation; 69/69 tests; V1–V3 PASS.
 - 2026-07-22: Lifecycle activation `proposed/` → `active/` at `phase-0:not-started` after matching design approve.
 - 2026-07-22: Independent design `review-002: approve/high` on exact `v2-review-foldback-2026-07-22`.
 - 2026-07-22: Folded review-001 P1 into `v2-review-foldback-2026-07-22` (qty completeness + same-bar marker rules).
@@ -45,6 +48,5 @@
 
 1. Re-run startup Git status and preserve untracked `output/` trees.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. Current plan is **Active** at revision `v2-review-foldback-2026-07-22`, parked at `phase-0:not-started`. Next gate is `phase-0-start` — not product implementation yet.
-4. Phase 0 / implementation requires a **separate explicit start/execute instruction** after this activation.
-5. No remote actions without explicit user request.
+3. Current plan is **Active** at revision `v2-review-foldback-2026-07-22`, `phase-1:complete`. Next gate is `implementation-review` (Phase 2 packet + independent review).
+4. No remote actions without explicit user request.

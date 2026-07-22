@@ -219,6 +219,71 @@ export function tradeEventActionLabel(action) {
   return null;
 }
 
+function finiteQuantity(value) {
+  if (value === null || value === undefined) return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+}
+
+/** Validated event/sequence order on a leg (sequence wins, array order ties). */
+function orderedLegEvents(leg) {
+  return array(leg?.events)
+    .map((event, index) => ({ event, index }))
+    .sort((a, b) => ((Number(a.event?.sequence) || 0) - (Number(b.event?.sequence) || 0)) || (a.index - b.index))
+    .map((entry) => entry.event);
+}
+
+/**
+ * Derive the remaining quantity for a `sell_close` event with `quantity: null`.
+ * Render/read path only — never writes back to source records.
+ *
+ * Completeness rule (fail closed): every prior quantity-bearing `buy_open`,
+ * `buy_add`, and `sell_partial` on the leg must have a finite quantity; any
+ * unknown prior position-changing quantity makes the remainder unknowable.
+ * "Prior" = events earlier in the validated event/sequence order on the leg.
+ * Over-closed partials (sum > opening) also return null. A close event that
+ * already carries a numeric quantity is never passed here — raw wins as-is.
+ */
+export function deriveCloseQuantity(leg, closeEvent) {
+  if (String(closeEvent?.action || '') !== 'sell_close') return null;
+  const ordered = orderedLegEvents(leg);
+  const closeIndex = ordered.findIndex((event) => (
+    event === closeEvent
+    || (event?.event_id && event.event_id === closeEvent?.event_id)
+  ));
+  if (closeIndex < 0) return null;
+  let opening = 0;
+  let openingCount = 0;
+  let partialSum = 0;
+  for (const event of ordered.slice(0, closeIndex)) {
+    const action = String(event?.action || '');
+    if (action === 'buy_open' || action === 'buy_add') {
+      const qty = finiteQuantity(event?.quantity);
+      if (qty === null) return null;
+      opening += qty;
+      openingCount += 1;
+    } else if (action === 'sell_partial') {
+      const qty = finiteQuantity(event?.quantity);
+      if (qty === null) return null;
+      partialSum += qty;
+    }
+  }
+  if (openingCount === 0 || partialSum > opening) return null;
+  return opening - partialSum;
+}
+
+/**
+ * Effective display quantity for an event: raw finite quantity preferred
+ * as-is; a null `sell_close` falls back to the completeness-gated derivation;
+ * everything else stays null (timeline `?`, no marker qty suffix).
+ */
+export function eventDisplayQuantity(leg, event) {
+  const raw = finiteQuantity(event?.quantity);
+  if (raw !== null) return raw;
+  if (String(event?.action || '') === 'sell_close') return deriveCloseQuantity(leg, event);
+  return null;
+}
+
 /**
  * Chronological min/max of complete leg event times across a group.
  * Incomplete/missing times are ignored; array order is irrelevant.
@@ -280,7 +345,7 @@ export function groupTimelineEvents(group) {
         time: hhmm,
         action: event.action,
         actionLabel,
-        quantity: event.quantity,
+        quantity: eventDisplayQuantity(leg, event),
         premium: event.premium,
       });
     });
@@ -376,6 +441,7 @@ export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []
           title: sideText,
           body: event.note || `${leg.expiry} ${leg.strike ?? '--'} ${leg.option_type}`,
           marker_label: sideText,
+          quantity: eventDisplayQuantity(leg, event),
           score: null,
         });
       });
@@ -391,6 +457,8 @@ export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []
         event_ids: [marker.event_id],
         trade_group_ids: [marker.trade_group_id],
         grouped_marker_count: 1,
+        quantity_total: marker.quantity ?? 0,
+        quantity_unknown: marker.quantity === null ? 1 : 0,
       });
       return;
     }
@@ -399,13 +467,19 @@ export function buildTradeRecordAnnotations(groups = [], traders = [], bars = []
       existing.trade_group_ids.push(marker.trade_group_id);
     }
     existing.grouped_marker_count += 1;
-    // title stays displayName + BUY|SELL; ×N is label-only.
+    existing.quantity_total += marker.quantity ?? 0;
+    existing.quantity_unknown += marker.quantity === null ? 1 : 0;
   });
+  // Same-side same-bar aggregation: `*QTY` sums contributors, emitted on both
+  // marker_label and title only when every contributing quantity is known
+  // (raw or derived); any unknown contributor omits the suffix on both.
   return [...groupedMarkers.values()].map((marker) => {
-    const count = marker.grouped_marker_count;
+    const known = marker.quantity_unknown === 0;
+    const suffix = known ? `*${marker.quantity_total}` : '';
     return {
       ...marker,
-      marker_label: count > 1 ? `${marker.marker_label} ×${count}` : marker.marker_label,
+      marker_label: `${marker.marker_label}${suffix}`,
+      title: `${marker.title}${suffix}`,
     };
   });
 }

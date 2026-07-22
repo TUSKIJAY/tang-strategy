@@ -199,7 +199,7 @@ async function run() {
       path: v2Path,
       hoverTitle,
       zoomOutApplied: true,
-      note: 'Visible labels: vordinkkk BUY|SELL (×N ok); Node N-Marker-label proves title vocabulary',
+      note: 'Visible labels: vordinkkk BUY|SELL*QTY; Node N-Marker-qty proves label+title quantity vocabulary',
     });
 
     // V3 Static Review parity

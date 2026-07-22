@@ -5,10 +5,12 @@
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Current phase: `phase-1`
+- Phase state: `complete`
+- Next gate: `implementation-review`
 <!-- operating-modes-state:end -->
+
+2026-07-22: User instruction `你来全权负责执行这个plan` authorized full local execution (`user-instruction:2026-07-22-execute-date-rail-ascending-and-trade-quantity-plan`). Phase 0 baseline HEAD `4f50878…41241`, `test:trade-records` 64/64 green, projection-only reverse approach + adversarial fixtures frozen under untracked `output/date-rail-ascending-trade-quantity-20260722/phase-0-baseline.md`. Phase 1 implemented all three OPTs: progressive chip projection ascending (membership/month inventory unchanged); `deriveCloseQuantity`/`eventDisplayQuantity` pure helpers with completeness rule wired into `groupTimelineEvents` and `buildTradeRecordAnnotations`; marker `*QTY` (same-side same-bar sum, both `marker_label`+`title`, omit on any unknown contributor) replaces `×N`. Frontend **69/69** test:trade-records (new N-Date-asc / N-Date-membership / N-Qty-derive / N-Marker-qty / N-Timeline-qty); normal + static Vite builds green; harness auto green. Playwright V1–V3 PASS under untracked `output/playwright/date-rail-qty-20260722023705/` (chips ascending 最近+按月; markers `vordinkkk SELL*150`/`SELL*24`/`SELL*34`/`SELL*12`/`BUY*70`; timeline `SELL 150 @ 0.15` / `SELL 12 @ 5.5`). No content/DB/backend/push/remote. Next gate: `implementation-review`.
 
 2026-07-22: User instruction `把prop plan迁移到active吧` authorized lifecycle activation of exact revision `v2-review-foldback-2026-07-22` after matching `review-002: approve/high` (`user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan`). Plan migrated `proposed/` → `active/`; Status Active; activation evidence set; phase parked at `phase-0:not-started`; next gate `phase-0-start`. Indexes/roadmap/OPT back-links/state blocks reconciled. This activation does **not** start Phase 0, does not authorize product implementation, content/DB mutation, push, PR, merge, Pages, provider/broker, or any remote action.
 

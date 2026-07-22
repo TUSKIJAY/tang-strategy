@@ -9,9 +9,11 @@ import {
   canEditTradeRecords,
   canonicalizeTradeToolsFilters,
   deriveAvailableTraders,
+  deriveCloseQuantity,
   DIRECTION_CALL_COLOR,
   DIRECTION_PUT_COLOR,
   displayableTradeGroups,
+  eventDisplayQuantity,
   eventFocusPayload,
   exportSelectionFromFilters,
   filtersMatchWorkspace,
@@ -286,8 +288,8 @@ test('marker color is direction-owned while CALL and PUT shapes stay independent
   assert.equal(markers[0].marker_color, '#6F9F7A');
   assert.equal(markers[0].marker_shape, 'triangle_up');
   assert.equal(markers[0].grouped_marker_count, 2);
-  assert.equal(markers[0].marker_label, 'Alice BUY ×2');
-  assert.equal(markers[0].title, 'Alice BUY');
+  assert.equal(markers[0].marker_label, 'Alice BUY*2');
+  assert.equal(markers[0].title, 'Alice BUY*2');
   assert.deepEqual(markers[0].event_ids, [
     'tg_20260717_alice_spy_001_l1_e1',
     'tg_20260717_alice_spy_001_l1_e2',
@@ -335,12 +337,12 @@ test('N-Action-map exact schema map and fail-closed omit (N-Action-map)', () => 
   assert.deepEqual(
     mapped.map((m) => [m.action_side, m.marker_label, m.title]).sort(),
     [
-      ['BUY', 'Alice BUY', 'Alice BUY'],
-      ['BUY', 'Alice BUY', 'Alice BUY'],
-      ['SELL', 'Alice SELL ×2', 'Alice SELL'],
+      ['BUY', 'Alice BUY*1', 'Alice BUY*1'],
+      ['BUY', 'Alice BUY*1', 'Alice BUY*1'],
+      ['SELL', 'Alice SELL*2', 'Alice SELL*2'],
     ].sort(),
   );
-  // same bar BUY+SELL stay separate; same-side SELL groups with ×N
+  // same bar BUY+SELL stay separate; same-side same-bar SELL sums *QTY
   const sellMarkers = mapped.filter((m) => m.action_side === 'SELL');
   assert.equal(sellMarkers.length, 1);
   assert.equal(sellMarkers[0].grouped_marker_count, 2);
@@ -357,7 +359,7 @@ test('N-Action-map exact schema map and fail-closed omit (N-Action-map)', () => 
   });
   const omitted = buildTradeRecordAnnotations([bad], traders, bars);
   assert.equal(omitted.length, 1);
-  assert.equal(omitted[0].marker_label, 'Alice BUY');
+  assert.equal(omitted[0].marker_label, 'Alice BUY*1');
   assert.doesNotMatch(omitted[0].marker_label, /\?/);
   assert.doesNotMatch(omitted[0].title, /\?/);
 });
@@ -366,27 +368,27 @@ test('N-Marker-label display_name + BUY/SELL on label and title (N-Marker-label)
   const bars = [{ t: '10:00' }, { t: '10:01' }];
   const markers = buildTradeRecordAnnotations(groups, traders, bars);
   for (const marker of markers) {
-    assert.match(marker.marker_label, /^(Alice|Bob) (BUY|SELL)( ×\d+)?$/);
-    assert.match(marker.title, /^(Alice|Bob) (BUY|SELL)$/);
-    assert.doesNotMatch(marker.marker_label, /CALL|PUT/);
-    assert.doesNotMatch(marker.title, /CALL|PUT/);
+    assert.match(marker.marker_label, /^(Alice|Bob) (BUY|SELL)(\*\d+)?$/);
+    assert.match(marker.title, /^(Alice|Bob) (BUY|SELL)(\*\d+)?$/);
+    assert.doesNotMatch(marker.marker_label, /CALL|PUT|×/);
+    assert.doesNotMatch(marker.title, /CALL|PUT|×/);
     assert.doesNotMatch(marker.title, /buy_open|buy_add|sell_partial|sell_close/);
     assert.doesNotMatch(marker.marker_label, /\b(alice|bob)\b/);
   }
-  assert.equal(markers[0].marker_label, 'Alice BUY ×2');
-  assert.equal(markers[0].title, 'Alice BUY');
-  assert.equal(markers[1].marker_label, 'Bob BUY');
-  assert.equal(markers[1].title, 'Bob BUY');
+  assert.equal(markers[0].marker_label, 'Alice BUY*2');
+  assert.equal(markers[0].title, 'Alice BUY*2');
+  assert.equal(markers[1].marker_label, 'Bob BUY*1');
+  assert.equal(markers[1].title, 'Bob BUY*1');
 
   // display_name fallback to trader_id when registry entry lacks a name
   const noNameTraders = [{ trader_id: 'alice', color: '#3366CC', active: true, sort_order: 10 }];
   const fallback = buildTradeRecordAnnotations([groups[0]], noNameTraders, bars);
-  assert.equal(fallback[0].marker_label, 'alice BUY ×2');
-  assert.equal(fallback[0].title, 'alice BUY');
+  assert.equal(fallback[0].marker_label, 'alice BUY*2');
+  assert.equal(fallback[0].title, 'alice BUY*2');
 
   // empty traders list still falls back to trader_id (no void traders)
   const rawId = buildTradeRecordAnnotations([groups[0]], [], bars);
-  assert.equal(rawId[0].marker_label, 'alice BUY ×2');
+  assert.equal(rawId[0].marker_label, 'alice BUY*2');
 
   // nickname dual-surface vocabulary for vordin display
   const vordinGroup = group({
@@ -405,17 +407,283 @@ test('N-Marker-label display_name + BUY/SELL on label and title (N-Marker-label)
   assert.equal(nickMarkers.length, 2);
   assert.deepEqual(
     nickMarkers.map((m) => m.marker_label).sort(),
-    ['vordinkkk BUY', 'vordinkkk SELL'],
+    ['vordinkkk BUY*1', 'vordinkkk SELL*1'],
   );
   assert.deepEqual(
     nickMarkers.map((m) => m.title).sort(),
-    ['vordinkkk BUY', 'vordinkkk SELL'],
+    ['vordinkkk BUY*1', 'vordinkkk SELL*1'],
   );
   for (const marker of nickMarkers) {
     // Raw trader_id must not appear as a token; display_name "vordinkkk" is fine.
     assert.doesNotMatch(marker.marker_label, /\bvordin\b|CALL|PUT|沃德哥/);
     assert.doesNotMatch(marker.title, /\bvordin\b|CALL|PUT|沃德哥|buy_open|sell_close/);
   }
+});
+
+// --- Close-qty derivation + marker *QTY (date-rail/qty plan carriers) --------
+
+function qtyEvent(eventId, sequence, occurredAt, action, quantity, premium = 1) {
+  return { ...event(eventId, sequence, occurredAt, action), quantity, premium };
+}
+
+// Live-mirror legs for QQQ 2026-07-17 vordin (content/trades/2026-07-17.json).
+function vordinPutLeg() {
+  return {
+    leg_id: 'tg_20260717_vordin_qqq_001_l1',
+    events: [
+      qtyEvent('tg_20260717_vordin_qqq_001_l1_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', 150, 0.84),
+      qtyEvent('tg_20260717_vordin_qqq_001_l1_e2', 2, '2026-07-17T10:43-04:00', 'sell_close', null, 0.15),
+    ],
+  };
+}
+
+function vordinCallLeg() {
+  return {
+    leg_id: 'tg_20260717_vordin_qqq_002_l1',
+    events: [
+      qtyEvent('tg_20260717_vordin_qqq_002_l1_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', 70, 1.8),
+      qtyEvent('tg_20260717_vordin_qqq_002_l1_e2', 2, '2026-07-17T09:50-04:00', 'sell_partial', 12, 2.3),
+      qtyEvent('tg_20260717_vordin_qqq_002_l1_e3', 3, '2026-07-17T09:50-04:00', 'sell_partial', 12, 2.9),
+      qtyEvent('tg_20260717_vordin_qqq_002_l1_e4', 4, '2026-07-17T09:57-04:00', 'sell_partial', 22, 3.8),
+      qtyEvent('tg_20260717_vordin_qqq_002_l1_e5', 5, '2026-07-17T09:57-04:00', 'sell_partial', 12, 4.3),
+      qtyEvent('tg_20260717_vordin_qqq_002_l1_e6', 6, '2026-07-17T10:01-04:00', 'sell_close', null, 5.5),
+    ],
+  };
+}
+
+test('N-Qty-derive completeness-gated close derivation (N-Qty-derive)', () => {
+  // Complete chains from the live-mirror fixtures: PUT 150, CALL 70−58=12.
+  const putLeg = vordinPutLeg();
+  assert.equal(deriveCloseQuantity(putLeg, putLeg.events[1]), 150);
+  assert.equal(eventDisplayQuantity(putLeg, putLeg.events[1]), 150);
+  const callLeg = vordinCallLeg();
+  assert.equal(deriveCloseQuantity(callLeg, callLeg.events[5]), 12);
+  assert.equal(eventDisplayQuantity(callLeg, callLeg.events[5]), 12);
+
+  // Raw numeric close preferred as-is even when the prior chain is incomplete.
+  const rawLeg = {
+    leg_id: 'raw_leg',
+    events: [
+      qtyEvent('raw_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', null),
+      qtyEvent('raw_e2', 2, '2026-07-17T10:00-04:00', 'sell_close', 5),
+    ],
+  };
+  assert.equal(deriveCloseQuantity(rawLeg, rawLeg.events[1]), null);
+  assert.equal(eventDisplayQuantity(rawLeg, rawLeg.events[1]), 5);
+
+  // Unknown open → unknown.
+  const unknownOpen = {
+    leg_id: 'unknown_open_leg',
+    events: [
+      qtyEvent('uo_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', null),
+      qtyEvent('uo_e2', 2, '2026-07-17T10:00-04:00', 'sell_close', null),
+    ],
+  };
+  assert.equal(deriveCloseQuantity(unknownOpen, unknownOpen.events[1]), null);
+
+  // Over-partial sum > opening → unknown (never invent a negative close).
+  const overPartial = {
+    leg_id: 'over_partial_leg',
+    events: [
+      qtyEvent('op_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', 10),
+      qtyEvent('op_e2', 2, '2026-07-17T09:50-04:00', 'sell_partial', 8),
+      qtyEvent('op_e3', 3, '2026-07-17T09:55-04:00', 'sell_partial', 8),
+      qtyEvent('op_e4', 4, '2026-07-17T10:00-04:00', 'sell_close', null),
+    ],
+  };
+  assert.equal(deriveCloseQuantity(overPartial, overPartial.events[3]), null);
+
+  // Adversarial: known open + null buy_add → unknown (no known-subset sum).
+  const nullAdd = {
+    leg_id: 'null_add_leg',
+    events: [
+      qtyEvent('na_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', 150),
+      qtyEvent('na_e2', 2, '2026-07-17T09:50-04:00', 'buy_add', null),
+      qtyEvent('na_e3', 3, '2026-07-17T10:00-04:00', 'sell_close', null),
+    ],
+  };
+  assert.equal(deriveCloseQuantity(nullAdd, nullAdd.events[2]), null);
+
+  // Adversarial: null prior sell_partial → unknown.
+  const nullPartial = {
+    leg_id: 'null_partial_leg',
+    events: [
+      qtyEvent('np_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', 70),
+      qtyEvent('np_e2', 2, '2026-07-17T09:50-04:00', 'sell_partial', null),
+      qtyEvent('np_e3', 3, '2026-07-17T10:00-04:00', 'sell_close', null),
+    ],
+  };
+  assert.equal(deriveCloseQuantity(nullPartial, nullPartial.events[2]), null);
+
+  // "Prior" follows validated sequence order, not array order: an add
+  // sequenced after the close does not block derivation.
+  const sequenced = {
+    leg_id: 'sequenced_leg',
+    events: [
+      qtyEvent('sq_close', 2, '2026-07-17T10:00-04:00', 'sell_close', null),
+      qtyEvent('sq_add', 3, '2026-07-17T10:05-04:00', 'buy_add', null),
+      qtyEvent('sq_open', 1, '2026-07-17T09:42-04:00', 'buy_open', 150),
+    ],
+  };
+  assert.equal(deriveCloseQuantity(sequenced, sequenced.events[0]), 150);
+
+  // No opening events on the leg → unknown.
+  const noOpen = {
+    leg_id: 'no_open_leg',
+    events: [
+      qtyEvent('no_e1', 1, '2026-07-17T09:50-04:00', 'sell_partial', 5),
+      qtyEvent('no_e2', 2, '2026-07-17T10:00-04:00', 'sell_close', null),
+    ],
+  };
+  assert.equal(deriveCloseQuantity(noOpen, noOpen.events[1]), null);
+
+  // Non-close actions and non-numeric raw quantities never derive.
+  assert.equal(deriveCloseQuantity(putLeg, putLeg.events[0]), null);
+  assert.equal(eventDisplayQuantity(putLeg, putLeg.events[0]), 150);
+  assert.equal(eventDisplayQuantity(putLeg, qtyEvent('x', 9, '2026-07-17T11:00-04:00', 'buy_add', null)), null);
+});
+
+test('N-Marker-qty same-side same-bar *QTY with completeness (N-Marker-qty)', () => {
+  const vordinTraders = [
+    { trader_id: 'vordin', display_name: 'vordinkkk', color: '#4E79A7', active: true, sort_order: 20 },
+  ];
+  const bars = [
+    { t: '09:42' }, { t: '09:50' }, { t: '09:57' }, { t: '10:01' }, { t: '10:43' },
+  ];
+  const putGroup = {
+    ...group({ id: 'tg_20260717_vordin_qqq_001', traderId: 'vordin', direction: 'PUT', events: [] }),
+    legs: [{ ...vordinPutLeg(), expiry: '2026-07-17', strike: 681, option_type: 'PUT' }],
+  };
+  const callGroup = {
+    ...group({ id: 'tg_20260717_vordin_qqq_002', traderId: 'vordin', direction: 'CALL', events: [] }),
+    legs: [{ ...vordinCallLeg(), expiry: '2026-07-17', strike: 691, option_type: 'CALL' }],
+  };
+  const markers = buildTradeRecordAnnotations([putGroup, callGroup], vordinTraders, bars);
+  for (const marker of markers) {
+    assert.doesNotMatch(marker.marker_label, /×/);
+    assert.doesNotMatch(marker.title, /×/);
+    assert.doesNotMatch(marker.marker_label, /CALL|PUT/);
+    assert.doesNotMatch(marker.title, /CALL|PUT/);
+    // Direction-owned shape/color/anchor family unchanged.
+    if (marker.direction === 'PUT') {
+      assert.equal(marker.marker_shape, 'triangle_down');
+      assert.equal(marker.marker_color, DIRECTION_PUT_COLOR);
+      assert.equal(marker.anchor_side, 'top');
+    } else {
+      assert.equal(marker.marker_shape, 'triangle_up');
+      assert.equal(marker.marker_color, DIRECTION_CALL_COLOR);
+      assert.equal(marker.anchor_side, 'bottom');
+    }
+  }
+  // PUT leg: known open, derived close (150).
+  const putOpen = markers.find((m) => m.event_ids.includes('tg_20260717_vordin_qqq_001_l1_e1'));
+  assert.equal(putOpen.marker_label, 'vordinkkk BUY*150');
+  assert.equal(putOpen.title, 'vordinkkk BUY*150');
+  const putClose = markers.find((m) => m.event_ids.includes('tg_20260717_vordin_qqq_001_l1_e2'));
+  assert.equal(putClose.marker_label, 'vordinkkk SELL*150');
+  assert.equal(putClose.title, 'vordinkkk SELL*150');
+  // CALL leg: same-side same-bar partial sums 12+12=24 and 22+12=34, derived close 12.
+  const partialAt950 = markers.find((m) => m.event_ids.includes('tg_20260717_vordin_qqq_002_l1_e2'));
+  assert.equal(partialAt950.marker_label, 'vordinkkk SELL*24');
+  assert.equal(partialAt950.title, 'vordinkkk SELL*24');
+  assert.equal(partialAt950.grouped_marker_count, 2);
+  const partialAt957 = markers.find((m) => m.event_ids.includes('tg_20260717_vordin_qqq_002_l1_e4'));
+  assert.equal(partialAt957.marker_label, 'vordinkkk SELL*34');
+  const callClose = markers.find((m) => m.event_ids.includes('tg_20260717_vordin_qqq_002_l1_e6'));
+  assert.equal(callClose.marker_label, 'vordinkkk SELL*12');
+  assert.equal(callClose.title, 'vordinkkk SELL*12');
+  const callOpen = markers.find((m) => m.event_ids.includes('tg_20260717_vordin_qqq_002_l1_e1'));
+  assert.equal(callOpen.marker_label, 'vordinkkk BUY*70');
+
+  // Adversarial: mixed known/unknown contributors on the same bar omit *QTY
+  // on both marker_label and title.
+  const mixedGroup = {
+    ...group({ id: 'tg_mixed_qty', traderId: 'vordin', direction: 'CALL', events: [] }),
+    legs: [{
+      leg_id: 'tg_mixed_qty_l1',
+      expiry: '2026-07-17',
+      strike: 691,
+      option_type: 'CALL',
+      events: [
+        qtyEvent('mx_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', 70),
+        qtyEvent('mx_e2', 2, '2026-07-17T09:50-04:00', 'sell_partial', 12),
+        qtyEvent('mx_e3', 3, '2026-07-17T09:50-04:00', 'sell_partial', null),
+        qtyEvent('mx_e4', 4, '2026-07-17T10:01-04:00', 'sell_close', null),
+      ],
+    }],
+  };
+  const mixed = buildTradeRecordAnnotations([mixedGroup], vordinTraders, bars);
+  const mixedPartial = mixed.find((m) => m.event_ids.includes('mx_e2'));
+  assert.equal(mixedPartial.grouped_marker_count, 2);
+  assert.equal(mixedPartial.marker_label, 'vordinkkk SELL');
+  assert.equal(mixedPartial.title, 'vordinkkk SELL');
+  // Incomplete prior chain also keeps the close marker suffix off.
+  const mixedClose = mixed.find((m) => m.event_ids.includes('mx_e4'));
+  assert.equal(mixedClose.marker_label, 'vordinkkk SELL');
+  assert.equal(mixedClose.title, 'vordinkkk SELL');
+  // Known single still carries its own quantity.
+  const mixedOpen = mixed.find((m) => m.event_ids.includes('mx_e1'));
+  assert.equal(mixedOpen.marker_label, 'vordinkkk BUY*70');
+});
+
+test('N-Timeline-qty derived close qty on complete safe chains only (N-Timeline-qty)', () => {
+  const putGroup = {
+    trade_group_id: 'tg_20260717_vordin_qqq_001',
+    legs: [vordinPutLeg()],
+  };
+  const putRows = groupTimelineEvents(putGroup);
+  assert.equal(putRows.length, 2);
+  assert.equal(putRows[0].quantity, 150);
+  assert.equal(putRows[1].actionLabel, 'SELL');
+  assert.equal(putRows[1].quantity, 150);
+  assert.equal(putRows[1].premium, 0.15);
+
+  const callGroup = {
+    trade_group_id: 'tg_20260717_vordin_qqq_002',
+    legs: [vordinCallLeg()],
+  };
+  const callRows = groupTimelineEvents(callGroup);
+  assert.equal(callRows.length, 6);
+  assert.equal(callRows[5].actionLabel, 'SELL');
+  assert.equal(callRows[5].quantity, 12);
+  assert.equal(callRows[5].premium, 5.5);
+  assert.deepEqual(callRows.slice(1, 5).map((row) => row.quantity), [12, 12, 22, 12]);
+
+  // Unsafe chains stay null → the list keeps rendering `?`.
+  const unsafeGroup = {
+    trade_group_id: 'tg_unsafe',
+    legs: [{
+      leg_id: 'tg_unsafe_l1',
+      events: [
+        qtyEvent('us_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', 70),
+        qtyEvent('us_e2', 2, '2026-07-17T09:50-04:00', 'sell_partial', null),
+        qtyEvent('us_e3', 3, '2026-07-17T10:01-04:00', 'sell_close', null),
+      ],
+    }],
+  };
+  const unsafeRows = groupTimelineEvents(unsafeGroup);
+  assert.equal(unsafeRows[1].quantity, null);
+  assert.equal(unsafeRows[2].quantity, null);
+
+  // Raw close qty passes through even with an incomplete prior chain.
+  const rawGroup = {
+    trade_group_id: 'tg_raw_close',
+    legs: [{
+      leg_id: 'tg_raw_close_l1',
+      events: [
+        qtyEvent('rc_e1', 1, '2026-07-17T09:42-04:00', 'buy_open', null),
+        qtyEvent('rc_e2', 2, '2026-07-17T10:01-04:00', 'sell_close', 5),
+      ],
+    }],
+  };
+  const rawRows = groupTimelineEvents(rawGroup);
+  assert.equal(rawRows[1].quantity, 5);
+
+  // No product derived pill: the list renders the quantity verbatim with `?`
+  // fallback and no derived badge chrome.
+  const listSource = readFileSync(new URL('./TraderTradeList.jsx', import.meta.url), 'utf8');
+  assert.match(listSource, /row\.quantity \?\? '\?'\} @ \{row\.premium \?\? '\?'\}/);
+  assert.doesNotMatch(listSource, /derived/i);
 });
 
 test('N-Card-time-range pure cross-leg chronology (N-Card-time-range)', () => {

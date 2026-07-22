@@ -146,7 +146,9 @@ export function projectProgressiveDateRail({
   const selected = cleanText(selectedDate);
 
   if (mode === 'recent') {
-    const dates = allDates.slice(0, Math.max(0, Number(recentLimit) || 0));
+    // Membership stays newest-first slice; chip display order flips to
+    // ascending (earlier left, later right) on the projection only.
+    const dates = allDates.slice(0, Math.max(0, Number(recentLimit) || 0)).reverse();
     return {
       browseMode: 'recent',
       browsedMonth: browsedMonth || owningMonth(selected) || months[0] || '',
@@ -164,7 +166,9 @@ export function projectProgressiveDateRail({
     : (owningMonth(selected) && months.includes(owningMonth(selected))
       ? owningMonth(selected)
       : (months[0] || ''));
-  const dates = datesInMonth(days, ticker, month);
+  // Same display-order flip within the browsed month; month inventory itself
+  // (listMonthsForTicker / stepBrowsedMonth) stays newest-first.
+  const dates = datesInMonth(days, ticker, month).reverse();
   const monthIndex = months.indexOf(month);
   return {
     browseMode: 'month',

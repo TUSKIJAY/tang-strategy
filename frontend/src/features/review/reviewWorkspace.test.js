@@ -11,6 +11,7 @@ import {
   formatDayHash,
   formatDaySlug,
   groupDatesByMonth,
+  listMonthsForTicker,
   listTickers,
   normalizeInteractiveDays,
   normalizeStaticDays,
@@ -508,4 +509,83 @@ test('progressive date navigation projects recent and month modes without fabric
   assert.equal(monthBrowse.browseMode, 'month');
   assert.equal(monthBrowse.pressedDate, '2026-07-10');
   assert.equal(monthBrowse.chipLabels['2026-07-10'], '10');
+});
+
+// --- Progressive chip ascending order (date-rail/qty plan carriers) ----------
+
+function progressiveFixtureDays() {
+  const days = [];
+  for (let i = 1; i <= 15; i += 1) {
+    const day = String(i).padStart(2, '0');
+    days.push({ key: `spy-2026-06-${day}`, ticker: 'SPY', trade_date: `2026-06-${day}`, session_mode: 'extended', ref: {} });
+  }
+  for (let i = 1; i <= 10; i += 1) {
+    const day = String(i).padStart(2, '0');
+    days.push({ key: `spy-2026-07-${day}`, ticker: 'SPY', trade_date: `2026-07-${day}`, session_mode: 'extended', ref: {} });
+  }
+  return days;
+}
+
+test('N-Date-asc progressive chip dates strictly ascending (N-Date-asc)', () => {
+  const days = progressiveFixtureDays();
+
+  // 最近: newest-12 membership projected in ascending chip order; the
+  // selected latest day is the last chip.
+  const recentProj = projectProgressiveDateRail({
+    days, ticker: 'SPY', selectedDate: '2026-07-10', browseMode: 'recent', browsedMonth: '',
+  });
+  assert.equal(recentProj.dates.length, 12);
+  const recentSorted = [...recentProj.dates].sort();
+  assert.deepEqual(recentProj.dates, recentSorted);
+  assert.equal(recentProj.dates[0], '2026-06-14');
+  assert.equal(recentProj.dates.at(-1), '2026-07-10');
+  assert.equal(recentProj.pressedDate, '2026-07-10');
+  assert.equal(recentProj.dates.at(-1), recentProj.pressedDate);
+
+  // 按月: chips within the browsed month are ascending too.
+  const monthProj = projectProgressiveDateRail({
+    days, ticker: 'SPY', selectedDate: '2026-06-03', browseMode: 'month', browsedMonth: '2026-06',
+  });
+  assert.equal(monthProj.dates.length, 15);
+  assert.deepEqual(monthProj.dates, [...monthProj.dates].sort());
+  assert.equal(monthProj.dates[0], '2026-06-01');
+  assert.equal(monthProj.dates.at(-1), '2026-06-15');
+  assert.equal(monthProj.pressedDate, '2026-06-03');
+
+  // Strictly ascending (no duplicate keys — inventory forbids them).
+  for (const dates of [recentProj.dates, monthProj.dates]) {
+    for (let i = 1; i < dates.length; i += 1) {
+      assert.ok(dates[i - 1] < dates[i], `${dates[i - 1]} < ${dates[i]}`);
+    }
+  }
+});
+
+test('N-Date-membership recent set equals newest N; month inventory unchanged (N-Date-membership)', () => {
+  const days = progressiveFixtureDays();
+
+  // Chip set equals the newest-N inventory dates; only display order differs.
+  const newestFirst = datesForTicker(days, 'SPY');
+  const recentProj = projectProgressiveDateRail({
+    days, ticker: 'SPY', selectedDate: '2026-07-10', browseMode: 'recent', browsedMonth: '',
+  });
+  assert.deepEqual([...recentProj.dates].sort(), newestFirst.slice(0, PROGRESSIVE_RECENT_LIMIT).sort());
+  assert.deepEqual(new Set(recentProj.dates), new Set(newestFirst.slice(0, 12)));
+  // Meta strings still report the same counts.
+  assert.match(recentProj.meta, /显示最近 12 · 全库 SPY 25/);
+  const monthProj = projectProgressiveDateRail({
+    days, ticker: 'SPY', selectedDate: '2026-06-03', browseMode: 'month', browsedMonth: '2026-06',
+  });
+  assert.match(monthProj.meta, /本月交易日 15 · 全库 SPY 25/);
+
+  // Inventory helpers stay newest-first: only the chip projection flipped.
+  assert.equal(newestFirst[0], '2026-07-10');
+  assert.equal(recentDatesForTicker(days, 'SPY')[0], '2026-07-10');
+  const months = listMonthsForTicker(days, 'SPY');
+  assert.deepEqual(months, ['2026-07', '2026-06']);
+  assert.equal(stepBrowsedMonth(days, 'SPY', '2026-07', 'older').browsedMonth, '2026-06');
+  assert.equal(stepBrowsedMonth(days, 'SPY', '2026-06', 'newer').browsedMonth, '2026-07');
+  // Month chrome (older/newer semantics) unchanged by the chip-order flip.
+  assert.equal(monthProj.monthBar.canOlder, false);
+  assert.equal(monthProj.monthBar.canNewer, true);
+  assert.equal(monthProj.monthBar.newerMonth, '2026-07');
 });
