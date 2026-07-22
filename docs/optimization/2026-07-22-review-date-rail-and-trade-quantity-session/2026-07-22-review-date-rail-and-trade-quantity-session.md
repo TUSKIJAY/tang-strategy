@@ -12,9 +12,9 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Progressive date chips must sort ascending (正序) | Shared progressive `DateRail` (Review / Data / Static) | promoted-to-proposed | [active plan](../../exec-plans/active/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User 验收：最近 + 按月 均为倒序，要求正序 |
-| OPT-002 | K-line marker labels should display trade quantity instead of count `×N` | Review / Static K-line markers (`tradeRecords.js` → `kline-engine`) | promoted-to-proposed | [active plan](../../exec-plans/active/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User：不写 `×2`；同 bar 写数量总和 `SELL*24`；单笔 `BUY*70` |
-| OPT-003 | Derive missing closing event quantity when opening quantity is known | Review / Static timeline + markers (`tradeRecords.js` / list render) | promoted-to-proposed | [active plan](../../exec-plans/active/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User：开仓已知时清仓不写 `?`，推导剩余量（fixture `150` / `12`） |
+| OPT-001 | Progressive date chips must sort ascending (正序) | Shared progressive `DateRail` (Review / Data / Static) | completed | [completed plan](../../exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User 验收：最近 + 按月 均为倒序，要求正序 |
+| OPT-002 | K-line marker labels should display trade quantity instead of count `×N` | Review / Static K-line markers (`tradeRecords.js` → `kline-engine`) | completed | [completed plan](../../exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User：不写 `×2`；同 bar 写数量总和 `SELL*24`；单笔 `BUY*70` |
+| OPT-003 | Derive missing closing event quantity when opening quantity is known | Review / Static timeline + markers (`tradeRecords.js` / list render) | completed | [completed plan](../../exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User：开仓已知时清仓不写 `?`，推导剩余量（fixture `150` / `12`） |
 
 ## Scope Lock (user-confirmed 2026-07-22)
 
@@ -82,7 +82,7 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: Chip rows render ascending by `trade_date` (left → right) in both modes across Review / Data / Static. For 最近, keep the same newest-`N` set and only reverse display order.
 - Boundary that must not change:
   - Recent-window membership rule and limit; month switcher / newest-first month list; ticker selection; which day is selected; footer meta semantics; non-progressive rails if any remain; no Data/Review workspace contract rewrite beyond chip order.
-- Lifecycle status: promoted-to-proposed → [active plan](../../exec-plans/active/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22` (phase-0 `not-started`)
+- Lifecycle status: completed → [completed plan](../../exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22`; `implementation-review-001: accept/high`; product commit `da12e1b03715be3de75fcafd8d47aa1a35554942`
 
 ## OPT-002 K-line Marker Labels Should Display Trade Quantity
 
@@ -91,7 +91,7 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: Replace event count `×N` with quantity suffix `*QTY` (sum when aggregated; e.g. `vordinkkk SELL*24`, `vordinkkk BUY*70`). Omit suffix when quantity remains unknown. Consume OPT-003 derived qty when present so close markers can show `SELL*150` / `SELL*12`.
 - Boundary that must not change:
   - Direction-owned marker shape/color/anchor; grouping key family (bar + trader + direction + action side); BUY/SELL vocabulary; display_name preference; fitRange / selection-band contracts; no CALL/PUT text regression on labels.
-- Lifecycle status: promoted-to-proposed → [active plan](../../exec-plans/active/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22` (phase-0 `not-started`)
+- Lifecycle status: completed → [completed plan](../../exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22`; `implementation-review-001: accept/high`; product commit `da12e1b03715be3de75fcafd8d47aa1a35554942`
 
 ## OPT-003 Derive Missing Closing Event Quantity
 
@@ -100,10 +100,11 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: On the read path, derive remaining close quantity when open qty is known (`derived = open − Σ prior partials`); show concrete numbers on timeline rows and feed the same qty into OPT-002 marker labels. Keep `?` / omit-suffix when derivation is unsafe.
 - Boundary that must not change:
   - Source day JSON / DB facts and provenance; schema validation allowing null quantity; Admin editing semantics; no automatic backfill write; no requirement for a product `derived` pill.
-- Lifecycle status: promoted-to-proposed → [active plan](../../exec-plans/active/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22` (phase-0 `not-started`)
+- Lifecycle status: completed → [completed plan](../../exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v2-review-foldback-2026-07-22`; `implementation-review-001: accept/high`; product commit `da12e1b03715be3de75fcafd8d47aa1a35554942`
 
 ## Record / promotion history
 
+- 2026-07-22: User instruction `你来全权负责执行这个plan` → execution `user-instruction:2026-07-22-execute-date-rail-ascending-and-trade-quantity-plan`. OPT-001…003 implemented (product commit `da12e1b03715be3de75fcafd8d47aa1a35554942`); independent `implementation-review-001: accept/high`; plan migrated to `completed/`; all three OPTs `completed`; next gate `closed`. No push/PR/merge/Pages/provider/broker/remote.
 - 2026-07-22: Independent acceptance; Scope Lock foldback; mock direction-legend fix `f408871`.
 - 2026-07-22: User instruction `把prop plan迁移到active吧` → activation `user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan`. Plan Active at `phase-0:not-started`; next gate `phase-0-start`. Does not start Phase 0 or authorize implementation/remote.
 - 2026-07-22: Independent design `review-002: approve/high` on exact `v2-review-foldback-2026-07-22`. Next gate `activation-recording` (approve does not activate). No activation/implementation/remote authority.

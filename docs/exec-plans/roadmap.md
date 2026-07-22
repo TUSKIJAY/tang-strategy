@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-- [Tang Strategy Date Rail Ascending And Trade Quantity](./active/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) — Active; revision `v2-review-foldback-2026-07-22`; `review-002: approve/high`; activation `user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan`; phase-0 `not-started`; next gate `phase-0-start`; OPT-001…003 from `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/`
+None.
 
 ## Proposed Plans
 
@@ -39,6 +39,7 @@ None.
 
 ## Completed Plans
 
+- [Tang Strategy Date Rail Ascending And Trade Quantity](./completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) — Completed; revision `v2-review-foldback-2026-07-22`; `implementation-review-001: accept/high`; product commit `da12e1b03715be3de75fcafd8d47aa1a35554942`; next gate `closed`
 - [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./completed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) — Completed; revision `v2-review-foldback-2026-07-21`; `implementation-review-001: accept/high`; product commit `5f36d29a44fb12aee2319ae147303cc970d83193`; next gate `closed`
 - [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./completed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Completed; canonical details: [completed index](./completed/index.md)
 - [Tang Strategy Trade Points And K-line Marker Labels](./completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) — Completed; canonical details: [completed index](./completed/index.md)

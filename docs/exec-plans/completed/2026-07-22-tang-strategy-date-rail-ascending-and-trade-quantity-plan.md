@@ -1,7 +1,7 @@
 # Tang Strategy Date Rail Ascending And Trade Quantity
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
 - Revision: `v2-review-foldback-2026-07-22`
 - Plan author ID: `grok-plan-author-2026-07-22-date-rail-quantity`
@@ -9,19 +9,19 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan
-- Current phase: phase-1
-- Phase state: complete
-- Phase entry gate: phase-0-exit
-- Next gate: `implementation-review`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
+- Implementation review: ../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/implementation-review-001.md@accept
+- Final disposition: Completed
+- Verified implementation commit: da12e1b03715be3de75fcafd8d47aa1a35554942
 - Lifecycle reconciliation commit: none
 - Owner: Grok
 - Created: 2026-07-22
 - Optimization source: `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/2026-07-22-review-date-rail-and-trade-quantity-session.md` OPT-001 + OPT-002 + OPT-003
 - Proposal baseline: `codex/project-harness@f40887100a7b4f832c59da32ac1607dc47b05854`
-- Scope authority: lifecycle activation only under `user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan` after matching design `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-22`. Parked at `phase-0:not-started`. Does **not** start Phase 0 or authorize product implementation, content/DB mutation, push, PR, merge, Pages, provider/broker, or remote action.
+- Scope authority: full local execution under `user-instruction:2026-07-22-execute-date-rail-ascending-and-trade-quantity-plan` (goal OBJECTIVE 你来全权负责执行这个plan). Matching design approval `review-002: approve/high`. Implementation review `implementation-review-001: accept/high`. Product commit `da12e1b03715be3de75fcafd8d47aa1a35554942`. No push/PR/merge/Pages/provider/broker/DB/content day-file/remote.
 - Local commit: task-scoped default; does not authorize implementation start, push, or remote action
 
 ## 1. Context And Evidence

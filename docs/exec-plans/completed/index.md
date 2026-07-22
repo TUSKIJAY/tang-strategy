@@ -4,6 +4,7 @@ Completed, terminated, rejected, superseded, or archived plans are indexed here 
 
 | Plan | Disposition | Verification | Final commit |
 | --- | --- | --- | --- |
+| [Tang Strategy Date Rail Ascending And Trade Quantity](./2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/implementation-review-001.md) | da12e1b03715be3de75fcafd8d47aa1a35554942 |
 | [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan/implementation-review-001.md) | 5f36d29a44fb12aee2319ae147303cc970d83193 |
 | [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/implementation-review-001.md) | a76b83680e80ab8bf7a857fa776146a2aa4f24aa |
 | [Tang Strategy Trade Points And K-line Marker Labels](./2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan/implementation-review-001.md) | 717ac8ae9bf5faf00ec6dff3b81d04c51c86b145 |
