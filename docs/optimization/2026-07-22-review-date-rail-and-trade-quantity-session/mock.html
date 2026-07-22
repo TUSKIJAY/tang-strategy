@@ -477,7 +477,7 @@
       <p class="sub">
         Scope lock：同 bar 多事件聚合显示数量求和 <code>${displayName} ${side}*${totalQty}</code>（如 <code>vordinkkk SELL*24</code>）；
         单事件有数量则带数量（<code>vordinkkk BUY*70</code>）；缺数量省略后缀（<code>vordinkkk SELL</code>）。
-        形状/颜色继续表达买卖与方向：下方 ▲ = BUY，上方 ▼ = SELL；绿 = CALL 腿，红 = PUT 腿。
+        形状/颜色/锚点由腿方向决定（direction-owned，对齐现网 <code>buildTradeRecordAnnotations</code>）：CALL = 绿 + ▲（锚 bar 下方），PUT = 红 + ▼（锚 bar 上方）；BUY/SELL 只出现在标签文字，不决定形状与位置。
       </p>
 
       <div class="compare">
@@ -487,8 +487,8 @@
             <div class="panel-bar">
               <span>QQQ · <strong>2026-07-17</strong> · 1m</span>
               <div class="legend">
-                <span><i class="tri up"></i>BUY</span>
-                <span><i class="tri down"></i>SELL</span>
+                <span><i class="tri up"></i>CALL</span>
+                <span><i class="tri down"></i>PUT</span>
                 <span>label = name SIDE ×N</span>
               </div>
             </div>
@@ -522,38 +522,38 @@
                   <line x1="515" y1="75" x2="515" y2="105" stroke="#E06B66"/><rect x="510" y="80" width="10" height="20" rx="1" fill="#E06B66"/>
                 </g>
                 <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" text-anchor="middle">
-                  <!-- 09:42 PUT BUY 150 @ 0.84 -->
-                  <g transform="translate(108,212)">
-                    <polygon points="0,0 -6,10 6,10" fill="#E06B66"/>
-                    <rect x="-46" y="14" width="92" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
-                    <text x="0" y="26" fill="#E06B66">vordinkkk BUY</text>
+                  <!-- 09:42 PUT BUY 150 @ 0.84：PUT → ▼ 红，锚 bar 上方 -->
+                  <g transform="translate(108,148)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                    <rect x="-46" y="-32" width="92" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="-20" fill="#E06B66">vordinkkk BUY</text>
                   </g>
-                  <!-- 09:42 CALL BUY 70 @ 1.8 (同 bar，错开) -->
+                  <!-- 09:42 CALL BUY 70 @ 1.8：CALL → ▲ 绿，锚 bar 下方（同 bar 与 PUT 上下分开） -->
                   <line x1="150" y1="240" x2="124" y2="216" stroke="#6F9F7A" stroke-width="1" stroke-dasharray="2 2" opacity=".5"/>
                   <g transform="translate(150,240)">
                     <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
                     <rect x="-46" y="14" width="92" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
                     <text x="0" y="26" fill="#6F9F7A">vordinkkk BUY</text>
                   </g>
-                  <!-- 09:50 CALL PART 12 + PART 12 -->
-                  <g transform="translate(175,135)">
-                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
-                    <rect x="-53" y="-32" width="106" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
-                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL ×2</text>
+                  <!-- 09:50 CALL PART 12 + PART 12：CALL → ▲ 绿，锚 bar 下方 -->
+                  <g transform="translate(175,178)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-53" y="14" width="106" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="26" fill="#6F9F7A">vordinkkk SELL ×2</text>
                   </g>
-                  <!-- 09:57 CALL PART 22 + PART 12 -->
-                  <g transform="translate(260,112)">
-                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
-                    <rect x="-53" y="-32" width="106" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
-                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL ×2</text>
+                  <!-- 09:57 CALL PART 22 + PART 12：CALL → ▲ 绿，锚 bar 下方 -->
+                  <g transform="translate(260,156)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-53" y="14" width="106" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="26" fill="#6F9F7A">vordinkkk SELL ×2</text>
                   </g>
-                  <!-- 10:01 CALL SELL_CLOSE qty null -->
-                  <g transform="translate(335,95)">
-                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
-                    <rect x="-49" y="-32" width="98" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
-                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL</text>
+                  <!-- 10:01 CALL SELL_CLOSE qty null：CALL → ▲ 绿，锚 bar 下方 -->
+                  <g transform="translate(335,133)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-49" y="14" width="98" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="26" fill="#6F9F7A">vordinkkk SELL</text>
                   </g>
-                  <!-- 10:43 PUT SELL_CLOSE qty null -->
+                  <!-- 10:43 PUT SELL_CLOSE qty null：PUT → ▼ 红，锚 bar 上方 -->
                   <g transform="translate(470,72)">
                     <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
                     <rect x="-49" y="-32" width="98" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
@@ -561,7 +561,7 @@
                   </g>
                 </g>
               </svg>
-              <div class="axis-note">09:30 ··· 09:56 ··· 10:22 ··· 10:48 · 两笔 BUY 同在 09:42，标签纵向错开防重叠</div>
+              <div class="axis-note">09:30 ··· 09:56 ··· 10:22 ··· 10:48 · 09:42 同 bar 两腿：PUT ▼ 锚上方、CALL ▲ 锚下方（方向决定形状/锚点，非 BUY/SELL）</div>
             </div>
           </section>
         </div>
@@ -572,8 +572,8 @@
             <div class="panel-bar">
               <span>QQQ · <strong>2026-07-17</strong> · 1m</span>
               <div class="legend">
-                <span><i class="tri up"></i>BUY</span>
-                <span><i class="tri down"></i>SELL</span>
+                <span><i class="tri up"></i>CALL</span>
+                <span><i class="tri down"></i>PUT</span>
                 <span>label = name SIDE*QTY</span>
               </div>
             </div>
@@ -607,38 +607,38 @@
                   <line x1="515" y1="75" x2="515" y2="105" stroke="#E06B66"/><rect x="510" y="80" width="10" height="20" rx="1" fill="#E06B66"/>
                 </g>
                 <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" text-anchor="middle">
-                  <!-- 09:42 PUT BUY 150 @ 0.84 -->
-                  <g transform="translate(108,212)">
-                    <polygon points="0,0 -6,10 6,10" fill="#E06B66"/>
-                    <rect x="-58" y="14" width="116" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
-                    <text x="0" y="26" fill="#E06B66">vordinkkk BUY*150</text>
+                  <!-- 09:42 PUT BUY 150 @ 0.84：PUT → ▼ 红，锚 bar 上方 -->
+                  <g transform="translate(108,148)">
+                    <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
+                    <rect x="-58" y="-32" width="116" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
+                    <text x="0" y="-20" fill="#E06B66">vordinkkk BUY*150</text>
                   </g>
-                  <!-- 09:42 CALL BUY 70 @ 1.8 (同 bar，错开) -->
+                  <!-- 09:42 CALL BUY 70 @ 1.8：CALL → ▲ 绿，锚 bar 下方（同 bar 与 PUT 上下分开） -->
                   <line x1="150" y1="240" x2="124" y2="216" stroke="#6F9F7A" stroke-width="1" stroke-dasharray="2 2" opacity=".5"/>
                   <g transform="translate(150,240)">
                     <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
                     <rect x="-55" y="14" width="110" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
                     <text x="0" y="26" fill="#6F9F7A">vordinkkk BUY*70</text>
                   </g>
-                  <!-- 09:50 CALL PART 12 + PART 12 → sum 24 -->
-                  <g transform="translate(175,135)">
-                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
-                    <rect x="-56" y="-32" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
-                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL*24</text>
+                  <!-- 09:50 CALL PART 12 + PART 12 → sum 24：CALL → ▲ 绿，锚 bar 下方 -->
+                  <g transform="translate(175,178)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-56" y="14" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="26" fill="#6F9F7A">vordinkkk SELL*24</text>
                   </g>
-                  <!-- 09:57 CALL PART 22 + PART 12 → sum 34 -->
-                  <g transform="translate(260,112)">
-                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
-                    <rect x="-56" y="-32" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
-                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL*34</text>
+                  <!-- 09:57 CALL PART 22 + PART 12 → sum 34：CALL → ▲ 绿，锚 bar 下方 -->
+                  <g transform="translate(260,156)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-56" y="14" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="26" fill="#6F9F7A">vordinkkk SELL*34</text>
                   </g>
-                  <!-- 10:01 CALL SELL_CLOSE derived 12 (OPT-003) -->
-                  <g transform="translate(335,95)">
-                    <polygon points="0,0 -6,-10 6,-10" fill="#6F9F7A"/>
-                    <rect x="-56" y="-32" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
-                    <text x="0" y="-20" fill="#6F9F7A">vordinkkk SELL*12</text>
+                  <!-- 10:01 CALL SELL_CLOSE derived 12 (OPT-003)：CALL → ▲ 绿，锚 bar 下方 -->
+                  <g transform="translate(335,133)">
+                    <polygon points="0,0 -6,10 6,10" fill="#6F9F7A"/>
+                    <rect x="-56" y="14" width="112" height="16" rx="3" fill="#18241C" stroke="#6F9F7A"/>
+                    <text x="0" y="26" fill="#6F9F7A">vordinkkk SELL*12</text>
                   </g>
-                  <!-- 10:43 PUT SELL_CLOSE derived 150 (OPT-003) -->
+                  <!-- 10:43 PUT SELL_CLOSE derived 150 (OPT-003)：PUT → ▼ 红，锚 bar 上方 -->
                   <g transform="translate(470,72)">
                     <polygon points="0,0 -6,-10 6,-10" fill="#E06B66"/>
                     <rect x="-59" y="-32" width="118" height="16" rx="3" fill="#2A1818" stroke="#E06B66"/>
@@ -739,7 +739,7 @@
           </section>
         </div>
       </div>
-      <p class="flow-note">推导仅发生在渲染层：<em>原始 day JSON 的 <code>quantity: null</code> 不回写</em>；开仓量未知或 Σpartial 超过开仓量时仍回退 <code>?</code>。</p>
+      <p class="flow-note">推导仅发生在渲染层：<em>原始 day JSON 的 <code>quantity: null</code> 不回写</em>；开仓量未知或 Σpartial 超过开仓量时仍回退 <code>?</code>。<code>derived</code> pill 仅为本 mock 的教学标注，不是产品锁定 UI。</p>
     </section>
 
     <!-- ========== MAPPING ========== -->
