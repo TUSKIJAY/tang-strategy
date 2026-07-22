@@ -3,12 +3,14 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
+
+2026-07-22: User instruction `升级成prop plan` promoted session OPT batch `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/` OPT-001…003 to Proposed plan `docs/exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md` revision `v1-proposal-2026-07-22`. Scope: progressive DateRail chip ascending order (membership unchanged); marker `*QTY` replaces `×N`; render-only close-qty derivation (150/12 fixtures). Next gate independent `design-review`. No activation, implementation, content/DB, push, PR, merge, Pages, provider/broker, or remote authority.
 
 2026-07-22: OPT batch `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/` **record foldback** after independent acceptance. OPT-001…003 remain `recorded` (DateRail ascending chips; marker `*QTY` replaces `×N`; render-only close-qty derivation with safe `?` fallback). Scope Lock tightened: recent-window membership unchanged, direction-owned marker shape/color, no day-JSON writeback, no product `derived` pill. Index + per-OPT boundaries updated. Mock `mock.html` shape-legend polish is a separate agent pass; Scope Lock is authoritative over mock legend. No proposed plan, implementation, content/DB, push, PR, merge, Pages, or remote authority.
 

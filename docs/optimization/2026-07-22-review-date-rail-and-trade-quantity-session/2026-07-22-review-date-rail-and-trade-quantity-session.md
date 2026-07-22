@@ -1,6 +1,6 @@
 # Optimization Batch · 2026-07-22 Review Date Rail And Trade Quantity Session
 
-> Record-only intake. This file does not authorize implementation, plan promotion, push, data mutation, or remote actions.
+> Record-only intake until promoted. This file does not by itself authorize implementation, activation, push, data mutation, or remote actions.
 >
 > Place this file at:
 > `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/2026-07-22-review-date-rail-and-trade-quantity-session.md`
@@ -8,13 +8,13 @@
 >
 > **Session-consolidated batch.** Combines 2026-07-21/22 Review date rail chip chronological order and trade marker/timeline quantity friction.
 > Mode entered: 2026-07-22 by user instruction `把这个合并进你刚创建的opt里面`.
-> A finalized record and its direct index update are committed locally by default under `docs/operating-modes.md` §2. This does not authorize implementation or remote action.
+> Promoted: 2026-07-22 by user instruction `升级成prop plan` → proposed plan below.
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Progressive date chips must sort ascending (正序) | Shared progressive `DateRail` (Review / Data / Static) | recorded | none | User 验收：最近 + 按月 均为倒序，要求正序 |
-| OPT-002 | K-line marker labels should display trade quantity instead of count `×N` | Review / Static K-line markers (`tradeRecords.js` → `kline-engine`) | recorded | none | User：不写 `×2`；同 bar 写数量总和 `SELL*24`；单笔 `BUY*70` |
-| OPT-003 | Derive missing closing event quantity when opening quantity is known | Review / Static timeline + markers (`tradeRecords.js` / list render) | recorded | none | User：开仓已知时清仓不写 `?`，推导剩余量（fixture `150` / `12`） |
+| OPT-001 | Progressive date chips must sort ascending (正序) | Shared progressive `DateRail` (Review / Data / Static) | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User 验收：最近 + 按月 均为倒序，要求正序 |
+| OPT-002 | K-line marker labels should display trade quantity instead of count `×N` | Review / Static K-line markers (`tradeRecords.js` → `kline-engine`) | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User：不写 `×2`；同 bar 写数量总和 `SELL*24`；单笔 `BUY*70` |
+| OPT-003 | Derive missing closing event quantity when opening quantity is known | Review / Static timeline + markers (`tradeRecords.js` / list render) | promoted-to-proposed | [proposed plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | User：开仓已知时清仓不写 `?`，推导剩余量（fixture `150` / `12`） |
 
 ## Scope Lock (user-confirmed 2026-07-22)
 
@@ -23,7 +23,7 @@
 | **OPT-001 DateRail order** | **正序** = chronological ascending (earlier date on the left, later on the right) in both **最近** and **按月** modes across Review / Data / Static progressive rails. |
 | **OPT-001 recent membership** | **最近** still means the newest `N` inventory dates (`PROGRESSIVE_RECENT_LIMIT`, currently 12). Membership is unchanged; only the chip **render order** flips to ascending within that set (selected latest day moves from first chip to last chip). |
 | **OPT-001 month inventory** | **按月** chip order is ascending within the browsed month. Month switcher (`‹ YYYY-MM ›`), newest-first month inventory, ticker tabs, footer meta counts, and selection authority stay unchanged. |
-| **OPT-002 Marker quantity text** | Same-bar multi-event aggregation (existing key: bar + trader + direction + action side) shows **sum of quantities** as `${displayName} ${actionSide}*${totalQuantity}` (e.g. `vordinkkk SELL*24`). Single events with known quantity append the same `*QTY` form (e.g. `vordinkkk BUY*70`). If quantity is still unknown after OPT-003 derivation, **omit the suffix** (e.g. `vordinkkk SELL`). Replace event-count `×N` entirely — do not show both. |
+| **OPT-002 Marker quantity text** | Same-bar multi-event aggregation shows sum of quantities as `${displayName} ${actionSide}*${totalQuantity}` (e.g. `vordinkkk SELL*24`). Single events with known quantity append the same `*QTY` form (e.g. `vordinkkk BUY*70`). If quantity is still unknown after OPT-003 derivation, **omit the suffix** (e.g. `vordinkkk SELL`). Replace event-count `×N` entirely — do not show both. |
 | **OPT-002 label surface** | Apply the quantity suffix to user-visible marker text fields that currently carry the side label (`marker_label`, and `title` if it shares the same vocabulary). Do **not** reintroduce CALL/PUT text, raw `trader_id` when `display_name` exists, or raw schema actions (`buy_open` / `sell_partial` / …). |
 | **OPT-002 shape/color contract (unchanged)** | Marker **shape and color remain direction-owned** from the completed trade-points plan: CALL → `triangle_up` / call color; PUT → `triangle_down` / put color; anchors stay direction-based. Quantity work is **label text only** — not action-side shape (BUY bottom / SELL top is not the product contract). |
 | **OPT-003 Closing quantity derivation** | Per **leg**, when opening quantity is known and a `sell_close` (or equivalent close) event has `quantity: null`, derive remaining size: `derived_qty = opening_qty − Σ(prior partial close qty on that leg)`. Example fixture (QQQ `2026-07-17` vordin): PUT `150 − 0 = 150` → `SELL 150 @ 0.15` / marker `SELL*150`; CALL `70 − (12+12+22+12) = 12` → `SELL 12 @ 5.5` / marker `SELL*12`. |
@@ -37,14 +37,7 @@
 
 | File | Role | Notes |
 | --- | --- | --- |
-| [`./mock.html`](./mock.html) | Self-contained Current vs Proposed for OPT-001…003 | Record-only visual aid. Open in a browser from this folder. Mock data is illustrative (anchors QQQ `2026-07-17` vordin cases); not live app output. |
-
-Mock polish residual (handed to a separate agent; **not** owned by this OPT-doc pass):
-
-- Correct marker shape/legend to match the direction-owned contract (CALL up / PUT down), not BUY-below / SELL-above.
-- Keep label examples (`*QTY`, derivation formulas, date-rail ascending) as in Scope Lock.
-
-This record’s Scope Lock is authoritative over any mock legend mismatch until the mock is updated.
+| [`./mock.html`](./mock.html) | Self-contained Current vs Proposed for OPT-001…003 | Visual aid for the proposed plan. Open in a browser from this folder. Mock data is illustrative (anchors QQQ `2026-07-17` vordin cases); not live app output. Marker shape/legend corrected to direction-owned (commit `f408871`). |
 
 ## Visual Reference (live friction)
 
@@ -89,7 +82,7 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: Chip rows render ascending by `trade_date` (left → right) in both modes across Review / Data / Static. For 最近, keep the same newest-`N` set and only reverse display order.
 - Boundary that must not change:
   - Recent-window membership rule and limit; month switcher / newest-first month list; ticker selection; which day is selected; footer meta semantics; non-progressive rails if any remain; no Data/Review workspace contract rewrite beyond chip order.
-- Lifecycle status: recorded
+- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v1-proposal-2026-07-22`
 
 ## OPT-002 K-line Marker Labels Should Display Trade Quantity
 
@@ -98,7 +91,7 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: Replace event count `×N` with quantity suffix `*QTY` (sum when aggregated; e.g. `vordinkkk SELL*24`, `vordinkkk BUY*70`). Omit suffix when quantity remains unknown. Consume OPT-003 derived qty when present so close markers can show `SELL*150` / `SELL*12`.
 - Boundary that must not change:
   - Direction-owned marker shape/color/anchor; grouping key family (bar + trader + direction + action side); BUY/SELL vocabulary; display_name preference; fitRange / selection-band contracts; no CALL/PUT text regression on labels.
-- Lifecycle status: recorded
+- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v1-proposal-2026-07-22`
 
 ## OPT-003 Derive Missing Closing Event Quantity
 
@@ -107,10 +100,9 @@ Split batches were consolidated into this folder then **removed** (git `514f8f4`
 - Desired outcome: On the read path, derive remaining close quantity when open qty is known (`derived = open − Σ prior partials`); show concrete numbers on timeline rows and feed the same qty into OPT-002 marker labels. Keep `?` / omit-suffix when derivation is unsafe.
 - Boundary that must not change:
   - Source day JSON / DB facts and provenance; schema validation allowing null quantity; Admin editing semantics; no automatic backfill write; no requirement for a product `derived` pill.
-- Lifecycle status: recorded
+- Lifecycle status: promoted-to-proposed → [plan](../../exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) revision `v1-proposal-2026-07-22`
 
-## Record foldback (2026-07-22)
+## Record / promotion history
 
-- Independent acceptance of this batch: OPT-001…003 friction confirmed against code + screenshots; Scope Lock tightened for recent-window membership, marker direction contract, render-only derivation, and fallbacks.
-- Design mock tracked at [`./mock.html`](./mock.html); mock shape-legend polish deferred to a separate agent pass — **Scope Lock above is authoritative**.
-- Status remains `recorded`. No proposed plan, activation, implementation, content/DB mutation, push, PR, merge, Pages, or remote authority.
+- 2026-07-22: Independent acceptance; Scope Lock foldback; mock direction-legend fix `f408871`.
+- 2026-07-22: User instruction `升级成prop plan` promoted OPT-001…003 to Proposed plan `docs/exec-plans/proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md` revision `v1-proposal-2026-07-22`. Next gate independent `design-review`. No activation, implementation, content/DB mutation, push, PR, merge, Pages, or remote authority.
