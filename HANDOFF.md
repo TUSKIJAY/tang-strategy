@@ -10,8 +10,12 @@
 - Next gate: `closed`
 <!-- operating-modes-state:end -->
 
-- Last updated: 2026-07-22
+- Last updated: 2026-07-23
 - Branch: `codex/project-harness`
+- Latest completed task: record-only mobile Review/Static OPT batch `docs/optimization/2026-07-22-review-mobile-chart-canvas-and-floating-filter-dock/`
+- Mobile OPT status: OPT-001…003 `recorded`; touch-verified self-contained `mock.html`; no proposed or active plan
+- Mobile touch evidence: coarse-pointer Playwright acceptance passed marker hit slop, cluster choice, tap-vs-drag cancellation, horizontal pan, vertical arbitration, `pointercancel`, pinch scale, sheet close paths, and four target viewport/orientation sizes
+- Mobile next gate: none unless the user explicitly requests promotion into a proposed plan
 - Completed plan: `docs/exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md`
 - Revision: `v2-review-foldback-2026-07-22`
 - Design reviews: `review-001.md` → `revise/high` @ v1; `review-002.md` → `approve/high` @ v2
@@ -25,6 +29,7 @@
 
 ## Latest Completed Work
 
+- 2026-07-23: Mobile Chart Canvas + Floating Filter Dock OPT-001…003 **recorded**; touch-first mock accepted locally; no implementation authority.
 - 2026-07-22: Date Rail Ascending And Trade Quantity **Completed** (OPT-001…003): product commit `da12e1b`, `implementation-review-001: accept/high`, migrated to `completed/`, next gate `closed`.
 - 2026-07-22: Lifecycle activation `proposed/` → `active/` at `phase-0:not-started` after matching design approve.
 - 2026-07-22: Independent design `review-002: approve/high` on exact `v2-review-foldback-2026-07-22`.

@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:,">
+<title>Mobile Chart Canvas + Floating Filter Dock · Touch-first Design Mock</title>
+<!--
+  Design-review aid for OPT batch:
+  docs/optimization/2026-07-22-review-mobile-chart-canvas-and-floating-filter-dock
+
+  - Self-contained mock of the SELECTED mobile state only
+    (chart-first canvas + floating filter dock, second generated direction).
+  - Interaction layer follows the batch's "Touch-first Interaction Contract":
+    Pointer Events + pointer capture, tap-vs-drag threshold, horizontal chart
+    pan, vertical native scroll (touch-action: pan-y on the canvas), app-owned
+    two-finger chart scale, cluster choice list, bottom sheets with close /
+    backdrop / swipe-down, visible touch states, in-page acceptance checklist.
+  - All chart/trade data is illustrative and synthetic; no backend facts.
+  - Not production code; no authority to modify frontend/src.
+-->
+<style>
+  :root{
+    --bg:#0c100d;
+    --panel:#161b16;
+    --panel-2:#1b211b;
+    --panel-border:#263026;
+    --text:#e9ede6;
+    --muted:#8b9389;
+    --faint:#6d756b;
+    --sage:#a6b696;
+    --sage-strong:#b3c3a2;
+    --cta:#9fae8a;
+    --up:#43b07e;
+    --down:#d0584f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{min-height:100%}
+  body{
+    background:#060807;
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue","PingFang SC",Arial,sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  #app{display:flex;flex-direction:column;align-items:center;width:100%}
+  .phone{
+    width:100%;
+    max-width:430px;
+    min-height:100dvh;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:8px 14px calc(12px + env(safe-area-inset-bottom,0px));
+  }
+  @media(min-width:480px){
+    .phone{border-left:1px solid #1c221c;border-right:1px solid #1c221c}
+  }
+
+  /* Slim context header */
+  .context{display:flex;align-items:center;min-height:52px;flex:none;gap:10px}
+  .id{display:flex;align-items:baseline;gap:8px;margin-right:auto}
+  .ticker{font-size:21px;font-weight:700;color:var(--sage-strong);letter-spacing:.4px}
+  .dot{color:var(--faint);font-weight:600}
+  .date{font-size:16px;color:#c9cfc5;font-weight:500;font-variant-numeric:tabular-nums}
+  .chg{font-size:16px;font-weight:650;font-variant-numeric:tabular-nums}
+  .chg.up{color:var(--up)}
+  .chg.down{color:var(--down)}
+  .seg{display:flex;background:#121711;border:1px solid #2a332a;border-radius:11px;padding:3px;gap:3px}
+  .seg button{
+    min-width:46px;min-height:44px;border:0;border-radius:8px;background:transparent;
+    color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  .seg button.on{background:#1f261e;border:1px solid var(--sage);color:var(--sage-strong);margin:-1px}
+
+  /* Compact chart controls (indicators / marker visibility) */
+  .tools{display:flex;gap:12px;height:44px;flex:none}
+  .tool{
+    width:44px;height:44px;border-radius:12px;border:1px solid #2a332a;background:#151a15;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .tool.off{opacity:.38}
+
+  /* Chart canvas: horizontal drags are app-owned (pan), vertical drags stay
+     native (page scroll). Pinch is app-owned two-pointer scale, so this must
+     NOT be "pan-y pinch-zoom" and must NOT be a blanket "none". */
+  .chart-wrap{flex:1;min-height:180px;position:relative}
+  #cv{position:absolute;inset:0;display:block;touch-action:pan-y;cursor:grab}
+  #cv.panning{cursor:grabbing}
+
+  /* Floating filter dock */
+  .dock{
+    flex:none;height:68px;background:var(--panel);border:1px solid var(--panel-border);
+    border-radius:18px;display:flex;box-shadow:0 10px 28px rgba(0,0,0,.5);
+  }
+  .dock button{
+    flex:1;background:none;border:0;color:var(--text);cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    font-size:13.5px;font-weight:550;border-radius:18px;
+  }
+  .dock button+button{border-left:1px solid #222922;border-radius:0}
+  .dock svg{color:var(--sage)}
+  .dock button.open{color:var(--sage-strong);background:rgba(166,182,150,.08)}
+  .dock button.open svg{color:var(--sage-strong)}
+
+  /* Compact truthful summary */
+  .summary{
+    flex:none;height:86px;background:var(--panel);border:1px solid var(--panel-border);
+    border-radius:18px;display:flex;
+  }
+  .cell{flex:1;display:flex;align-items:center;justify-content:center;gap:10px}
+  .cell+.cell{border-left:1px solid #222922}
+  .cell .n{font-size:19px;font-weight:700;display:block;line-height:1.1;font-variant-numeric:tabular-nums}
+  .cell .l{font-size:12.5px;color:var(--muted)}
+
+  /* Detail entry */
+  .cta{
+    flex:none;height:54px;border:0;border-radius:15px;background:var(--cta);color:#161c11;
+    font-size:16px;font-weight:650;font-family:inherit;cursor:pointer;position:relative;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .cta svg{position:absolute;right:18px}
+
+  /* In-page touch acceptance entry (below the fold, page-scroll reachable) */
+  .accept-strip{
+    flex:none;display:flex;justify-content:center;padding:14px 0 calc(18px + env(safe-area-inset-bottom,0px));
+  }
+  .accept-strip button{
+    min-height:44px;padding:0 18px;border-radius:12px;border:1px solid #2a332a;background:transparent;
+    color:var(--muted);font-size:13px;font-weight:550;font-family:inherit;cursor:pointer;
+  }
+
+  /* Pressed feedback (touch-visible, not hover-dependent) */
+  .seg button:active,.tool:active,.dock button:active,.cta:active,.accept-strip button:active,
+  .sheet-close:active,.opt-row:active,.sw-row:active,.trade-row:active{
+    transform:scale(.97);
+  }
+  @media(hover:hover){
+    .seg button:hover,.tool:hover,.dock button:hover,.accept-strip button:hover{border-color:var(--sage)}
+    .opt-row:hover,.sw-row:hover,.trade-row:hover{background:rgba(166,182,150,.06)}
+  }
+
+  /* ---------------- bottom sheet ---------------- */
+  .sheet-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;
+    opacity:0;transition:opacity .18s ease;
+  }
+  .sheet-backdrop.open{opacity:1}
+  .sheet{
+    position:fixed;left:50%;bottom:0;z-index:41;width:min(100%,430px);
+    max-height:74dvh;display:flex;flex-direction:column;
+    background:var(--panel);border:1px solid var(--panel-border);border-bottom:0;
+    border-radius:20px 20px 0 0;
+    transform:translate(-50%,102%);transition:transform .2s ease;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    box-shadow:0 -12px 40px rgba(0,0,0,.5);
+  }
+  .sheet.open{transform:translate(-50%,0)}
+  .sheet.dragging{transition:none}
+  .sheet-handle{
+    flex:none;height:44px;display:flex;align-items:center;justify-content:center;
+    touch-action:none;cursor:grab;
+  }
+  .sheet-handle span{width:40px;height:4.5px;border-radius:3px;background:#3a443a}
+  .sheet-head{
+    flex:none;display:flex;align-items:center;gap:10px;padding:0 8px 10px 18px;
+    border-bottom:1px solid #222922;touch-action:none;
+  }
+  .sheet-head h2{font-size:16px;font-weight:650;flex:1;letter-spacing:.2px}
+  .sheet-close{
+    width:44px;height:44px;border:0;border-radius:12px;background:transparent;
+    color:var(--muted);font-size:22px;line-height:1;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .sheet-body{overflow-y:auto;touch-action:pan-y;padding:8px 12px 14px;-webkit-overflow-scrolling:touch}
+
+  .opt-row,.sw-row,.trade-row{
+    width:100%;min-height:48px;display:flex;align-items:center;gap:12px;
+    padding:8px 12px;border:0;border-radius:12px;background:transparent;color:var(--text);
+    font-family:inherit;font-size:15px;font-weight:550;cursor:pointer;text-align:left;
+  }
+  .opt-row .cur{margin-left:auto;color:var(--sage-strong);font-size:13px;font-weight:650}
+  .opt-row.current{color:var(--sage-strong)}
+  .sw-row .lab{flex:1}
+  .sw-row .sub{display:block;font-size:12px;color:var(--muted);font-weight:450;margin-top:2px}
+  .sw{
+    flex:none;width:46px;height:28px;border-radius:14px;background:#2a332a;position:relative;
+    transition:background .15s ease;
+  }
+  .sw.on{background:var(--sage)}
+  .sw .knob{
+    position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+    background:#0c100d;transition:left .15s ease;
+  }
+  .sw.on .knob{left:21px}
+  .trade-row .who{flex:1;min-width:0}
+  .trade-row .who b{display:block;font-size:15px;font-weight:650}
+  .trade-row .who span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .trade-row .side{font-size:12.5px;font-weight:750}
+  .trade-row .side.buy{color:var(--sage-strong)}
+  .trade-row .side.sell{color:var(--down)}
+  .trade-row .qty{font-size:13px;color:#8f9a8b;font-weight:600;font-variant-numeric:tabular-nums}
+  .trade-row.sel{outline:1px solid var(--sage);outline-offset:-1px}
+  .fact{display:flex;align-items:baseline;gap:12px;padding:10px 12px;border-bottom:1px solid #1e251e}
+  .fact:last-child{border-bottom:0}
+  .fact .k{width:64px;flex:none;font-size:13px;color:var(--muted)}
+  .fact .v{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+  .fact .v.buy{color:var(--sage-strong)}
+  .fact .v.sell{color:var(--down)}
+  .sheet-note{padding:10px 12px 2px;font-size:12px;color:var(--faint)}
+  .chk{
+    display:flex;gap:12px;align-items:flex-start;padding:9px 12px;font-size:13.5px;
+    line-height:1.45;color:#c9cfc5;cursor:pointer;
+  }
+  .chk input{width:20px;height:20px;flex:none;accent-color:var(--sage);margin-top:1px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="phone">
+
+    <header class="context">
+      <div class="id">
+        <span class="ticker" id="hdrTicker">QQQ</span>
+        <span class="dot">·</span>
+        <span class="date" id="hdrDate">07-21</span>
+      </div>
+      <div class="chg up" id="chg">+0.20%</div>
+      <div class="seg" role="group" aria-label="时间周期">
+        <button id="seg1m" class="on" aria-pressed="true">1m</button>
+        <button id="seg5m" aria-pressed="false">5m</button>
+      </div>
+    </header>
+
+    <div class="tools">
+      <button id="btnInd" class="tool" aria-label="指标显示" aria-pressed="true">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M2 6c2-2.4 4-2.4 6 0s4 2.4 6 0 4-2.4 6 0" stroke="#43b07e" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M2 11c2-2.4 4-2.4 6 0s4 2.4 6 0 4-2.4 6 0" stroke="#8a6fd0" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M2 16c2-2.4 4-2.4 6 0s4 2.4 6 0 4-2.4 6 0" stroke="#dfb54a" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button id="btnMark" class="tool" aria-label="交易标记显示" aria-pressed="true">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M2 11c2.6-4.2 5.4-6 9-6s6.4 1.8 9 6c-2.6 4.2-5.4 6-9 6s-6.4-1.8-9-6z" stroke="#dfe5dc" stroke-width="1.5"/>
+          <circle cx="11" cy="11" r="2.6" stroke="#dfe5dc" stroke-width="1.5"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="chart-wrap" id="wrap">
+      <canvas id="cv" role="img" aria-label="QQQ 07-21 1分钟K线示意图"></canvas>
+    </div>
+
+    <nav class="dock" aria-label="浮动筛选坞">
+      <button type="button" id="dockTicker" aria-label="选择标的">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M4 18v-5M9 18V8M14 18v-7M19 18V5"/>
+        </svg>
+        <span id="dockTickerLabel">QQQ</span>
+      </button>
+      <button type="button" id="dockDate" aria-label="选择日期">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="3" y="4.5" width="16" height="14.5" rx="2.5"/>
+          <path d="M3 9h16M7.5 2.8v3M14.5 2.8v3" stroke-linecap="round"/>
+          <rect x="6.4" y="12" width="3" height="3" rx=".8" fill="currentColor" stroke="none"/>
+        </svg>
+        <span id="dockDateLabel">07-21</span>
+      </button>
+      <button type="button" id="dockFilters" aria-label="筛选">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M3 6h16M3 11h16M3 16h16"/>
+          <circle cx="14" cy="6" r="2.2" fill="#161b16"/>
+          <circle cx="8" cy="11" r="2.2" fill="#161b16"/>
+          <circle cx="15" cy="16" r="2.2" fill="#161b16"/>
+        </svg>
+        <span>筛选</span>
+      </button>
+    </nav>
+
+    <section class="summary" aria-label="当日摘要">
+      <div class="cell">
+        <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 4l6 10H4z" fill="#43b07e"/></svg>
+        <div><span class="n" id="nTrades">8</span><span class="l">Trades</span></div>
+      </div>
+      <div class="cell">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#9aa39a" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="8.5" cy="7.5" r="3"/>
+          <path d="M3 17.5c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/>
+          <path d="M14 4.8a3 3 0 0 1 0 5.6M16.5 13.3c1.6.7 2.7 2 3 4.2"/>
+        </svg>
+        <div><span class="n" id="nTraders">3</span><span class="l">Traders</span></div>
+      </div>
+      <div class="cell">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 16L4 6h12l-6 10z" stroke="#d0584f" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        <div><span class="n" id="nSignals">2</span><span class="l">Signals</span></div>
+      </div>
+    </section>
+
+    <button class="cta" type="button" id="btnDetail">
+      查看交易详情
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M6.5 3.5L11.5 9l-5 5.5" stroke="#161c11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+  </div>
+
+  <div class="accept-strip">
+    <button type="button" id="btnAccept">触控验收清单</button>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="backdrop" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="sheet-handle" id="sheetHandle" aria-hidden="true"><span></span></div>
+  <div class="sheet-head" id="sheetHead">
+    <h2 id="sheetTitle"></h2>
+    <button class="sheet-close" id="sheetClose" aria-label="关闭">×</button>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+</section>
+
+<script>
+'use strict';
+/* ------------------------------------------------------------------
+ * Synthetic illustrative data only. No backend facts.
+ * Full session 09:30–16:00 (390 one-minute bars); the initial view
+ * shows the first 75 minutes, matching the selected visual target.
+ * ------------------------------------------------------------------ */
+const TICKERS = { QQQ: 705.74, SPY: 628.41 };
+const DATES = ['07-21', '07-18', '07-17'];
+const OPEN_MIN = 570; // 09:30 in minutes from midnight
+const SESSION_MIN = 390;
+const SIGNAL_COUNT = 2;
+
+/* 8 trades / 3 traders; same-side same-bar groups collapse to a count. */
+const TRADES = [
+  { t: 6,  side: 'SELL', qty: 100, trader: 'vordinkkk' }, // 09:36
+  { t: 14, side: 'BUY',  qty: 150, trader: 'vordinkkk' }, // 09:44 ┐ same-side
+  { t: 14, side: 'BUY',  qty: 50,  trader: 'merrrill'  }, // 09:44 ┘ same bar → ②
+  { t: 24, side: 'BUY',  qty: 100, trader: 'sabloooo'  }, // 09:54 ┐
+  { t: 24, side: 'BUY',  qty: 100, trader: 'vordinkkk' }, // 09:54 ├ same bar → ③
+  { t: 24, side: 'BUY',  qty: 50,  trader: 'merrrill'  }, // 09:54 ┘
+  { t: 36, side: 'SELL', qty: 200, trader: 'sabloooo'  }, // 10:06
+  { t: 51, side: 'BUY',  qty: 150, trader: 'vordinkkk' }, // 10:21 ← selected
+];
+const DEFAULT_SELECTED = 7;
+
+const COLORS = {
+  up: '#43b07e', down: '#d0584f',
+  text: '#e9ede6', axis: '#7e877c', muted: '#8b9389',
+  sage: '#a6b696', sageStrong: '#b3c3a2',
+  grid: 'rgba(222,236,222,0.06)',
+  pillBg: '#1f251e', pillBorder: 'rgba(166,182,150,0.45)',
+};
+const MA_SPECS = [
+  { p: 5,  c: '#dfb54a' },
+  { p: 10, c: '#c94f9d' },
+  { p: 20, c: '#41a08d' },
+  { p: 30, c: '#5b7fd4' },
+  { p: 60, c: '#8a6fd0' },
+];
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashSeed(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+const ANCHORS = [
+  [0, 705.30], [6, 706.30], [11, 705.60], [14, 705.00], [20, 705.55],
+  [28, 704.40], [33, 704.10], [38, 703.60], [44, 702.95], [50, 704.20],
+  [55, 705.40], [60, 706.00], [66, 706.80], [74, 707.16],
+  [120, 706.40], [180, 707.60], [240, 706.60], [300, 708.30], [340, 707.40], [389, 707.16],
+];
+function anchorClose(i) {
+  for (let k = 0; k < ANCHORS.length - 1; k++) {
+    const [i0, p0] = ANCHORS[k], [i1, p1] = ANCHORS[k + 1];
+    if (i >= i0 && i <= i1) return p0 + (p1 - p0) * (i - i0) / (i1 - i0);
+  }
+  return ANCHORS[ANCHORS.length - 1][1];
+}
+function genBars(scale, seedStr) {
+  const rnd = mulberry32(hashSeed(seedStr));
+  const bars = [];
+  let prev = 705.74 * scale;
+  for (let i = 0; i < SESSION_MIN; i++) {
+    const c = anchorClose(i) * scale + (rnd() - 0.5) * 0.22 * scale;
+    const o = prev + (rnd() - 0.5) * 0.16 * scale;
+    const h = Math.max(o, c) + rnd() * 0.18 * scale;
+    let l = Math.min(o, c) - rnd() * 0.18 * scale;
+    let v = 60 + rnd() * 40;
+    if (i < 7) v *= 2.4;
+    else if (i >= 33 && i <= 40) v *= 1.7;
+    else if (i > 60 && i < 80) v *= 1.3;
+    else if (i >= 120 && i <= 240) v *= 0.6;
+    else if (i > 340) v *= 1.6;
+    bars.push({ t: i, o, h, l, c, v: Math.round(v) });
+    prev = c;
+  }
+  // pin the session last so the header readout stays +0.20%
+  bars[SESSION_MIN - 1].c = 707.16 * scale;
+  bars[SESSION_MIN - 1].h = Math.max(bars[SESSION_MIN - 1].h, bars[SESSION_MIN - 1].c);
+  let mi = 0;
+  bars.forEach((b, i) => { if (b.l < bars[mi].l) mi = i; });
+  bars[mi].l = 702.770 * scale; // pin the annotated session low
+  bars.forEach((b, i) => { if (i !== mi && b.l < 702.86 * scale) b.l = 702.86 * scale; });
+  sessionLowMin = mi; // actual bar carrying the pinned low (for the callout)
+  return bars;
+}
+function aggregateTf(bars, tf) {
+  const out = [];
+  for (let i = 0; i < bars.length; i += tf) {
+    const g = bars.slice(i, i + tf);
+    out.push({
+      startMin: g[0].t, midMin: g[0].t + tf / 2,
+      o: g[0].o, c: g[g.length - 1].c,
+      h: Math.max(...g.map(b => b.h)),
+      l: Math.min(...g.map(b => b.l)),
+      v: g.reduce((s, b) => s + b.v, 0),
+    });
+  }
+  return out;
+}
+function sma(closes, p) {
+  const r = new Array(closes.length).fill(null);
+  let s = 0;
+  for (let i = 0; i < closes.length; i++) {
+    s += closes[i];
+    if (i >= p) s -= closes[i - p];
+    if (i >= p - 1) r[i] = s / p;
+  }
+  return r;
+}
+function fmtTime(offsetMin) {
+  const m = OPEN_MIN + offsetMin;
+  return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+}
+function fmtPct(p, prev) {
+  const v = (p / prev - 1) * 100;
+  return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%';
+}
+
+/* ---------------- state ---------------- */
+let ticker = 'QQQ';
+let date = '07-21';
+let prevClose = TICKERS[ticker];
+let sessionLowMin = 44; // 1m bar carrying the pinned session low
+let BASE = genBars(1, ticker + date);
+let tf = 1;
+let tfBars = aggregateTf(BASE, tf);
+let showIndicators = true;
+let showMarkers = true;
+let selectedId = DEFAULT_SELECTED;
+/* view window in 1m minutes: [endMin - countMin, endMin) */
+const VIEW_MIN = 25, VIEW_MAX = SESSION_MIN;
+const view = { endMin: 75, countMin: 75 };
+let hitMarks = [];   // {x,y,ids} canvas hit regions, 22px hit radius
+let pillHit = null;  // {x,y,w,h,id}
+
+const appRoot = document.getElementById('app');
+const wrap = document.getElementById('wrap');
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+document.getElementById('nTrades').textContent = TRADES.length;
+document.getElementById('nTraders').textContent = new Set(TRADES.map(t => t.trader)).size;
+document.getElementById('nSignals').textContent = SIGNAL_COUNT;
+
+/* Input-agnostic tap helper: pointerup drives activation (touch-first).
+   The click listener is the keyboard/desktop fallback only: synthetic clicks
+   that follow a pointer (detail ≥ 1) are ignored, because pointerup already
+   handled them — otherwise a tap that opens the sheet would re-dispatch its
+   compat click onto the freshly-shown backdrop/sheet and instantly close it.
+   Keyboard activation (Enter/Space) fires click with detail 0 and passes. */
+function onTap(el, fn) {
+  el.addEventListener('pointerup', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    fn(e);
+  });
+  el.addEventListener('click', (e) => {
+    if (e.detail !== 0) return;
+    fn(e);
+  });
+}
+
+function updateHeader() {
+  const last = BASE[BASE.length - 1].c;
+  const chg = document.getElementById('chg');
+  chg.textContent = fmtPct(last, prevClose);
+  chg.className = 'chg ' + (last >= prevClose ? 'up' : 'down');
+}
+
+/* ---------------- chart ---------------- */
+function draw() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  if (W < 40 || H < 40) return;
+  cv.width = Math.round(W * dpr);
+  cv.height = Math.round(H * dpr);
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  /* layout */
+  const padL = 14, gutter = 58, padR = 2;
+  const timeH = 26;
+  const priceTop = 18;
+  const priceH = (H - timeH) * 0.74;
+  const volTop = priceTop + priceH + 10;
+  const volH = Math.max(20, H - timeH - volTop - 2);
+  const plotW = W - padL - gutter - padR;
+  const plotR = padL + plotW;
+
+  /* view window (minutes) → pixels */
+  const startMin = view.endMin - view.countMin;
+  const slotMin = plotW / view.countMin;
+  const xMin = m => padL + (m - startMin) * slotMin;
+  const vis = tfBars.filter(b => b.startMin + tf > startMin && b.startMin < view.endMin);
+  if (!vis.length) return;
+  const bodyW = Math.max(1.5, slotMin * tf * 0.62);
+
+  let vmax = -Infinity, vmin = Infinity, vVol = 0;
+  vis.forEach(b => {
+    if (b.h > vmax) vmax = b.h;
+    if (b.l < vmin) vmin = b.l;
+    if (b.v > vVol) vVol = b.v;
+  });
+  const range = vmax - vmin || 1;
+  vmax += range * 0.10;
+  vmin -= range * 0.16; // room for markers anchored below lows
+  const y = p => priceTop + (vmax - p) / (vmax - vmin) * priceH;
+
+  const font = (size, weight) => `${weight || 400} ${size}px -apple-system,"Helvetica Neue","PingFang SC",Arial,sans-serif`;
+
+  /* grid + right axis (rows adapt to pane height, pct vs prev close) */
+  const rows = priceH < 220 ? 3 : 6;
+  ctx.lineWidth = 1;
+  ctx.textAlign = 'left';
+  for (let i = 0; i < rows; i++) {
+    const gy = priceTop + priceH * i / (rows - 1);
+    const p = vmax - (vmax - vmin) * i / (rows - 1);
+    ctx.strokeStyle = COLORS.grid;
+    ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(plotR, gy); ctx.stroke();
+    const pct = (p / prevClose - 1) * 100;
+    ctx.fillStyle = '#c9d1c5'; ctx.font = font(12, 550); ctx.textBaseline = 'bottom';
+    ctx.fillText(p.toFixed(3), plotR + 8, gy - 3);
+    ctx.fillStyle = pct >= 0 ? COLORS.up : COLORS.down; ctx.font = font(11, 500); ctx.textBaseline = 'top';
+    ctx.fillText(fmtPct(p, prevClose), plotR + 8, gy + 3);
+  }
+
+  /* vertical grid + time labels (collision-clamped) */
+  const labelStep = Math.max(1, Math.round(view.countMin / 6.5));
+  const labelMins = [];
+  for (let m = Math.max(0, Math.ceil(startMin / labelStep) * labelStep); m < view.endMin && m < SESSION_MIN; m += labelStep) {
+    labelMins.push(m);
+  }
+  ctx.strokeStyle = COLORS.grid;
+  labelMins.forEach(m => {
+    const gx = xMin(m);
+    ctx.beginPath(); ctx.moveTo(gx, priceTop); ctx.lineTo(gx, priceTop + priceH); ctx.stroke();
+  });
+
+  /* prev close dashed reference */
+  const yc = y(prevClose);
+  if (yc > priceTop && yc < priceTop + priceH) {
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = 'rgba(230,238,228,0.16)';
+    ctx.beginPath(); ctx.moveTo(padL, yc); ctx.lineTo(plotR, yc); ctx.stroke();
+    ctx.restore();
+  }
+
+  /* moving averages (computed on full series, drawn for the window) */
+  if (showIndicators) {
+    const closes = tfBars.map(b => b.c);
+    MA_SPECS.forEach(({ p, c }) => {
+      const line = sma(closes, p);
+      ctx.strokeStyle = c; ctx.lineWidth = 1.2; ctx.beginPath();
+      let started = false;
+      vis.forEach(b => {
+        const v = line[Math.round(b.startMin / tf)];
+        if (v == null) return;
+        const px = xMin(b.midMin), py = y(v);
+        if (!started) { ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+    });
+  }
+
+  /* candles */
+  ctx.lineWidth = 1;
+  vis.forEach(b => {
+    const up = b.c >= b.o;
+    const col = up ? COLORS.up : COLORS.down;
+    const cx = xMin(b.midMin);
+    ctx.strokeStyle = col;
+    ctx.beginPath(); ctx.moveTo(cx, y(b.h)); ctx.lineTo(cx, y(b.l)); ctx.stroke();
+    ctx.fillStyle = col;
+    const top = y(Math.max(b.o, b.c)), hgt = Math.max(1.2, Math.abs(y(b.o) - y(b.c)));
+    ctx.fillRect(cx - bodyW / 2, top, bodyW, hgt);
+  });
+
+  /* session-low callout (only when the pinned low is inside the window) */
+  if (sessionLowMin >= startMin && sessionLowMin < view.endMin) {
+    const lowBar = vis.find(b => sessionLowMin >= b.startMin && sessionLowMin < b.startMin + tf);
+    if (lowBar) {
+      const lx = xMin(lowBar.midMin), ly = y(lowBar.l);
+      ctx.strokeStyle = 'rgba(201,209,197,0.55)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(lx + 2, ly + 2); ctx.lineTo(lx + 12, ly + 13); ctx.lineTo(lx + 20, ly + 13); ctx.stroke();
+      ctx.fillStyle = '#c9d1c5'; ctx.font = font(12, 550); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(lowBar.l.toFixed(3), lx + 24, ly + 14);
+    }
+  }
+
+  /* volume */
+  ctx.fillStyle = COLORS.muted; ctx.font = font(11, 500); ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillText('成交量', padL, volTop + 2);
+  vis.forEach(b => {
+    const up = b.c >= b.o;
+    ctx.fillStyle = up ? 'rgba(67,176,126,0.72)' : 'rgba(208,88,79,0.72)';
+    const bh = Math.max(1, b.v / vVol * (volH - 4));
+    ctx.fillRect(xMin(b.midMin) - bodyW / 2, volTop + volH - bh, bodyW, bh);
+  });
+
+  /* time axis */
+  ctx.fillStyle = COLORS.axis; ctx.font = font(11, 500); ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'center';
+  let prevRight = -Infinity;
+  labelMins.forEach(m => {
+    const label = fmtTime(m);
+    const w = ctx.measureText(label).width;
+    let cx = Math.max(xMin(m), prevRight + 6 + w / 2);
+    cx = Math.min(cx, plotR - w / 2 + bodyW);
+    ctx.fillText(label, cx, H - 8);
+    prevRight = cx + w / 2;
+  });
+
+  /* trade markers: compact, direction-owned, same-side same-bar collapse */
+  hitMarks = [];
+  pillHit = null;
+  if (showMarkers) {
+    const groups = new Map();
+    TRADES.forEach((tr, id) => {
+      if (tr.t < startMin || tr.t >= view.endMin) return;
+      const key = tr.side + '@' + Math.floor(tr.t / tf);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(id);
+    });
+
+    const drawTri = (cx, cy, side, fill) => {
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      if (side === 'BUY') { ctx.moveTo(cx, cy - 6); ctx.lineTo(cx - 6, cy + 4); ctx.lineTo(cx + 6, cy + 4); }
+      else { ctx.moveTo(cx, cy + 6); ctx.lineTo(cx - 6, cy - 4); ctx.lineTo(cx + 6, cy - 4); }
+      ctx.closePath(); ctx.fill();
+    };
+
+    groups.forEach((ids, key) => {
+      const tr = TRADES[ids[0]];
+      const bi = Math.floor(tr.t / tf);
+      const bar = tfBars[bi];
+      if (!bar) return;
+      const col = tr.side === 'BUY' ? COLORS.up : COLORS.down;
+      const cx = xMin(bar.midMin);
+      let cy = tr.side === 'BUY' ? y(bar.l) + 16 : y(bar.h) - 16;
+      cy = Math.max(priceTop + 14, Math.min(priceTop + priceH - 14, cy));
+      /* hit region ≥44×44 CSS px (22px radius) even though the glyph is small */
+      hitMarks.push({ x: cx, y: cy, r: 22, ids });
+
+      if (ids.length === 1) {
+        drawTri(cx, cy, tr.side, col);
+      } else {
+        ctx.fillStyle = 'rgba(12,16,13,0.88)';
+        ctx.strokeStyle = col; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(cx, cy, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = col; ctx.font = font(11, 700);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(ids.length), cx, cy + 0.5);
+      }
+
+      /* selected trade expands to one readable short label + detail affordance */
+      if (ids.includes(selectedId)) {
+        const s = TRADES[selectedId];
+        const sideCol = s.side === 'BUY' ? COLORS.sageStrong : COLORS.down;
+        ctx.font = font(11, 600);
+        const wName = ctx.measureText(s.trader).width;
+        ctx.font = font(10, 700);
+        const wSide = ctx.measureText(s.side).width;
+        ctx.font = font(10, 600);
+        const wQty = ctx.measureText('*' + s.qty).width;
+        const wMore = 12; // › detail affordance
+        const pillW = 10 + 9 + 5 + wName + 5 + wSide + 4 + wQty + wMore + 8;
+        const pillH = 28;
+        /* collision-aware: prefer right of the marker inside the plot */
+        let px = cx + 16;
+        if (px + pillW > plotR - 2) px = cx - 16 - pillW;
+        if (px < padL + 2) px = padL + 2;
+        let py = cy - pillH / 2 + (s.side === 'BUY' ? 12 : -12);
+        py = Math.max(priceTop + 4, Math.min(priceTop + priceH - pillH - 4, py));
+        pillHit = { x: px, y: py, w: pillW, h: pillH, id: selectedId };
+
+        ctx.fillStyle = COLORS.pillBg;
+        ctx.strokeStyle = COLORS.pillBorder; ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(px, py, pillW, pillH, pillH / 2); else ctx.rect(px, py, pillW, pillH);
+        ctx.fill(); ctx.stroke();
+
+        let tx = px + 10;
+        drawTri(tx + 4, py + pillH / 2, s.side, s.side === 'BUY' ? COLORS.up : COLORS.down);
+        tx += 9 + 5;
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = COLORS.text; ctx.font = font(11, 600);
+        ctx.fillText(s.trader, tx, py + pillH / 2 + 0.5); tx += wName + 5;
+        ctx.fillStyle = sideCol; ctx.font = font(10, 700);
+        ctx.fillText(s.side, tx, py + pillH / 2 + 0.5); tx += wSide + 4;
+        ctx.fillStyle = '#8f9a8b'; ctx.font = font(10, 600);
+        ctx.fillText('*' + s.qty, tx, py + pillH / 2 + 0.5); tx += wQty + 4;
+        ctx.fillStyle = COLORS.sage; ctx.font = font(13, 600);
+        ctx.fillText('›', tx + 2, py + pillH / 2 + 0.5);
+      }
+    });
+  }
+}
+
+/* ---------------- chart gesture layer (Pointer Events) ----------------
+ * pointerdown/move/up/cancel + pointer capture.
+ * - tap vs drag: 10px movement threshold; release after a drag never activates.
+ * - one finger horizontal drag  → chart pan (time axis).
+ * - one finger vertical drag    → left to the browser (touch-action: pan-y);
+ *   native takeover arrives as pointercancel and leaves state clean.
+ * - two pointers on the chart   → app-owned scale (pinch), marker activation
+ *   suppressed for the whole gesture.
+ * Mouse works through the same path as the desktop/a11y fallback.
+ */
+const TAP_SLOP = 10;
+const pointers = new Map(); // pointerId → {x, y}
+let gesture = 'idle';       // idle | maybe-tap | pan | pinch | settle
+let tapStart = null;        // {x, y}
+let panStart = null;        // {endMin}
+let pinchStart = null;      // {dist, countMin, anchorMin, fracX}
+
+function canvasPos(e) {
+  const r = cv.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+function clampView() {
+  view.countMin = Math.max(VIEW_MIN, Math.min(VIEW_MAX, view.countMin));
+  view.endMin = Math.max(view.countMin, Math.min(SESSION_MIN, view.endMin));
+}
+function beginPinch() {
+  const pts = [...pointers.values()];
+  const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+  const padL = 14, gutter = 58, padR = 2;
+  const plotW = cv.getBoundingClientRect().width - padL - gutter - padR;
+  const centerX = (pts[0].x + pts[1].x) / 2;
+  pinchStart = {
+    dist: d,
+    countMin: view.countMin,
+    startMin: view.endMin - view.countMin,
+    fracX: Math.max(0, Math.min(1, (centerX - padL) / plotW)),
+  };
+  gesture = 'pinch';
+  cv.classList.remove('panning');
+}
+
+cv.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  const p = canvasPos(e);
+  pointers.set(e.pointerId, p);
+  if (pointers.size === 1) {
+    gesture = 'maybe-tap';
+    tapStart = p;
+    panStart = { endMin: view.endMin };
+  } else if (pointers.size === 2) {
+    beginPinch(); // two pointers on the chart own scale; tap is cancelled
+  }
+});
+
+cv.addEventListener('pointermove', (e) => {
+  if (!pointers.has(e.pointerId)) return;
+  const p = canvasPos(e);
+  pointers.set(e.pointerId, p);
+
+  if (gesture === 'maybe-tap' && pointers.size === 1) {
+    const dx = p.x - tapStart.x, dy = p.y - tapStart.y;
+    if (Math.hypot(dx, dy) > TAP_SLOP) {
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        gesture = 'pan';
+        cv.classList.add('panning');
+      } else {
+        /* predominantly vertical: not a chart gesture. On touch the browser
+           takes over (pan-y) and we receive pointercancel; on mouse we simply
+           mark the gesture cancelled so release never activates a marker. */
+        gesture = 'settle';
+      }
+    }
+    return;
+  }
+
+  if (gesture === 'pan' && pointers.size === 1) {
+    const plotW = cv.getBoundingClientRect().width - 14 - 58 - 2;
+    const slotMin = plotW / view.countMin;
+    view.endMin = panStart.endMin - (p.x - tapStart.x) / slotMin;
+    clampView();
+    draw();
+    return;
+  }
+
+  if (gesture === 'pinch' && pointers.size === 2) {
+    const pts = [...pointers.values()];
+    const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+    const ratio = d / pinchStart.dist;
+    const countMin = Math.max(VIEW_MIN, Math.min(VIEW_MAX, pinchStart.countMin / ratio));
+    const anchorMin = pinchStart.startMin + pinchStart.fracX * pinchStart.countMin;
+    view.countMin = countMin;
+    view.endMin = anchorMin + (1 - pinchStart.fracX) * countMin;
+    clampView();
+    draw();
+  }
+});
+
+function endPointer(e, cancelled) {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.delete(e.pointerId);
+  try { cv.releasePointerCapture(e.pointerId); } catch (_) {}
+
+  if (cancelled) {
+    /* native takeover / interruption: leave chart state clean, never activate */
+    if (pointers.size === 0) { gesture = 'idle'; cv.classList.remove('panning'); }
+    else if (gesture === 'pinch') gesture = 'settle';
+    return;
+  }
+
+  if (gesture === 'maybe-tap' && pointers.size === 0) {
+    const p = canvasPos(e);
+    handleTap(p.x, p.y);
+    gesture = 'idle';
+  } else if (pointers.size === 0) {
+    gesture = 'idle'; // release after pan/settle: no marker activation
+    cv.classList.remove('panning');
+  } else if (gesture === 'pinch' && pointers.size === 1) {
+    gesture = 'settle'; // remaining finger cannot turn into a tap
+  }
+}
+cv.addEventListener('pointerup', (e) => endPointer(e, false));
+cv.addEventListener('pointercancel', (e) => endPointer(e, true));
+
+function handleTap(px, py) {
+  if (pillHit && showMarkers &&
+      px >= pillHit.x && px <= pillHit.x + pillHit.w &&
+      py >= pillHit.y && py <= pillHit.y + pillHit.h) {
+    openSheet('trade', pillHit.id);
+    return;
+  }
+  let best = null, bestD = 22; // ≥44×44 hit region per marker
+  hitMarks.forEach(m => {
+    const d = Math.hypot(m.x - px, m.y - py);
+    if (d <= bestD) { bestD = d; best = m; }
+  });
+  if (best) {
+    if (best.ids.length > 1) {
+      openSheet('cluster', best.ids); // visible choice list, never silent cycling
+    } else if (best.ids[0] === selectedId) {
+      openSheet('trade', selectedId); // second tap on the selection opens detail
+    } else {
+      selectedId = best.ids[0];
+      draw();
+    }
+  } else if (selectedId !== null) {
+    selectedId = null;
+    draw();
+  }
+}
+
+/* ---------------- bottom sheet ---------------- */
+const backdrop = document.getElementById('backdrop');
+const sheet = document.getElementById('sheet');
+const sheetTitle = document.getElementById('sheetTitle');
+const sheetBody = document.getElementById('sheetBody');
+const sheetClose = document.getElementById('sheetClose');
+const dockBtns = {
+  ticker: document.getElementById('dockTicker'),
+  date: document.getElementById('dockDate'),
+  filters: document.getElementById('dockFilters'),
+};
+let sheetType = null;
+let sheetOpener = null;
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function triSvg(side, size) {
+  const s = size || 14;
+  return side === 'BUY'
+    ? `<svg width="${s}" height="${s}" viewBox="0 0 14 14"><path d="M7 2.5l5 9h-10z" fill="#43b07e"/></svg>`
+    : `<svg width="${s}" height="${s}" viewBox="0 0 14 14"><path d="M7 11.5L2 2.5h10z" fill="#d0584f"/></svg>`;
+}
+function tradeRowHtml(id) {
+  const t = TRADES[id];
+  return `<button class="trade-row${id === selectedId ? ' sel' : ''}" data-trade="${id}">
+    ${triSvg(t.side)}
+    <span class="who"><b>${esc(t.trader)}</b><span>${fmtTime(t.t)} · 1m</span></span>
+    <span class="side ${t.side === 'BUY' ? 'buy' : 'sell'}">${t.side}</span>
+    <span class="qty">*${t.qty}</span>
+  </button>`;
+}
+
+function buildSheetContent(type, payload) {
+  if (type === 'ticker') {
+    sheetTitle.textContent = '选择标的';
+    sheetBody.innerHTML = Object.keys(TICKERS).map(k =>
+      `<button class="opt-row${k === ticker ? ' current' : ''}" data-pick-ticker="${k}">
+        ${triSvg('BUY', 0)}<span style="font-size:16px;font-weight:700">${k}</span>
+        ${k === ticker ? '<span class="cur">当前 ✓</span>' : ''}
+      </button>`).join('');
+    sheetBody.querySelectorAll('[data-pick-ticker]').forEach(b =>
+      onTap(b, () => { setSession(b.dataset.pickTicker, date); closeSheet(); }));
+  } else if (type === 'date') {
+    sheetTitle.textContent = '选择日期';
+    sheetBody.innerHTML = DATES.map(d =>
+      `<button class="opt-row${d === date ? ' current' : ''}" data-pick-date="${d}">
+        <span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">${d}</span>
+        ${d === date ? '<span class="cur">当前 ✓</span>' : ''}
+      </button>`).join('');
+    sheetBody.querySelectorAll('[data-pick-date]').forEach(b =>
+      onTap(b, () => { setSession(ticker, b.dataset.pickDate); closeSheet(); }));
+  } else if (type === 'filters') {
+    sheetTitle.textContent = '筛选';
+    sheetBody.innerHTML = `
+      <button class="sw-row" data-sw="ind" aria-pressed="${showIndicators}">
+        <span class="lab">均线指标<span class="sub">MA 5 / 10 / 20 / 30 / 60</span></span>
+        <span class="sw${showIndicators ? ' on' : ''}"><span class="knob"></span></span>
+      </button>
+      <button class="sw-row" data-sw="mark" aria-pressed="${showMarkers}">
+        <span class="lab">交易标记<span class="sub">方向所属形状/颜色 · 同向同 bar 聚合</span></span>
+        <span class="sw${showMarkers ? ' on' : ''}"><span class="knob"></span></span>
+      </button>`;
+    sheetBody.querySelectorAll('[data-sw]').forEach(b =>
+      onTap(b, () => {
+        if (b.dataset.sw === 'ind') setIndicators(!showIndicators);
+        else setMarkersVisible(!showMarkers);
+        const on = b.dataset.sw === 'ind' ? showIndicators : showMarkers;
+        b.setAttribute('aria-pressed', on);
+        b.querySelector('.sw').classList.toggle('on', on);
+      }));
+  } else if (type === 'cluster') {
+    const ids = payload;
+    const t0 = TRADES[ids[0]];
+    sheetTitle.textContent = `${fmtTime(t0.t)} · ${t0.side} × ${ids.length}`;
+    sheetBody.innerHTML = ids.map(tradeRowHtml).join('') +
+      `<div class="sheet-note">同向同 bar 聚合 · 选择一笔在图上展开</div>`;
+    bindTradeRows();
+  } else if (type === 'trade') {
+    const t = TRADES[payload];
+    const bar = tfBars[Math.floor(t.t / tf)];
+    sheetTitle.textContent = '交易详情';
+    sheetBody.innerHTML = `
+      <div class="fact"><span class="k">交易员</span><span class="v">${esc(t.trader)}</span></div>
+      <div class="fact"><span class="k">方向</span><span class="v ${t.side === 'BUY' ? 'buy' : 'sell'}">${t.side}</span></div>
+      <div class="fact"><span class="k">数量</span><span class="v">*${t.qty}</span></div>
+      <div class="fact"><span class="k">时间</span><span class="v">${fmtTime(t.t)}</span></div>
+      <div class="fact"><span class="k">参考价</span><span class="v">${bar ? bar.c.toFixed(3) : '—'}</span></div>
+      <div class="sheet-note">示意数据 · 非真实后端事实</div>`;
+  } else if (type === 'all-trades') {
+    sheetTitle.textContent = `当日交易 · ${TRADES.length}`;
+    sheetBody.innerHTML = TRADES.map((_, id) => tradeRowHtml(id)).join('') +
+      `<div class="sheet-note">汇总 8 Trades · 3 Traders · 2 Signals（示意）</div>`;
+    bindTradeRows();
+  } else if (type === 'accept') {
+    sheetTitle.textContent = '触控验收清单';
+    const items = [
+      '单指点按选中标记（命中半径 22px ≥ 44×44）',
+      '点按聚合标记打开可见列表，不静默轮播',
+      '拖动超过阈值后松手不激活标记（tap vs drag）',
+      '单指横拖平移时间轴（pointer capture）',
+      '竖拖交由页面/sheet 原生滚动（touch-action: pan-y）',
+      '双指在图表上缩放 K 线；区域外保留浏览器缩放',
+      'pointercancel / 原生接管后图表状态干净',
+      'Sheet：关闭按钮 / 背景点按 / 下滑关闭；背景 inert；焦点回退',
+      'Dock 三键打开态可见；当前值在选择前清晰',
+      '360×800 / 390×844 / 430×932 竖屏 + 横屏 smoke；safe-area 不遮挡',
+    ];
+    sheetBody.innerHTML = items.map((s, i) =>
+      `<label class="chk"><input type="checkbox" id="chk${i}"><span>${s}</span></label>`).join('') +
+      `<div class="sheet-note">鼠标 click-only 验证不通过 · 需真机或触控仿真</div>`;
+  }
+}
+function bindTradeRows() {
+  sheetBody.querySelectorAll('[data-trade]').forEach(b =>
+    onTap(b, () => {
+      selectedId = Number(b.dataset.trade);
+      closeSheet();
+      draw();
+    }));
+}
+
+function openSheet(type, payload) {
+  if (sheetType) closeSheet(true);
+  sheetType = type;
+  sheetOpener = document.activeElement;
+  buildSheetContent(type, payload);
+  backdrop.hidden = false;
+  sheet.hidden = false;
+  void sheet.offsetHeight; // start transition
+  backdrop.classList.add('open');
+  sheet.classList.add('open');
+  appRoot.inert = true; // background inert while the sheet is modal
+  Object.values(dockBtns).forEach(b => b.classList.remove('open'));
+  if (dockBtns[type]) dockBtns[type].classList.add('open');
+  sheetClose.focus();
+}
+function closeSheet(immediate) {
+  if (!sheetType) return;
+  sheetType = null;
+  backdrop.classList.remove('open');
+  sheet.classList.remove('open');
+  sheet.style.transform = '';
+  sheet.classList.remove('dragging');
+  appRoot.inert = false;
+  Object.values(dockBtns).forEach(b => b.classList.remove('open'));
+  const done = () => { backdrop.hidden = true; sheet.hidden = true; };
+  if (immediate) done(); else setTimeout(done, 200);
+  if (sheetOpener && sheetOpener.focus) sheetOpener.focus();
+  sheetOpener = null;
+}
+
+onTap(sheetClose, () => closeSheet());
+onTap(backdrop, () => closeSheet());
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && sheetType) closeSheet(); // a11y fallback, not required
+});
+
+/* sheet downward-swipe close (handle + header, pointer capture) */
+(function () {
+  const dragZone = [document.getElementById('sheetHandle'), document.getElementById('sheetHead')];
+  let dragId = null, startY = 0, dy = 0;
+  dragZone.forEach(zone => {
+    zone.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.sheet-close')) return;
+      dragId = e.pointerId; startY = e.clientY; dy = 0;
+      try { sheet.setPointerCapture(e.pointerId); } catch (_) {}
+      sheet.classList.add('dragging');
+    });
+  });
+  sheet.addEventListener('pointermove', (e) => {
+    if (dragId !== e.pointerId) return;
+    dy = Math.max(0, e.clientY - startY);
+    sheet.style.transform = `translate(-50%, ${dy}px)`;
+  });
+  const finish = (e) => {
+    if (dragId !== e.pointerId) return;
+    dragId = null;
+    sheet.classList.remove('dragging');
+    if (dy > 80) closeSheet();
+    else sheet.style.transform = '';
+    dy = 0;
+  };
+  sheet.addEventListener('pointerup', finish);
+  sheet.addEventListener('pointercancel', finish);
+})();
+
+/* ---------------- controls ---------------- */
+function setTf(next) {
+  tf = next;
+  tfBars = aggregateTf(BASE, tf);
+  document.getElementById('seg1m').classList.toggle('on', tf === 1);
+  document.getElementById('seg5m').classList.toggle('on', tf === 5);
+  document.getElementById('seg1m').setAttribute('aria-pressed', tf === 1);
+  document.getElementById('seg5m').setAttribute('aria-pressed', tf === 5);
+  cv.setAttribute('aria-label', `${ticker} ${date} ${tf}分钟K线示意图`);
+  draw();
+}
+function setIndicators(on) {
+  showIndicators = on;
+  const b = document.getElementById('btnInd');
+  b.classList.toggle('off', !on);
+  b.setAttribute('aria-pressed', on);
+  draw();
+}
+function setMarkersVisible(on) {
+  showMarkers = on;
+  const b = document.getElementById('btnMark');
+  b.classList.toggle('off', !on);
+  b.setAttribute('aria-pressed', on);
+  draw();
+}
+function setSession(nextTicker, nextDate) {
+  ticker = nextTicker; date = nextDate;
+  prevClose = TICKERS[ticker];
+  BASE = genBars(prevClose / 705.74, ticker + date);
+  tfBars = aggregateTf(BASE, tf);
+  view.endMin = 75; view.countMin = 75;
+  selectedId = DEFAULT_SELECTED;
+  document.getElementById('hdrTicker').textContent = ticker;
+  document.getElementById('hdrDate').textContent = date;
+  document.getElementById('dockTickerLabel').textContent = ticker;
+  document.getElementById('dockDateLabel').textContent = date;
+  cv.setAttribute('aria-label', `${ticker} ${date} ${tf}分钟K线示意图`);
+  updateHeader();
+  draw();
+}
+
+onTap(document.getElementById('seg1m'), () => setTf(1));
+onTap(document.getElementById('seg5m'), () => setTf(5));
+onTap(document.getElementById('btnInd'), () => setIndicators(!showIndicators));
+onTap(document.getElementById('btnMark'), () => setMarkersVisible(!showMarkers));
+onTap(dockBtns.ticker, () => openSheet('ticker'));
+onTap(dockBtns.date, () => openSheet('date'));
+onTap(dockBtns.filters, () => openSheet('filters'));
+onTap(document.getElementById('btnDetail'), () => openSheet('all-trades'));
+onTap(document.getElementById('btnAccept'), () => openSheet('accept'));
+
+/* ---------------- test hooks (touch-emulation acceptance) ---------------- */
+window.__mock = {
+  get view() { return { endMin: view.endMin, countMin: view.countMin }; },
+  get selectedId() { return selectedId; },
+  get sheetType() { return sheetType; },
+  get markersVisible() { return showMarkers; },
+  marks: () => hitMarks.map(m => ({ x: m.x, y: m.y, ids: [...m.ids] })),
+  pill: () => (pillHit ? { ...pillHit } : null),
+  trades: TRADES,
+};
+
+new ResizeObserver(() => { clampView(); draw(); }).observe(wrap);
+updateHeader();
+draw();
+</script>
+</body>
+</html>
