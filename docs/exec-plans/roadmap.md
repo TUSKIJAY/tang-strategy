@@ -31,11 +31,11 @@
 
 ## Active Plans
 
-None.
+- [Tang Strategy Date Rail Ascending And Trade Quantity](./active/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) — Active; revision `v2-review-foldback-2026-07-22`; `review-002: approve/high`; activation `user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan`; phase-0 `not-started`; next gate `phase-0-start`; OPT-001…003 from `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/`
 
 ## Proposed Plans
 
-- [Tang Strategy Date Rail Ascending And Trade Quantity](./proposed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) — Proposed; revision `v2-review-foldback-2026-07-22`; `review-002: approve/high`; next gate `activation-recording`; OPT-001…003 from `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/`
+None.
 
 ## Completed Plans
 

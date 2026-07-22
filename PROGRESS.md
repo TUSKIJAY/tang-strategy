@@ -4,11 +4,13 @@
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation-recording`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
+
+2026-07-22: User instruction `把prop plan迁移到active吧` authorized lifecycle activation of exact revision `v2-review-foldback-2026-07-22` after matching `review-002: approve/high` (`user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan`). Plan migrated `proposed/` → `active/`; Status Active; activation evidence set; phase parked at `phase-0:not-started`; next gate `phase-0-start`. Indexes/roadmap/OPT back-links/state blocks reconciled. This activation does **not** start Phase 0, does not authorize product implementation, content/DB mutation, push, PR, merge, Pages, provider/broker, or any remote action.
 
 2026-07-22: Independent design review `review-002` on exact revision `v2-review-foldback-2026-07-22` returned `approve/high` with no findings. V2 closes review-001 P1 (qty completeness + same-side same-bar marker rules + adversarial fixtures). Exact plan SHA-256 `67ae3c06…4f22` matched at HEAD `17ebee5…46ad`; all five §1.3 evidence hashes matched. Lifecycle remains **Proposed**; next gate `activation-recording`. Approval does **not** activate. No activation, implementation, content/DB mutation, provider/broker, publication, push, or remote authority.
 

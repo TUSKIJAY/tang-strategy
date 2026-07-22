@@ -1,18 +1,18 @@
 # Tang Strategy Date Rail Ascending And Trade Quantity
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Proposed
+- Status: Active
 - Plan slug: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
 - Revision: `v2-review-foldback-2026-07-22`
 - Plan author ID: `grok-plan-author-2026-07-22-date-rail-quantity`
 - Design reviews: ../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/review-001.md@revise@v1-proposal-2026-07-22, ../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/review-002.md@approve@v2-review-foldback-2026-07-22
 - Latest design verdict: approve
 - Review independence: attested
-- Activation evidence: none
-- Current phase: none
-- Phase state: none
-- Phase entry gate: none
-- Next gate: `activation-recording`
+- Activation evidence: user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan
+- Current phase: phase-0
+- Phase state: not-started
+- Phase entry gate: phase-0-start
+- Next gate: `phase-0-start`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -21,8 +21,8 @@
 - Created: 2026-07-22
 - Optimization source: `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/2026-07-22-review-date-rail-and-trade-quantity-session.md` OPT-001 + OPT-002 + OPT-003
 - Proposal baseline: `codex/project-harness@f40887100a7b4f832c59da32ac1607dc47b05854`
-- Scope authority: review-only; this proposed plan does not authorize activation, implementation, push, data mutation, or remote action
-- Local commit: task-scoped default; does not authorize activation, implementation, push, or remote action
+- Scope authority: lifecycle activation only under `user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan` after matching design `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-22`. Parked at `phase-0:not-started`. Does **not** start Phase 0 or authorize product implementation, content/DB mutation, push, PR, merge, Pages, provider/broker, or remote action.
+- Local commit: task-scoped default; does not authorize implementation start, push, or remote action
 
 ## 1. Context And Evidence
 
@@ -236,10 +236,10 @@ Untracked `output/**` trees are evidence-owned. Do not stage or delete them as p
 ## 6. Review And Activation Gate
 
 - Review location: `docs/exec-plans/reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/`
-- Required verdict: independent design review `approve` on the exact revision under review
-- Required user approval: explicit activation instruction after matching approve (approval alone does not activate)
-- Activation is a separate lifecycle change before implementation
-- Implementation start requires a later explicit start/execute instruction after activation recording
-- Creating this durable plan is committed locally by default; no push/PR/merge/Pages/provider/broker
+- Matching design approval: independent `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-22`
+- Activation recording: `user-instruction:2026-07-22-activate-date-rail-ascending-and-trade-quantity-plan` (user: 把prop plan迁移到active吧) — plan migrated `proposed/` → `active/` at `phase-0:not-started`
+- This activation does **not** start Phase 0 and does **not** authorize product implementation
+- Implementation start requires a later explicit start/execute instruction after this activation recording
+- Local activation commit only; no push/PR/merge/Pages/provider/broker
 
 The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../operating-modes.md) for state invariants, review paths, gate-token syntax, manual transitions, and closeout fields.
