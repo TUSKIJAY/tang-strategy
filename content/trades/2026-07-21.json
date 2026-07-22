@@ -1,0 +1,239 @@
+{
+  "schema_version": "trades-day-v1",
+  "trade_date": "2026-07-21",
+  "timezone": "America/New_York",
+  "trade_groups": [
+    {
+      "trade_group_id": "tg_20260721_vordin_qqq_001",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-21",
+      "direction": "PUT",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260721_vordin_qqq_001_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "PUT",
+          "strike": 700,
+          "expiry": "2026-07-21",
+          "expiry_provenance": "rule_default",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260721_vordin_qqq_001_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-07-21T09:40-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 0.75,
+              "quantity": null,
+              "fees": null,
+              "note": "09:40 EDT（21:40 UTC+8）持仓成本 0.75 入场 QQQ 700 Put",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260721_vordin_qqq_001_l1_e2",
+              "sequence": 2,
+              "action": "sell_partial",
+              "occurred_at": "2026-07-21T09:42-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 1.025,
+              "quantity": null,
+              "fees": null,
+              "note": "09:42 EDT（22:42 UTC+9 海报现价 1.025，浮盈 +36.67%），口述「出货 1/5」",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260721_vordin_qqq_001_l1_e3",
+              "sequence": 3,
+              "action": "sell_partial",
+              "occurred_at": "2026-07-21T09:50-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 1.34,
+              "quantity": null,
+              "fees": null,
+              "note": "09:50 EDT Discord 消息「Put 脚1.34再出」",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260721_vordin_qqq_001_l1_e4",
+              "sequence": 4,
+              "action": "sell_partial",
+              "occurred_at": "2026-07-21T10:03-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 1.25,
+              "quantity": null,
+              "fees": null,
+              "note": "10:03 EDT Discord 消息「P脚1.25再出 还剩2/5」",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260721_vordin_qqq_001_l1_e5",
+              "sequence": 5,
+              "action": "sell_close",
+              "occurred_at": "2026-07-21T10:27-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 0.52,
+              "quantity": null,
+              "fees": null,
+              "note": "10:27 EDT Discord 消息「Ok i turn bullish here, P腿全收0.52」",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": null,
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "QQQ 2026-07-21 700 Put（0DTE）开盘双买 Put 脚。",
+          "provenance": "user_provided"
+        }
+      ],
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "chat_screenshot",
+        "source_path": "records/2026/2026-07-21-day05/record.md",
+        "source_index": null,
+        "review_flags": ["message_time_not_fill_time", "missing_open_quantity", "missing_close_quantity"]
+      }
+    },
+    {
+      "trade_group_id": "tg_20260721_vordin_qqq_002",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-21",
+      "direction": "CALL",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260721_vordin_qqq_002_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "CALL",
+          "strike": 709,
+          "expiry": "2026-07-21",
+          "expiry_provenance": "rule_default",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260721_vordin_qqq_002_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-07-21T09:40-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 0.67,
+              "quantity": null,
+              "fees": null,
+              "note": "09:40 EDT 双买开仓（口述 10:42 EDT 确认「709 c 0.67入」）；10:35 海报显示现价 0.835 / 摊薄成本 0.78 / 浮盈 +7.05%",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            },
+            {
+              "event_id": "tg_20260721_vordin_qqq_002_l1_e2",
+              "sequence": 2,
+              "action": "sell_partial",
+              "occurred_at": "2026-07-21T09:50-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": 0.90,
+              "quantity": null,
+              "fees": null,
+              "note": "09:50 EDT Discord 消息「Call脚0.9出2/5」",
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "user_provided",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": null,
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "QQQ 2026-07-21 709 Call（0DTE）开盘双买 Call 脚。",
+          "provenance": "user_provided"
+        }
+      ],
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "chat_screenshot",
+        "source_path": "records/2026/2026-07-21-day05/record.md",
+        "source_index": null,
+        "review_flags": ["message_time_not_fill_time", "missing_open_quantity"]
+      }
+    }
+  ],
+  "note_contexts": [
+    {
+      "context_id": "ctx_20260721_vordin_qqq_001",
+      "trader_id": "vordin",
+      "underlying": "QQQ",
+      "trade_date": "2026-07-21",
+      "text": "09:40 EDT 双买策略启动（QQQ 700 Put 成本 0.75）；09:42 P脚 1.025 出 1/5；09:50 P脚 1.34 再出，C脚 0.90 出 2/5；10:03 P脚 1.25 再出还剩 2/5；10:27 全面转多 P腿 0.52 全平；10:42 口述 709 Call 0.67 入。",
+      "status": "active",
+      "review_status": "verified",
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "chat_screenshot",
+        "source_path": "records/2026/2026-07-21-day05/record.md",
+        "source_index": null,
+        "review_flags": []
+      }
+    }
+  ]
+}
