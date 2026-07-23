@@ -21,7 +21,10 @@ class Budget:
 BUDGETS = {
     "AGENTS.md": Budget(180, 24_576, 240, 32_768),
     "INSTRUCTIONS.md": Budget(220, 30_720, 300, 40_960),
-    "PROGRESS.md": Budget(280, 38_400, 350, 49_152),
+    # PROGRESS.md entries are single-line paragraphs (~1 KB each), so the byte
+    # warning is the working proxy for the ">10 body entries" archive trigger
+    # in docs/progress-archive/index.md; the line budget almost never binds.
+    "PROGRESS.md": Budget(280, 12_288, 350, 49_152),
     "HANDOFF.md": Budget(176, 38_400, 220, 49_152),
 }
 
