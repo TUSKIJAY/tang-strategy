@@ -28,6 +28,8 @@ npm-debug.log*
 *.db-wal
 *.db.write.lock
 data/exports/
+# Playwright/acceptance scratch databases; receipts and screenshots under output/ are kept
+output/**/*.db
 
 # Raw / bulky provider files
 *.csv
