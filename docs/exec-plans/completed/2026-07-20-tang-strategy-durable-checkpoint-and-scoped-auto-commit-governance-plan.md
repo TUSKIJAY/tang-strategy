@@ -250,7 +250,7 @@ Size gates are per-file plus aggregate, using exact byte counts:
 | OPT screenshot evidence | `docs/optimization/<opt>/screenshots/*.(png|jpg|jpeg|webp)` for `opt-record` or `plan-proposal` only | 5,242,880 bytes | Counts toward the same aggregate maximum |
 | Other binary | Any other binary path | denied | denied |
 
-The live reference `docs/optimization/2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png` is a required positive fixture at 1,688,940 bytes and SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`. Fixtures also require rejection at 5,242,881 screenshot bytes, at 1,048,577 text bytes, and at 26,214,401 aggregate bytes.
+The live reference `docs/optimization/2026-07-19-01-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png` is a required positive fixture at 1,688,940 bytes and SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`. Fixtures also require rejection at 5,242,881 screenshot bytes, at 1,048,577 text bytes, and at 26,214,401 aggregate bytes.
 
 Denied credential paths are: basename `.env`; basename beginning `.env.` except exact `.env.example`; extensions `.key`, `.pem`, `.p12`, `.pfx`; any path under `.ssh/`; and basenames `credentials.json`, `secrets.json`, or `secrets.yaml`. Added text lines are scanned for PEM private-key headers and non-placeholder assignments to case-insensitive `api_key`, `access_token`, `client_secret`, `password`, or `private_key`. Exact placeholders consisting only of `${...}`, `<...>`, `example`, `placeholder`, or `redacted` are allowed. Harmless filenames containing `token` and governance text such as `gate-token` are not denied; fixtures pin both false-positive cases.
 

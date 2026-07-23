@@ -29,7 +29,7 @@
 - Expected checkpoint kind: completed-migration
 - Owner: Codex
 - Created: 2026-07-20
-- Optimization source: `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md`
+- Optimization source: `docs/optimization/2026-07-20-03-review-date-nav-and-trade-filter-fusion/2026-07-20-03-review-date-nav-and-trade-filter-fusion.md`
 - Proposal baseline: `codex/project-harness@45ca9cb231ef459b7d03bad246d762ed1139bf86`
 - Scope authority: local implementation, verification, independent review, and completed-migration under `user-instruction:2026-07-21-execute-review-date-filter-fusion-plan` (goal 全权执行active plan); push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote remain unauthorized
 
@@ -37,7 +37,7 @@
 
 ### 1.1 Proposal provenance
 
-This plan promotes the user-named optimization batch `2026-07-20-review-date-nav-and-trade-filter-fusion` into one governed Coding Mode Lane 3 proposal. It covers OPT-001 through OPT-005 as one Review usability contract while retaining the prior completed Terminal UI/Trader Registry implementation as the product baseline.
+This plan promotes the user-named optimization batch `2026-07-20-03-review-date-nav-and-trade-filter-fusion` into one governed Coding Mode Lane 3 proposal. It covers OPT-001 through OPT-005 as one Review usability contract while retaining the prior completed Terminal UI/Trader Registry implementation as the product baseline.
 
 The proposal was drafted from the live repository at `codex/project-harness@45ca9cb231ef459b7d03bad246d762ed1139bf86`. The worktree already contained the uncommitted optimization record, its three screenshots, its locked HTML mockup, updates to `PROGRESS.md`, `HANDOFF.md`, and `docs/optimization/index.md`, plus unrelated `.playwright-cli/` and `output/` artifacts. All of those existing changes remain user-owned. This plan may reference the optimization assets but may not sweep unrelated artifacts into a later manifest or checkpoint.
 
@@ -45,7 +45,7 @@ The following proposal evidence was re-hashed locally and matches the optimizati
 
 | Evidence | SHA-256 | Role |
 | --- | --- | --- |
-| `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/mockups/review-left-column.html` | `ff5d71ffa87bb65127f0bcf05d421e07c211678cff19473f9f88672337233c50` | Sole locked visual proposal for date IA, fused controls, direction colors, and B Chip scaling |
+| `docs/optimization/2026-07-20-03-review-date-nav-and-trade-filter-fusion/mockups/review-left-column.html` | `ff5d71ffa87bb65127f0bcf05d421e07c211678cff19473f9f88672337233c50` | Sole locked visual proposal for date IA, fused controls, direction colors, and B Chip scaling |
 | `screenshots/2026-07-20-data-sidebar-trader-nav-wrap.png` | `4a52d56c44375e5a0e64d56b7979027520d708afd89438b9f6d4cd89fc99d6c6` | Current shell trader-nav CJK wrapping failure |
 | `screenshots/2026-07-20-review-trade-filter-current.png` | `4e5e0f4af36f69c2c748d4c6c6909a1558e4cf257f827fef5e194ada354933e1` | Current Review left-column chrome and duplicate-context friction |
 | `screenshots/2026-07-20-trade-call-put-trader-color.png` | `dda2d9256a738ebc320d7752243ca98816ebb19a818fc03bbec2348317cf50cb` | Current trader-owned hue makes CALL and PUT difficult to scan |

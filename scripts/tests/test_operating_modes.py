@@ -225,6 +225,18 @@ class OperatingModesTests(unittest.TestCase):
         self.fx.write_state(handoff_gate="closed", progress_gate="closed")
         self.assert_fails_with("does not match canonical plan")
 
+    def append_to_handoff(self, line: str) -> None:
+        path = self.fx.root / "HANDOFF.md"
+        path.write_text(f"{path.read_text(encoding='utf-8')}\n{line}\n", encoding="utf-8")
+
+    def test_handoff_dated_log_entry_fails(self) -> None:
+        self.append_to_handoff("- 2026-07-23: migrated the archive index.")
+        self.assert_fails_with("dated log entries")
+
+    def test_handoff_last_updated_line_passes(self) -> None:
+        self.append_to_handoff("- Last updated: 2026-07-23")
+        self.assert_passes()
+
 
 if __name__ == "__main__":
     unittest.main()

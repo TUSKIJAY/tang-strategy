@@ -19,7 +19,7 @@
 - Lifecycle reconciliation commit: `43b96ab9c8ffffad2e76191b0d31d45e277afddc`
 - Owner: Codex
 - Created: 2026-07-20
-- Optimization source: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md`
+- Optimization source: `docs/optimization/2026-07-20-02-trader-workspace-nav-and-registry/2026-07-20-02-trader-workspace-nav-and-registry.md`
 - Scope authority: `user-instruction:2026-07-20-execute-terminal-ui-registry-plan` authorized local Phase 0-6 implementation, verification, remediation, lifecycle closeout, and isolated temporary-copy acceptance; `user-instruction:2026-07-20-commit-activation-with-next-phase` authorized the consumed Phase 0 scoped commit; `user-instruction:2026-07-20-commit-and-push-terminal-ui-registry` is consumed by implementation/lifecycle commit `43b96ab9c8ffffad2e76191b0d31d45e277afddc`, this boundary-metadata commit, and the final push of `codex/project-harness`. Canonical data writes, further push, PR, merge, Pages publication, provider/broker access, hosted verification, and remote administration remain unauthorized
 
 ## 1. Context And Evidence
@@ -391,7 +391,7 @@ Use the repository's pinned backend environment when the default interpreter lac
 - Design reviews: `docs/exec-plans/reviews/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan/review-NNN.md`
 - Phase evidence and final review packet: the same review directory under `evidence/`
 - Temporary screenshots/behavior receipts: `output/playwright/terminal-ui-registry-<phase>-<timestamp>/`
-- Durable visual source: `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/screenshots/`
+- Durable visual source: `docs/optimization/2026-07-20-02-trader-workspace-nav-and-registry/screenshots/`
 
 ## 8. Commit, Remote, Data, And Publication Boundaries
 

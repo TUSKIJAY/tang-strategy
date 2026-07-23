@@ -57,7 +57,7 @@ Out of scope (unchanged): `content/trades/**`, tracked SQLite, seed market data,
 - test:trade-records baseline: 64 pass → post 69 pass
 - OPT-001 approach freeze: projection-only `dates` reverse inside `projectProgressiveDateRail`; no deeper `datesForTicker` change
 - Fixture freeze: test-local live-mirror legs for QQQ `2026-07-17` vordin PUT 150 / CALL 12 chains (cross-checked against `content/trades/2026-07-17.json` on 2026-07-22) + raw-preferred, unknown-open, over-partial, null-`buy_add`, null-prior-`sell_partial`, mixed same-bar adversarial cases
-- Phase 0 note: `output/date-rail-ascending-trade-quantity-20260722/phase-0-baseline.md` (untracked)
+- Phase 0 note: `docs/exec-plans/reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/evidence/phase-0-baseline.md` (moved into the plan's evidence folder on 2026-07-23; drafted under untracked `output/` at freeze time)
 
 ## Authority boundary
 

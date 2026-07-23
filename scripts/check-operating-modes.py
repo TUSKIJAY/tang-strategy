@@ -58,6 +58,14 @@ STATE_KEYS = (
 
 VERDICTS = {"approve", "revise", "reject", "accept"}
 
+# PROGRESS.md is the running lifecycle log; HANDOFF.md is only the latest resume
+# point (AGENTS.md startup contract, docs/operating-modes.md section 6). History
+# reaches HANDOFF.md by pasting a dated bullet out of PROGRESS.md, so that shape
+# is the one this checker can reject deterministically. It is a shape rule, not a
+# semantic one: undated history prose still passes, and the structural guard is
+# that HANDOFF.md holds no history section at all.
+HANDOFF_LOG_ENTRY = re.compile(r"^- \d{4}-\d{2}-\d{2}: ")
+
 
 @dataclass(frozen=True)
 class Plan:
@@ -323,6 +331,22 @@ def check_current_state(root: Path, plans: dict[str, Plan], errors: list[str]) -
         errors.append(f"current-state block does not match canonical plan: found={progress} expected={expected}")
 
 
+def check_handoff_role(root: Path, errors: list[str]) -> None:
+    path = root / "HANDOFF.md"
+    numbers = [
+        number
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1)
+        if HANDOFF_LOG_ENTRY.match(line)
+    ]
+    if numbers:
+        located = ", ".join(str(number) for number in numbers)
+        errors.append(
+            f"HANDOFF.md carries dated log entries at line {located}: "
+            "history belongs in PROGRESS.md or docs/progress-archive/, "
+            "and a blocker is written as current state, not as a dated entry"
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
@@ -334,6 +358,7 @@ def main(argv: list[str] | None = None) -> int:
     check_state_indexes(root, plans, errors)
     check_reviews(root, plans, errors)
     check_current_state(root, plans, errors)
+    check_handoff_role(root, errors)
 
     payload = {
         "schema_version": "operating-modes-check-simple-v1",

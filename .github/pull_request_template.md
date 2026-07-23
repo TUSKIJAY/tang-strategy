@@ -10,9 +10,7 @@
 
 ## Verification
 
-- [ ] `python3 scripts/check-project-harness.py --root . --profile auto`
-- [ ] Relevant backend checks completed
-- [ ] `cd frontend && npm run build`
+- [ ] `python3 scripts/verify.py` — full battery from `.harness/config.json`
 - [ ] Manual Review/Backtest regression completed when logic or payload behavior changed
 
 Evidence or notes:

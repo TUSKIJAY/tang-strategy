@@ -80,14 +80,15 @@ The script resolves the repository root independently of the caller's current di
 
 ### Repository Checks
 
-- `python3 scripts/check-project-harness.py --root . --profile governed`
-- `python3 scripts/check-operating-modes.py --root .`
-- `python3 -m unittest scripts.tests.test_operating_modes`
-- `python3 scripts/check-startup-doc-budget.py`
-- `cd backend && PYTHONPATH=. python3 -m unittest discover -s tests -p 'test_*.py'`
-- `cd backend && PYTHONPATH=. python3 -m compileall -q app scripts tests`
-- `cd frontend && npm run build`
-- `git diff --check`
+The verification battery is defined once, in `.harness/config.json` (`verification_commands`); do not restate the command list here or in `HANDOFF.md`. Run it through the cross-platform entry point:
+
+```bash
+python3 scripts/verify.py                 # full battery
+python3 scripts/verify.py --list          # show commands without running
+python3 scripts/verify.py --only frontend # substring filter (repeatable)
+```
+
+The runner executes each command through bash (macOS/Linux native; Git Bash on Windows) and exits non-zero on any failure.
 
 TradingView tests require the pinned dependencies in `backend/requirements-tv.txt`; an environment missing them is an environment prerequisite failure, not a code regression.
 

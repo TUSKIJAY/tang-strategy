@@ -19,7 +19,7 @@
 - Lifecycle reconciliation commit: a94ae234dc8264c8f837af5d73e7c3878f49278f
 - Owner: Grok
 - Created: 2026-07-21
-- Optimization source: `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/2026-07-21-review-sidebar-spacing-and-kline-selection-band.md` OPT-001 + OPT-002
+- Optimization source: `docs/optimization/2026-07-21-09-review-sidebar-spacing-and-kline-selection-band/2026-07-21-09-review-sidebar-spacing-and-kline-selection-band.md` OPT-001 + OPT-002
 - Proposal baseline: `codex/project-harness@652092bd4577eeb004b2d4eda4c9452b8dd98f83`
 - Scope authority: full local execution under `user-instruction:2026-07-21-execute-sidebar-spacing-and-kline-selection-band-plan` (goal OBJECTIVE 这个active plan交给你全权负责执行). Matching design approval `review-002: approve/high`. Implementation review `implementation-review-001: accept/high`. Product commit `5f36d29a44fb12aee2319ae147303cc970d83193`. No push/PR/merge/Pages/provider/broker/DB/content day-file/remote.
 - Local commit: task-scoped default; does not authorize implementation start, push, or remote action
@@ -35,7 +35,7 @@
 | **OPT-001** | Sidebar Trade tools / trader cards / strategy detail stack needs gaps | **In scope** | ≈20px inter-block gaps + 交易者/策略讲解 captions + hairline dividers; Traders-row dedupe |
 | **OPT-002** | Trader select blue K-line band overlay is too loud | **In scope** | Cancel blue selection band entirely; no replacement cue; keep click-to-locate / fitRange; marker labels unchanged |
 
-Only these two OPTs from batch `2026-07-21-review-sidebar-spacing-and-kline-selection-band` are promoted. Adjacent session OPTs and completed plans stay closed.
+Only these two OPTs from batch `2026-07-21-09-review-sidebar-spacing-and-kline-selection-band` are promoted. Adjacent session OPTs and completed plans stay closed.
 
 相关已完成边界（不得回退）：
 
@@ -60,9 +60,9 @@ Independent `review-001` returned `revise/high` against exact revision `v1-propo
 
 | 证据 | 路径 | SHA-256 | 作用 |
 | --- | --- | --- | --- |
-| Sidebar stack no gap (live) | `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/screenshots/2026-07-21-review-sidebar-stack-no-gap.png` | `e7846e060f3f7f5049dd92edc512de39f939dab11670cfc4ac0667d969020d37` | OPT-001 friction |
-| Blue selection band (live) | `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/screenshots/2026-07-21-review-kline-selection-blue-band.png` | `a5cf3b8a4f64ab86775e16ecb00a3bfcb842c02698e87f1892772dad5b5de89d` | OPT-002 friction |
-| Confirmed design mock | `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/mock.html` | `f2386dbd46aff8c472d635aa3c53f2071ca4e2f22d6d053ffa366abf8981ce46` | Locked proposal surface (`opt001=fixed`, `opt002=none`) |
+| Sidebar stack no gap (live) | `docs/optimization/2026-07-21-09-review-sidebar-spacing-and-kline-selection-band/screenshots/2026-07-21-review-sidebar-stack-no-gap.png` | `e7846e060f3f7f5049dd92edc512de39f939dab11670cfc4ac0667d969020d37` | OPT-001 friction |
+| Blue selection band (live) | `docs/optimization/2026-07-21-09-review-sidebar-spacing-and-kline-selection-band/screenshots/2026-07-21-review-kline-selection-blue-band.png` | `a5cf3b8a4f64ab86775e16ecb00a3bfcb842c02698e87f1892772dad5b5de89d` | OPT-002 friction |
+| Confirmed design mock | `docs/optimization/2026-07-21-09-review-sidebar-spacing-and-kline-selection-band/mock.html` | `f2386dbd46aff8c472d635aa3c53f2071ca4e2f22d6d053ffa366abf8981ce46` | Locked proposal surface (`opt001=fixed`, `opt002=none`) |
 
 Untracked informal `output/playwright/mock-*.png` trees are **not** batch evidence and must not be staged.
 

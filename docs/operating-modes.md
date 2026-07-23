@@ -144,6 +144,8 @@ Each plan must be linked exactly once from its matching state index and from the
 
 When `Current plan=none`, the other values are `None`, `none`, `none`, and `none`. Otherwise the block must match the named plan's metadata.
 
+Beyond that shared block the two files divide by time, not by topic. `PROGRESS.md` is the running lifecycle log: it accretes dated entries and sheds the oldest closed ones into `docs/progress-archive/` on the triggers that index defines. `HANDOFF.md` is the current resume point: it is overwritten, never appended, and carries no history — a blocker or an open thread is written as present-tense state, not as a dated entry. The lifecycle checker rejects any `HANDOFF.md` line matching `- <YYYY-MM-DD>: `, which is how a pasted log entry looks; that is a shape rule and does not excuse writing the same history without a date. Duplicating a `PROGRESS.md` fact into `HANDOFF.md` creates a second copy that must be hand-synced and will drift, so link or restate the current consequence instead.
+
 ## 7. Data Update Mode
 
 Routine use of the existing fetch/rebuild/acceptance system does not require an Exec Plan. Resolve the requested session with the actual US equity calendar, fetch the SPY/QQQ pair from TradingView first, validate hard session/OHLCV gates, rebuild through a candidate DB, reject shrink/integrity/drift failures, and verify the requested day through the runtime.
@@ -160,5 +162,16 @@ Run verification in proportion to the change:
 - product changes: focused tests plus the relevant build or browser acceptance;
 - DB/data changes: the candidate, integrity, non-shrink, runtime, and runbook gates;
 - remote actions: only after explicit authority and only with their real remote receipts.
+
+Browser acceptance runs write to `output/playwright/<plan-slug>-<run-id>/`. Commit that run's `receipts.json` — the assertion values are the durable evidence and stay greppable and re-verifiable. Every path a receipt records that points inside the repository is repository-relative with forward slashes (`output/playwright/<run>/v2-foo.png`); an absolute machine path to a repository file is a defect, since it names one developer's disk and reads as broken on every other machine and OS. An artifact deliberately written outside the worktree is named by its real absolute path — that is a location, not a repository path. Screenshots and scratch databases from the run stay local and are gitignored; a screenshot only enters the repository when a plan deliberately pins its SHA-256, and then it belongs in that plan's `evidence/` folder, not in `output/`.
+
+Local acceptance artifacts have a defined life, and clearing them needs no separate authorization:
+
+- Scratch databases die with the run that created them. Delete them at the end of the run, not later.
+- A superseded run — any earlier attempt at the same acceptance — is deleted as soon as the run that the review packet cites exists. Only the cited run survives.
+- The cited run's screenshots are deleted once the plan reaches `Completed`. From then on the committed `receipts.json` and the implementation review carry the claim.
+- Nothing under `output/` is a record, and no `output/` tree survives its plan. A resumed session preserves untracked `output/` trees only while their plan is still open.
+
+Because runs do not outlive their plan, a closed plan's review packet naming its run directory is a historical reference, not a broken link. Leave those records as written; do not rewrite frozen governance text to chase a path that was always ephemeral.
 
 The lifecycle checker is intentionally small. It verifies plan uniqueness, required metadata, state-index and roadmap links, review verdict linkage, and matching `PROGRESS.md` / `HANDOFF.md` state. It does not parse Git history, CI YAML semantics, arbitrary Markdown edge cases, or remote authority.

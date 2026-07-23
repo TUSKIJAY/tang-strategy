@@ -28,6 +28,10 @@ npm-debug.log*
 *.db-wal
 *.db.write.lock
 data/exports/
+# Playwright acceptance runs: keep receipts.json, drop scratch DBs and screenshots
+# (see docs/operating-modes.md §8; a screenshot that must persist goes in the plan's evidence/ folder)
+output/**/*.db
+output/**/*.png
 
 # Raw / bulky provider files
 *.csv

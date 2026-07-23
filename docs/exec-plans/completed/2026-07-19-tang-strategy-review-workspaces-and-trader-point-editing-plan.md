@@ -29,8 +29,8 @@
 - Lifecycle reconciliation commit: `65fd15dd3a3b7030bc3d15fc0590ea26a048490c`
 - Owner: Codex
 - Created: 2026-07-19
-- Source intake: [`docs/optimization/2026-07-19-review-ui-and-trader-editing/`](../../optimization/2026-07-19-review-ui-and-trader-editing/2026-07-19-review-ui-and-trader-editing.md), OPT-001 through OPT-004
-- Visual baseline: [`docs/optimization/2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png`](../../optimization/2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png), SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`
+- Source intake: [`docs/optimization/2026-07-19-01-review-ui-and-trader-editing/`](../../optimization/2026-07-19-01-review-ui-and-trader-editing/2026-07-19-01-review-ui-and-trader-editing.md), OPT-001 through OPT-004
+- Visual baseline: [`docs/optimization/2026-07-19-01-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png`](../../optimization/2026-07-19-01-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png), SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`
 - Scope authority: lifecycle-only activation and Phases 0-6 are complete; `user-instruction:2026-07-19-start-review-workspaces-implementation`, `user-instruction:2026-07-20-kimi-limit-takeover`, the final Phase 6 closeout instruction, and `user-instruction:2026-07-20-commit-and-push` are fully consumed. External Grok Build accepted the exact review-ready revision above with high confidence and no findings. The plan-scoped commits and current `codex/project-harness` branch push completed without granting data writes, provider/broker access, PR, merge, Pages publication, hosted verification, or other remote changes
 - Current request authority: consumed by the exact plan-scoped commit chain and current-branch push; any future source, data, Git, publication, provider/broker, PR, merge, or remote-setting action requires new authority
 

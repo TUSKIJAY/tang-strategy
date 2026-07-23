@@ -37,6 +37,7 @@ GOVERNED = (
     "docs/optimization/record-template.md",
     "docs/progress-archive/index.md",
     "scripts/check-startup-doc-budget.py",
+    "scripts/verify.py",
 )
 
 LINK_SURFACES = (

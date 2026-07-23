@@ -19,7 +19,7 @@
 - Lifecycle reconciliation commit: none
 - Owner: Grok
 - Created: 2026-07-21
-- Optimization source: `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/2026-07-21-trade-points-and-kline-marker-labels.md` (user-named; superseded pointer) with authoritative detail in session batch OPT-001/OPT-002 `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`
+- Optimization source: `docs/optimization/2026-07-21-06-trade-points-and-kline-marker-labels/2026-07-21-06-trade-points-and-kline-marker-labels.md` (user-named; superseded pointer) with authoritative detail in session batch OPT-001/OPT-002 `docs/optimization/2026-07-21-08-review-trade-and-kline-session/2026-07-21-08-review-trade-and-kline-session.md`
 - Proposal baseline: `codex/project-harness@6c62c2b1ff8314da36a5f2dad57a81451c720edb`
 - Scope authority: full local execution through closeout under goal OBJECTIVE / `user-instruction:2026-07-21-execute-trade-points-and-kline-marker-labels-plan`. Push/PR/merge/Pages/provider/broker/remote remain unauthorized. Matching design approval is `review-002: approve/high` on exact revision `v2-review-foldback-2026-07-21`.
 
@@ -27,7 +27,7 @@
 
 ### 1.1 Proposal provenance
 
-用户点名 optimization 文档 `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/` 并要求 **转换成 prop plan**。该文件本身是 session 合并后的 `superseded` 指针（OPT-001 + OPT-002）；权威正文与证据已并入 session 批次：
+用户点名 optimization 文档 `docs/optimization/2026-07-21-06-trade-points-and-kline-marker-labels/` 并要求 **转换成 prop plan**。该文件本身是 session 合并后的 `superseded` 指针（OPT-001 + OPT-002）；权威正文与证据已并入 session 批次：
 
 | 来源 | OPT | 摩擦点 |
 | --- | --- | --- |
@@ -60,10 +60,10 @@ Independent `review-001` returned `revise/high` against exact revision `v1-propo
 
 | 证据 | 路径 | SHA-256 | 作用 |
 | --- | --- | --- | --- |
-| Live cards amount/profit noise | `docs/optimization/2026-07-21-review-trade-and-kline-session/screenshots/2026-07-21-trade-card-amount-profit-subtraction.png` | `fb446df9d39de6e3890b573c06338aca4267646330ea341b8813da96b937db90` | OPT-001 现状 |
-| Live markers CALL/PUT + trader_id | `docs/optimization/2026-07-21-review-trade-and-kline-session/screenshots/2026-07-21-kline-marker-buysell-trader-nickname.png` | `610e3d74216adf869626310e65a48de4127632f3f48c44256510874483a33559` | OPT-002 现状 |
-| Named-batch locked mock | `docs/optimization/2026-07-21-trade-points-and-kline-marker-labels/mockups/trade-points-and-kline-labels.html` | `e5bb2a0557700868ffbabf64ffa3dba4d4a28f2176fa76a127d58e6a740a67e9` | 本计划 UI 方向（cards + markers） |
-| Session mock (superset) | `docs/optimization/2026-07-21-review-trade-and-kline-session/mockups/review-trade-and-kline-session.html` | `f2cbec2cf0ae1ee2f292583c40c693adb766a911a4e5f872d9250828d680de6a` | 上下文；仅 OPT-001/002 切片对本计划有约束力 |
+| Live cards amount/profit noise | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/screenshots/2026-07-21-trade-card-amount-profit-subtraction.png` | `fb446df9d39de6e3890b573c06338aca4267646330ea341b8813da96b937db90` | OPT-001 现状 |
+| Live markers CALL/PUT + trader_id | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/screenshots/2026-07-21-kline-marker-buysell-trader-nickname.png` | `610e3d74216adf869626310e65a48de4127632f3f48c44256510874483a33559` | OPT-002 现状 |
+| Named-batch locked mock | `docs/optimization/2026-07-21-06-trade-points-and-kline-marker-labels/mockups/trade-points-and-kline-labels.html` | `e5bb2a0557700868ffbabf64ffa3dba4d4a28f2176fa76a127d58e6a740a67e9` | 本计划 UI 方向（cards + markers） |
+| Session mock (superset) | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/mockups/review-trade-and-kline-session.html` | `f2cbec2cf0ae1ee2f292583c40c693adb766a911a4e5f872d9250828d680de6a` | 上下文；仅 OPT-001/002 切片对本计划有约束力 |
 
 Named-batch mock 与 session 截图字节一致（同名 PNG 哈希相同）。
 
