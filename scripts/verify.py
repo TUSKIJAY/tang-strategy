@@ -26,6 +26,10 @@ WINDOWS_BASH_FALLBACKS = (
 
 
 def find_bash() -> str | None:
+    if sys.platform == "win32":
+        for candidate in WINDOWS_BASH_FALLBACKS:
+            if candidate.is_file():
+                return str(candidate)
     found = shutil.which("bash")
     if found:
         return found
