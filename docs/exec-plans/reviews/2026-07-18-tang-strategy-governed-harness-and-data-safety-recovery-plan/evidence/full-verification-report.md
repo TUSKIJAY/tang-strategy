@@ -77,7 +77,7 @@ All exercised API requests returned HTTP 200. The only console error was a non-p
 - TV remains the default daily source; IB is fallback only after named TV failure gates.
 - `docs/index.html`, `docs/assets/`, `docs/reviews/`, `docs/reference.html`, `docs/reviewed/`, and zero-byte `.codex` were deleted only after consumer and recovery proof. All remain recoverable from Git history.
 - Provider stubs, frontend helpers/scanner/chart assets, browser tooling, tracked DB, seed model, and Pages publisher were retained.
-- Excluded repository-audit findings are recorded in `docs/optimization/2026-07-18-repository-audit-followups.md` without execution authority.
+- Excluded repository-audit findings are recorded in `docs/optimization/2026-07-18-01-repository-audit-followups/2026-07-18-01-repository-audit-followups.md` without execution authority.
 
 ## Cleanup And Authority Boundary
 

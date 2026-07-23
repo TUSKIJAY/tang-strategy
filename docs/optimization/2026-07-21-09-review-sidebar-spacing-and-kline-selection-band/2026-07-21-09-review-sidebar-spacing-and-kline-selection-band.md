@@ -3,7 +3,7 @@
 > Record-only intake. This file does not authorize implementation, plan promotion, push, data mutation, or remote actions.
 >
 > Place this file at:
-> `docs/optimization/2026-07-21-review-sidebar-spacing-and-kline-selection-band/2026-07-21-review-sidebar-spacing-and-kline-selection-band.md`
+> `docs/optimization/2026-07-21-09-review-sidebar-spacing-and-kline-selection-band/2026-07-21-09-review-sidebar-spacing-and-kline-selection-band.md`
 > Evidence images live in `./screenshots/`.
 >
 > A finalized record and its direct index update are committed locally by default under `docs/operating-modes.md` §2. This does not authorize implementation or remote action.
@@ -35,7 +35,7 @@
 
 ## Relationship To Prior Work
 
-- Recent completed group-span / viewport work: [`2026-07-21-review-trade-and-kline-session`](../2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md) OPT-003…006 → completed plan `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan` (introduced multi-bar blue selection band + span-fit). OPT-002 is post-ship acceptance friction on that band visual, not a reopening of the whole plan.
+- Recent completed group-span / viewport work: [`2026-07-21-08-review-trade-and-kline-session`](../2026-07-21-08-review-trade-and-kline-session/2026-07-21-08-review-trade-and-kline-session.md) OPT-003…006 → completed plan `2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan` (introduced multi-bar blue selection band + span-fit). OPT-002 is post-ship acceptance friction on that band visual, not a reopening of the whole plan.
 - Trade panel polish / density: completed plans under trade-panel visual polish and data progressive + card density. OPT-001 is residual **inter-block rhythm** between tools, trader list, and strategy signal list after those density passes.
 
 ## Visual Reference

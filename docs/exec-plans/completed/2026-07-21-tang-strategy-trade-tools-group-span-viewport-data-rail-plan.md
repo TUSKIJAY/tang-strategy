@@ -19,7 +19,7 @@
 - Lifecycle reconciliation commit: 9946a45e9103e2f940c21f3a3a366425af46417a
 - Owner: Grok
 - Created: 2026-07-21
-- Optimization source: `docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md` session OPT-003…006
+- Optimization source: `docs/optimization/2026-07-21-08-review-trade-and-kline-session/2026-07-21-08-review-trade-and-kline-session.md` session OPT-003…006
 - Proposal baseline: `codex/project-harness@5f7a4cce581f1a475d5dbadd2cb8cbac33b9bfb3`
 - Scope authority: full local execution under `user-instruction:2026-07-21-execute-trade-tools-group-span-viewport-data-rail-plan` (goal OBJECTIVE). Matching design approval `review-003: approve/high`. Implementation review `implementation-review-001: accept/high`. Product commit `a76b83680e80ab8bf7a857fa776146a2aa4f24aa`. No push/PR/merge/Pages/provider/broker/DB/content day-file/remote.
 - Local commit: task-scoped default; does not authorize implementation, push, or remote action
@@ -29,7 +29,7 @@
 ### 1.1 Proposal provenance
 
 用户点名 session-consolidated optimization 文档
-`docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`
+`docs/optimization/2026-07-21-08-review-trade-and-kline-session/2026-07-21-08-review-trade-and-kline-session.md`
 并要求 **转换成 prop plan**。
 
 | OPT | Title | 本计划 | 备注 |
@@ -81,12 +81,12 @@ Independent `review-002` returned `revise/high` against exact revision `v2-revie
 
 | 证据 | 路径 | SHA-256 | 作用 |
 | --- | --- | --- | --- |
-| Eligibility row to remove | `docs/optimization/2026-07-21-review-trade-and-kline-session/screenshots/2026-07-21-trade-tools-eligibility-remove.png` | `d0a6beba6c6069fc9a39a62623c73a4a9fc6273eca75f359483d5b8fe80ee11a` | OPT-003 现状 |
-| 5m switch broken first paint | `docs/optimization/2026-07-21-review-trade-and-kline-session/screenshots/2026-07-21-kline-5m-switch-initial-viewport.png` | `9691ae10b41503db49ceaaf6db64880c1d934646662baf62e81f0309ad8efe08` | OPT-004 现状 |
-| Group select zooms first event only | `docs/optimization/2026-07-21-review-trade-and-kline-session/screenshots/2026-07-21-trade-group-select-first-event-only.png` | `1256380599cb21a0236d59f071ac6b7759955501be8a3c1cd1dca0ae0159f7d0` | OPT-005 chart |
-| Legs/events dense dump | `docs/optimization/2026-07-21-review-trade-and-kline-session/screenshots/2026-07-21-trade-legs-events-current-ui.png` | `888970a008cc039edd12a3ddf662d5ed44c9be46384a89733c4b3daa27d1b5e6` | OPT-005 list |
-| Data Market days stretched | `docs/optimization/2026-07-21-review-trade-and-kline-session/screenshots/2026-07-21-data-market-days-stretched-controls.png` | `39888c6db1ef1e211b21e6bf63de950ce40c597538f7ad72ae423c6aab0da0f8` | OPT-006 现状 |
-| Session mock (all UI items) | `docs/optimization/2026-07-21-review-trade-and-kline-session/mockups/review-trade-and-kline-session.html` | `f2cbec2cf0ae1ee2f292583c40c693adb766a911a4e5f872d9250828d680de6a` | OPT-003…006 目标方向 |
+| Eligibility row to remove | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/screenshots/2026-07-21-trade-tools-eligibility-remove.png` | `d0a6beba6c6069fc9a39a62623c73a4a9fc6273eca75f359483d5b8fe80ee11a` | OPT-003 现状 |
+| 5m switch broken first paint | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/screenshots/2026-07-21-kline-5m-switch-initial-viewport.png` | `9691ae10b41503db49ceaaf6db64880c1d934646662baf62e81f0309ad8efe08` | OPT-004 现状 |
+| Group select zooms first event only | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/screenshots/2026-07-21-trade-group-select-first-event-only.png` | `1256380599cb21a0236d59f071ac6b7759955501be8a3c1cd1dca0ae0159f7d0` | OPT-005 chart |
+| Legs/events dense dump | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/screenshots/2026-07-21-trade-legs-events-current-ui.png` | `888970a008cc039edd12a3ddf662d5ed44c9be46384a89733c4b3daa27d1b5e6` | OPT-005 list |
+| Data Market days stretched | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/screenshots/2026-07-21-data-market-days-stretched-controls.png` | `39888c6db1ef1e211b21e6bf63de950ce40c597538f7ad72ae423c6aab0da0f8` | OPT-006 现状 |
+| Session mock (all UI items) | `docs/optimization/2026-07-21-08-review-trade-and-kline-session/mockups/review-trade-and-kline-session.html` | `f2cbec2cf0ae1ee2f292583c40c693adb766a911a4e5f872d9250828d680de6a` | OPT-003…006 目标方向 |
 
 ### 1.4 Current repository facts
 
@@ -321,7 +321,7 @@ Untracked `output/local-acceptance/`, `output/playwright/*` evidence trees — p
 ## 7. References
 
 - Operating modes: [`docs/operating-modes.md`](../../operating-modes.md)
-- Optimization source: [`docs/optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md`](../../optimization/2026-07-21-review-trade-and-kline-session/2026-07-21-review-trade-and-kline-session.md)
+- Optimization source: [`docs/optimization/2026-07-21-08-review-trade-and-kline-session/2026-07-21-08-review-trade-and-kline-session.md`](../../optimization/2026-07-21-08-review-trade-and-kline-session/2026-07-21-08-review-trade-and-kline-session.md)
 - Design review-001 (v1): [`../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md`](../reviews/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan/review-001.md)
 - Completed OPT-001/002 plan: [`docs/exec-plans/completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md`](../completed/2026-07-21-tang-strategy-trade-points-and-kline-marker-labels-plan.md)
 - Completed polish plan: [`docs/exec-plans/completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md`](../completed/2026-07-21-tang-strategy-trade-panel-visual-polish-plan.md)

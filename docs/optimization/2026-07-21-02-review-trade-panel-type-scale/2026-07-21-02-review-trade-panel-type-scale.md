@@ -3,7 +3,7 @@
 > Record-only intake. This file does not authorize implementation, plan promotion, commit, push, data mutation, or remote actions.
 >
 > Place this file at:
-> `docs/optimization/2026-07-21-review-trade-panel-type-scale/2026-07-21-review-trade-panel-type-scale.md`
+> `docs/optimization/2026-07-21-02-review-trade-panel-type-scale/2026-07-21-02-review-trade-panel-type-scale.md`
 > Put evidence images in the sibling `screenshots/` folder and link them as `./screenshots/<name>.png`.
 >
 > This completed historical record does not authorize new implementation or remote action. New OPT work follows the task-scoped local commit default in `docs/operating-modes.md` §2.
@@ -15,8 +15,8 @@
 ## Relationship To Prior Work
 
 - Completed plan `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan` set CALL/PUT direction colors and B-chip visibility on the Review trade surface. Residual acceptance now targets **type scale of the real trader point cards**, not a second pass on date rail or chip filter semantics.
-- Prior batch [`2026-07-20-review-date-nav-and-trade-filter-fusion`](../2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md) OPT-004 (direction colors) and OPT-002 (panel fusion) are related context; this intake is specifically **typography/density** of the point list.
-- Sibling same-day intake [`2026-07-21-data-page-progressive-date-nav`](../2026-07-21-data-page-progressive-date-nav/2026-07-21-data-page-progressive-date-nav.md) is separate.
+- Prior batch [`2026-07-20-03-review-date-nav-and-trade-filter-fusion`](../2026-07-20-03-review-date-nav-and-trade-filter-fusion/2026-07-20-03-review-date-nav-and-trade-filter-fusion.md) OPT-004 (direction colors) and OPT-002 (panel fusion) are related context; this intake is specifically **typography/density** of the point list.
+- Sibling same-day intake [`2026-07-21-01-data-page-progressive-date-nav`](../2026-07-21-01-data-page-progressive-date-nav/2026-07-21-01-data-page-progressive-date-nav.md) is separate.
 
 ## Clarification Log
 

@@ -12,7 +12,7 @@
 
 - Last updated: 2026-07-23
 - Branch: `codex/project-harness`
-- Latest completed task: record-only mobile Review/Static OPT batch `docs/optimization/2026-07-22-review-mobile-chart-canvas-and-floating-filter-dock/`
+- Latest completed task: record-only mobile Review/Static OPT batch `docs/optimization/2026-07-22-02-review-mobile-chart-canvas-and-floating-filter-dock/`
 - Mobile OPT status: OPT-001…003 `recorded`; touch-verified self-contained `mock.html`; no proposed or active plan
 - Mobile touch evidence: coarse-pointer Playwright acceptance passed marker hit slop, cluster choice, tap-vs-drag cancellation, horizontal pan, vertical arbitration, `pointercancel`, pinch scale, sheet close paths, and four target viewport/orientation sizes
 - Mobile next gate: none unless the user explicitly requests promotion into a proposed plan
@@ -22,13 +22,14 @@
 - Implementation review: `implementation-review-001.md` → `accept/high`
 - Verified implementation commit: `da12e1b03715be3de75fcafd8d47aa1a35554942`
 - Final disposition: `Completed`; next gate `closed`
-- Source OPT: `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/` OPT-001…003 `completed`
+- Source OPT: `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/` OPT-001…003 `completed`
 - Tests: frontend `test:trade-records` 69/69; normal + static builds green; harness auto green
 - V1–V3 receipts: `output/playwright/date-rail-qty-20260722023705/` (untracked)
 - Preserve untracked `output/` trees; do not stage
 
 ## Latest Completed Work
 
+- 2026-07-23: OPT batch folders renamed to `<YYYY-MM-DD>-<NN>-<slug>` (daily sequence from `01`, creation order); 16 batches backfilled, references swept, hash-pinned mock evidence left byte-identical; rule in `docs/optimization/SOP.md`.
 - 2026-07-23: Mobile Chart Canvas + Floating Filter Dock OPT-001…003 **recorded**; touch-first mock accepted locally; no implementation authority.
 - 2026-07-22: Date Rail Ascending And Trade Quantity **Completed** (OPT-001…003): product commit `da12e1b`, `implementation-review-001: accept/high`, migrated to `completed/`, next gate `closed`.
 - 2026-07-22: Lifecycle activation `proposed/` → `active/` at `phase-0:not-started` after matching design approve.

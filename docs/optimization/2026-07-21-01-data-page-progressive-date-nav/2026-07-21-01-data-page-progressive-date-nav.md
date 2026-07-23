@@ -3,7 +3,7 @@
 > Record-only intake. This file does not authorize implementation, plan promotion, commit, push, data mutation, or remote actions.
 >
 > Place this file at:
-> `docs/optimization/2026-07-21-data-page-progressive-date-nav/2026-07-21-data-page-progressive-date-nav.md`
+> `docs/optimization/2026-07-21-01-data-page-progressive-date-nav/2026-07-21-01-data-page-progressive-date-nav.md`
 > Put evidence images in the sibling `screenshots/` folder and link them as `./screenshots/<name>.png`.
 >
 > This completed historical record does not authorize new implementation or remote action. New OPT work follows the task-scoped local commit default in `docs/operating-modes.md` §2.
@@ -14,8 +14,8 @@
 
 ## Relationship To Prior Work
 
-- Completed Review-only progressive date navigation: [`2026-07-20-review-date-nav-and-trade-filter-fusion`](../2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md) → completed plan `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`. That plan **explicitly excluded** Data/Admin/Static progressive DateRail: only `ReviewPage` passes `dateNavigation="progressive"`; shared default remains `exhaustive`.
-- Earlier same-theme draft [`2026-07-20-data-coverage-presentation`](../2026-07-20-data-coverage-presentation/2026-07-20-data-coverage-presentation.md) was **superseded** when intake shifted to trader-workspace/nav. This batch is a **new 2026-07-21 user acceptance reopen** of Data progressive date presentation after Review progressive is live—not a resurrection of the superseded draft’s research scope.
+- Completed Review-only progressive date navigation: [`2026-07-20-03-review-date-nav-and-trade-filter-fusion`](../2026-07-20-03-review-date-nav-and-trade-filter-fusion/2026-07-20-03-review-date-nav-and-trade-filter-fusion.md) → completed plan `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`. That plan **explicitly excluded** Data/Admin/Static progressive DateRail: only `ReviewPage` passes `dateNavigation="progressive"`; shared default remains `exhaustive`.
+- Earlier same-theme draft [`2026-07-20-01-data-coverage-presentation`](../2026-07-20-01-data-coverage-presentation/2026-07-20-01-data-coverage-presentation.md) was **superseded** when intake shifted to trader-workspace/nav. This batch is a **new 2026-07-21 user acceptance reopen** of Data progressive date presentation after Review progressive is live—not a resurrection of the superseded draft’s research scope.
 - Live technical fact (read-only): `DashboardPage` already mounts shared `ReviewContextPanel` without `dateNavigation`, so it inherits exhaustive month-grouped chips. Review passes `dateNavigation="progressive"`.
 
 ## Visual Reference

@@ -19,7 +19,7 @@
 - Lifecycle reconciliation commit: 9ba765db4ac261fc19408877fab6befedf6804d1
 - Owner: Grok
 - Created: 2026-07-22
-- Optimization source: `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/2026-07-22-review-date-rail-and-trade-quantity-session.md` OPT-001 + OPT-002 + OPT-003
+- Optimization source: `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/2026-07-22-01-review-date-rail-and-trade-quantity-session.md` OPT-001 + OPT-002 + OPT-003
 - Proposal baseline: `codex/project-harness@f40887100a7b4f832c59da32ac1607dc47b05854`
 - Scope authority: full local execution under `user-instruction:2026-07-22-execute-date-rail-ascending-and-trade-quantity-plan` (goal OBJECTIVE 你来全权负责执行这个plan). Matching design approval `review-002: approve/high`. Implementation review `implementation-review-001: accept/high`. Product commit `da12e1b03715be3de75fcafd8d47aa1a35554942`. No push/PR/merge/Pages/provider/broker/DB/content day-file/remote.
 - Local commit: task-scoped default; does not authorize implementation start, push, or remote action
@@ -58,11 +58,11 @@ Independent `review-001` returned `revise/high` against exact revision `v1-propo
 
 | 证据 | 路径 | SHA-256 | 作用 |
 | --- | --- | --- | --- |
-| DateRail 最近倒序 | `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/screenshots/2026-07-21-date-rail-recent-desc.png` | `41e89858444978159bfd1b88fd4a7f6870d32b83de8127ca92035dab1eb3f649` | OPT-001 |
-| DateRail 按月倒序 | `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/screenshots/2026-07-21-date-rail-month-desc.png` | `e54d13943d3a9dbb7bc0b581ed185a2579f50ae01c65c30edf79587c5eb66c44` | OPT-001 |
-| Marker `×N` | `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/screenshots/2026-07-21-kline-marker-quantity-desc.png` | `f45a860bfdcff764cbe870220b68776df1f2046f6d08434fbd0e40929d798480` | OPT-002 |
-| Timeline `SELL ?` | `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/screenshots/2026-07-22-trade-close-quantity-question-mark.png` | `157a48331cd07f67f1c3848f89c5df2f0d44e5bbb9022cecefd665e5ec08334f` | OPT-003 |
-| Design mock | `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/mock.html` | `0363492762fee72cc63adaa97f4797c22925a57758c7942fb52391d3fa0a1640` | Current vs Proposed for OPT-001…003 |
+| DateRail 最近倒序 | `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/screenshots/2026-07-21-date-rail-recent-desc.png` | `41e89858444978159bfd1b88fd4a7f6870d32b83de8127ca92035dab1eb3f649` | OPT-001 |
+| DateRail 按月倒序 | `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/screenshots/2026-07-21-date-rail-month-desc.png` | `e54d13943d3a9dbb7bc0b581ed185a2579f50ae01c65c30edf79587c5eb66c44` | OPT-001 |
+| Marker `×N` | `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/screenshots/2026-07-21-kline-marker-quantity-desc.png` | `f45a860bfdcff764cbe870220b68776df1f2046f6d08434fbd0e40929d798480` | OPT-002 |
+| Timeline `SELL ?` | `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/screenshots/2026-07-22-trade-close-quantity-question-mark.png` | `157a48331cd07f67f1c3848f89c5df2f0d44e5bbb9022cecefd665e5ec08334f` | OPT-003 |
+| Design mock | `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/mock.html` | `0363492762fee72cc63adaa97f4797c22925a57758c7942fb52391d3fa0a1640` | Current vs Proposed for OPT-001…003 |
 
 Mock is illustrative; **OPT Scope Lock + this plan** are authoritative over any residual mock pedagogy (e.g. teaching-only `derived` pill).
 

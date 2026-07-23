@@ -160,7 +160,7 @@ It lives in `ReviewPage`’s left column under the workspace date rail and strat
     - **Paper / editorial app skin (default):** `:root` tokens `--paper #f7f1e6`, `--panel #fffaf0`, `--line #dfd1bb`, `--accent #a6532a`, `--ink #181713`; `body` cream gradient; `.metric`/`.panel` warm panels. Used by Data, Admin Traders, Backtest, Teaching content inside `main`.
     - **Review terminal skin:** `.dr-shell { background: #141413; color: #E8E7E3; }` plus a large `.dr-*` token island (sidebar `#1E1E1D`, controls `#282827`, accent olive `#8B9A6D`). `ReviewPage` roots at `className="dr-shell"` and intentionally `margin: -36px` to fill `main`.
   - Outer shell sidebar is a third warm-dark brown (`rgba(31, 29, 24, .94)`), so even “dark next to dark” does not match Review charcoal.
-  - Prior Review visual baseline [`../2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png`](../2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png) locked a dark compact trading-terminal look for Review workspaces; it did **not** decide that Data/Admin must stay permanently on a separate cream product skin.
+  - Prior Review visual baseline [`../2026-07-19-01-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png`](../2026-07-19-01-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png) locked a dark compact trading-terminal look for Review workspaces; it did **not** decide that Data/Admin must stay permanently on a separate cream product skin.
 - Current friction:
   - Switching Data → Review feels like entering a different application, not another module of the same product.
   - Shared components (filters, export, group cards) need dual skins and still leak light widgets on Review (feeds OPT-003).
@@ -199,7 +199,7 @@ It lives in `ReviewPage`’s left column under the workspace date rail and strat
 
 ## Relationship To Earlier Same-Day Draft
 
-An earlier same-day draft ([`2026-07-20-data-coverage-presentation/`](../2026-07-20-data-coverage-presentation/2026-07-20-data-coverage-presentation.md)) explored Data-page market-day coverage density after external FreqUI/Jesse research. User follow-ups with screenshots clarified the intended friction is **nav fusion**, **Review trade-panel fusion**, **app-wide color unification**, and **missing add-trader**, not primarily the month-grouped date rail. That coverage draft is superseded by this batch; coverage remains a possible future intake only if the user re-raises it.
+An earlier same-day draft ([`2026-07-20-01-data-coverage-presentation/`](../2026-07-20-01-data-coverage-presentation/2026-07-20-01-data-coverage-presentation.md)) explored Data-page market-day coverage density after external FreqUI/Jesse research. User follow-ups with screenshots clarified the intended friction is **nav fusion**, **Review trade-panel fusion**, **app-wide color unification**, and **missing add-trader**, not primarily the month-grouped date rail. That coverage draft is superseded by this batch; coverage remains a possible future intake only if the user re-raises it.
 
 ## How The Visual Items Nest
 
@@ -221,6 +221,6 @@ OPT-002  functional: discoverable add-trader (can ship with or after visual work
 
 ## Promotion Boundary
 
-This batch was promoted and completed as [`Tang Strategy Terminal UI Fusion And Trader Registry`](../../exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md). The batch layout remains this markdown file plus sibling `screenshots/` under `docs/optimization/2026-07-20-trader-workspace-nav-and-registry/`.
+This batch was promoted and completed as [`Tang Strategy Terminal UI Fusion And Trader Registry`](../../exec-plans/completed/2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan.md). The batch layout remains this markdown file plus sibling `screenshots/` under `docs/optimization/2026-07-20-02-trader-workspace-nav-and-registry/`.
 
 Final path: optimization record → Proposed v2/design approval → Active implementation → remediation-1 → exact packet-002 `implementation-review-002: accept/high` → **Completed**. The two local commits are activation `3f589a0` and Phase 0 `3d9a67c`; later implementation remains uncommitted, and no canonical data, provider/broker, push, publication, or remote action occurred.

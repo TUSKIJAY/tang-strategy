@@ -10,7 +10,7 @@
 
 This draft captured an earlier interpretation of Data-page market-day density and external FreqUI/Jesse research. After the user provided the admin trader-workspace screenshot and explicit notes, the active same-day intake moved to:
 
-[`2026-07-20-trader-workspace-nav-and-registry.md`](../2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md)
+[`2026-07-20-02-trader-workspace-nav-and-registry.md`](../2026-07-20-02-trader-workspace-nav-and-registry/2026-07-20-02-trader-workspace-nav-and-registry.md)
 
 - OPT-001 there: align `交易记录 / 点位管理` with Data/Review sidebar style
 - OPT-002 there: discoverable add-trader in the registry form

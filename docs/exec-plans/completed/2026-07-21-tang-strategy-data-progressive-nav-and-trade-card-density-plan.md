@@ -22,7 +22,7 @@
 - Latest implementation verdict: accept
 - Owner: Codex
 - Created: 2026-07-21
-- Optimization source: `docs/optimization/2026-07-21-data-page-progressive-date-nav/2026-07-21-data-page-progressive-date-nav.md`, `docs/optimization/2026-07-21-review-trade-panel-type-scale/2026-07-21-review-trade-panel-type-scale.md`
+- Optimization source: `docs/optimization/2026-07-21-01-data-page-progressive-date-nav/2026-07-21-01-data-page-progressive-date-nav.md`, `docs/optimization/2026-07-21-02-review-trade-panel-type-scale/2026-07-21-02-review-trade-panel-type-scale.md`
 - Proposal baseline: `codex/project-harness@6eee7e3b9993f57c51d710d40fc988eb15b489ce`
 - Scope authority: fully executed under goal OBJECTIVE full-execution grant; push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote remain unauthorized.
 
@@ -34,8 +34,8 @@
 
 | 优化记录 | OPT ID | 摩擦点 |
 | --- | --- | --- |
-| [`2026-07-21-data-page-progressive-date-nav`](../../optimization/2026-07-21-data-page-progressive-date-nav/2026-07-21-data-page-progressive-date-nav.md) | OPT-001 | Data 页面仍使用 exhaustive 月分组日期芯片，而 Review 已切换为 progressive 最近/按月 导航，两页体验不一致 |
-| [`2026-07-21-review-trade-panel-type-scale`](../../optimization/2026-07-21-review-trade-panel-type-scale/2026-07-21-review-trade-panel-type-scale.md) | OPT-001 | 现实交易者点位卡片（trader name + CALL/PUT + meta）字号过大，与 Review 左栏其他密度不统一 |
+| [`2026-07-21-01-data-page-progressive-date-nav`](../../optimization/2026-07-21-01-data-page-progressive-date-nav/2026-07-21-01-data-page-progressive-date-nav.md) | OPT-001 | Data 页面仍使用 exhaustive 月分组日期芯片，而 Review 已切换为 progressive 最近/按月 导航，两页体验不一致 |
+| [`2026-07-21-02-review-trade-panel-type-scale`](../../optimization/2026-07-21-02-review-trade-panel-type-scale/2026-07-21-02-review-trade-panel-type-scale.md) | OPT-001 | 现实交易者点位卡片（trader name + CALL/PUT + meta）字号过大，与 Review 左栏其他密度不统一 |
 
 两项优化均为纯前端、CSS/prop 层面的改动，不涉及后端、数据库、内容、API、发布流程或市场数据管线，且彼此无依赖冲突，适合合并为一个计划以减少治理开销。
 
@@ -74,9 +74,9 @@
 
 | 证据 | 位置 | 作用 |
 | --- | --- | --- |
-| Data 页面 exhaustive 多月芯片轨道 | `docs/optimization/2026-07-21-data-page-progressive-date-nav/screenshots/2026-07-21-data-market-days-exhaustive-rail.png` | 展示当前 Data 页面日期选择使用 exhaustive 模式，所有月份的日期芯片全部平铺 |
-| Tang 点位卡片字号过大 | `docs/optimization/2026-07-21-review-trade-panel-type-scale/screenshots/2026-07-21-review-trade-panel-tang-large-type.png` | Tang CALL 卡片标题/meta 与周围 Review 元素对比明显偏大 |
-| 沃德哥多点位卡片同样过大 | `docs/optimization/2026-07-21-review-trade-panel-type-scale/screenshots/2026-07-21-review-trade-panel-vordin-large-type.png` | 多交易者场景下列表整体偏粗糙 |
+| Data 页面 exhaustive 多月芯片轨道 | `docs/optimization/2026-07-21-01-data-page-progressive-date-nav/screenshots/2026-07-21-data-market-days-exhaustive-rail.png` | 展示当前 Data 页面日期选择使用 exhaustive 模式，所有月份的日期芯片全部平铺 |
+| Tang 点位卡片字号过大 | `docs/optimization/2026-07-21-02-review-trade-panel-type-scale/screenshots/2026-07-21-review-trade-panel-tang-large-type.png` | Tang CALL 卡片标题/meta 与周围 Review 元素对比明显偏大 |
+| 沃德哥多点位卡片同样过大 | `docs/optimization/2026-07-21-02-review-trade-panel-type-scale/screenshots/2026-07-21-review-trade-panel-vordin-large-type.png` | 多交易者场景下列表整体偏粗糙 |
 
 ### 1.4 Current repository facts
 

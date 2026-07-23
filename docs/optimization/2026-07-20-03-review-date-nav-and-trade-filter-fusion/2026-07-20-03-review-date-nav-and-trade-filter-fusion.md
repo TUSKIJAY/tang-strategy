@@ -3,7 +3,7 @@
 > Implemented and closed under [`Tang Strategy Review Date Navigation And Trader Filter Fusion`](../../exec-plans/completed/2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan.md). Lifecycle `Completed`; independent `implementation-review-001: accept/high`.
 >
 > Place this file at:
-> `docs/optimization/2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md`
+> `docs/optimization/2026-07-20-03-review-date-nav-and-trade-filter-fusion/2026-07-20-03-review-date-nav-and-trade-filter-fusion.md`
 > Evidence images live in `./screenshots/`. Interactive HTML mockups live in `./mockups/` and are the locked visual proposal for later plan promotion.
 >
 > This completed historical record does not authorize new implementation or remote action. New OPT work follows the task-scoped local commit default in `docs/operating-modes.md` §2.
@@ -18,12 +18,12 @@
 
 ## Relationship To Prior Work
 
-- Prior completed batch [`2026-07-20-trader-workspace-nav-and-registry`](../2026-07-20-trader-workspace-nav-and-registry/2026-07-20-trader-workspace-nav-and-registry.md) delivered terminal-first tokens, peer trader nav (no orange CTA), add-trader, and a first pass of trade-panel token migration under completed plan `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`.
+- Prior completed batch [`2026-07-20-02-trader-workspace-nav-and-registry`](../2026-07-20-02-trader-workspace-nav-and-registry/2026-07-20-02-trader-workspace-nav-and-registry.md) delivered terminal-first tokens, peer trader nav (no orange CTA), add-trader, and a first pass of trade-panel token migration under completed plan `2026-07-20-tang-strategy-terminal-ui-fusion-and-trader-registry-plan`.
 - User acceptance on 2026-07-20 showed residual friction that plan did **not** close:
   1. Date rail is still exhaustive flat chips (`MM-DD` for every historical day) — unreadable as inventory grows.
   2. Trade Eligibility / Focus / Download / cards still read as a bolted-on form module under Strategy (and the current Ext K / Rescan / Backtest row), and still re-mirror ticker/date.
   3. Outer `交易记录 / 点位管理` label + long role badge still crush CJK into one-character-per-line wrap.
-- Superseded Data coverage draft [`2026-07-20-data-coverage-presentation`](../2026-07-20-data-coverage-presentation/2026-07-20-data-coverage-presentation.md) explored progressive market-day presentation for Data; user later deprioritized it. **This batch re-opens progressive date navigation only for Review**, not Data/Admin/Static unless a later intake expands scope.
+- Superseded Data coverage draft [`2026-07-20-01-data-coverage-presentation`](../2026-07-20-01-data-coverage-presentation/2026-07-20-01-data-coverage-presentation.md) explored progressive market-day presentation for Data; user later deprioritized it. **This batch re-opens progressive date navigation only for Review**, not Data/Admin/Static unless a later intake expands scope.
 - User explicitly rejected a “make selects darker” misread: the ask is **UI style consistency** and **date/data filtering IA**, not surface lightness alone.
 
 ## Visual Reference
@@ -117,7 +117,7 @@ What the evidence shows together:
 - Source evidence:
   - User statements (2026-07-20): 不是浅色问题，而是 **UI 风格一致性** 以及 **日期数据筛选**；交易区按“去掉重复 mirror + 对齐 Strategy/按钮语汇”做；并确认 mockup 方向。
   - Current crop: [`./screenshots/2026-07-20-review-trade-filter-current.png`](./screenshots/2026-07-20-review-trade-filter-current.png).
-  - Prior pink-box crop still informative: [`../2026-07-20-trader-workspace-nav-and-registry/screenshots/2026-07-20-review-trade-filter-panel.png`](../2026-07-20-trader-workspace-nav-and-registry/screenshots/2026-07-20-review-trade-filter-panel.png).
+  - Prior pink-box crop still informative: [`../2026-07-20-02-trader-workspace-nav-and-registry/screenshots/2026-07-20-review-trade-filter-panel.png`](../2026-07-20-02-trader-workspace-nav-and-registry/screenshots/2026-07-20-review-trade-filter-panel.png).
   - Implementation: `TraderFilters.jsx`, `TradeExportControls.jsx`, `TraderTradeList.jsx` composed under Review left column after `ReviewContextPanel` in `ReviewPage.jsx` / `StaticReviewsApp.jsx`; shared styles under `.trade-filter-panel` / `.trade-group-card` in `frontend/src/styles.css`.
   - Target visual: trade block section of [`./mockups/review-left-column.html`](./mockups/review-left-column.html).
 - Current friction:

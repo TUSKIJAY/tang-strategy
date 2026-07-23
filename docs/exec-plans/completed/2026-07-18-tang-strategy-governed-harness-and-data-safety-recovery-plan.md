@@ -267,7 +267,7 @@ Retain the tracked DB, gitignored seed model and its tracked README, active Page
 - Plan reviews: `docs/exec-plans/reviews/2026-07-18-tang-strategy-governed-harness-and-data-safety-recovery-plan/`
 - Recovery/verification evidence: the `evidence/` child of that directory
 - Decisions: `docs/decisions/2026-07-18-governed-harness-and-docs-authority.md` and `docs/decisions/2026-07-18-market-data-rebuild-safety-contract.md`
-- Optimization follow-ups: `docs/optimization/2026-07-18-repository-audit-followups.md`
+- Optimization follow-ups: `docs/optimization/2026-07-18-01-repository-audit-followups/2026-07-18-01-repository-audit-followups.md`
 
 No evidence may contain credentials, secret values, tokens, or unredacted private configuration.
 

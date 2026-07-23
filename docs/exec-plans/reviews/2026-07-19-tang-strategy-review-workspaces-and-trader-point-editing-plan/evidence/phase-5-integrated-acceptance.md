@@ -43,7 +43,7 @@ Several acceptance-script mistakes were kept separate from product truth: missin
 
 ## 4. Visual comparison
 
-The canonical reference `docs/optimization/2026-07-19-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png` (relocated from `design/references/`) remains SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`. It was compared independently from behavior/accessibility acceptance.
+The canonical reference `docs/optimization/2026-07-19-01-review-ui-and-trader-editing/screenshots/2026-07-19-review-ui-reference-v1.png` (relocated from `design/references/`) remains SHA-256 `57c34ea70bf7c6cab2c983b8feaedb6ad9be6f23fc02262ac7c97a48b156d3c5`. It was compared independently from behavior/accessibility acceptance.
 
 The final 1672x941 Review preserves the reference direction: compact dark terminal, explicit QQQ/SPY parent tabs, ticker-scoped date rail, strategy/session/business actions in the left context, availability-driven trader/group stack, and one large engine-owned chart/toolbar. The authenticated shell navigation occupies additional left width, but does not reintroduce mixed dates or duplicate chart controls. The narrow composition intentionally reorders chart before the long sidebar stream and remains readable without horizontal overflow.
 

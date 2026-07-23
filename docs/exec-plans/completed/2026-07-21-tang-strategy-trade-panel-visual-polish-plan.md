@@ -19,7 +19,7 @@
 - Lifecycle reconciliation commit: none
 - Owner: Grok
 - Created: 2026-07-21
-- Optimization source: `docs/optimization/2026-07-21-review-trade-panel-visual-polish/2026-07-21-review-trade-panel-visual-polish.md`
+- Optimization source: `docs/optimization/2026-07-21-03-review-trade-panel-visual-polish/2026-07-21-03-review-trade-panel-visual-polish.md`
 - Proposal baseline: `codex/project-harness@34179ea6947bb1345c17c42a1e4d3a1482b8d85d`
 - Scope authority: local implementation, verification, review, and closeout under `user-instruction:2026-07-21-execute-trade-panel-visual-polish-plan`; push/PR/merge/Pages/provider/broker/tracked-DB/canonical-content/remote remain unauthorized
 
@@ -31,7 +31,7 @@
 
 | 优化记录 | OPT ID | 摩擦点 |
 | --- | --- | --- |
-| [`2026-07-21-review-trade-panel-visual-polish`](../../optimization/2026-07-21-review-trade-panel-visual-polish/2026-07-21-review-trade-panel-visual-polish.md) | OPT-001 | 点位工具仍是套在侧栏里的表单模块；全宽 `Download JSON + 3 CSV`；卡片信息层级不清。字号密度计划已完成，但未解决 chrome / IA |
+| [`2026-07-21-03-review-trade-panel-visual-polish`](../../optimization/2026-07-21-03-review-trade-panel-visual-polish/2026-07-21-03-review-trade-panel-visual-polish.md) | OPT-001 | 点位工具仍是套在侧栏里的表单模块；全宽 `Download JSON + 3 CSV`；卡片信息层级不清。字号密度计划已完成，但未解决 chrome / IA |
 
 相关已完成计划（边界保留）：
 
@@ -66,8 +66,8 @@ Independent `review-002` returned `revise/high` against frozen revision `v2-revi
 
 | 证据 | 位置 | 作用 |
 | --- | --- | --- |
-| Live Review trade tools + cards | `docs/optimization/2026-07-21-review-trade-panel-visual-polish/screenshots/2026-07-21-review-trade-panel-current.png` · SHA-256 `ce00fef17e4fd58a73b5c8de7415041bdc95aa651c6865e78f41347635db3765` | 当前 form-card 摩擦 |
-| Locked design mock | `docs/optimization/2026-07-21-review-trade-panel-visual-polish/mockups/trade-panel-v2.html` · SHA-256 `ddea8609c48c9f19c1d27f1f0d51ae5c1b5fa80ab3a0bcc5e67408c943d6e9bc` | 目标布局与 chrome 语汇（visual only; a11y contract is §1.4/§2.2, not the mock’s plain buttons） |
+| Live Review trade tools + cards | `docs/optimization/2026-07-21-03-review-trade-panel-visual-polish/screenshots/2026-07-21-review-trade-panel-current.png` · SHA-256 `ce00fef17e4fd58a73b5c8de7415041bdc95aa651c6865e78f41347635db3765` | 当前 form-card 摩擦 |
+| Locked design mock | `docs/optimization/2026-07-21-03-review-trade-panel-visual-polish/mockups/trade-panel-v2.html` · SHA-256 `ddea8609c48c9f19c1d27f1f0d51ae5c1b5fa80ab3a0bcc5e67408c943d6e9bc` | 目标布局与 chrome 语汇（visual only; a11y contract is §1.4/§2.2, not the mock’s plain buttons） |
 
 ### 1.4 User scope locks (from optimization foldback + review-001; retained in v3)
 
@@ -300,8 +300,8 @@ Negative substring scans apply only to the production paths in items 1–7 above
 ## 7. References
 
 - Operating modes: [`docs/operating-modes.md`](../../operating-modes.md)
-- Optimization batch: [`docs/optimization/2026-07-21-review-trade-panel-visual-polish/2026-07-21-review-trade-panel-visual-polish.md`](../../optimization/2026-07-21-review-trade-panel-visual-polish/2026-07-21-review-trade-panel-visual-polish.md)
-- Mock: [`docs/optimization/2026-07-21-review-trade-panel-visual-polish/mockups/trade-panel-v2.html`](../../optimization/2026-07-21-review-trade-panel-visual-polish/mockups/trade-panel-v2.html)
+- Optimization batch: [`docs/optimization/2026-07-21-03-review-trade-panel-visual-polish/2026-07-21-03-review-trade-panel-visual-polish.md`](../../optimization/2026-07-21-03-review-trade-panel-visual-polish/2026-07-21-03-review-trade-panel-visual-polish.md)
+- Mock: [`docs/optimization/2026-07-21-03-review-trade-panel-visual-polish/mockups/trade-panel-v2.html`](../../optimization/2026-07-21-03-review-trade-panel-visual-polish/mockups/trade-panel-v2.html)
 - Design review (v1, append-only): [`docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md`](../reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-001.md)
 - Design review (v2, append-only): [`docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-002.md`](../reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-002.md)
 - Design review (v3, approved): [`docs/exec-plans/reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-003.md`](../reviews/2026-07-21-tang-strategy-trade-panel-visual-polish-plan/review-003.md)

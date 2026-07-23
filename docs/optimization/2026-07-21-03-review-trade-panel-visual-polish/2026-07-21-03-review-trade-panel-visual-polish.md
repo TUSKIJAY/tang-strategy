@@ -3,7 +3,7 @@
 > Record-only intake. This file does not authorize implementation, plan promotion, commit, push, data mutation, or remote actions.
 >
 > Place this file at:
-> `docs/optimization/2026-07-21-review-trade-panel-visual-polish/2026-07-21-review-trade-panel-visual-polish.md`
+> `docs/optimization/2026-07-21-03-review-trade-panel-visual-polish/2026-07-21-03-review-trade-panel-visual-polish.md`
 > Evidence images live in `./screenshots/`. Interactive HTML mockups live in `./mockups/`.
 >
 > This completed historical record does not authorize new implementation or remote action. New OPT work follows the task-scoped local commit default in `docs/operating-modes.md` §2.
@@ -14,8 +14,8 @@
 
 ## Relationship To Prior Work
 
-- Completed filter fusion + progressive date nav: [`2026-07-20-review-date-nav-and-trade-filter-fusion`](../2026-07-20-review-date-nav-and-trade-filter-fusion/2026-07-20-review-date-nav-and-trade-filter-fusion.md) → completed plan `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`. Locked **B chip**, direction colors, YaHei, no ticker/date mirror; shipped density later under Data progressive + trade-card density plan.
-- Completed type/density pass: [`2026-07-21-review-trade-panel-type-scale`](../2026-07-21-review-trade-panel-type-scale/2026-07-21-review-trade-panel-type-scale.md) → completed plan `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`. Reduced `.dr-sidebar` card type to 12/11px; **did not** redesign tool chrome IA.
+- Completed filter fusion + progressive date nav: [`2026-07-20-03-review-date-nav-and-trade-filter-fusion`](../2026-07-20-03-review-date-nav-and-trade-filter-fusion/2026-07-20-03-review-date-nav-and-trade-filter-fusion.md) → completed plan `2026-07-20-tang-strategy-review-date-navigation-and-trader-filter-fusion-plan`. Locked **B chip**, direction colors, YaHei, no ticker/date mirror; shipped density later under Data progressive + trade-card density plan.
+- Completed type/density pass: [`2026-07-21-02-review-trade-panel-type-scale`](../2026-07-21-02-review-trade-panel-type-scale/2026-07-21-02-review-trade-panel-type-scale.md) → completed plan `2026-07-21-tang-strategy-data-progressive-nav-and-trade-card-density-plan`. Reduced `.dr-sidebar` card type to 12/11px; **did not** redesign tool chrome IA.
 - User acceptance 2026-07-21 after density ship: the Eligibility / trader chip / Download / cards block is **still ugly** as a bolted form module. This batch is visual/IA polish of that shared chrome.
 
 ## Visual Reference

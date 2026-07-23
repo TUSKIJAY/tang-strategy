@@ -3,7 +3,7 @@
 > Record-only intake until promoted. This file does not by itself authorize implementation, activation, push, data mutation, or remote actions.
 >
 > Place this file at:
-> `docs/optimization/2026-07-22-review-date-rail-and-trade-quantity-session/2026-07-22-review-date-rail-and-trade-quantity-session.md`
+> `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/2026-07-22-01-review-date-rail-and-trade-quantity-session.md`
 > Evidence images live in `./screenshots/`. Design mock: [`./mock.html`](./mock.html).
 >
 > **Session-consolidated batch.** Combines 2026-07-21/22 Review date rail chip chronological order and trade marker/timeline quantity friction.

@@ -32,10 +32,10 @@
 
 | Previous batch | Status |
 | --- | --- |
-| [`../2026-07-21-trade-card-simplify-points-only/`](../2026-07-21-trade-card-simplify-points-only/2026-07-21-trade-card-simplify-points-only.md) | superseded → OPT-001 |
-| [`../2026-07-21-kline-marker-action-and-trader-nickname/`](../2026-07-21-kline-marker-action-and-trader-nickname/2026-07-21-kline-marker-action-and-trader-nickname.md) | superseded → OPT-002 |
-| [`../2026-07-21-trade-points-and-kline-marker-labels/`](../2026-07-21-trade-points-and-kline-marker-labels/2026-07-21-trade-points-and-kline-marker-labels.md) | superseded → OPT-001 + OPT-002 (partial merge) |
-| [`../2026-07-21-kline-5m-switch-viewport-glitch/`](../2026-07-21-kline-5m-switch-viewport-glitch/2026-07-21-kline-5m-switch-viewport-glitch.md) | superseded → OPT-004 |
+| [`../2026-07-21-04-trade-card-simplify-points-only/`](../2026-07-21-04-trade-card-simplify-points-only/2026-07-21-04-trade-card-simplify-points-only.md) | superseded → OPT-001 |
+| [`../2026-07-21-05-kline-marker-action-and-trader-nickname/`](../2026-07-21-05-kline-marker-action-and-trader-nickname/2026-07-21-05-kline-marker-action-and-trader-nickname.md) | superseded → OPT-002 |
+| [`../2026-07-21-06-trade-points-and-kline-marker-labels/`](../2026-07-21-06-trade-points-and-kline-marker-labels/2026-07-21-06-trade-points-and-kline-marker-labels.md) | superseded → OPT-001 + OPT-002 (partial merge) |
+| [`../2026-07-21-07-kline-5m-switch-viewport-glitch/`](../2026-07-21-07-kline-5m-switch-viewport-glitch/2026-07-21-07-kline-5m-switch-viewport-glitch.md) | superseded → OPT-004 |
 
 ---
 
