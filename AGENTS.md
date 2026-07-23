@@ -33,7 +33,7 @@ This repo is a frontend/backend workspace for Tang Strategy.
 - `backend/app`, `frontend/src`, `strategies/`, `content/`, and `data/` are the active code/data boundaries.
 - `data/seed/market-data/live_extended` is the only seed source format accepted by current pipeline.
 - `docs/roadmap.md` owns product direction; governed lifecycle artifacts live under `docs/exec-plans`, `docs/decisions`, `docs/optimization`, and `docs/progress-archive`.
-- Generated static review JSON belongs in `frontend/public/reviews`, Vite output belongs in `frontend/dist`, and publication output belongs on `gh-pages`; generated output must not be written back under `docs/`.
+- Generated static review JSON belongs in `frontend/public/reviews`, Vite output belongs in `frontend/dist`, and publication output belongs on `gh-pages`; none of that build or publication output may be written back under `docs/`. Evidence captured deliberately for a governed record — OPT screenshots, design mocks, a plan's pinned acceptance artifact — is not build output and lives with its record under `docs/`.
 
 ## Build, Test, and Development Commands
 

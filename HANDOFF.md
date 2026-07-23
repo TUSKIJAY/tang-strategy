@@ -42,7 +42,7 @@
 
 ## Verification Baseline
 
-- `cd frontend && npm run test:trade-records` (64/64 at last product closeout)
+- `cd frontend && npm run test:trade-records` (69/69 at last product closeout)
 - `python scripts/check-operating-modes.py --root .`
 - `python -m unittest scripts.tests.test_operating_modes`
 - `python scripts/check-project-harness.py --root . --profile auto`
