@@ -25,6 +25,8 @@ docs/optimization/
     <YYYY-MM-DD>-<NN>-<batch-slug>.md    # the record
     screenshots/                         # evidence images for this batch only
       <descriptive-name>.png
+    mockups/                             # design mocks for this batch only
+      <descriptive-name>.html
 ```
 
 Rules:
@@ -38,7 +40,16 @@ Rules:
 - Link images with paths relative to the record file, e.g. `[label](./screenshots/foo.png)`.
 - Root-level files in `docs/optimization/` are limited to `index.md`, `SOP.md`, and `record-template.md`.
 
-Legacy note: batches created before 2026-07-23 predate `NN` and were renamed into this scheme in their original creation order, with all markdown references updated. Hash-pinned mock/mockup evidence inside those batches was left byte-identical, so a few of those HTML files still print their pre-rename path in body text while the SHA-256 values recorded in completed plans stay verifiable.
+Design mocks follow the same containment rule as screenshots:
+
+- A batch's design mocks live in the sibling `mockups/` folder as `<descriptive-name>.html`, one file per proposal surface. Do not put a mock at the batch-folder root, under `design/references/`, `frontend/`, or any global design tree.
+- Omit `mockups/` entirely when the batch has no mock. Unlike `screenshots/`, it needs no placeholder.
+- Each mock is a **self-contained single file**: inline CSS/JS, no CDN, remote font, remote image, or build step, so it opens from disk and hashes stably.
+- Link mocks with paths relative to the record file, e.g. `[label](./mockups/foo.html)`, and cite the file the record actually relies on — not a draft.
+- Drafts iterated under untracked `output/` are working material, never the record. Only the copy under `mockups/` is authoritative.
+- Once a plan's evidence table pins a mock's SHA-256, that file is frozen. Later iteration creates `<descriptive-name>-v2.html` with its own pin instead of editing the pinned file in place.
+
+Legacy note: batches created before 2026-07-23 predate `NN` and were renamed into this scheme in their original creation order, with all markdown references updated. Hash-pinned mock/mockup evidence inside those batches was left byte-identical, so a few of those HTML files still print their pre-rename path in body text while the SHA-256 values recorded in completed plans stay verifiable. Those batches also predate the `mockups/` rule — three of them keep a root `mock.html`, which stays where it is; the rule binds batches created from 2026-07-23 on.
 
 ## Record-Only Boundary
 

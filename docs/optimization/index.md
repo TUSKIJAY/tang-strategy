@@ -2,7 +2,7 @@
 
 本索引只收录用户启用记录模式后形成的优化批次。记录本身不授权实施。
 
-每批为独立文件夹：`docs/optimization/<YYYY-MM-DD>-<NN>-<batch-slug>/<同名>.md`，证据截图在同目录 `screenshots/`。`NN` 是当日序号，从 `01` 起按创建顺序递增，分配后不重排、不回收。
+每批为独立文件夹：`docs/optimization/<YYYY-MM-DD>-<NN>-<batch-slug>/<同名>.md`，证据截图在同目录 `screenshots/`，设计 mock 在同目录 `mockups/`（自包含单文件 HTML）。`NN` 是当日序号，从 `01` 起按创建顺序递增，分配后不重排、不回收。
 
 | Batch | Scope | Status | Lifecycle links |
 | --- | --- | --- | --- |

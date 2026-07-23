@@ -6,6 +6,7 @@
 > `docs/optimization/<YYYY-MM-DD>-<NN>-<batch-slug>/<YYYY-MM-DD>-<NN>-<batch-slug>.md`
 > `NN` is the two-digit daily sequence: `01` for the day's first batch, then `02`, `03`… in creation order. Check the existing folders for that date before choosing it, and never renumber an assigned one.
 > Put evidence images in the sibling `screenshots/` folder and link them as `./screenshots/<name>.png`.
+> Put design mocks in the sibling `mockups/` folder as self-contained single-file HTML and link them as `./mockups/<name>.html`. Omit the folder when the batch has no mock.
 >
 > A finalized record and its direct index update are committed locally by default under `docs/operating-modes.md` §2. A draft, failed/incomplete record, explicit no-commit instruction, or unclear path ownership prevents that commit. This does not authorize implementation or remote action.
 
@@ -15,7 +16,8 @@
 
 ## Visual Reference
 
-- Example: [`screenshots/example.png`](./screenshots/example.png)
+- Friction evidence: [`screenshots/example.png`](./screenshots/example.png)
+- Design mock: [`mockups/example.html`](./mockups/example.html)
 
 ## OPT-001 <Title>
 
