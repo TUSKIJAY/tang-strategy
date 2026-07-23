@@ -161,4 +161,6 @@ Run verification in proportion to the change:
 - DB/data changes: the candidate, integrity, non-shrink, runtime, and runbook gates;
 - remote actions: only after explicit authority and only with their real remote receipts.
 
+Browser acceptance runs write to `output/playwright/<plan-slug>-<run-id>/`. Commit that run's `receipts.json` — the assertion values are the durable evidence and stay greppable and re-verifiable. Screenshots and scratch databases from the run stay local and are gitignored; a screenshot only enters the repository when a plan deliberately pins its SHA-256, and then it belongs in that plan's `evidence/` folder, not in `output/`. Runs superseded by a later run of the same acceptance leave nothing behind.
+
 The lifecycle checker is intentionally small. It verifies plan uniqueness, required metadata, state-index and roadmap links, review verdict linkage, and matching `PROGRESS.md` / `HANDOFF.md` state. It does not parse Git history, CI YAML semantics, arbitrary Markdown edge cases, or remote authority.

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "V1",
+    "title": "Interactive Review Trade Panel Screenshot",
+    "status": "PASS",
+    "details": {
+      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-panel-polish-20260721\\v1-interactive-review.png"
+    },
+    "ts": "2026-07-21T07:36:49.276Z"
+  },
+  {
+    "id": "B-Eligibility-interaction",
+    "title": "Eligibility single-select radio interaction & state",
+    "status": "PASS",
+    "details": {},
+    "ts": "2026-07-21T07:36:49.452Z"
+  },
+  {
+    "id": "B-Download-four-file",
+    "title": "Four-file download click receipt on Review",
+    "status": "PASS",
+    "details": {
+      "count": 4,
+      "filenames": [
+        "trade_records_qqq_2026-07-17.json",
+        "trade_groups.csv",
+        "trade_legs.csv",
+        "trade_events.csv"
+      ]
+    },
+    "ts": "2026-07-21T07:36:50.485Z"
+  },
+  {
+    "id": "B-Drawer-scale",
+    "title": "Synthetic >=7 trader drawer interaction (Edit/Search/Select all/Clear)",
+    "status": "PASS",
+    "details": {},
+    "ts": "2026-07-21T07:36:51.285Z"
+  },
+  {
+    "id": "V3",
+    "title": "Admin Workspace Trade Panel Screenshot",
+    "status": "PASS",
+    "details": {
+      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-panel-polish-20260721\\v3-admin-workspace.png"
+    },
+    "ts": "2026-07-21T07:36:51.485Z"
+  },
+  {
+    "id": "Admin-Composition",
+    "title": "Admin page uses shared tools strip without header long Download",
+    "status": "PASS",
+    "details": {},
+    "ts": "2026-07-21T07:36:51.488Z"
+  },
+  {
+    "id": "V2",
+    "title": "Static Review Trade Panel Screenshot",
+    "status": "PASS",
+    "details": {
+      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-panel-polish-20260721\\v2-static-review.png"
+    },
+    "ts": "2026-07-21T07:36:52.873Z"
+  },
+  {
+    "id": "Static-Composition",
+    "title": "Static Review uses the shared tools strip with one short Download control",
+    "status": "PASS",
+    "details": {},
+    "ts": "2026-07-21T07:36:52.875Z"
+  }
+]
