@@ -19,8 +19,12 @@ class Budget:
 
 
 BUDGETS = {
-    "AGENTS.md": Budget(180, 24_576, 240, 32_768),
-    "INSTRUCTIONS.md": Budget(220, 30_720, 300, 40_960),
+    # Policy files bloat by rule-creep, not history; a warning here means
+    # dedupe/refactor (usually into docs/operating-modes.md or the runbook),
+    # not archive. Warnings sit ~60% above current size so growth is flagged
+    # while it is still one section, not a rewrite.
+    "AGENTS.md": Budget(180, 16_384, 240, 32_768),
+    "INSTRUCTIONS.md": Budget(180, 12_288, 300, 40_960),
     # PROGRESS.md entries are single-line paragraphs (~1 KB each), so the byte
     # warning is the working proxy for the ">10 body entries" archive trigger
     # in docs/progress-archive/index.md; the line budget almost never binds.
