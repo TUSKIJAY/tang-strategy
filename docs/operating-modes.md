@@ -161,6 +161,13 @@ Run verification in proportion to the change:
 - DB/data changes: the candidate, integrity, non-shrink, runtime, and runbook gates;
 - remote actions: only after explicit authority and only with their real remote receipts.
 
-Browser acceptance runs write to `output/playwright/<plan-slug>-<run-id>/`. Commit that run's `receipts.json` — the assertion values are the durable evidence and stay greppable and re-verifiable. Screenshots and scratch databases from the run stay local and are gitignored; a screenshot only enters the repository when a plan deliberately pins its SHA-256, and then it belongs in that plan's `evidence/` folder, not in `output/`. Runs superseded by a later run of the same acceptance leave nothing behind.
+Browser acceptance runs write to `output/playwright/<plan-slug>-<run-id>/`. Commit that run's `receipts.json` — the assertion values are the durable evidence and stay greppable and re-verifiable. Screenshots and scratch databases from the run stay local and are gitignored; a screenshot only enters the repository when a plan deliberately pins its SHA-256, and then it belongs in that plan's `evidence/` folder, not in `output/`.
+
+Local acceptance artifacts have a defined life, and clearing them needs no separate authorization:
+
+- Scratch databases die with the run that created them. Delete them at the end of the run, not later.
+- A superseded run — any earlier attempt at the same acceptance — is deleted as soon as the run that the review packet cites exists. Only the cited run survives.
+- The cited run's screenshots are deleted once the plan reaches `Completed`. From then on the committed `receipts.json` and the implementation review carry the claim.
+- Nothing under `output/` is a record, and no `output/` tree survives its plan. A resumed session preserves untracked `output/` trees only while their plan is still open.
 
 The lifecycle checker is intentionally small. It verifies plan uniqueness, required metadata, state-index and roadmap links, review verdict linkage, and matching `PROGRESS.md` / `HANDOFF.md` state. It does not parse Git history, CI YAML semantics, arbitrary Markdown edge cases, or remote authority.

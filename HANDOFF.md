@@ -24,11 +24,11 @@
 - Final disposition: `Completed`; next gate `closed`
 - Source OPT: `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/` OPT-001…003 `completed`
 - Tests: frontend `test:trade-records` 69/69; normal + static builds green; harness auto green
-- V1–V3 receipts: `output/playwright/date-rail-qty-20260722023705/` (untracked)
-- Preserve untracked `output/` trees; do not stage
+- V1–V3 receipts: `output/playwright/date-rail-qty-20260722023705/receipts.json` (tracked; run screenshots deleted at plan closeout per `docs/operating-modes.md` §8)
 
 ## Latest Completed Work
 
+- 2026-07-23: `output/` cleaned to receipts-only (206 MB → 16 MB); acceptance screenshots and scratch DBs gitignored with a retention rule in `docs/operating-modes.md` §8.
 - 2026-07-23: OPT batch folders renamed to `<YYYY-MM-DD>-<NN>-<slug>` (daily sequence from `01`, creation order); 16 batches backfilled, references swept, hash-pinned mock evidence left byte-identical; rule in `docs/optimization/SOP.md`.
 - 2026-07-23: Mobile Chart Canvas + Floating Filter Dock OPT-001…003 **recorded**; touch-first mock accepted locally; no implementation authority.
 - 2026-07-22: Date Rail Ascending And Trade Quantity **Completed** (OPT-001…003): product commit `da12e1b`, `implementation-review-001: accept/high`, migrated to `completed/`, next gate `closed`.
@@ -49,7 +49,7 @@
 
 ## Resume Rules
 
-1. Re-run startup Git status and preserve untracked `output/` trees.
+1. Re-run startup Git status. Untracked `output/` trees are preserved only while their plan is open; closed plans' runs are deleted per `docs/operating-modes.md` §8.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
 3. Current plan is **Completed** at revision `v2-review-foldback-2026-07-22`; next gate `closed`. No active plan remains.
 4. No remote actions without explicit user request.
