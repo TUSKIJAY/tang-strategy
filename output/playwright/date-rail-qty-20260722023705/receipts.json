@@ -4,7 +4,7 @@
     "title": "Progressive rail 最近 chips ascending, latest pressed last",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\date-rail-qty-20260722023705\\v1a-rail-recent-ascending.png",
+      "path": "output/playwright/date-rail-qty-20260722023705/v1a-rail-recent-ascending.png",
       "dates": [
         "2026-07-02",
         "2026-07-06",
@@ -28,7 +28,7 @@
     "title": "Progressive rail 按月 chips ascending",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\date-rail-qty-20260722023705\\v1b-rail-month-ascending.png",
+      "path": "output/playwright/date-rail-qty-20260722023705/v1b-rail-month-ascending.png",
       "dates": [
         "2026-07-01",
         "2026-07-02",
@@ -52,7 +52,7 @@
     "title": "Review K-line markers show *QTY labels (no ×N)",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\date-rail-qty-20260722023705\\v2-kline-marker-qty-labels.png"
+      "path": "output/playwright/date-rail-qty-20260722023705/v2-kline-marker-qty-labels.png"
     },
     "ts": "2026-07-22T02:37:08.509Z"
   },
@@ -61,7 +61,7 @@
     "title": "Timeline derived close qty: SELL 150 @ 0.15 / SELL 12 @ 5.5",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\date-rail-qty-20260722023705\\v3-timeline-derived-close-qty.png",
+      "path": "output/playwright/date-rail-qty-20260722023705/v3-timeline-derived-close-qty.png",
       "putClose": "10:43 SELL 150 @ 0.15",
       "callClose": "10:01 SELL 12 @ 5.5"
     },

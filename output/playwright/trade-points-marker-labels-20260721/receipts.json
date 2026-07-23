@@ -4,7 +4,7 @@
     "title": "Interactive Review trade cards QQQ",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-points-marker-labels-20260721\\v1-interactive-cards-qqq-2026-07-17.png",
+      "path": "output/playwright/trade-points-marker-labels-20260721/v1-interactive-cards-qqq-2026-07-17.png",
       "cardCount": 2,
       "firstCardSnippet": "vordinkkk\nPUT\nQQQ · 2026-07-17 · 09:42 → 10:43\nVERIFIED\nHide legs/events\n2026-07-17 · 681 PUT · ×100\n09:42buy_open150 @ 0.84\n10:43sell_close? @ 0.15",
       "hasVordinkkk": true
@@ -16,7 +16,7 @@
     "title": "Interactive Review K-line markers QQQ",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-points-marker-labels-20260721\\v2-interactive-markers-qqq-2026-07-17.png",
+      "path": "output/playwright/trade-points-marker-labels-20260721/v2-interactive-markers-qqq-2026-07-17.png",
       "hoverTitle": "\n            vordinkkk SELL\n            群聊原话「3.8出22张」；时间为群聊消息发布时间。\n            \n          ",
       "zoomOutApplied": true,
       "note": "Visible labels: vordinkkk BUY|SELL (×N ok); Node N-Marker-label proves title vocabulary"
@@ -28,7 +28,7 @@
     "title": "Static Review parity QQQ",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-points-marker-labels-20260721\\v3-static-review-qqq-2026-07-17.png",
+      "path": "output/playwright/trade-points-marker-labels-20260721/v3-static-review-qqq-2026-07-17.png",
       "cardCount": 2,
       "hasVordinkkk": true
     },

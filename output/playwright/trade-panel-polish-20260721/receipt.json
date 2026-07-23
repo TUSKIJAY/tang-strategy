@@ -4,7 +4,7 @@
     "title": "Interactive Review Trade Panel Screenshot",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-panel-polish-20260721\\v1-interactive-review.png"
+      "path": "output/playwright/trade-panel-polish-20260721/v1-interactive-review.png"
     },
     "ts": "2026-07-21T07:36:49.276Z"
   },
@@ -42,7 +42,7 @@
     "title": "Admin Workspace Trade Panel Screenshot",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-panel-polish-20260721\\v3-admin-workspace.png"
+      "path": "output/playwright/trade-panel-polish-20260721/v3-admin-workspace.png"
     },
     "ts": "2026-07-21T07:36:51.485Z"
   },
@@ -58,7 +58,7 @@
     "title": "Static Review Trade Panel Screenshot",
     "status": "PASS",
     "details": {
-      "path": "D:\\Code\\tang-strategy\\output\\playwright\\trade-panel-polish-20260721\\v2-static-review.png"
+      "path": "output/playwright/trade-panel-polish-20260721/v2-static-review.png"
     },
     "ts": "2026-07-21T07:36:52.873Z"
   },

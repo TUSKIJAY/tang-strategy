@@ -79,8 +79,12 @@ async function runTests() {
     const page = await context.newPage();
     const receipts = [];
 
+    const toRepoPath = (value) =>
+      (path.isAbsolute(value) ? path.relative(repoRoot, value).split(path.sep).join('/') : value);
+
     function record(id, title, status, details = {}) {
-      receipts.push({ id, title, status, details, ts: new Date().toISOString() });
+      const portable = typeof details.path === 'string' ? { ...details, path: toRepoPath(details.path) } : details;
+      receipts.push({ id, title, status, details: portable, ts: new Date().toISOString() });
       console.log(`[RECEIPT] ${id}: ${title} -> ${status}`);
     }
 

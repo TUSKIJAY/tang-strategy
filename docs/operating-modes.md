@@ -161,7 +161,7 @@ Run verification in proportion to the change:
 - DB/data changes: the candidate, integrity, non-shrink, runtime, and runbook gates;
 - remote actions: only after explicit authority and only with their real remote receipts.
 
-Browser acceptance runs write to `output/playwright/<plan-slug>-<run-id>/`. Commit that run's `receipts.json` — the assertion values are the durable evidence and stay greppable and re-verifiable. Screenshots and scratch databases from the run stay local and are gitignored; a screenshot only enters the repository when a plan deliberately pins its SHA-256, and then it belongs in that plan's `evidence/` folder, not in `output/`.
+Browser acceptance runs write to `output/playwright/<plan-slug>-<run-id>/`. Commit that run's `receipts.json` — the assertion values are the durable evidence and stay greppable and re-verifiable. Every path a receipt records is repository-relative with forward slashes (`output/playwright/<run>/v2-foo.png`); an absolute machine path in a committed artifact is a defect, since it names one developer's disk and reads as broken on every other machine and OS. Screenshots and scratch databases from the run stay local and are gitignored; a screenshot only enters the repository when a plan deliberately pins its SHA-256, and then it belongs in that plan's `evidence/` folder, not in `output/`.
 
 Local acceptance artifacts have a defined life, and clearing them needs no separate authorization:
 
