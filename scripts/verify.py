@@ -24,19 +24,27 @@ WINDOWS_BASH_FALLBACKS = (
     Path("C:/Program Files (x86)/Git/bin/bash.exe"),
 )
 
+# `bash.exe` in these directories launches WSL / the Store installer, not Git Bash.
+WINDOWS_BASH_LAUNCHER_DIRS = frozenset({"system32", "windowsapps"})
+
 
 def find_bash() -> str | None:
-    if sys.platform == "win32":
-        for candidate in WINDOWS_BASH_FALLBACKS:
-            if candidate.is_file():
-                return str(candidate)
-    found = shutil.which("bash")
-    if found:
-        return found
+    if sys.platform != "win32":
+        return shutil.which("bash")
+
     for candidate in WINDOWS_BASH_FALLBACKS:
         if candidate.is_file():
             return str(candidate)
-    return None
+    # Git is on PATH wherever this repo is usable; derive bash from a non-default install.
+    git = shutil.which("git")
+    if git:
+        candidate = Path(git).resolve().parents[1] / "bin" / "bash.exe"
+        if candidate.is_file():
+            return str(candidate)
+    found = shutil.which("bash")
+    if found and Path(found).parent.name.lower() in WINDOWS_BASH_LAUNCHER_DIRS:
+        return None  # WSL/Store launcher, not a POSIX bash
+    return found
 
 
 def load_commands(root: Path) -> list[str]:
