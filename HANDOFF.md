@@ -42,10 +42,7 @@
 
 ## Verification Baseline
 
-- `cd frontend && npm run test:trade-records` (69/69 at last product closeout)
-- `python scripts/check-operating-modes.py --root .`
-- `python -m unittest scripts.tests.test_operating_modes`
-- `python scripts/check-project-harness.py --root . --profile auto`
+- `python3 scripts/verify.py` — runs the full battery from `.harness/config.json` (`verification_commands` is the only command list); `test:trade-records` was 69/69 at last product closeout.
 
 ## Resume Rules
 

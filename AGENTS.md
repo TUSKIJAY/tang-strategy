@@ -56,6 +56,7 @@ This repo is a frontend/backend workspace for Tang Strategy.
 - Backend validation: `/api/reviews/assemble` should return payload with 1m and 5m bars.
 - Frontend validation: open Review and Backtest pages, run one-day regression manually.
 - Harness validation: `python3 scripts/check-project-harness.py --root . --profile auto`.
+- Full verification battery: `python3 scripts/verify.py` (command list lives only in `.harness/config.json`).
 
 ## Commit & PR Guidelines
 
