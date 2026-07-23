@@ -60,10 +60,28 @@ This surface is designed for fingers on a phone, not for a mouse cursor scaled d
 
 | Area | Current anchor |
 | --- | --- |
-| Mobile page ordering | `frontend/src/styles.css` mobile grid currently orders `chart` before `sidebar`, leaving context controls below the chart |
+| Mobile page ordering | `frontend/src/styles.css:992-1010` mobile grid currently orders `chart` before `sidebar`, leaving context controls below the chart |
 | Static context stack | `frontend/src/pages/StaticReviewsApp.jsx` renders `ReviewContextPanel`, Strategy, filters, trades, and signals inside `.dr-sidebar` |
-| Mobile chart sizing | `frontend/src/kline/kline-engine.js` mobile media rule reduces padding and fixes chart height, but does not change annotation density |
-| Full trade labels | `frontend/src/kline/kline-engine.js` draws a full label rectangle for every visible `trade_record` annotation |
+| Mobile chart sizing | `frontend/src/kline/kline-engine.js:521-541` mobile media rule reduces padding and fixes chart height, but does not change annotation density |
+| Full trade labels | `frontend/src/kline/kline-engine.js:2271-2285` draws a full label rectangle for every visible `trade_record` annotation |
+
+### Touch-contract Gap Evidence (read-only, verified 2026-07-23)
+
+Recorded because the Touch-first Interaction Contract above has no existing implementation to extend. Absence rows were established by repository-wide search under `frontend/` excluding `node_modules`; they are stated as zero-match facts, not as inferences. Nothing in this section authorizes a change.
+
+| Area | Current anchor |
+| --- | --- |
+| Gesture ownership | No `touch-action` declaration exists anywhere under `frontend/` (0 matches). The interactive canvas therefore runs on the default `auto`, so the browser may claim a drag and implicitly cancel the pointer stream mid-pan. The contract requires an explicit `pan-y`-equivalent policy. |
+| Pointer lifecycle | `frontend/src/kline/kline-engine.js` binds `pointerdown` (`:1292`), `pointermove` (`:1242`), and `pointerup` (`:1309`), but no `pointercancel` handler exists under `frontend/` (0 matches). Only `lostpointercapture` (`:1318`) clears `dragState`, and it does not reset `_wasDragging`, so native-takeover cleanup is incomplete. |
+| Multi-pointer | `pointerdown` (`:1292-1308`) keeps a single `dragState` and overwrites it when a second pointer arrives (`:1297`). Chart scale is bound to `wheel` only (`:1260-1291`); no two-pointer scale path exists. The canvas binds eight listeners total (`:1087`, `:1241`, `:1242`, `:1260`, `:1292`, `:1309`, `:1321`, `:1334`) and none are touch or gesture events. |
+| Tap versus drag | Activation runs on `click` (`:1321-1333`), not `pointerup`. The drag threshold is 3 CSS px (`:1313`), below normal finger tremor for a stationary tap. |
+| Marker hit region | `_hitTestAnnotation` (`:2379-2387`) tests the exact label rectangle with no slop. The zone is built at `:2287-2299` from a marker radius of 8/10 px (`:2239`) plus an 18 px-tall label (`:2274`), against the contract's 44×44 CSS px / ~22 px radius requirement. |
+| Hover-only information | The annotation tooltip and the OHLC hover card are driven by `mousemove` / `mouseleave` (`:1241`, `:1334`) via `_updateAnnoHover` (`:2437`) and `_updateHoverCard` (`:2453`). On a coarse pointer neither surface is reachable, so per-bar OHLC readout and per-marker detail have no touch path. Any pointer-driven replacement is a shared change and engages the Desktop preservation lock. |
+| Touch target size | Toolbar controls use `min-height: 32px` with 12 px labels (`:262-273`); the MA value readout renders at 10 px (`:300-306`). |
+| Capability detection | No `pointer: coarse`, `hover: hover`, `matchMedia`, or any touch-capability check exists under `frontend/src` (0 matches). All responsive behavior keys on width alone, which the Activation model lock disallows as sole proof of touch input. |
+| Responsive breakpoints | Width-only breakpoints are 820 px (`frontend/src/styles.css:103`), 980 px (`:992`, `:1106`), and 1100 px (`:1226`), plus 900 px in `frontend/src/kline/kline-engine.js:521`. No rule targets the locked 360 / 390 / 430 acceptance widths, and there is no landscape rule. |
+| Fixed mobile chart height | The 900 px rule pins `.kline-engine__viewport`, `.kline-engine__canvas-wrap`, and `.kline-engine__canvas` to `min-height: 420px; height: 420px` (`frontend/src/kline/kline-engine.js:538-539`) — a fixed pixel height, not a share of the viewport. The outer `.unified-kline-engine` wrapper separately floors at `min-height: 560px` (`frontend/src/styles.css:1110-1114`) with no compact override. |
+| Safe area | `frontend/index.html:5` declares `width=device-width, initial-scale=1.0` with no `viewport-fit=cover`, and no `env(safe-area-inset-*)` usage exists under `frontend/src` (0 matches). |
 
 ## OPT-001 Chart-first Mobile Canvas And Floating Filter Dock
 
@@ -83,6 +101,7 @@ This surface is designed for fingers on a phone, not for a mouse cursor scaled d
 ## OPT-002 Progressive Disclosure For Mobile Trade Markers
 
 - Source evidence: repeated `vordinkkk BUY/SELL` labels overlap candles in the current mobile screenshot; selected target uses compact markers and one selected label.
+- Code evidence: see Touch-contract Gap Evidence above — the unconditional label rectangle (`kline-engine.js:2271-2285`), the no-slop exact-rectangle hit test (`:2379-2387`), and the hover-only annotation tooltip (`:1241`, `:2437`) are the current anchors for marker density, marker tap, and marker detail respectively.
 - Current friction:
   - Every visible trade annotation receives a full label, even when the chart width cannot accommodate the labels.
   - Clamped labels overlap each other and the candle field, obscuring the market move the page exists to review.
@@ -98,6 +117,7 @@ This surface is designed for fingers on a phone, not for a mouse cursor scaled d
 ## OPT-003 Touch-first Mobile Review Interaction
 
 - Source evidence: the current compact date and toolbar controls are visually dense; the selected target promotes three large dock actions and a compact timeframe control.
+- Code evidence: see Touch-contract Gap Evidence above. No clause of the Touch-first Interaction Contract currently has an implementation to extend: gesture ownership, pointer-cancel cleanup, two-finger scale, tap-versus-drag, forgiving hit regions, capability detection, target size, and safe-area handling are all either absent (0 matches) or bound to a mouse-only path. The contract therefore describes new engine behavior, not a refinement of existing behavior.
 - Current friction:
   - Date chips and secondary chart controls are small and crowded on a touch viewport.
   - Browser chrome can cover lower-page controls while the long page requires repeated scrolling.

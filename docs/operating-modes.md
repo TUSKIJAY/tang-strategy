@@ -144,6 +144,8 @@ Each plan must be linked exactly once from its matching state index and from the
 
 When `Current plan=none`, the other values are `None`, `none`, `none`, and `none`. Otherwise the block must match the named plan's metadata.
 
+Beyond that shared block the two files divide by time, not by topic. `PROGRESS.md` is the running lifecycle log: it accretes dated entries and sheds the oldest closed ones into `docs/progress-archive/` on the triggers that index defines. `HANDOFF.md` is the current resume point: it is overwritten, never appended, and carries no history — a blocker or an open thread is written as present-tense state, not as a dated entry. The lifecycle checker rejects any `HANDOFF.md` line matching `- <YYYY-MM-DD>: `, which is how a pasted log entry looks; that is a shape rule and does not excuse writing the same history without a date. Duplicating a `PROGRESS.md` fact into `HANDOFF.md` creates a second copy that must be hand-synced and will drift, so link or restate the current consequence instead.
+
 ## 7. Data Update Mode
 
 Routine use of the existing fetch/rebuild/acceptance system does not require an Exec Plan. Resolve the requested session with the actual US equity calendar, fetch the SPY/QQQ pair from TradingView first, validate hard session/OHLCV gates, rebuild through a candidate DB, reject shrink/integrity/drift failures, and verify the requested day through the runtime.
