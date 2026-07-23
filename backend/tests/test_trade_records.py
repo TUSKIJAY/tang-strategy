@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import copy
 import json
 import shutil
@@ -269,7 +270,10 @@ class TradeRecordValidationTests(unittest.TestCase):
                     after_replace=main_module._sync_trade_projection,
                 )
 
-            with sqlite3.connect(live) as connection:
+            # sqlite3.connect's context manager only wraps the transaction and
+            # never closes the connection; an open handle here makes the
+            # TemporaryDirectory cleanup fail on Windows (WinError 32).
+            with contextlib.closing(sqlite3.connect(live)) as connection:
                 notes = json.loads(
                     connection.execute(
                         "SELECT notes_json FROM trade_groups WHERE trade_group_id=?",

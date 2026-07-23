@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import secrets
 import shutil
@@ -359,7 +360,10 @@ def _sync_trade_projection() -> dict[str, Any]:
 
         def validate_projection(path: Path) -> None:
             validate_sqlite(path)
-            with connect(path) as connection:
+            # contextlib.closing is required: sqlite3's context manager only
+            # scopes the transaction, and an unclosed handle on the promoted
+            # live DB blocks later file operations on Windows.
+            with contextlib.closing(connect(path)) as connection:
                 actual = {
                     table: int(connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
                     for table in counts

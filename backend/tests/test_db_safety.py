@@ -207,11 +207,14 @@ class DatabaseSafetyTests(unittest.TestCase):
                 build_target_candidate(live, candidate, failure_hook=drift_live)
             self._assert_dates(live, ["2026-07-17", "2026-07-18"])
 
-    def test_repository_candidate_projects_49_days_and_agent_filters(self) -> None:
+    def test_repository_candidate_projects_all_market_days_and_agent_filters(self) -> None:
         root = Path(__file__).resolve().parents[2]
         live = root / "data" / "sqlite" / "tang_strategy_live_extended.db"
         registry = load_trader_registry(root / "content" / "traders" / "index.json")
         days = validate_trade_repository((root / "content" / "trades").glob("*.json"), registry)
+        with contextlib.closing(sqlite3.connect(live)) as live_connection:
+            live_market_days = live_connection.execute("SELECT COUNT(*) FROM market_days").fetchone()[0]
+            live_market_datasets = live_connection.execute("SELECT COUNT(*) FROM market_datasets").fetchone()[0]
         with tempfile.TemporaryDirectory() as raw_directory:
             candidate = Path(raw_directory) / "candidate.db"
             baseline, report = build_target_candidate(
@@ -220,28 +223,42 @@ class DatabaseSafetyTests(unittest.TestCase):
                 registry,
                 days,
             )
-            self.assertEqual(report["counts"]["market_days"], 49)
-            self.assertEqual(report["counts"]["market_datasets"], 52)
-            self.assertEqual(report["counts"]["trade_groups"], 33)
-            self.assertEqual(report["counts"]["trade_outcomes"], 7)
+            # The candidate must carry every live market day/dataset and all
+            # canonical trade content; the repository only grows past the
+            # 2026-07-19 cutover floor (49 SPY days, 33 groups, 7 outcomes).
+            self.assertEqual(report["counts"]["market_days"], live_market_days)
+            self.assertEqual(report["counts"]["market_datasets"], live_market_datasets)
+            self.assertGreaterEqual(report["counts"]["market_days"], 49)
+            self.assertEqual(
+                report["counts"]["trade_groups"],
+                sum(len(day["trade_groups"]) for day in days),
+            )
+            self.assertGreaterEqual(report["counts"]["trade_groups"], 33)
+            self.assertGreaterEqual(report["counts"]["trade_outcomes"], 7)
             self.assertEqual(report["logical_market_sha256"], baseline.logical_sha256)
             with contextlib.closing(sqlite3.connect(candidate)) as connection:
                 connection.row_factory = sqlite3.Row
+                # Exact agent-filter expectations are frozen against the
+                # cutover-era rows only, so later published days cannot
+                # invalidate them.
                 reported = connection.execute(
                     "SELECT trade_group_id, direction, reported_return_pct "
                     "FROM v_trade_group_performance "
                     "WHERE trader_id='tang' AND underlying='SPY' "
+                    "AND trade_date <= '2026-07-17' "
                     "AND reported_return_pct IS NOT NULL ORDER BY trade_date, trade_group_id"
                 ).fetchall()
                 self.assertEqual([row["reported_return_pct"] for row in reported], [50.0, 40.0, 40.0, 30.0])
                 winning_reported = connection.execute(
                     "SELECT COUNT(*) FROM v_trade_group_performance "
                     "WHERE trader_id='tang' AND underlying='SPY' "
+                    "AND trade_date <= '2026-07-17' "
                     "AND reported_stats_eligible=1 AND reported_return_pct>0"
                 ).fetchone()[0]
                 incomplete_calculated = connection.execute(
                     "SELECT COUNT(*) FROM v_trade_group_performance "
                     "WHERE trader_id='tang' AND underlying='SPY' "
+                    "AND trade_date <= '2026-07-17' "
                     "AND calculated_stats_eligible=0"
                 ).fetchone()[0]
                 self.assertEqual((winning_reported, incomplete_calculated), (4, 27))
