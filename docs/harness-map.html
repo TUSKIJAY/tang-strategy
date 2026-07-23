@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<!--
+  Tang Strategy · Project Harness 体系图（手工维护的文档页，非构建产物）
+  数据为时点快照，更新方式：
+    - battery 状态/耗时: python scripts/verify.py
+    - 文档预算: python scripts/check-startup-doc-budget.py
+    - 命令清单: .harness/config.json
+  自包含单文件，无外部依赖，浏览器直接打开即可。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tang Strategy · Project Harness</title>
+<style>
+  :root {
+    --bg: #F3F5F7;
+    --surface: #FFFFFF;
+    --ink: #16232E;
+    --muted: #5A6B78;
+    --line: #D8DFE5;
+    --accent: #23617A;
+    --accent-ink: #1A4A5E;
+    --accent-soft: #E3EEF3;
+    --pass: #1F7A4D;
+    --pass-soft: #E2F2E9;
+    --warn: #A8741F;
+    --warn-soft: #F6EDDA;
+    --rail: #EAEFF2;
+    --mono: "Cascadia Code", "SF Mono", "JetBrains Mono", ui-monospace, Consolas, "Microsoft YaHei", monospace;
+    --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F151B;
+      --surface: #161E26;
+      --ink: #DEE7EE;
+      --muted: #8FA1AF;
+      --line: #2A3540;
+      --accent: #6FB0CC;
+      --accent-ink: #9CCBDF;
+      --accent-soft: #1C303C;
+      --pass: #5CC08D;
+      --pass-soft: #16302380;
+      --warn: #D5A34C;
+      --warn-soft: #33291280;
+      --rail: #1B242D;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #F3F5F7; --surface: #FFFFFF; --ink: #16232E; --muted: #5A6B78;
+    --line: #D8DFE5; --accent: #23617A; --accent-ink: #1A4A5E; --accent-soft: #E3EEF3;
+    --pass: #1F7A4D; --pass-soft: #E2F2E9; --warn: #A8741F; --warn-soft: #F6EDDA; --rail: #EAEFF2;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F151B; --surface: #161E26; --ink: #DEE7EE; --muted: #8FA1AF;
+    --line: #2A3540; --accent: #6FB0CC; --accent-ink: #9CCBDF; --accent-soft: #1C303C;
+    --pass: #5CC08D; --pass-soft: #16302380; --warn: #D5A34C; --warn-soft: #33291280; --rail: #1B242D;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(24px, 3.4vw, 32px);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .masthead { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .masthead p { margin: 0; color: var(--muted); max-width: 56ch; }
+
+  .verdict {
+    flex-shrink: 0;
+    background: var(--pass-soft);
+    border: 1px solid color-mix(in srgb, var(--pass) 40%, transparent);
+    border-radius: 6px;
+    padding: 10px 16px;
+    text-align: right;
+  }
+  .verdict strong { display: block; font-family: var(--mono); font-size: 22px; color: var(--pass); font-variant-numeric: tabular-nums; }
+  .verdict span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 8px 20px;
+    margin: 18px 0 0;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .meta b { color: var(--ink); font-weight: 550; }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 17px;
+    font-weight: 650;
+    margin: 48px 0 6px;
+  }
+  .h2sub { color: var(--muted); margin: 0 0 18px; max-width: 72ch; }
+
+  /* ---- Layer stack ---- */
+  .layer {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .layer .rail {
+    background: var(--rail);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 18px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--accent);
+    border-right: 1px solid var(--line);
+  }
+  .layer .body { padding: 16px 20px 18px; min-width: 0; }
+  .layer h3 { margin: 0 0 2px; font-family: var(--mono); font-size: 14.5px; font-weight: 650; }
+  .layer h3 small { font-weight: 400; color: var(--muted); font-family: var(--sans); font-size: 13px; margin-left: 8px; }
+  .layer .role { color: var(--muted); margin: 0 0 12px; font-size: 13.5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    white-space: nowrap;
+  }
+  .layer ul { margin: 0; padding-left: 18px; color: var(--ink); font-size: 13.5px; }
+  .layer li { margin: 3px 0; }
+  .layer li code, td code, .note code {
+    font-family: var(--mono); font-size: 12.5px;
+    background: var(--rail); padding: 1px 5px; border-radius: 3px;
+  }
+  .connector {
+    display: flex; align-items: center; gap: 10px;
+    margin: 6px 0 6px 27px;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  .connector::before {
+    content: "";
+    width: 1px; height: 26px;
+    background: var(--accent);
+    opacity: 0.55;
+    margin-left: 0;
+  }
+  .connector em { font-style: normal; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em; }
+
+  /* ---- Two-column: battery + budgets ---- */
+  .cols { display: grid; grid-template-columns: 1.45fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; }
+  .panel h3 { margin: 0 0 4px; font-family: var(--mono); font-size: 14.5px; font-weight: 650; }
+  .panel .sub { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 550;
+    padding: 6px 10px 6px 0;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  td { padding: 6.5px 10px 6.5px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.num, td.time { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+  td.cmd { font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--pass-soft);
+    color: var(--pass);
+    border: 1px solid color-mix(in srgb, var(--pass) 40%, transparent);
+  }
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: var(--rail);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ---- Budget meters ---- */
+  .meter { margin: 0 0 16px; }
+  .meter:last-child { margin-bottom: 0; }
+  .meter .mhead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--mono); font-size: 12.5px; margin-bottom: 5px;
+  }
+  .meter .mhead b { font-weight: 650; color: var(--ink); }
+  .meter .mhead span { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .track {
+    position: relative;
+    height: 10px;
+    background: var(--rail);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 5px; }
+  .fill.hot { background: var(--warn); }
+  .mfoot { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+  /* ---- Notes & footer ---- */
+  .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .notes { grid-template-columns: 1fr; } }
+  .note {
+    background: var(--warn-soft);
+    border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+  }
+  .note b { font-family: var(--mono); font-size: 12.5px; color: var(--warn); display: block; margin-bottom: 4px; letter-spacing: 0.04em; }
+
+  .commits { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+  .commits li { margin: 4px 0; }
+  .commits b { color: var(--accent-ink); font-weight: 550; }
+  footer { margin-top: 44px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; font-family: var(--mono); }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Tang Strategy · Governed Profile</p>
+      <h1>Project Harness 体系图</h1>
+      <p>五层结构：启动文档定边界，机器契约定清单，检查器逐项强制，CI 复跑同一套验证，发布通道与验证隔离。</p>
+    </div>
+    <div class="verdict">
+      <strong>11 / 11 PASS</strong>
+      <span>verify.py · 2026-07-23</span>
+    </div>
+  </header>
+  <div class="meta">
+    <div>branch <b>codex/project-harness</b></div>
+    <div>profile <b>governed</b></div>
+    <div>schema <b>project-harness-config-v1</b></div>
+    <div>backend <b>78/78</b></div>
+    <div>frontend <b>test:trade-records 69/69</b></div>
+  </div>
+
+  <h2>五层结构</h2>
+  <p class="h2sub">层序即依赖方向：上层定义规则，下层执行并把结果送回门禁。</p>
+
+  <div class="layer">
+    <div class="rail">1</div>
+    <div class="body">
+      <h3>启动文档层 <small>每个会话的强制阅读链</small></h3>
+      <p class="role">按 <code>AGENTS.md → INSTRUCTIONS.md → PROGRESS.md → HANDOFF.md</code> 顺序读取；受右侧预算仪表约束，超预警即触发归档 / 去重义务。</p>
+      <div class="chips">
+        <span class="chip">AGENTS.md</span>
+        <span class="chip">INSTRUCTIONS.md</span>
+        <span class="chip">PROGRESS.md</span>
+        <span class="chip">HANDOFF.md</span>
+        <span class="chip">docs/progress-archive/</span>
+      </div>
+      <ul>
+        <li><code>AGENTS.md</code> 是唯一权威入口；<code>CLAUDE.md</code> 只是兼容指针</li>
+        <li>PROGRESS 只保留当前真相；plan 关闭后逐步条目迁入 progress-archive（2026-07-23 起有硬触发规则）</li>
+      </ul>
+    </div>
+  </div>
+  <div class="connector"><em>AGENTS / INSTRUCTIONS 指向唯一命令清单 ↓</em></div>
+
+  <div class="layer">
+    <div class="rail">2</div>
+    <div class="body">
+      <h3>机器契约层 <small>唯一事实源 + 跨平台执行器</small></h3>
+      <p class="role"><code>.harness/config.json</code> 是全仓库唯一的验证命令清单（11 条）与 GitHub 契约；<code>scripts/verify.py</code> 读取并通过 bash 执行，Windows / macOS 用法一致。</p>
+      <div class="chips">
+        <span class="chip">.harness/config.json</span>
+        <span class="chip">scripts/verify.py</span>
+      </div>
+      <ul>
+        <li>清单不在任何文档里复述；INSTRUCTIONS / HANDOFF / PR 模板只留一行指引</li>
+        <li><code>verify.py --list / --only &lt;substr&gt; / --verbose</code>；任一命令失败退出码非零</li>
+      </ul>
+    </div>
+  </div>
+  <div class="connector"><em>verify.py 执行清单 · 检查器逐项校验 ↓</em></div>
+
+  <div class="layer">
+    <div class="rail">3</div>
+    <div class="body">
+      <h3>检查器层 <small>三个专职检查器 + 12 个 fixture 单测</small></h3>
+      <div class="chips">
+        <span class="chip">check-project-harness.py</span>
+        <span class="chip">check-operating-modes.py</span>
+        <span class="chip">check-startup-doc-budget.py</span>
+        <span class="chip">scripts.tests.test_operating_modes ×12</span>
+      </div>
+      <ul>
+        <li><b>harness</b>：22 个必需文件；config schema；GitHub 契约双向核对（workflow job 显示名 ≡ config.checks，逐项按序）；9 个索引页全部链接目标存在且不逃出仓库根；内嵌调用生命周期检查器</li>
+        <li><b>operating-modes</b>：plan 唯一归属（proposed / active / completed 恰一处）、必需元数据、review verdict 链接、PROGRESS 与 HANDOFF 状态块逐字段相等</li>
+        <li><b>doc-budget</b>：预警 = 归档 / 去重义务，硬上限 = CI 红</li>
+      </ul>
+    </div>
+  </div>
+  <div class="connector"><em>CI 三个 job 复跑同一批检查 ↓</em></div>
+
+  <div class="layer">
+    <div class="rail">4</div>
+    <div class="body">
+      <h3>CI 层 <small>.github/workflows/project-harness.yml · PR → main 时触发</small></h3>
+      <div class="chips">
+        <span class="chip">Harness structure</span>
+        <span class="chip">Backend checks</span>
+        <span class="chip">Frontend build</span>
+      </div>
+      <ul>
+        <li>三个 job 显示名被 harness 检查器强制与 <code>config.github.checks</code> 精确匹配</li>
+        <li>与本地 battery 同构：11 条中 CI 显式跑 9 条 + 1 条内嵌覆盖；<code>git diff --check</code> 仅本地有意义</li>
+        <li>环境：Python 3.11 · Node 22 · 安装 <code>requirements-tv.txt</code></li>
+      </ul>
+    </div>
+  </div>
+  <div class="connector"><em>验证与发布隔离：绿 check 是证据，不是发布授权 ↓</em></div>
+
+  <div class="layer">
+    <div class="rail">5</div>
+    <div class="body">
+      <h3>发布层 <small>.github/workflows/publish-static-reviews.yml · 唯一 Pages 发布者</small></h3>
+      <p class="role">仅由 <code>main</code> push 触发：export 静态 review → static build → force-push <code>gh-pages</code>。与 PR 验证 workflow 零重叠，受 daily-publish-runbook 契约管辖。</p>
+      <div class="chips">
+        <span class="chip">export_static_reviews.py</span>
+        <span class="chip">build:static-reviews</span>
+        <span class="chip">gh-pages</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cols" style="margin-top: 48px;">
+    <div class="panel">
+      <h3>验证 Battery</h3>
+      <p class="sub">来源 <code>.harness/config.json</code> · 最近全量运行 2026-07-23</p>
+      <div class="tablewrap">
+        <table>
+          <tr><th>#</th><th>状态</th><th>耗时</th><th>命令</th></tr>
+          <tr><td class="num">1</td><td><span class="pill">PASS</span></td><td class="time">0.4s</td><td class="cmd">check-project-harness.py --profile governed</td></tr>
+          <tr><td class="num">2</td><td><span class="pill">PASS</span></td><td class="time">0.3s</td><td class="cmd">check-operating-modes.py</td></tr>
+          <tr><td class="num">3</td><td><span class="pill">PASS</span></td><td class="time">1.2s</td><td class="cmd">unittest scripts.tests.test_operating_modes</td></tr>
+          <tr><td class="num">4</td><td><span class="pill">PASS</span></td><td class="time">0.2s</td><td class="cmd">check-startup-doc-budget.py</td></tr>
+          <tr><td class="num">5</td><td><span class="pill">PASS</span></td><td class="time">0.0s</td><td class="cmd">bash -n start-local-acceptance.sh</td></tr>
+          <tr><td class="num">6</td><td><span class="pill">PASS</span></td><td class="time">35.9s</td><td class="cmd">backend unittest discover（78 tests）</td></tr>
+          <tr><td class="num">7</td><td><span class="pill">PASS</span></td><td class="time">0.2s</td><td class="cmd">backend compileall app scripts tests</td></tr>
+          <tr><td class="num">8</td><td><span class="pill">PASS</span></td><td class="time">0.8s</td><td class="cmd">frontend npm run test:trade-records（69）</td></tr>
+          <tr><td class="num">9</td><td><span class="pill">PASS</span></td><td class="time">1.1s</td><td class="cmd">frontend npm run build</td></tr>
+          <tr><td class="num">10</td><td><span class="pill">PASS</span></td><td class="time">1.1s</td><td class="cmd">VITE_STATIC_REVIEWS=true build:static-reviews</td></tr>
+          <tr><td class="num">11</td><td><span class="pill">PASS</span></td><td class="time">0.1s</td><td class="cmd">git diff --check</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>启动文档预算</h3>
+      <p class="sub">条以预警线为满格；触顶即产生归档 / 去重义务</p>
+
+      <div class="meter">
+        <div class="mhead"><b>PROGRESS.md</b><span>10,681 B · 87%</span></div>
+        <div class="track"><div class="fill hot" style="width: 87%;"></div></div>
+        <div class="mfoot"><span>预警 12,288 B（归档义务）</span><span>硬上限 49,152 B</span></div>
+      </div>
+      <div class="meter">
+        <div class="mhead"><b>AGENTS.md</b><span>10,206 B · 62%</span></div>
+        <div class="track"><div class="fill" style="width: 62%;"></div></div>
+        <div class="mfoot"><span>预警 16,384 B（去重义务）</span><span>硬上限 32,768 B</span></div>
+      </div>
+      <div class="meter">
+        <div class="mhead"><b>INSTRUCTIONS.md</b><span>7,676 B · 62%</span></div>
+        <div class="track"><div class="fill" style="width: 62%;"></div></div>
+        <div class="mfoot"><span>预警 12,288 B（去重义务）</span><span>硬上限 40,960 B</span></div>
+      </div>
+      <div class="meter">
+        <div class="mhead"><b>HANDOFF.md</b><span>4,038 B · 11%</span></div>
+        <div class="track"><div class="fill" style="width: 11%;"></div></div>
+        <div class="mfoot"><span>预警 38,400 B</span><span>硬上限 49,152 B</span></div>
+      </div>
+
+      <p class="sub" style="margin: 14px 0 0;">PROGRESS 已接近预警——下一到两条正文条目后，追加前必须先把最旧的已关闭条目迁入 <code>docs/progress-archive/</code>。</p>
+    </div>
+  </div>
+
+  <h2>CI ↔ 本地映射</h2>
+  <p class="h2sub">同一批验证，两个执行面。本地 battery 是超集；CI 在干净环境复跑。</p>
+  <div class="panel">
+    <div class="tablewrap">
+      <table>
+        <tr><th>本地命令</th><th>CI 覆盖方式</th></tr>
+        <tr><td class="cmd">check-project-harness / test_operating_modes / doc-budget / bash -n</td><td><span class="tag">Harness structure</span> 逐条显式运行</td></tr>
+        <tr><td class="cmd">check-operating-modes.py</td><td><span class="tag">Harness structure</span> 经 harness 检查器内嵌调用覆盖</td></tr>
+        <tr><td class="cmd">backend unittest + compileall</td><td><span class="tag">Backend checks</span> 装 requirements-tv 后运行</td></tr>
+        <tr><td class="cmd">test:trade-records + 两种 build</td><td><span class="tag">Frontend build</span> npm ci 后运行</td></tr>
+        <tr><td class="cmd">git diff --check</td><td><span class="tag">仅本地</span> CI 的干净 checkout 上无意义</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h2>已知无害项</h2>
+  <div class="notes">
+    <div class="note">
+      <b>冗余运行 ×2</b>
+      <code>check-operating-modes</code> 在 battery 中跑两次：独立第 2 条 + 内嵌在第 1 条。0.3 秒换取独立可见性，保留是刻意选择。
+    </div>
+    <div class="note">
+      <b>正则 YAML 解析</b>
+      harness 检查器提取 CI job 显示名依赖标准两空格缩进。现有 workflow 符合；大改 workflow 结构时需留意。
+    </div>
+  </div>
+
+  <h2>2026-07-23 加固记录</h2>
+  <ul class="commits">
+    <li><b>11e941f</b> 归档机制修复：23 条已关闭 plan 流水迁入 progress-archive，触发规则写死</li>
+    <li><b>e6256e6</b> AGENTS / INSTRUCTIONS 预警阈值收紧（24.5K→16K / 30.7K→12K）</li>
+    <li><b>37a911c</b> 新增 scripts/verify.py 统一验证入口；命令清单收敛到 config.json 单一事实源</li>
+    <li><b>7e2152f</b> 修正 PROGRESS 中后端漂移记录的方向错误</li>
+    <li><b>bc4f2ca</b> 后端 4 个既有失败修复：钉死快照 → 下界+子集+推导；修复 Windows 下 live DB 句柄泄漏（产品 bug，app/main.py validate_projection）</li>
+    <li><b>0523d71</b> PR 模板验证清单对齐 verify.py</li>
+  </ul>
+
+  <footer>Generated 2026-07-23 · sources: scripts/verify.py · check-startup-doc-budget.py · .harness/config.json · .github/workflows/*.yml</footer>
+</div>
+</body>
+</html>

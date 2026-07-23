@@ -17,6 +17,7 @@
 - [`kline-engine.md`](./kline-engine.md) — shared frontend chart engine and payload contract.
 - [`daily-publish-runbook.md`](./daily-publish-runbook.md) — TV-first daily fetch, safe DB rebuild, and Pages publication SOP.
 - [`operating-modes.md`](./operating-modes.md) — normative Coding/Data Update routing, lifecycle formats, task-scoped local commit default, reviewer evidence, and authority gates.
+- [`harness-map.html`](./harness-map.html) — hand-maintained visual map of the harness layers, verification battery, and doc budgets; point-in-time snapshot, not build output.
 
 ## Governed Lifecycle Docs
 
