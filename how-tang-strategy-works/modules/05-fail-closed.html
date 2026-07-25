@@ -1,0 +1,424 @@
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">宁可失败也不乱写</h1>
+      <p class="module-subtitle">空管塔台换跑道：新航班计划必须全部过检，旧跑道先备份；半空发现问题就立刻切回备份。</p>
+    </header>
+
+    <!-- ── Screen 1: Hook ─────────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">为什么「有一个就算了」不行？</h2>
+      <p>
+        每天都要更新
+        <span class="term" data-definition="成对更新的两个标的：SPY 与 QQQ。编排器要求同一天、同一会话、同一数据源一起通过。">SPY + QQQ</span>
+        这对标的。抓取失败、质量门没过、半路断电——这时候旧库必须完好。
+      </p>
+      <p>
+        核心原则叫
+        <span class="term" data-definition="校验不过就拒绝写入或推广；失败时保留旧状态，绝不带着半成品上线。">fail-closed</span>
+        ：宁可整次更新失败，也不接受「只写进一半」的生产库。
+      </p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🛡</div>
+        <div class="callout-content">
+          <span class="callout-title">fail-closed vs fail-open</span>
+          <p>
+            <strong>fail-closed</strong>：门没过 → 拒绝写入 → 旧 live 继续服务。<br>
+            <strong>fail-open</strong>：门没过 → 硬塞进去 → 半套数据污染生产。<br>
+            Tang Strategy 的日常路径永远是前者。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 2: Runway swap metaphor + steps ──────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">塔台换跑道：四步</h2>
+      <p>
+        把更新想成空管切换跑道。
+        <span class="term" data-definition="已验证但尚未替换上线的新数据库文件。像尚未授权落地的新航班计划。">candidate</span>
+        是新计划，live 是正在使用的跑道，backup 是随时可切回的旧跑道副本。
+      </p>
+
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Stage pair — 成对进场</strong>
+            <p>
+              <span class="term" data-definition="负责把 SPY 与 QQQ 作为同一批任务拉取、校验、写入的脚本协调器。">orchestrator</span>
+              要求
+              <code>PAIR = ("SPY", "QQQ")</code>
+              同一天、同一
+              <span class="term" data-definition="数据来源方。日常默认 tradingview，硬门失败后才考虑 ibkr。">provider</span>
+              。只到一个标的 = 整批拒绝。
+            </p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Validate — 硬门检查</strong>
+            <p>
+              会话模式、provider 一致、bar 质量等
+              <span class="term" data-definition="必须全部通过才允许继续的硬性校验；任一失败则整对拒绝，不写 live。">hard gate</span>
+              必须全过。TV 优先；IB 只在 TV 重试与硬门失败之后才作为后备。
+            </p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Build candidate — 新跑道旁建</strong>
+            <p>
+              在旁路建好完整 candidate，并先做好 live 的 verified backup。candidate 还没
+              <span class="term" data-definition="把已验证的 candidate 原子替换成 live DB 的过程（compare-and-swap）。">promote</span>
+              前，用户仍读旧跑道。
+            </p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Promote OR keep old — 授权落地或原路返回</strong>
+            <p>
+              锁住 live → 确认没漂移 →
+              <code>os.replace</code>
+              →
+              <span class="term" data-definition="强制把目录元数据刷到磁盘，避免断电后文件名替换结果丢失。">fsync</span>
+              →
+              <code>post_validate</code>
+              。验证失败立刻把 backup 换回 live。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 3: PAIR constants ────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">成对常量：同一天、同一源</h2>
+      <p>
+        编排器写死了这对关系。日常路径禁止「只收 SPY」「混用两个 provider」「默认
+        <code>--allow-date-loss</code>」。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>PAIR = ("SPY", "QQQ")
+SESSION_MODE = "extended"
+PROVIDERS = {"tradingview", "ibkr"}
+TRADINGVIEW_EXCHANGES = {
+    "SPY": "AMEX",
+    "QQQ": "NASDAQ",
+}</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>PAIR</code> — 永远成对：SPY 与 QQQ 同进同退</div>
+            <div class="tl"><code>SESSION_MODE</code> — 扩展时段会话，不是任意字符串</div>
+            <div class="tl"><code>PROVIDERS</code> — 只认这两个源：TV 优先，IB 后备</div>
+            <div class="tl"><code>TRADINGVIEW_EXCHANGES</code> — 各标的在 TV 上的交易所代码</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="badge-list">
+        <div class="badge-item">
+          <span class="badge-code">tradingview first</span>
+          <span class="badge-desc">日常默认源；不因 Gateway 关闭就去找 IB</span>
+        </div>
+        <div class="badge-item">
+          <span class="badge-code">ibkr fallback</span>
+          <span class="badge-desc">仅在 TV 重试或硬门失败后，报告失败门再请开 Gateway</span>
+        </div>
+        <div class="badge-item">
+          <span class="badge-code">never --allow-date-loss</span>
+          <span class="badge-desc">日常/默认路径禁止用丢日期换「强行通过」</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 4: promote_candidate signature ───────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">promote_candidate：签名在说什么</h2>
+      <p>
+        推广不是「覆盖文件」那么简单。函数要同时拿着 live、candidate、baseline 令牌、backup 和推广后校验回调。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>def promote_candidate(
+    live_path: Path,
+    candidate_path: Path,
+    baseline_token: DatabaseToken,
+    backup_path: Path,
+    post_validate: Callable[[Path], None],
+) -> None:
+    """Compare-and-swap a verified candidate
+    while preserving a verified backup."""</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>live_path</code> — 正在服务的跑道（生产 DB）</div>
+            <div class="tl"><code>candidate_path</code> — 已通过检查、等待授权落地的新计划</div>
+            <div class="tl"><code>baseline_token</code> — 开建 candidate 时的 live 快照指纹</div>
+            <div class="tl"><code>backup_path</code> — 已验证的旧跑道副本，失败可秒切回</div>
+            <div class="tl"><code>post_validate</code> — 替换后再验一次；不过就回滚</div>
+            <div class="tl">docstring — 对比并交换（CAS），同时保住 verified backup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 5: drift guard ───────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">漂移拒绝：live 在快照后被改了？</h2>
+      <p>
+        锁住写入后先检查：live 是否还是你开建 candidate 时那一份。若别人/别进程在中间改过，直接拒绝推广。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>with db_write_lock(live):
+    _checkpoint_and_require_quiescent(live)
+    current_token = capture_database_token(live)
+    if current_token != baseline_token:
+        raise RuntimeError(
+            "Refusing DB promotion: live DB drifted "
+            "after the candidate snapshot "
+            f"(baseline={baseline_token.as_dict()}, "
+            f"current={current_token.as_dict()})"
+        )</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>db_write_lock</code> — 独占跑道，防止双写</div>
+            <div class="tl"><code>_checkpoint_and_require_quiescent</code> — 要求库安静、可安全替换</div>
+            <div class="tl"><code>capture_database_token</code> — 抓当前 live 指纹</div>
+            <div class="tl"><code>!= baseline_token</code> — 和开建时不一致 → 漂移</div>
+            <div class="tl"><code>RuntimeError</code> — 拒绝推广，candidate 不上线</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 6: replace + rollback ────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">落地与回滚：一秒钟的生死线</h2>
+      <p>
+        令牌对上了，才做原子替换。替换后立刻再验；任何异常都把 backup 换回 live，再把异常抛出去。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>os.replace(candidate, live)
+fsync_directory(live.parent)
+try:
+    post_validate(live)
+except Exception:
+    os.replace(backup, live)
+    fsync_directory(live.parent)
+    raise</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>os.replace(candidate, live)</code> — 原子改名：新跑道就位</div>
+            <div class="tl"><code>fsync_directory</code> — 把目录改动刷盘，防断电丢名</div>
+            <div class="tl"><code>post_validate(live)</code> — 替换后再跑业务硬门</div>
+            <div class="tl"><code>except</code> — 任一失败进入回滚通道</div>
+            <div class="tl"><code>os.replace(backup, live)</code> — 旧跑道立刻复位</div>
+            <div class="tl"><code>raise</code> — 不吞错误；调用方必须看见失败</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">✈</div>
+        <div class="callout-content">
+          <span class="callout-title">塔台口令</span>
+          <p>
+            新计划可以作废，旧跑道不能没。这就是
+            <span class="term" data-definition="校验不过就拒绝写入或推广；失败时保留旧状态，绝不带着半成品上线。">fail-closed</span>
+            在数据库推广上的具体形状。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 7: Spot the bug ──────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">找出错误的「换跑道」写法</h2>
+      <p>下面是一段伪代码。点出真正会毁掉生产库的那一行。</p>
+
+      <div class="bug-challenge">
+        <h3>哪一行是 bug？</h3>
+        <div class="bug-code">
+          <div class="bug-line"
+               onclick="checkBugLine(this, false)"
+               data-hint="先备份 live 是正确的。继续找真正破坏原子性的那一行。">
+            <span class="line-num">1</span>
+            <code>backup = copy(live)  # keep verified backup</code>
+          </div>
+          <div class="bug-line"
+               onclick="checkBugLine(this, true)"
+               data-explanation="先删 live 再写 candidate 会留下「无库」窗口：断电或写到一半时生产库直接消失。正确做法是 os.replace 原子切换，失败再用 backup 回滚。">
+            <span class="line-num">2</span>
+            <code>delete(live)  # free the path, then write candidate</code>
+          </div>
+          <div class="bug-line"
+               onclick="checkBugLine(this, false)"
+               data-hint="写入 candidate 本身不是问题——危险的是前面先删 live。">
+            <span class="line-num">3</span>
+            <code>write(candidate_bytes, live)</code>
+          </div>
+          <div class="bug-line"
+               onclick="checkBugLine(this, false)"
+               data-hint="post_validate 是对的；真正的 bug 在删除 live 那一步。">
+            <span class="line-num">4</span>
+            <code>post_validate(live)</code>
+          </div>
+        </div>
+        <div class="bug-feedback"></div>
+      </div>
+    </div>
+
+    <!-- ── Screen 8: Quiz ─────────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">情景测验：你会怎么指挥？</h2>
+
+      <div class="quiz-container" id="quiz-m5">
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对。PAIR 要求 SPY 与 QQQ 同 provider 同日通过；只到 SPY 时整批拒绝，live 保持不变。"
+             data-explanation-wrong="再想：编排器是成对硬门。单 ticker 接受会破坏同日同源契约。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 1</span>
+              <p>TV 成功返回了 SPY，但 QQQ 超时。AI 提议：「先把 SPY 写进库，QQQ 明天补。」</p>
+            </div>
+          </div>
+          <p class="quiz-question">正确做法是？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              接受 SPY，单独 rebuild 再 promote
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              整对拒绝；不写 live，重试或报告 QQQ 硬门失败
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              用昨天的 QQQ 配今天的 SPY 凑一对
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="对。os.replace 之后 post_validate 失败会 os.replace(backup, live) 再 raise——旧跑道复位。"
+             data-explanation-wrong="再看 rollback 分支：except 里用 backup 换回 live，不会留下半成品。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 2</span>
+              <p>candidate 已通过预检，promote 时 <code>os.replace(candidate, live)</code> 成功，但 <code>post_validate(live)</code> 抛错。</p>
+            </div>
+          </div>
+          <p class="quiz-question">生产库最终应是？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              backup 被换回 live；异常向上抛出
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              保留已替换的 candidate，只记日志
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              删除 live，等运维手工恢复
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="对。日常/默认路径永不 --allow-date-loss。丢日期是刻意破坏 fail-closed 的逃生口，不是日常开关。"
+             data-explanation-wrong="日常路径必须 fail-closed。--allow-date-loss 不是「今天赶工」按钮。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 3</span>
+              <p>重建候选时日期集合缩小，AI 建议：「日常发布加 <code>--allow-date-loss</code> 先过门。」</p>
+            </div>
+          </div>
+          <p class="quiz-question">你该怎么回？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              同意，发布窗口要紧
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              只对 QQQ 开允许丢日期
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              拒绝：日常路径禁止 --allow-date-loss；先查丢了哪些日
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">重置</button>
+      </div>
+    </div>
+
+    <!-- ── Screen 9: Takeaway ──────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">带走的指挥口令</h2>
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-accent-light);">🔒</div>
+          <div>
+            <strong>禁止 --allow-date-loss（日常）</strong>
+            <p>日期集合缩小 = 停下来查，不是开开关硬推。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-info-light);">👯</div>
+          <div>
+            <strong>禁止单 ticker 接受</strong>
+            <p>SPY 与 QQQ 同 provider、同日、同会话；只到一个就整对失败。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-success-light);">📡</div>
+          <div>
+            <strong>TV 优先，IB 只在硬门之后</strong>
+            <p>先报告失败的 ticker/gate，再请开 IB Gateway 重跑完整 pair。</p>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:var(--space-6);color:var(--color-text-secondary);">
+        下一课：用所有权地图指挥 AI——哪层该改、哪句口令有效、什么动作永远需要单独授权。
+      </p>
+    </div>
+
+  </div>
+</section>

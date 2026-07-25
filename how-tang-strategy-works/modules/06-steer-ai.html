@@ -1,0 +1,448 @@
+<section class="module" id="module-6">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">像船长一样指挥 AI</h1>
+      <p class="module-subtitle">航海图 + 职责牌：每块甲板有明确「谁说了算」。你不必拧每一颗螺丝，但要知道该把哪张海图交给大副。</p>
+    </header>
+
+    <!-- ── Screen 1: Hook ─────────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">毕业技能：指挥，而不是陪跑</h2>
+      <p>
+        你已经看过旅程、演员、对话、金库和安全阀。最后一课：用
+        <span class="term" data-definition="哪一层代码/数据对该行为拥有最终解释权；越界改动会破坏架构与可维护性。">ownership</span>
+        边界指挥 AI、打断死循环、做架构决策。
+      </p>
+      <p>
+        vibe coding 的终点不是「让 AI 多写几行」，而是：用正确词汇下指令，用症状反查层级，拒绝越权（push / publish /
+        <code>--allow-date-loss</code>）。
+      </p>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚓</div>
+        <div class="callout-content">
+          <span class="callout-title">本地 commit ≠ push / Pages 授权</span>
+          <p>
+            任务结束的默认动作可以是<strong>一次作用域内的本地 commit</strong>。
+            它<strong>从不</strong>附带 push、开 PR、合并、GitHub Pages、provider/broker 或其他远程动作。
+            远程动作永远需要你单独开口。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 2: Ownership map ─────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">职责牌：五块甲板</h2>
+      <p>改 bug 前先问：这是哪张海图的事？把问题扔给正确甲板，AI 才不会在引擎里塞业务、在 content 里塞生成物。</p>
+
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:var(--color-accent-light);">🗺</div>
+          <div class="pattern-title">reviewWorkspace</div>
+          <p class="pattern-desc">
+            纯函数工作区逻辑：选日、切标的、上下文转移。不捏造不存在的日期。
+          </p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:var(--color-info-light);">📈</div>
+          <div class="pattern-title">kline 引擎</div>
+          <p class="pattern-desc">
+            图表通用控件：缩放、拖拽、绘制。不管业务「哪天属于哪个 ticker」。
+          </p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:var(--color-success-light);">🧭</div>
+          <div class="pattern-title">Review 业务层</div>
+          <p class="pattern-desc">
+            业务上下文：策略、交易标记、过滤器、页面状态。向引擎喂数据，不反向污染引擎。
+          </p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:#F5E8F5;">📜</div>
+          <div class="pattern-title">canonical content</div>
+          <p class="pattern-desc">
+            <span class="term" data-definition="规范交易原文（如 content/trades 全日文档）。写入应是完整文档原子替换，不是半文件补丁。">canonical</span>
+            交易写完整文档；投影进 DB，不是手改库冒充真相。
+          </p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:var(--color-error-light);">📡</div>
+          <div class="pattern-title">export / publish</div>
+          <p class="pattern-desc">
+            Pages 读已提交的 DB 导出，不是 seed 草稿。发布需要单独授权与发布契约。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 3: AI phrasebook ─────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">指挥 AI 的话术清单</h2>
+      <p>同一件事，用对词能省掉半小时的错误尝试。把这些词贴在职责牌上。</p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-accent-light);">🔒</div>
+          <div>
+            <strong>fail-closed · 宁可不写</strong>
+            <p>「按 fail-closed：校验不过就拒绝，不要静默换日或丢日期。」</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-info-light);">📦</div>
+          <div>
+            <strong>assemble · 组装复盘包</strong>
+            <p>「问题在 assemble 载荷，还是前端画图？先看 <code>/api/reviews/assemble</code>。」</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-success-light);">⬆</div>
+          <div>
+            <strong>promote · 候选晋升</strong>
+            <p>「只改 candidate 路径；promote 必须 CAS + backup 回滚，禁止先删 live。」</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:#F5E8F5;">📄</div>
+          <div>
+            <strong>canonical content · 规范原文</strong>
+            <p>「交易改动写完整 content 文档，再投影；不要手改 SQLite 当真相。」</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-error-light);">🧭</div>
+          <div>
+            <strong>ownership · 所有权边界</strong>
+            <p>「日期归属在 reviewWorkspace；kline 只做图表通用，不塞业务规则。」</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 4: DnD symptom → layer ───────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">症状 → 先看哪一层</h2>
+      <p>把症状芯片拖到对应职责区。船长先定位甲板，再下令维修。</p>
+
+      <div class="dnd-container" id="dnd-m6">
+        <div class="dnd-chips">
+          <div class="dnd-chip" draggable="true" data-answer="auth">401 Unauthorized</div>
+          <div class="dnd-chip" draggable="true" data-answer="db">图表空 bars / 无 K 线</div>
+          <div class="dnd-chip" draggable="true" data-answer="workspace">切标的后日期错乱</div>
+          <div class="dnd-chip" draggable="true" data-answer="publish">Pages 仍是旧日数据</div>
+        </div>
+        <div class="dnd-zones">
+          <div class="dnd-zone" data-correct="auth">
+            <p class="dnd-zone-label">鉴权 / token / 登录页</p>
+            <div class="dnd-zone-target">拖到这里</div>
+          </div>
+          <div class="dnd-zone" data-correct="db">
+            <p class="dnd-zone-label">DB / seed / rebuild / assemble 载荷</p>
+            <div class="dnd-zone-target">拖到这里</div>
+          </div>
+          <div class="dnd-zone" data-correct="workspace">
+            <p class="dnd-zone-label">reviewWorkspace 纯函数（选日 / 切 ticker）</p>
+            <div class="dnd-zone-target">拖到这里</div>
+          </div>
+          <div class="dnd-zone" data-correct="publish">
+            <p class="dnd-zone-label">export 静态 JSON → 构建 → Pages 工作流</p>
+            <div class="dnd-zone-target">拖到这里</div>
+          </div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkDnD('dnd-m6')">检查匹配</button>
+        <button class="quiz-reset-btn" onclick="resetDnD('dnd-m6')">重置</button>
+      </div>
+    </div>
+
+    <!-- ── Screen 5: switchTicker translation ──────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">switchTicker：不捏造日期</h2>
+      <p>
+        切标的时：目标 ticker
+        <strong>拥有</strong>同一天就留在那天；否则选该 ticker
+        <strong>真实存在</strong>的最新日。没有天数的 ticker 绝不虚构——保持当前上下文并上报。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>// Ticker switch: keep the same date only when
+// the target ticker owns it, otherwise select
+// the target ticker's newest real date. A ticker
+// without days is never fabricated; the current
+// context is kept and reported.
+export function switchTicker(
+  days = [], current = {}, nextTicker = ''
+) {
+  const ordered = [...array(days)]
+    .sort(compareWorkspaceDays);
+  const wanted = cleanText(nextTicker).toUpperCase();</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">注释契约 — 同日仅当目标拥有；否则用真实最新日</div>
+            <div class="tl">无天数 → 不捏造；保留当前上下文并报告</div>
+            <div class="tl"><code>switchTicker</code> — 纯函数：输入 days/current/next，输出 transition</div>
+            <div class="tl"><code>ordered</code> — 按工作区规则排序，结果可复现</div>
+            <div class="tl"><code>wanted</code> — 规范化后的目标 ticker 大写代码</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>const sameDate = currentDay
+  ? targetDays.find(
+      (day) => day.trade_date === currentDay.trade_date
+    )
+  : null;
+if (sameDate) {
+  return transition(
+    sameDate,
+    { kind: 'same-date', requested: wanted, reason: '' },
+    previousContext
+  );
+}
+return transition(
+  targetDays[0],
+  {
+    kind: 'newest-date',
+    requested: wanted,
+    reason: 'date-not-owned',
+  },
+  previousContext
+);</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>sameDate</code> — 目标 ticker 是否也有当前 trade_date</div>
+            <div class="tl"><code>kind: 'same-date'</code> — 拥有同日：平滑切换，不跳日</div>
+            <div class="tl"><code>targetDays[0]</code> — 排序后的「最新真实日」（非臆造）</div>
+            <div class="tl"><code>date-not-owned</code> — 原因码：当前日不属于目标 ticker</div>
+            <div class="tl"><code>previousContext</code> — 保留上下文 token，便于 UI 解释发生了什么</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 6: selectWorkspaceDay ────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">selectWorkspaceDay：缺日就报，不偷换</h2>
+      <p>
+        显式点选日期 rail 或对账时：只有真实 day 可选。找不到就保持当前日，并带上
+        <code>missing-date</code> / <code>no-such-day</code>——这是前端的 fail-closed。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>export function selectWorkspaceDay(
+  days = [],
+  current = {},
+  { ticker = '', tradeDate = '', key = '' } = {}
+) {
+  const previousContext =
+    cleanText(current.context) || contextToken(current.day);
+  const currentDay = current.day || null;
+  const target = key
+    ? findDayByKey(days, key)
+    : findDay(days, { ticker, tradeDate });
+  if (!target) {
+    return transition(currentDay, {
+      kind: 'missing-date',</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">可用 key，或 ticker + tradeDate 查找</div>
+            <div class="tl"><code>previousContext</code> — 失败时仍能解释「你刚才在哪」</div>
+            <div class="tl"><code>target</code> — 只认列表里真实存在的 day</div>
+            <div class="tl"><code>!target</code> — 不静默换成邻近日</div>
+            <div class="tl"><code>kind: 'missing-date'</code> — 上报缺失，currentDay 原位不动</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 7: Quiz ─────────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">船长情景测验</h2>
+
+      <div class="quiz-container" id="quiz-m6">
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对。日期 rail 的归属与排序属于 reviewWorkspace 纯函数，不是 kline 绘图层。"
+             data-explanation-wrong="日期「谁拥有哪一天」是工作区逻辑。kline 只负责画，不决定业务日选择。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 1</span>
+              <p>用户反馈：切换 SPY → QQQ 后，日期条跳到了错误的一天，且没有说明原因。</p>
+            </div>
+          </div>
+          <p class="quiz-question">你该让 AI 先打开哪里？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              kline-engine 的拖拽与缩放代码
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              reviewWorkspace 的 switchTicker / selectWorkspaceDay
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              GitHub Pages 发布工作流
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="对。交易标记颜色与业务语义属于 Review 业务层；kline 提供通用绘制，不拥有「这笔单什么颜色」的产品规则。"
+             data-explanation-wrong="marker 颜色是业务语义。引擎可渲染，但规则所有权在 Review / 交易记录层。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 2</span>
+              <p>产品要求：多空标记颜色跟交易方向走，而不是跟 K 线涨跌色盘走。</p>
+            </div>
+          </div>
+          <p class="quiz-question">所有权在哪一层？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Review 业务层（标记语义）+ 明确不把规则塞进图表通用核
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              backend promote_candidate
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              content/traders/index.json 的 registry 顺序
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="对。本地 commit 只固化工作区；push / PR / Pages 永远需要单独、明确的用户授权。"
+             data-explanation-wrong="任务默认的本地 commit 不含任何远程动作。发布必须你另行授权。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 3</span>
+              <p>你让 AI 修完一个前端 bug。它 commit 后问：「要不要顺便 push 并触发 Pages？»</p>
+            </div>
+          </div>
+          <p class="quiz-question">正确回应？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              可以，本地 commit 默认包含发布权
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              只允许 push，Pages 工作流会自己决定
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              拒绝：本地 commit ≠ push/PR/Pages；远程动作需单独授权
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对。401 先鉴权；空 bars 先 DB/assemble；Pages 旧数据先 export/publish 链。症状分层，避免一把梭。"
+             data-explanation-wrong="三种症状落在三层：auth、数据组装、发布链路。不要一上来就改 kline。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 4</span>
+              <p>同事同时报了三件事：登录后 401、某日图表无 bars、公开站还是上周数据。</p>
+            </div>
+          </div>
+          <p class="quiz-question">你给 AI 的排查顺序？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              全部先改 kline-engine，因为都和「图」有关
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              401→鉴权；空 bars→DB/seed/assemble；旧 Pages→export/publish
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              先 --allow-date-loss rebuild，再看前端
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m6')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m6')">重置</button>
+      </div>
+    </div>
+
+    <!-- ── Screen 8: Closing ───────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">航程结束</h2>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🎉</div>
+        <div class="callout-content">
+          <span class="callout-title">恭喜完成本课</span>
+          <p>
+            你已经能：描述复盘链路、点名前后端与金库、用 fail-closed 语言挡住危险写入，
+            并用所有权地图指挥 AI。回到顶部任意模块复习，或打开仓库里的真实路径对照。
+          </p>
+        </div>
+      </div>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-accent-light);">①</div>
+          <div>
+            <strong>旅程</strong>
+            <p>一页复盘 = 一次 assemble 载荷 + 前端绘制。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-info-light);">②</div>
+          <div>
+            <strong>金库</strong>
+            <p>tracked SQLite 是运行时真相；Pages 从 DB 导出，不从草稿。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-success-light);">③</div>
+          <div>
+            <strong>安全阀</strong>
+            <p>成对更新、CAS promote、backup 回滚、日常禁止丢日期。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:#F5E8F5;">④</div>
+          <div>
+            <strong>船长权</strong>
+            <p>ownership 分层下指令；本地 commit 永不偷偷等于远程授权。</p>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:var(--space-8);text-align:center;color:var(--color-text-secondary);">
+        Tang Strategy 拆解课 · 完 · 欢迎从 Module 1 再航一程
+      </p>
+    </div>
+
+  </div>
+</section>

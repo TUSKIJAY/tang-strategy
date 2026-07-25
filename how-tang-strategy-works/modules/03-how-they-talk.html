@@ -1,0 +1,290 @@
+<section class="module" id="module-3">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h2 class="module-title">它们怎么对话</h2>
+      <p class="module-subtitle">登录像办门禁腕带：先换通行证，再每次请求都出示。</p>
+    </header>
+
+    <!-- Screen 1: Opening -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">腕带规则：没带就别进</h3>
+      <p class="animate-in">你已经认识演员了。现在看他们怎么说话：密码换 <span class="term" data-definition="登录成功后服务器签发的临时通行证，存在浏览器 localStorage。">token</span>，请求头带上，后端才肯拼复盘包。</p>
+      <p class="animate-in">前端<span class="term" data-definition="浏览器里的 React 应用。它只调 HTTP API，从不直接打开 SQLite 文件。">frontend</span> 从不直接打开数据库；它只喊 <span class="term" data-definition="后端暴露的 URL 路径，例如 /api/reviews/assemble。">API 路径</span>。后端校验身份后，从 SQLite 拼出 bars、strategy、trade_records。</p>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎫</div>
+        <div class="callout-content">
+          <span class="callout-title">Bearer token = 门禁腕带</span>
+          <p><code>Authorization: Bearer &lt;token&gt;</code> 不是「问候语」，是每次进门要亮的腕带。丢了腕带 = <code>401 Unauthorized</code>，和「图是空的」完全不是一回事。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Request lifecycle steps -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">一次请求的生命周期</h3>
+      <p class="animate-in">从密码到复盘 JSON，固定五步。任何一步断了，症状都不同。</p>
+
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>POST /auth/login</strong>
+            <p>浏览器把密码 JSON 发给后端；密码对了才换腕带。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>存 token + role</strong>
+            <p><code>localStorage</code> 记下 token 和角色（admin / readonly）。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>api() 自动贴腕带</strong>
+            <p>之后每个请求头都加 <code>Authorization: Bearer …</code>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>GET /api/reviews/assemble</strong>
+            <p>后端 <span class="term" data-definition="依赖注入守卫：要求至少 readonly 身份，否则拒绝请求。">require_readonly</span> 验身份，再查 day / strategy / bars。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>返回复盘包</strong>
+            <p>一份 JSON 里装 1m/5m K 线、策略体、当日交易记录——前端只负责画。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: login + api translation -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：换腕带 + 亮腕带</h3>
+      <p class="animate-in"><code>login</code> 负责办证；<code>api()</code> 负责每次出门都把证贴在袖口。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">login</span>(password) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">`${API_BASE}/auth/login`</span>, {</span>
+<span class="code-line">    method: <span class="code-string">'POST'</span>,</span>
+<span class="code-line">    headers: { <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span> },</span>
+<span class="code-line">    body: JSON.stringify({ password }),</span>
+<span class="code-line">  });</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!response.ok) <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">'Password rejected'</span>);</span>
+<span class="code-line">  <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.json();</span>
+<span class="code-line">  window.localStorage.setItem(TOKEN_KEY, data.token);</span>
+<span class="code-line">  window.localStorage.setItem(ROLE_KEY, data.role);</span>
+<span class="code-line">  <span class="code-keyword">return</span> data;</span>
+<span class="code-line">}</span>
+<span class="code-line">&nbsp;</span>
+<span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">api</span>(path, options = {}) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> token = <span class="code-function">getToken</span>();</span>
+<span class="code-line">  <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">`${API_BASE}${path}`</span>, {</span>
+<span class="code-line">    ...options,</span>
+<span class="code-line">    headers: {</span>
+<span class="code-line">      <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span>,</span>
+<span class="code-line">      ...(token ? { Authorization: <span class="code-string">`Bearer ${token}`</span> } : {}),</span>
+<span class="code-line">      ...(options.headers || {}),</span>
+<span class="code-line">    },</span>
+<span class="code-line">  });</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">白话对照</span>
+          <div class="translation-lines">
+            <p class="tl"><strong>login</strong>：拿密码去服务台换临时通行证。</p>
+            <p class="tl">密码不对 → 直接抛错，不发腕带。</p>
+            <p class="tl">成功后把 token 和 role 塞进浏览器抽屉（localStorage）。</p>
+            <p class="tl"><strong>api(path)</strong>：每次请求先摸口袋有没有 token。</p>
+            <p class="tl">有 token → 请求头写上 <code>Bearer …</code>，像亮腕带。</p>
+            <p class="tl">没 token → 不带 Authorization，后端大概率 401。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: roles + assemble -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">两种腕带颜色</h3>
+      <p class="animate-in">密码对照用 <span class="term" data-definition="HMAC 安全比较：防止用响应时间差猜密码。">hmac.compare_digest</span>，对上 admin 或 readonly 之一才算身份。</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">admin</code>
+          <span class="badge-desc">管理员腕带：可写导入、改内容等管理接口</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">readonly</code>
+          <span class="badge-desc">只读腕带：够看复盘、拉列表；assemble 最低要求就是它</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">None</code>
+          <span class="badge-desc">密码都不对 → 不发腕带，后续请求被拒</span>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🔐</div>
+        <div class="callout-content">
+          <span class="callout-title">role_from_password</span>
+          <p>后端用常量时间比较密码，返回 <code>"admin"</code> / <code>"readonly"</code> / <code>None</code>。腕带颜色决定你能喊哪些 API——不是前端自己声明的。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h3 class="screen-heading animate-in">assemble：把三样东西装进同一个包</h3>
+      <p class="animate-in">有了腕带，才允许进库房打包。缺 day、缺 active strategy、或 bars 空，各自对应不同故障。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">@app.get(<span class="code-string">"/api/reviews/assemble"</span>)</span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">assemble_review</span>(market_day_id: int, strategy_id: int, _: str = Depends(require_readonly)) -&gt; dict[str, Any]:</span>
+<span class="code-line">    <span class="code-keyword">with</span> <span class="code-function">connect</span>() <span class="code-keyword">as</span> conn:</span>
+<span class="code-line">        day = conn.execute(<span class="code-string">"SELECT * FROM market_days WHERE id=?"</span>, (market_day_id,)).fetchone()</span>
+<span class="code-line">        <span class="code-keyword">if not</span> day:</span>
+<span class="code-line">            <span class="code-keyword">raise</span> HTTPException(status_code=<span class="code-number">404</span>, detail=<span class="code-string">"Market day not found"</span>)</span>
+<span class="code-line">        strategy_row = conn.execute(<span class="code-string">"SELECT * FROM strategies WHERE id=? AND active=1"</span>, (strategy_id,)).fetchone()</span>
+<span class="code-line">        <span class="code-keyword">if not</span> strategy_row:</span>
+<span class="code-line">            <span class="code-keyword">raise</span> HTTPException(status_code=<span class="code-number">404</span>, detail=<span class="code-string">"Strategy not found"</span>)</span>
+<span class="code-line">        bars_1m_rows = <span class="code-function">_fetch_bar_rows</span>(conn, <span class="code-string">"bars_1m"</span>, market_day_id)</span>
+<span class="code-line">        bars_5m = <span class="code-function">_build_5m_payload</span>(conn, day, bars_1m_rows)</span>
+<span class="code-line">        strategy_json = json.loads(strategy_row[<span class="code-string">"json_body"</span>])</span>
+<span class="code-line">        trade_records = <span class="code-function">_trade_records_for_day</span>(day[<span class="code-string">"ticker"</span>], day[<span class="code-string">"trade_date"</span>])</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">白话对照</span>
+          <div class="translation-lines">
+            <p class="tl">门口先验腕带：至少 readonly，否则进不来。</p>
+            <p class="tl">查 market_days：没有这一天 → 404「Market day not found」。</p>
+            <p class="tl">查 strategies 且 active=1：没有 → 404「Strategy not found」。</p>
+            <p class="tl">拉 1 分钟 K 线，再合成 5 分钟载荷。</p>
+            <p class="tl">解析策略 JSON，按 ticker + 日期取交易记录。</p>
+            <p class="tl">前端从不自己拼库；它只消费这个打包结果。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-error-light);">🚫</div>
+          <div>
+            <strong>401 / 鉴权失败</strong>
+            <p>腕带没了、过期、或根本没登录——请求在打包前就被拦下。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light);">📦</div>
+          <div>
+            <strong>404 Strategy / Market day</strong>
+            <p>身份过了，但 day 或 active strategy 对不上——包打不出来。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent-light);">📉</div>
+          <div>
+            <strong>200 但图是空的</strong>
+            <p>请求成功，可 bars 没数据或渲染层吃瘪——先查库里的 bars，再查 K 线引擎。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Quiz -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">场景测验：先分清故障层</h3>
+      <p class="animate-in">三题都是「你看到什么症状，该先查哪一层」——不是背路径名。</p>
+
+      <div class="quiz-container animate-in" id="quiz-module3">
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="没有 Authorization 腕带时，后端在打包前就拒绝，典型是 401。这和图表组件坏了完全不同。"
+             data-explanation-wrong="空图通常是 200 但 bars 空或渲染问题；缺 strategy 是 404。缺 token 会在鉴权层被拦。">
+          <p class="quiz-question">1. 用户清掉 localStorage 后再点复盘，最可能先看到什么？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>图表区域空白，但网络面板里 assemble 返回 200</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>请求被拒（常见 401），后端还没开始拼 bars</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>404 Strategy not found，因为策略表被清了</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="assemble 只要 readonly。改交易内容/导入才需要 admin。先别让 AI 去改登录页样式。"
+             data-explanation-wrong="只读复盘不需要 admin 腕带；缺图也不是 KlineEngine 先背锅——先确认鉴权与 assemble 载荷。">
+          <p class="quiz-question">2. 同事能登录但只能看图，导入接口 403。你该先核对什么？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>他拿到的是 readonly 腕带，导入需要 admin 密码</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>KlineEngine 没注册导入按钮，改前端组件即可</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>SQLite 文件只读挂载了，跟角色无关</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="200 且无鉴权/404 报错时，优先查库内 bars 是否装货，以及 assemble 是否返回了 bars 字段——别先重写画图。"
+             data-explanation-wrong="401 会在入口被拦；strategy 缺失是 404。空图更像数据层或渲染，不是「再加一个 Bearer 头」。">
+          <p class="quiz-question">3. 网络里 assemble 返回 200，策略名也在，但 K 线区域完全空白。优先查哪条？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>再发一次 login，多贴一层 Bearer 头</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>把 strategy_id 改成 0，绕过 active=1 过滤</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>看响应里 bars_1m / bars_5m 是否为空，再查 DB 是否有该日 K 线</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">核对答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">再试一次</button>
+      </div>
+
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">⚡</div>
+        <div class="callout-content">
+          <span class="callout-title">指挥 AI 时用对词</span>
+          <p>说「401 鉴权」/「404 strategy」/「200 但 bars 空」，AI 才不会在登录页、策略表、画图引擎三处乱打补丁。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

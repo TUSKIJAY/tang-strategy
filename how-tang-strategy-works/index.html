@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tang Strategy 拆解课</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — forest accent for markets / charts.
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2D8B55;
+      --color-accent-hover: #226B41;
+      --color-accent-light: #E8F5EE;
+      --color-accent-muted: #5AAD7A;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Tang Strategy 拆解课</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="点开复盘" role="tab" aria-label="Module 1: 点开复盘"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="认识演员" role="tab" aria-label="Module 2: 认识演员"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="它们怎么对话" role="tab" aria-label="Module 3: 它们怎么对话"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="数据保险库" role="tab" aria-label="Module 4: 数据保险库"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="宁可失败也不乱写" role="tab" aria-label="Module 5: 宁可失败也不乱写"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="像船长一样指挥 AI" role="tab" aria-label="Module 6: 像船长一样指挥 AI"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h2 class="module-title">点开复盘</h2>
+      <p class="module-subtitle">像进电影院：选好片子，胶片和字幕一起上映。</p>
+    </header>
+
+    <!-- Screen 1: Hook -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">一页复盘从哪里来？</h3>
+      <p class="animate-in">你打开 Tang Strategy，登录后点「复盘」，选一个交易日——图表和交易标记就出现了。</p>
+      <p class="animate-in">下面拆开这一秒里发生了什么：谁在要数据，谁在打包，谁在画图。</p>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎬</div>
+        <div class="callout-content">
+          <span class="callout-title">电影院隐喻</span>
+          <p>你选片子（标的 + 日期）；放映员把胶片（K 线）和字幕（交易点位）一起装进放映机。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards stagger-children animate-in">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">🎞️</div>
+          <div class="pattern-title">胶片 = bars</div>
+          <p class="pattern-desc">分钟级行情 K 线，从库里读出再送给画布。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light);">💬</div>
+          <div class="pattern-title">字幕 = 交易点</div>
+          <p class="pattern-desc">买卖标记叠在图上，让人一眼看到进出场。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light);">🎟️</div>
+          <div class="pattern-title">票根 = 选择</div>
+          <p class="pattern-desc">标的、交易日、策略——三者定了才开映。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: User journey steps -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">用户旅程：五步到图</h3>
+      <p class="animate-in">整条链路很短。记住顺序，排查时就不会乱枪打鸟。</p>
+
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>登录</strong>
+            <p>未认证时只渲染 <span class="term" data-definition="登录页组件：未通过认证时唯一可见的界面。">LoginPage</span>，进不了复盘。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>点「复盘」</strong>
+            <p><span class="term" data-definition="外壳布局组件：顶部/侧栏导航，根据 active 切换子页面。">Layout</span> 把 <span class="term" data-definition="当前激活的导航标签，例如 dashboard / review / backtest。">active</span> 切到 <code>review</code>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>选日 + 选策略</strong>
+            <p><span class="term" data-definition="复盘页主组件：选交易日与策略，请求 assemble，并把结果交给图表。">ReviewPage</span> 等你选好 <span class="term" data-definition="市场交易日记录，通常含 id、ticker、日期等元数据。">selectedDay</span> 和 <span class="term" data-definition="策略定义的标识与元数据，用来决定信号与标记如何组装。">selectedStrategy</span>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>调用 assemble</strong>
+            <p>前端打 <span class="term" data-definition="Application Programming Interface：前后端约定好的请求入口。">API</span> 的 <span class="term" data-definition="把行情、策略与交易记录打成一份复盘数据包的接口路径。">/reviews/assemble</span>，拿回一份 <span class="term" data-definition="JavaScript Object Notation：前后端交换的结构化文本数据包。">JSON</span>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>画图</strong>
+            <p><span class="term" data-definition="K 线画布引擎：吃 bars 与标记数据，负责缩放、平移与绘制。">KlineEngine</span> 把 <span class="term" data-definition="接口返回的完整数据包，前端用它更新 state 再渲染。">payload</span> 画成蜡烛图与交易点。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <span class="callout-title">Aha：一页 = 一次组装</span>
+          <p>屏幕上的「一页复盘」不是魔法，是后端把行情 + 策略 + 交易记录打包成一份 JSON，前端再画出来。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Flow animation -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">消息怎么走</h3>
+      <p class="animate-in">点「下一步」看数据包在五个演员之间传递。先认脸，再记方向。</p>
+
+      <div class="flow-animation animate-in" data-steps='[{"highlight":"flow-actor-1","label":"你选好标的与交易日"},{"highlight":"flow-actor-2","label":"ReviewPage 发起 assemble 请求","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-3","label":"请求到达 FastAPI 的 assemble 端点","packet":true,"from":"actor-2","to":"actor-3"},{"highlight":"flow-actor-4","label":"FastAPI 向 SQLite 查询 bars 与交易","packet":true,"from":"actor-3","to":"actor-4"},{"highlight":"flow-actor-3","label":"SQLite 返回原始数据，后端打包 JSON","packet":true,"from":"actor-4","to":"actor-3"},{"highlight":"flow-actor-2","label":"payload 回到 ReviewPage","packet":true,"from":"actor-3","to":"actor-2"},{"highlight":"flow-actor-5","label":"KlineEngine 把 bars 与标记画上画布","packet":true,"from":"actor-2","to":"actor-5"}]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon" style="background: var(--color-accent-light); color: var(--color-actor-1);">你</div>
+            <span>You</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon" style="background: var(--color-info-light); color: var(--color-actor-2);">R</div>
+            <span>ReviewPage</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon" style="background: #F0EDF7; color: var(--color-actor-3);">F</div>
+            <span>FastAPI</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon" style="background: #FBF5E4; color: var(--color-actor-4);">S</div>
+            <span>SQLite</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-5">
+            <div class="flow-actor-icon" style="background: var(--color-success-light); color: var(--color-actor-5);">K</div>
+            <span>KlineEngine</span>
+          </div>
+        </div>
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击「下一步」开始</div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn btn-primary">下一步</button>
+          <button class="btn flow-reset-btn">重来</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-content">
+          <span class="callout-title">为什么要关心？</span>
+          <p>知道这条链路后，你才能对 AI 说「改的是组装接口，还是画图引擎」，而不是「图坏了你看着办」。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Code translations -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：路由切换</h3>
+      <p class="animate-in">
+        <span class="term" data-definition="用于构建用户界面的 JavaScript 库；本项目前端页面都是 React 组件。">React</span>
+        入口用 <code>active</code> 决定渲染哪一页——复盘只是其中一个分支。
+      </p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">  <span class="code-keyword">if</span> (!authenticated) <span class="code-keyword">return</span> &lt;LoginPage onLogin={() =&gt; setAuthenticated(<span class="code-keyword">true</span>)} /&gt;;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;Layout active={active} onNavigate={setActive}&gt;</span>
+<span class="code-line">      {active === <span class="code-string">'dashboard'</span> &amp;&amp; &lt;DashboardPage state={state} setState={setState} onNavigate={setActive} /&gt;}</span>
+<span class="code-line">      {active === <span class="code-string">'review'</span> &amp;&amp; &lt;ReviewPage state={state} setState={setState} onNavigate={setActive} /&gt;}</span>
+<span class="code-line">      {active === <span class="code-string">'backtest'</span> &amp;&amp; &lt;BacktestPage state={state} setState={setState} /&gt;}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">没登录？只显示登录页，别的全挡在外面。</p>
+            <p class="tl">已登录：用 Layout 包住内容，并记下当前标签。</p>
+            <p class="tl">active 是 dashboard 就渲染仪表盘页。</p>
+            <p class="tl">active 是 review 才挂上 ReviewPage——复盘从这里开始。</p>
+            <p class="tl">active 是 backtest 则挂上回测页。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：请求 assemble</h3>
+      <p class="animate-in">选日与策略就绪后，<code>useEffect</code> 触发一次 <span class="term" data-definition="HTTP 接口地址；这里是 /reviews/assemble。">endpoint</span> 调用。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">  useEffect(() =&gt; {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (!selectedDay || !selectedStrategy) <span class="code-keyword">return</span>;</span>
+<span class="code-line">    setLoading(<span class="code-keyword">true</span>);</span>
+<span class="code-line">    setError(<span class="code-string">''</span>);</span>
+<span class="code-line">    Api.review(selectedDay.id, selectedStrategy.id)</span>
+<span class="code-line">      .then((payload) =&gt; {</span>
+<span class="code-line">        setReview(payload);</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">当选中的日或策略变化时，跑这段副作用。</p>
+            <p class="tl">缺日或缺策略？直接退出，不发请求。</p>
+            <p class="tl">开 loading，清空旧错误，准备新请求。</p>
+            <p class="tl">用日 id 和策略 id 调用 Api.review。</p>
+            <p class="tl">成功拿到 payload 后写入 review 状态，供图表使用。</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="animate-in" style="margin-top: var(--space-6);">真正的 URL 写在客户端封装里——注意查询参数名字。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">export const</span> Api = {</span>
+<span class="code-line">  tickers: () =&gt; api(<span class="code-string">'/tickers'</span>),</span>
+<span class="code-line">  marketDays: (params = {}) =&gt; api(<span class="code-string">`/market-days?${new URLSearchParams(params)}`</span>),</span>
+<span class="code-line">  bars: (id, timeframe) =&gt; api(<span class="code-string">`/market-days/${id}/bars?timeframe=${timeframe}`</span>),</span>
+<span class="code-line">  strategies: () =&gt; api(<span class="code-string">'/strategies'</span>),</span>
+<span class="code-line">  review: (marketDayId, strategyId) =&gt; api(<span class="code-string">`/reviews/assemble?market_day_id=${marketDayId}&amp;strategy_id=${strategyId}`</span>),</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">Api 是一小组命名好的请求助手。</p>
+            <p class="tl">tickers / marketDays / bars / strategies 各管一类列表或明细。</p>
+            <p class="tl">review 才是复盘核心：打 assemble，带上 market_day_id 与 strategy_id。</p>
+            <p class="tl">缺任一参数，后端装不齐「一页复盘」。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Quiz -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">场景测验：你会指挥谁？</h3>
+      <p class="animate-in">三道题对应真实排障场景。先想链路，再选层。</p>
+
+      <div class="quiz-container animate-in" id="quiz-module1">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="对。先确认 assemble 是否返回完整 payload；图引擎只在有数据后才画。"
+             data-explanation-wrong="图空白时先查组装与 payload，而不是一上来改 KlineEngine 样式。">
+          <h3 class="quiz-question">1. 用户登录后选了日和策略，但图表空白。你优先查哪一层？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. 立刻改 KlineEngine 的颜色与线宽</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. 看 /reviews/assemble 是否返回完整 payload</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. 重写 LoginPage 的表单校验</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="对。assemble 需要 market_day_id 与 strategy_id；缺一就装不齐复盘包。"
+             data-explanation-wrong="再看 client.js：review 调用显式拼接了 market_day_id 和 strategy_id。">
+          <h3 class="quiz-question">2. Api.review 打 assemble 时，缺什么会让组装失败？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. 只缺浏览器窗口宽度</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. 只缺 CSS 主题变量</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. 缺 market_day_id 或 strategy_id</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="对。LoginPage 管认证门禁；ReviewPage 管选日、assemble 与画图数据流。"
+             data-explanation-wrong="main.jsx 里未认证只渲染 LoginPage；ReviewPage 只在 active === review 时挂载。">
+          <h3 class="quiz-question">3. LoginPage 与 ReviewPage 的职责怎么分？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. Login 管进门；Review 管选日/策略并请求 assemble</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. Login 负责画 K 线；Review 只负责改密码</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. 两者都直接读写 SQLite 文件</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">核对答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">再试一次</button>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">📌</div>
+        <div class="callout-content">
+          <span class="callout-title">带走一句话</span>
+          <p>一页复盘 = 一次 assemble JSON + 一次前端绘制。下一课认识整组演员与目录边界。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-2">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h2 class="module-title">认识演员</h2>
+      <p class="module-subtitle">剧组分工清楚，你才能指挥 AI「改 X 别动 Y」。</p>
+    </header>
+
+    <!-- Screen 1: Metaphor + key insight -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">全栈 monorepo，一个剧组</h3>
+      <p class="animate-in">上一课你看到「复盘一键出来」。这一课认识是谁在干活。</p>
+      <p class="animate-in">
+        Tang Strategy 是<span class="term" data-definition="单一仓库同时放前端、后端、数据与内容，便于共享约定与一起发布。">全栈 monorepo</span>：
+        浏览器里的 <span class="term" data-definition="前端 UI 库；页面与状态主要在 frontend/src。">React</span> +
+        服务器上的 <span class="term" data-definition="Python Web 框架；本项目 API 服务入口。">FastAPI</span> +
+        被 Git 跟踪的 <span class="term" data-definition="嵌入式数据库文件；交互运行时与 Pages 导出都读它。">SQLite</span> +
+        规范 <span class="term" data-definition="结构化文本数据格式，用于交易记录与教学资产。">JSON</span> 内容。
+      </p>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎥</div>
+        <div class="callout-content">
+          <span class="callout-title">剧组隐喻</span>
+          <p>前台演员是页面；场务是 API；片库是 SQLite；剧本是 strategies；场记本是 content。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🧭</div>
+        <div class="callout-content">
+          <span class="callout-title">为什么要关心？</span>
+          <p>指错目录 = AI 改错层。能说出「这是 kline 引擎职责」就等于获得架构否决权。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Six actors -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">六位主角，一句话职责</h3>
+      <p class="animate-in">先记名字与边界，细节后面再展开。</p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-actor-1);">L</div>
+          <div>
+            <strong>Layout</strong>
+            <p>导航壳：根据 active 切换 Dashboard / Review / Backtest，自己不装行情包。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-actor-2);">R</div>
+          <div>
+            <strong>ReviewPage</strong>
+            <p>复盘业务页：选日、选策略、调 assemble、把 payload 交给画布。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #F0EDF7; color: var(--color-actor-3);">F</div>
+          <div>
+            <strong>FastAPI</strong>
+            <p>场务 API：鉴权、读库、组装 <span class="term" data-definition="后端组装后返回前端的复盘数据包。">payload</span>，不画一像素。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #FBF5E4; color: var(--color-actor-4);">S</div>
+          <div>
+            <strong>SQLite</strong>
+            <p>片库：跟踪在仓库里的运行时数据库，Pages 导出也读它。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-actor-5);">K</div>
+          <div>
+            <strong>KlineEngine</strong>
+            <p>放映机：只负责缩放、平移与绘制；业务筛选归 Review 控件。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-bg-warm); color: var(--color-text);">$</div>
+          <div>
+            <strong>StaticReviewsApp</strong>
+            <p>静态放映厅：GitHub Pages 模式入口，读预导出 JSON，不走登录与动态 API。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-cards stagger-children animate-in">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">📜</div>
+          <div class="pattern-title">strategies/</div>
+          <p class="pattern-desc">剧本：策略定义与信号意图文档，决定「演什么戏」。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light);">📋</div>
+          <div class="pattern-title">content/</div>
+          <p class="pattern-desc">场记本：交易记录、教学案例与规范 JSON，是权威内容源。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light);">🗂️</div>
+          <div class="pattern-title">data/sqlite/</div>
+          <p class="pattern-desc">片库文件：候选构建后原子晋升，交互与发布共用这份 DB。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: File tree -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">仓库地图：该进哪扇门</h3>
+      <p class="animate-in">改 UI 进 frontend；改接口进 backend；改权威交易内容进 content——别混。</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder">
+          <span class="ft-name">backend/app</span>
+          <span class="ft-desc">FastAPI 路由、鉴权、assemble、SQLite 访问</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">main.py</span>
+              <span class="ft-desc">应用入口与中间件</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">services/…</span>
+              <span class="ft-desc">组装、导入、交易校验等服务</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">frontend/src</span>
+          <span class="ft-desc">React 页面、API 客户端、图表引擎</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">main.jsx</span>
+              <span class="ft-desc">双模式入口：App 或 StaticReviewsApp</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">pages/ReviewPage.jsx</span>
+              <span class="ft-desc">复盘业务控件与数据请求</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">…/kline-engine.js</span>
+              <span class="ft-desc">画布绘制，不拥有业务筛选语义</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">data/sqlite</span>
+          <span class="ft-desc">跟踪的运行时 DB（Pages 输入）</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">tang_strategy_live_extended.db</span>
+              <span class="ft-desc">唯一被晋升的 live 库文件</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">content/</span>
+          <span class="ft-desc">场记本：traders、trades、教学资产</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">trades/*.json</span>
+              <span class="ft-desc">规范化交易日记录（权威）</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">traders/index.json</span>
+              <span class="ft-desc">交易员注册表</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">strategies/</span>
+          <span class="ft-desc">剧本：策略 JSON 与 STRATEGY.md</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">json/…</span>
+              <span class="ft-desc">可加载的策略定义</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Dual-mode code translation -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：双模式入口</h3>
+      <p class="animate-in">同一个仓库能跑两种「放映厅」：交互 App，或静态 Pages。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">createRoot(document.getElementById(<span class="code-string">'root'</span>)).render(</span>
+<span class="code-line">  import.meta.env.VITE_STATIC_REVIEWS === <span class="code-string">'true'</span> ? &lt;StaticReviewsApp /&gt; : &lt;App /&gt;,</span>
+<span class="code-line">);</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">在页面 root 节点挂上 React 根。</p>
+            <p class="tl">若环境变量 VITE_STATIC_REVIEWS 为 true → 渲染 StaticReviewsApp。</p>
+            <p class="tl">否则渲染完整 App（含登录与动态 API）。</p>
+            <p class="tl">静态模式不该去改 LoginPage 流程——那条路根本不走。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <span class="callout-title">所有权提醒</span>
+          <p>静态 Pages 路径吃的是导出 JSON + StaticReviewsApp；交互路径才有 Login 与 FastAPI 实时 assemble。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: FastAPI bootstrap -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：FastAPI 登场</h3>
+      <p class="animate-in">后端先创建应用并挂上 <span class="term" data-definition="跨域资源共享：允许浏览器从另一域名访问 API。">CORS</span>，再注册各业务路由。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">app = FastAPI(title=<span class="code-string">"Tang Strategy API"</span>)</span>
+<span class="code-line">app.add_middleware(</span>
+<span class="code-line">    CORSMiddleware,</span>
+<span class="code-line">    allow_origins=[<span class="code-string">"*"</span>],</span>
+<span class="code-line">    allow_credentials=<span class="code-keyword">False</span>,</span>
+<span class="code-line">    allow_methods=[<span class="code-string">"*"</span>],</span>
+<span class="code-line">    allow_headers=[<span class="code-string">"*"</span>],</span>
+<span class="code-line">)</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">创建名为 Tang Strategy API 的 FastAPI 应用。</p>
+            <p class="tl">挂上 CORS 中间件，让浏览器前端能跨源访问。</p>
+            <p class="tl">允许任意来源、方法与头；不携带凭证 cookie。</p>
+            <p class="tl">这是场务的「开机仪式」——真正的 assemble 路由在别处注册。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 6: Group chat -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">幕后对白：一页复盘怎么开映</h3>
+      <p class="animate-in">点「下一条」听剧组对话。注意谁开口、谁只负责搬运数据。</p>
+
+      <div class="chat-window animate-in" id="chat-module2">
+        <div class="chat-messages">
+          <div class="chat-message" data-msg="0" data-sender="layout" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">L</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1)">Layout</span>
+              <p>用户点了「复盘」。我把 active 切到 review，把舞台让给 ReviewPage。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="1" data-sender="review" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">R</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">ReviewPage</span>
+              <p>日和策略都齐了。我去叫 FastAPI 要一份 assemble 包。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="2" data-sender="fastapi" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">F</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">FastAPI</span>
+              <p>收到 market_day_id 和 strategy_id。SQLite，把 bars 和交易记录给我。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="3" data-sender="sqlite" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-4)">S</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-4)">SQLite</span>
+              <p>片库在此。当日行情与投影交易都查到了，原样交还。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="4" data-sender="fastapi" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">F</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">FastAPI</span>
+              <p>打包成 JSON payload，发回 ReviewPage。我不碰画布。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="5" data-sender="review" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">R</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">ReviewPage</span>
+              <p>包到了。筛选与业务控件归我；绘制交给 KlineEngine。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="6" data-sender="kline" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-5)">K</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-5)">KlineEngine</span>
+              <p>胶片与字幕上机。我只画：缩放、平移、蜡烛和标记位置。</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn btn-primary">下一条</button>
+          <button class="btn chat-all-btn">全部播放</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 7: Quiz -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">所有权测验：该改谁？</h3>
+      <p class="animate-in">三道题练「指对人」。答错通常意味着会让 AI 改错目录。</p>
+
+      <div class="quiz-container animate-in" id="quiz-module2">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="对。静态 Pages 走 StaticReviewsApp，不渲染 LoginPage；改登录对静态模式无效。"
+             data-explanation-wrong="main.jsx 在 VITE_STATIC_REVIEWS=true 时直接挂 StaticReviewsApp，登录链路不在这条路上。">
+          <h3 class="quiz-question">1. 只修 GitHub Pages 静态复盘展示，不该优先改谁？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. StaticReviewsApp 与静态导出 JSON</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. 交互模式的 LoginPage 登录流程</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. 导出用的 tracked SQLite 内容是否齐全</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="对。权威交易记录落在 content/ 的规范化 JSON；前端 state 只是临时 UI 状态。"
+             data-explanation-wrong="持久、可发布的交易真相在 content（再投影进 DB），不是 React 组件里的临时 state。">
+          <h3 class="quiz-question">2. 要永久改正一笔交易记录，应落在哪里？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. content/ 下的规范化交易 JSON</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. ReviewPage 组件里的临时 UI state</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. KlineEngine 的颜色常量</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="对。业务筛选与控件语义归 ReviewPage；KlineEngine 只负责绘制与交互手势。"
+             data-explanation-wrong="把业务规则塞进画布引擎会搅乱所有权——筛选状态应在 Review 层。">
+          <h3 class="quiz-question">3. 「按交易员过滤标记」这类业务控件，所有权在谁？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. 只在 KlineEngine 内部硬编码</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. 只改 strategies/STRATEGY.md 文案</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. ReviewPage 业务控件；引擎只按结果绘制</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">核对答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">再试一次</button>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">📌</div>
+        <div class="callout-content">
+          <span class="callout-title">带走一句话</span>
+          <p>认目录 = 认职责。下一课看它们怎么用 token 与 assemble 细节真正对话。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-3">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h2 class="module-title">它们怎么对话</h2>
+      <p class="module-subtitle">登录像办门禁腕带：先换通行证，再每次请求都出示。</p>
+    </header>
+
+    <!-- Screen 1: Opening -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">腕带规则：没带就别进</h3>
+      <p class="animate-in">你已经认识演员了。现在看他们怎么说话：密码换 <span class="term" data-definition="登录成功后服务器签发的临时通行证，存在浏览器 localStorage。">token</span>，请求头带上，后端才肯拼复盘包。</p>
+      <p class="animate-in">前端<span class="term" data-definition="浏览器里的 React 应用。它只调 HTTP API，从不直接打开 SQLite 文件。">frontend</span> 从不直接打开数据库；它只喊 <span class="term" data-definition="后端暴露的 URL 路径，例如 /api/reviews/assemble。">API 路径</span>。后端校验身份后，从 SQLite 拼出 bars、strategy、trade_records。</p>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎫</div>
+        <div class="callout-content">
+          <span class="callout-title">Bearer token = 门禁腕带</span>
+          <p><code>Authorization: Bearer &lt;token&gt;</code> 不是「问候语」，是每次进门要亮的腕带。丢了腕带 = <code>401 Unauthorized</code>，和「图是空的」完全不是一回事。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Request lifecycle steps -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">一次请求的生命周期</h3>
+      <p class="animate-in">从密码到复盘 JSON，固定五步。任何一步断了，症状都不同。</p>
+
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>POST /auth/login</strong>
+            <p>浏览器把密码 JSON 发给后端；密码对了才换腕带。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>存 token + role</strong>
+            <p><code>localStorage</code> 记下 token 和角色（admin / readonly）。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>api() 自动贴腕带</strong>
+            <p>之后每个请求头都加 <code>Authorization: Bearer …</code>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>GET /api/reviews/assemble</strong>
+            <p>后端 <span class="term" data-definition="依赖注入守卫：要求至少 readonly 身份，否则拒绝请求。">require_readonly</span> 验身份，再查 day / strategy / bars。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>返回复盘包</strong>
+            <p>一份 JSON 里装 1m/5m K 线、策略体、当日交易记录——前端只负责画。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: login + api translation -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：换腕带 + 亮腕带</h3>
+      <p class="animate-in"><code>login</code> 负责办证；<code>api()</code> 负责每次出门都把证贴在袖口。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">login</span>(password) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">`${API_BASE}/auth/login`</span>, {</span>
+<span class="code-line">    method: <span class="code-string">'POST'</span>,</span>
+<span class="code-line">    headers: { <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span> },</span>
+<span class="code-line">    body: JSON.stringify({ password }),</span>
+<span class="code-line">  });</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!response.ok) <span class="code-keyword">throw new</span> <span class="code-function">Error</span>(<span class="code-string">'Password rejected'</span>);</span>
+<span class="code-line">  <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> response.json();</span>
+<span class="code-line">  window.localStorage.setItem(TOKEN_KEY, data.token);</span>
+<span class="code-line">  window.localStorage.setItem(ROLE_KEY, data.role);</span>
+<span class="code-line">  <span class="code-keyword">return</span> data;</span>
+<span class="code-line">}</span>
+<span class="code-line">&nbsp;</span>
+<span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">api</span>(path, options = {}) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> token = <span class="code-function">getToken</span>();</span>
+<span class="code-line">  <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">`${API_BASE}${path}`</span>, {</span>
+<span class="code-line">    ...options,</span>
+<span class="code-line">    headers: {</span>
+<span class="code-line">      <span class="code-string">'Content-Type'</span>: <span class="code-string">'application/json'</span>,</span>
+<span class="code-line">      ...(token ? { Authorization: <span class="code-string">`Bearer ${token}`</span> } : {}),</span>
+<span class="code-line">      ...(options.headers || {}),</span>
+<span class="code-line">    },</span>
+<span class="code-line">  });</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">白话对照</span>
+          <div class="translation-lines">
+            <p class="tl"><strong>login</strong>：拿密码去服务台换临时通行证。</p>
+            <p class="tl">密码不对 → 直接抛错，不发腕带。</p>
+            <p class="tl">成功后把 token 和 role 塞进浏览器抽屉（localStorage）。</p>
+            <p class="tl"><strong>api(path)</strong>：每次请求先摸口袋有没有 token。</p>
+            <p class="tl">有 token → 请求头写上 <code>Bearer …</code>，像亮腕带。</p>
+            <p class="tl">没 token → 不带 Authorization，后端大概率 401。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: roles + assemble -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">两种腕带颜色</h3>
+      <p class="animate-in">密码对照用 <span class="term" data-definition="HMAC 安全比较：防止用响应时间差猜密码。">hmac.compare_digest</span>，对上 admin 或 readonly 之一才算身份。</p>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">admin</code>
+          <span class="badge-desc">管理员腕带：可写导入、改内容等管理接口</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">readonly</code>
+          <span class="badge-desc">只读腕带：够看复盘、拉列表；assemble 最低要求就是它</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">None</code>
+          <span class="badge-desc">密码都不对 → 不发腕带，后续请求被拒</span>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🔐</div>
+        <div class="callout-content">
+          <span class="callout-title">role_from_password</span>
+          <p>后端用常量时间比较密码，返回 <code>"admin"</code> / <code>"readonly"</code> / <code>None</code>。腕带颜色决定你能喊哪些 API——不是前端自己声明的。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h3 class="screen-heading animate-in">assemble：把三样东西装进同一个包</h3>
+      <p class="animate-in">有了腕带，才允许进库房打包。缺 day、缺 active strategy、或 bars 空，各自对应不同故障。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">@app.get(<span class="code-string">"/api/reviews/assemble"</span>)</span>
+<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">assemble_review</span>(market_day_id: int, strategy_id: int, _: str = Depends(require_readonly)) -&gt; dict[str, Any]:</span>
+<span class="code-line">    <span class="code-keyword">with</span> <span class="code-function">connect</span>() <span class="code-keyword">as</span> conn:</span>
+<span class="code-line">        day = conn.execute(<span class="code-string">"SELECT * FROM market_days WHERE id=?"</span>, (market_day_id,)).fetchone()</span>
+<span class="code-line">        <span class="code-keyword">if not</span> day:</span>
+<span class="code-line">            <span class="code-keyword">raise</span> HTTPException(status_code=<span class="code-number">404</span>, detail=<span class="code-string">"Market day not found"</span>)</span>
+<span class="code-line">        strategy_row = conn.execute(<span class="code-string">"SELECT * FROM strategies WHERE id=? AND active=1"</span>, (strategy_id,)).fetchone()</span>
+<span class="code-line">        <span class="code-keyword">if not</span> strategy_row:</span>
+<span class="code-line">            <span class="code-keyword">raise</span> HTTPException(status_code=<span class="code-number">404</span>, detail=<span class="code-string">"Strategy not found"</span>)</span>
+<span class="code-line">        bars_1m_rows = <span class="code-function">_fetch_bar_rows</span>(conn, <span class="code-string">"bars_1m"</span>, market_day_id)</span>
+<span class="code-line">        bars_5m = <span class="code-function">_build_5m_payload</span>(conn, day, bars_1m_rows)</span>
+<span class="code-line">        strategy_json = json.loads(strategy_row[<span class="code-string">"json_body"</span>])</span>
+<span class="code-line">        trade_records = <span class="code-function">_trade_records_for_day</span>(day[<span class="code-string">"ticker"</span>], day[<span class="code-string">"trade_date"</span>])</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">白话对照</span>
+          <div class="translation-lines">
+            <p class="tl">门口先验腕带：至少 readonly，否则进不来。</p>
+            <p class="tl">查 market_days：没有这一天 → 404「Market day not found」。</p>
+            <p class="tl">查 strategies 且 active=1：没有 → 404「Strategy not found」。</p>
+            <p class="tl">拉 1 分钟 K 线，再合成 5 分钟载荷。</p>
+            <p class="tl">解析策略 JSON，按 ticker + 日期取交易记录。</p>
+            <p class="tl">前端从不自己拼库；它只消费这个打包结果。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-error-light);">🚫</div>
+          <div>
+            <strong>401 / 鉴权失败</strong>
+            <p>腕带没了、过期、或根本没登录——请求在打包前就被拦下。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light);">📦</div>
+          <div>
+            <strong>404 Strategy / Market day</strong>
+            <p>身份过了，但 day 或 active strategy 对不上——包打不出来。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent-light);">📉</div>
+          <div>
+            <strong>200 但图是空的</strong>
+            <p>请求成功，可 bars 没数据或渲染层吃瘪——先查库里的 bars，再查 K 线引擎。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Quiz -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">场景测验：先分清故障层</h3>
+      <p class="animate-in">三题都是「你看到什么症状，该先查哪一层」——不是背路径名。</p>
+
+      <div class="quiz-container animate-in" id="quiz-module3">
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="没有 Authorization 腕带时，后端在打包前就拒绝，典型是 401。这和图表组件坏了完全不同。"
+             data-explanation-wrong="空图通常是 200 但 bars 空或渲染问题；缺 strategy 是 404。缺 token 会在鉴权层被拦。">
+          <p class="quiz-question">1. 用户清掉 localStorage 后再点复盘，最可能先看到什么？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>图表区域空白，但网络面板里 assemble 返回 200</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>请求被拒（常见 401），后端还没开始拼 bars</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>404 Strategy not found，因为策略表被清了</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="assemble 只要 readonly。改交易内容/导入才需要 admin。先别让 AI 去改登录页样式。"
+             data-explanation-wrong="只读复盘不需要 admin 腕带；缺图也不是 KlineEngine 先背锅——先确认鉴权与 assemble 载荷。">
+          <p class="quiz-question">2. 同事能登录但只能看图，导入接口 403。你该先核对什么？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>他拿到的是 readonly 腕带，导入需要 admin 密码</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>KlineEngine 没注册导入按钮，改前端组件即可</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>SQLite 文件只读挂载了，跟角色无关</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="200 且无鉴权/404 报错时，优先查库内 bars 是否装货，以及 assemble 是否返回了 bars 字段——别先重写画图。"
+             data-explanation-wrong="401 会在入口被拦；strategy 缺失是 404。空图更像数据层或渲染，不是「再加一个 Bearer 头」。">
+          <p class="quiz-question">3. 网络里 assemble 返回 200，策略名也在，但 K 线区域完全空白。优先查哪条？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>再发一次 login，多贴一层 Bearer 头</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>把 strategy_id 改成 0，绕过 active=1 过滤</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>看响应里 bars_1m / bars_5m 是否为空，再查 DB 是否有该日 K 线</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">核对答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">再试一次</button>
+      </div>
+
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">⚡</div>
+        <div class="callout-content">
+          <span class="callout-title">指挥 AI 时用对词</span>
+          <p>说「401 鉴权」/「404 strategy」/「200 但 bars 空」，AI 才不会在登录页、策略表、画图引擎三处乱打补丁。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-4">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h2 class="module-title">数据保险库</h2>
+      <p class="module-subtitle">银行金库：草稿纸是 seed，总账是 SQLite，公开宣传册是 Pages。</p>
+    </header>
+
+    <!-- Screen 1: Opening -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">复盘包从哪装货？</h3>
+      <p class="animate-in">上一课：API 从库里打包。这一课：库本身怎么进货，公开静态站又读谁。</p>
+      <p class="animate-in">唯一运行时真相是被 Git 跟踪的 <span class="term" data-definition="被仓库跟踪的运行时数据库文件，路径 data/sqlite/tang_strategy_live_extended.db。">tracked SQLite</span>。seed 只是本地抓取输入；Pages 是从同一本总账导出后再构建。</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder">
+          <span class="ft-name">data/</span>
+          <div class="ft-children">
+            <div class="ft-folder">
+              <span class="ft-name">seed/market-data/live_extended/</span>
+              <span class="ft-desc">受理窗口的临时单据（抓取输入）</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">sqlite/</span>
+              <div class="ft-children">
+                <div class="ft-file">
+                  <span class="ft-name">tang_strategy_live_extended.db</span>
+                  <span class="ft-desc">金库总账 · 运行时真相</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">content/trades/</span>
+          <span class="ft-desc">规范交易原文（canonical），不是草稿</span>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">frontend/public/reviews/</span>
+          <span class="ft-desc">导出 JSON · 构建输入，不是真相源</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Pipeline -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">进货流水线：从单据到宣传册</h3>
+      <p class="animate-in">默认路径永远是「候选库 → 校验 → 原子晋升」。不许跳步把半成品直接当总账。</p>
+
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Seed JSON</strong>
+            <p><code>live_extended/&lt;date&gt;/</code> 成对 SPY/QQQ 单据；本地抓取写入，不进公开站。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Candidate DB</strong>
+            <p>重建先写候选库；日期缩水等硬门一失败就拒收。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Live tracked DB</strong>
+            <p>校验通过后原子 <span class="term" data-definition="把通过校验的候选库替换为正式 tracked DB 的动作。">promote</span>——这才是 runtime 真相。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Export static JSON</strong>
+            <p>从 live DB 导出 slug 文件；Pages 读的是这份拷贝，不是 seed。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>StaticReviewsApp</strong>
+            <p>静态模式挂载公开宣传册：无登录、无编辑，只浏览导出结果。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">🚫</div>
+        <div class="callout-content">
+          <span class="callout-title">生成物不进 docs/</span>
+          <p>静态 review JSON、Vite dist、Pages 产物都不是文档。故意存档的 OPT 截图/验收钉可以跟记录走；构建输出禁止写回 <code>docs/</code>。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: dual mode + badge boundary -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">两种营业方式</h3>
+      <p class="animate-in">同一个前端仓库，环境变量决定开「柜台」还是发「宣传册」。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-function">createRoot</span>(document.getElementById(<span class="code-string">'root'</span>)).render(</span>
+<span class="code-line">  import.meta.env.VITE_STATIC_REVIEWS === <span class="code-string">'true'</span></span>
+<span class="code-line">    ? &lt;StaticReviewsApp /&gt;</span>
+<span class="code-line">    : &lt;App /&gt;,</span>
+<span class="code-line">);</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">白话对照</span>
+          <div class="translation-lines">
+            <p class="tl"><code>VITE_STATIC_REVIEWS=true</code> → 只开宣传册浏览壳。</p>
+            <p class="tl">否则 → 完整交互 App（登录、API、编辑能力）。</p>
+            <p class="tl">两套壳，同一套导出/总账约定，不要混着改。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">interactive</code>
+          <span class="badge-desc">登录 + Bearer + 调 live API；可编辑/导入（视角色）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">static / Pages</code>
+          <span class="badge-desc">无登录、无写接口；只读导出 JSON + hash 选日</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">content/trades</code>
+          <span class="badge-desc">交易规范原文；入库是投影，改交易先改这里</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">seed JSON</code>
+          <span class="badge-desc">本地抓取输入；只改 seed 不 rebuild = 总账不变</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: slugify + resolve workspace -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">宣传册怎么写页码</h3>
+      <p class="animate-in">导出用确定性 slug；打开静态站时按 key / hash / 默认日解析——hash 坏了要会回落，不能空白死页。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">slugify_day</span>(day: dict[str, Any]) -&gt; str:</span>
+<span class="code-line">    ticker = str(day[<span class="code-string">"ticker"</span>]).lower()</span>
+<span class="code-line">    session = str(day[<span class="code-string">"session_mode"</span>] <span class="code-keyword">or</span> <span class="code-string">"session"</span>).lower().replace(<span class="code-string">"_"</span>, <span class="code-string">"-"</span>)</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-string">f"{ticker}-{day['trade_date']}-{session}"</span></span>
+<span class="code-line">&nbsp;</span>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">resolveInitialWorkspace</span>({ days = [], explicitKey = <span class="code-string">''</span>, hash = <span class="code-string">''</span> } = {}) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> ordered = [...array(days)].sort(compareWorkspaceDays);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!ordered.length) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">transition</span>(null, { kind: <span class="code-string">'empty'</span>, requested: <span class="code-string">''</span>, reason: <span class="code-string">'no-days'</span> });</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">const</span> explicit = <span class="code-function">findDayByKey</span>(ordered, explicitKey);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (explicit) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">transition</span>(explicit, { kind: <span class="code-string">'explicit'</span>, requested: explicit.key, reason: <span class="code-string">''</span> });</span>
+<span class="code-line">  }</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">白话对照</span>
+          <div class="translation-lines">
+            <p class="tl"><strong>slugify_day</strong>：把一天编成 <code>spy-2026-07-17-extended</code> 这类页码。</p>
+            <p class="tl">ticker 小写 + 日期 + session（下划线变连字符）。</p>
+            <p class="tl"><strong>resolveInitialWorkspace</strong>：先排序可用日列表。</p>
+            <p class="tl">一个交易日都没有 → kind=empty，别假装有数据。</p>
+            <p class="tl">有 explicitKey 且能匹配 → 精确打开那一天。</p>
+            <p class="tl">（后续）hash 无效会 fallback 默认日，而不是白屏卡死。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🏦</div>
+        <div class="callout-content">
+          <span class="callout-title">三层分清就不怕 AI 写错地方</span>
+          <p><strong>seed</strong> = 受理单据 · <strong>SQLite</strong> = 金库总账 · <strong>Pages JSON</strong> = 宣传册复印件。改单据却不 rebuild，宣传册和柜台都还是旧账。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Quiz -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">场景测验：数据源与回落</h3>
+      <p class="animate-in">发布错数据，多半是把 seed、总账、宣传册搞混了。做完这三题再指挥 AI。</p>
+
+      <div class="quiz-container animate-in" id="quiz-module4">
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="GitHub Pages 读的是从 tracked SQLite 导出的静态 JSON，不是 gitignored 的 seed，也不是直接挂载 .db 文件。"
+             data-explanation-wrong="seed 只是抓取输入；浏览器不会直接打开仓库里的 .db。发布链路是 DB → export → 静态构建。">
+          <p class="quiz-question">1. 公开 Pages 上的 SPY 复盘，数据源实际是什么？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>浏览器直接 fetch 仓库里的 seed JSON</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>从 tracked live DB 导出的静态 review JSON</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>运行时再连一次 IB Gateway 现拉</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="resolveInitialWorkspace 在 hash 无法匹配时会 fallback 到默认日（并带上 reason），而不是留下空白工作区硬崩。"
+             data-explanation-wrong="无效 hash 不该清掉全部 days，也不该要求用户必须重新登录——静态站根本没有登录。">
+          <p class="quiz-question">2. 静态站 URL hash 写成不存在的日期时，合理行为是？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>fallback 到默认交易日，并标记 reason（如 unknown-day）</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>清空 days 列表，显示「请登录后重试」</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>静默改写 seed 目录，补上缺失日期</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="content/trades 是规范原文；DB 里的交易是投影。只改 seed 行情或只改前端临时 state，都不会正确更新发布用的交易真相。"
+             data-explanation-wrong="seed 管行情抓取输入；前端 state 一刷新就没了。要改规范交易，落到 content/trades 再走投影/晋升。">
+          <p class="quiz-question">3. 要修正某日公开复盘上的成交点位，第一落点应是？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>只改 data/seed 里某日 JSON，不 rebuild</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>只在浏览器 React state 里改 marker，然后截图</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>改 content/trades 规范原文，再投影进 DB / 导出</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">核对答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">再试一次</button>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">📋</div>
+        <div class="callout-content">
+          <span class="callout-title">指挥 AI 的正确词</span>
+          <p>用 <code>candidate</code>、<code>promote</code>、<code>export</code>、<code>manifest</code>、<code>content/trades</code>——别说「把数据随便写进 docs 就行」。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">宁可失败也不乱写</h1>
+      <p class="module-subtitle">空管塔台换跑道：新航班计划必须全部过检，旧跑道先备份；半空发现问题就立刻切回备份。</p>
+    </header>
+
+    <!-- ── Screen 1: Hook ─────────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">为什么「有一个就算了」不行？</h2>
+      <p>
+        每天都要更新
+        <span class="term" data-definition="成对更新的两个标的：SPY 与 QQQ。编排器要求同一天、同一会话、同一数据源一起通过。">SPY + QQQ</span>
+        这对标的。抓取失败、质量门没过、半路断电——这时候旧库必须完好。
+      </p>
+      <p>
+        核心原则叫
+        <span class="term" data-definition="校验不过就拒绝写入或推广；失败时保留旧状态，绝不带着半成品上线。">fail-closed</span>
+        ：宁可整次更新失败，也不接受「只写进一半」的生产库。
+      </p>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🛡</div>
+        <div class="callout-content">
+          <span class="callout-title">fail-closed vs fail-open</span>
+          <p>
+            <strong>fail-closed</strong>：门没过 → 拒绝写入 → 旧 live 继续服务。<br>
+            <strong>fail-open</strong>：门没过 → 硬塞进去 → 半套数据污染生产。<br>
+            Tang Strategy 的日常路径永远是前者。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 2: Runway swap metaphor + steps ──────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">塔台换跑道：四步</h2>
+      <p>
+        把更新想成空管切换跑道。
+        <span class="term" data-definition="已验证但尚未替换上线的新数据库文件。像尚未授权落地的新航班计划。">candidate</span>
+        是新计划，live 是正在使用的跑道，backup 是随时可切回的旧跑道副本。
+      </p>
+
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Stage pair — 成对进场</strong>
+            <p>
+              <span class="term" data-definition="负责把 SPY 与 QQQ 作为同一批任务拉取、校验、写入的脚本协调器。">orchestrator</span>
+              要求
+              <code>PAIR = ("SPY", "QQQ")</code>
+              同一天、同一
+              <span class="term" data-definition="数据来源方。日常默认 tradingview，硬门失败后才考虑 ibkr。">provider</span>
+              。只到一个标的 = 整批拒绝。
+            </p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Validate — 硬门检查</strong>
+            <p>
+              会话模式、provider 一致、bar 质量等
+              <span class="term" data-definition="必须全部通过才允许继续的硬性校验；任一失败则整对拒绝，不写 live。">hard gate</span>
+              必须全过。TV 优先；IB 只在 TV 重试与硬门失败之后才作为后备。
+            </p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Build candidate — 新跑道旁建</strong>
+            <p>
+              在旁路建好完整 candidate，并先做好 live 的 verified backup。candidate 还没
+              <span class="term" data-definition="把已验证的 candidate 原子替换成 live DB 的过程（compare-and-swap）。">promote</span>
+              前，用户仍读旧跑道。
+            </p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Promote OR keep old — 授权落地或原路返回</strong>
+            <p>
+              锁住 live → 确认没漂移 →
+              <code>os.replace</code>
+              →
+              <span class="term" data-definition="强制把目录元数据刷到磁盘，避免断电后文件名替换结果丢失。">fsync</span>
+              →
+              <code>post_validate</code>
+              。验证失败立刻把 backup 换回 live。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 3: PAIR constants ────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">成对常量：同一天、同一源</h2>
+      <p>
+        编排器写死了这对关系。日常路径禁止「只收 SPY」「混用两个 provider」「默认
+        <code>--allow-date-loss</code>」。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>PAIR = ("SPY", "QQQ")
+SESSION_MODE = "extended"
+PROVIDERS = {"tradingview", "ibkr"}
+TRADINGVIEW_EXCHANGES = {
+    "SPY": "AMEX",
+    "QQQ": "NASDAQ",
+}</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>PAIR</code> — 永远成对：SPY 与 QQQ 同进同退</div>
+            <div class="tl"><code>SESSION_MODE</code> — 扩展时段会话，不是任意字符串</div>
+            <div class="tl"><code>PROVIDERS</code> — 只认这两个源：TV 优先，IB 后备</div>
+            <div class="tl"><code>TRADINGVIEW_EXCHANGES</code> — 各标的在 TV 上的交易所代码</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="badge-list">
+        <div class="badge-item">
+          <span class="badge-code">tradingview first</span>
+          <span class="badge-desc">日常默认源；不因 Gateway 关闭就去找 IB</span>
+        </div>
+        <div class="badge-item">
+          <span class="badge-code">ibkr fallback</span>
+          <span class="badge-desc">仅在 TV 重试或硬门失败后，报告失败门再请开 Gateway</span>
+        </div>
+        <div class="badge-item">
+          <span class="badge-code">never --allow-date-loss</span>
+          <span class="badge-desc">日常/默认路径禁止用丢日期换「强行通过」</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 4: promote_candidate signature ───────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">promote_candidate：签名在说什么</h2>
+      <p>
+        推广不是「覆盖文件」那么简单。函数要同时拿着 live、candidate、baseline 令牌、backup 和推广后校验回调。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>def promote_candidate(
+    live_path: Path,
+    candidate_path: Path,
+    baseline_token: DatabaseToken,
+    backup_path: Path,
+    post_validate: Callable[[Path], None],
+) -> None:
+    """Compare-and-swap a verified candidate
+    while preserving a verified backup."""</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>live_path</code> — 正在服务的跑道（生产 DB）</div>
+            <div class="tl"><code>candidate_path</code> — 已通过检查、等待授权落地的新计划</div>
+            <div class="tl"><code>baseline_token</code> — 开建 candidate 时的 live 快照指纹</div>
+            <div class="tl"><code>backup_path</code> — 已验证的旧跑道副本，失败可秒切回</div>
+            <div class="tl"><code>post_validate</code> — 替换后再验一次；不过就回滚</div>
+            <div class="tl">docstring — 对比并交换（CAS），同时保住 verified backup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 5: drift guard ───────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">漂移拒绝：live 在快照后被改了？</h2>
+      <p>
+        锁住写入后先检查：live 是否还是你开建 candidate 时那一份。若别人/别进程在中间改过，直接拒绝推广。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>with db_write_lock(live):
+    _checkpoint_and_require_quiescent(live)
+    current_token = capture_database_token(live)
+    if current_token != baseline_token:
+        raise RuntimeError(
+            "Refusing DB promotion: live DB drifted "
+            "after the candidate snapshot "
+            f"(baseline={baseline_token.as_dict()}, "
+            f"current={current_token.as_dict()})"
+        )</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>db_write_lock</code> — 独占跑道，防止双写</div>
+            <div class="tl"><code>_checkpoint_and_require_quiescent</code> — 要求库安静、可安全替换</div>
+            <div class="tl"><code>capture_database_token</code> — 抓当前 live 指纹</div>
+            <div class="tl"><code>!= baseline_token</code> — 和开建时不一致 → 漂移</div>
+            <div class="tl"><code>RuntimeError</code> — 拒绝推广，candidate 不上线</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 6: replace + rollback ────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">落地与回滚：一秒钟的生死线</h2>
+      <p>
+        令牌对上了，才做原子替换。替换后立刻再验；任何异常都把 backup 换回 live，再把异常抛出去。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>os.replace(candidate, live)
+fsync_directory(live.parent)
+try:
+    post_validate(live)
+except Exception:
+    os.replace(backup, live)
+    fsync_directory(live.parent)
+    raise</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>os.replace(candidate, live)</code> — 原子改名：新跑道就位</div>
+            <div class="tl"><code>fsync_directory</code> — 把目录改动刷盘，防断电丢名</div>
+            <div class="tl"><code>post_validate(live)</code> — 替换后再跑业务硬门</div>
+            <div class="tl"><code>except</code> — 任一失败进入回滚通道</div>
+            <div class="tl"><code>os.replace(backup, live)</code> — 旧跑道立刻复位</div>
+            <div class="tl"><code>raise</code> — 不吞错误；调用方必须看见失败</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">✈</div>
+        <div class="callout-content">
+          <span class="callout-title">塔台口令</span>
+          <p>
+            新计划可以作废，旧跑道不能没。这就是
+            <span class="term" data-definition="校验不过就拒绝写入或推广；失败时保留旧状态，绝不带着半成品上线。">fail-closed</span>
+            在数据库推广上的具体形状。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 7: Spot the bug ──────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">找出错误的「换跑道」写法</h2>
+      <p>下面是一段伪代码。点出真正会毁掉生产库的那一行。</p>
+
+      <div class="bug-challenge">
+        <h3>哪一行是 bug？</h3>
+        <div class="bug-code">
+          <div class="bug-line"
+               onclick="checkBugLine(this, false)"
+               data-hint="先备份 live 是正确的。继续找真正破坏原子性的那一行。">
+            <span class="line-num">1</span>
+            <code>backup = copy(live)  # keep verified backup</code>
+          </div>
+          <div class="bug-line"
+               onclick="checkBugLine(this, true)"
+               data-explanation="先删 live 再写 candidate 会留下「无库」窗口：断电或写到一半时生产库直接消失。正确做法是 os.replace 原子切换，失败再用 backup 回滚。">
+            <span class="line-num">2</span>
+            <code>delete(live)  # free the path, then write candidate</code>
+          </div>
+          <div class="bug-line"
+               onclick="checkBugLine(this, false)"
+               data-hint="写入 candidate 本身不是问题——危险的是前面先删 live。">
+            <span class="line-num">3</span>
+            <code>write(candidate_bytes, live)</code>
+          </div>
+          <div class="bug-line"
+               onclick="checkBugLine(this, false)"
+               data-hint="post_validate 是对的；真正的 bug 在删除 live 那一步。">
+            <span class="line-num">4</span>
+            <code>post_validate(live)</code>
+          </div>
+        </div>
+        <div class="bug-feedback"></div>
+      </div>
+    </div>
+
+    <!-- ── Screen 8: Quiz ─────────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">情景测验：你会怎么指挥？</h2>
+
+      <div class="quiz-container" id="quiz-m5">
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对。PAIR 要求 SPY 与 QQQ 同 provider 同日通过；只到 SPY 时整批拒绝，live 保持不变。"
+             data-explanation-wrong="再想：编排器是成对硬门。单 ticker 接受会破坏同日同源契约。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 1</span>
+              <p>TV 成功返回了 SPY，但 QQQ 超时。AI 提议：「先把 SPY 写进库，QQQ 明天补。」</p>
+            </div>
+          </div>
+          <p class="quiz-question">正确做法是？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              接受 SPY，单独 rebuild 再 promote
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              整对拒绝；不写 live，重试或报告 QQQ 硬门失败
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              用昨天的 QQQ 配今天的 SPY 凑一对
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="对。os.replace 之后 post_validate 失败会 os.replace(backup, live) 再 raise——旧跑道复位。"
+             data-explanation-wrong="再看 rollback 分支：except 里用 backup 换回 live，不会留下半成品。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 2</span>
+              <p>candidate 已通过预检，promote 时 <code>os.replace(candidate, live)</code> 成功，但 <code>post_validate(live)</code> 抛错。</p>
+            </div>
+          </div>
+          <p class="quiz-question">生产库最终应是？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              backup 被换回 live；异常向上抛出
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              保留已替换的 candidate，只记日志
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              删除 live，等运维手工恢复
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="对。日常/默认路径永不 --allow-date-loss。丢日期是刻意破坏 fail-closed 的逃生口，不是日常开关。"
+             data-explanation-wrong="日常路径必须 fail-closed。--allow-date-loss 不是「今天赶工」按钮。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 3</span>
+              <p>重建候选时日期集合缩小，AI 建议：「日常发布加 <code>--allow-date-loss</code> 先过门。」</p>
+            </div>
+          </div>
+          <p class="quiz-question">你该怎么回？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              同意，发布窗口要紧
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              只对 QQQ 开允许丢日期
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              拒绝：日常路径禁止 --allow-date-loss；先查丢了哪些日
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">重置</button>
+      </div>
+    </div>
+
+    <!-- ── Screen 9: Takeaway ──────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">带走的指挥口令</h2>
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-accent-light);">🔒</div>
+          <div>
+            <strong>禁止 --allow-date-loss（日常）</strong>
+            <p>日期集合缩小 = 停下来查，不是开开关硬推。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-info-light);">👯</div>
+          <div>
+            <strong>禁止单 ticker 接受</strong>
+            <p>SPY 与 QQQ 同 provider、同日、同会话；只到一个就整对失败。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-success-light);">📡</div>
+          <div>
+            <strong>TV 优先，IB 只在硬门之后</strong>
+            <p>先报告失败的 ticker/gate，再请开 IB Gateway 重跑完整 pair。</p>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:var(--space-6);color:var(--color-text-secondary);">
+        下一课：用所有权地图指挥 AI——哪层该改、哪句口令有效、什么动作永远需要单独授权。
+      </p>
+    </div>
+
+  </div>
+</section>
+<section class="module" id="module-6">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">像船长一样指挥 AI</h1>
+      <p class="module-subtitle">航海图 + 职责牌：每块甲板有明确「谁说了算」。你不必拧每一颗螺丝，但要知道该把哪张海图交给大副。</p>
+    </header>
+
+    <!-- ── Screen 1: Hook ─────────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">毕业技能：指挥，而不是陪跑</h2>
+      <p>
+        你已经看过旅程、演员、对话、金库和安全阀。最后一课：用
+        <span class="term" data-definition="哪一层代码/数据对该行为拥有最终解释权；越界改动会破坏架构与可维护性。">ownership</span>
+        边界指挥 AI、打断死循环、做架构决策。
+      </p>
+      <p>
+        vibe coding 的终点不是「让 AI 多写几行」，而是：用正确词汇下指令，用症状反查层级，拒绝越权（push / publish /
+        <code>--allow-date-loss</code>）。
+      </p>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚓</div>
+        <div class="callout-content">
+          <span class="callout-title">本地 commit ≠ push / Pages 授权</span>
+          <p>
+            任务结束的默认动作可以是<strong>一次作用域内的本地 commit</strong>。
+            它<strong>从不</strong>附带 push、开 PR、合并、GitHub Pages、provider/broker 或其他远程动作。
+            远程动作永远需要你单独开口。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 2: Ownership map ─────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">职责牌：五块甲板</h2>
+      <p>改 bug 前先问：这是哪张海图的事？把问题扔给正确甲板，AI 才不会在引擎里塞业务、在 content 里塞生成物。</p>
+
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:var(--color-accent-light);">🗺</div>
+          <div class="pattern-title">reviewWorkspace</div>
+          <p class="pattern-desc">
+            纯函数工作区逻辑：选日、切标的、上下文转移。不捏造不存在的日期。
+          </p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:var(--color-info-light);">📈</div>
+          <div class="pattern-title">kline 引擎</div>
+          <p class="pattern-desc">
+            图表通用控件：缩放、拖拽、绘制。不管业务「哪天属于哪个 ticker」。
+          </p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:var(--color-success-light);">🧭</div>
+          <div class="pattern-title">Review 业务层</div>
+          <p class="pattern-desc">
+            业务上下文：策略、交易标记、过滤器、页面状态。向引擎喂数据，不反向污染引擎。
+          </p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:#F5E8F5;">📜</div>
+          <div class="pattern-title">canonical content</div>
+          <p class="pattern-desc">
+            <span class="term" data-definition="规范交易原文（如 content/trades 全日文档）。写入应是完整文档原子替换，不是半文件补丁。">canonical</span>
+            交易写完整文档；投影进 DB，不是手改库冒充真相。
+          </p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background:var(--color-error-light);">📡</div>
+          <div class="pattern-title">export / publish</div>
+          <p class="pattern-desc">
+            Pages 读已提交的 DB 导出，不是 seed 草稿。发布需要单独授权与发布契约。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 3: AI phrasebook ─────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">指挥 AI 的话术清单</h2>
+      <p>同一件事，用对词能省掉半小时的错误尝试。把这些词贴在职责牌上。</p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-accent-light);">🔒</div>
+          <div>
+            <strong>fail-closed · 宁可不写</strong>
+            <p>「按 fail-closed：校验不过就拒绝，不要静默换日或丢日期。」</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-info-light);">📦</div>
+          <div>
+            <strong>assemble · 组装复盘包</strong>
+            <p>「问题在 assemble 载荷，还是前端画图？先看 <code>/api/reviews/assemble</code>。」</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-success-light);">⬆</div>
+          <div>
+            <strong>promote · 候选晋升</strong>
+            <p>「只改 candidate 路径；promote 必须 CAS + backup 回滚，禁止先删 live。」</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:#F5E8F5;">📄</div>
+          <div>
+            <strong>canonical content · 规范原文</strong>
+            <p>「交易改动写完整 content 文档，再投影；不要手改 SQLite 当真相。」</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-error-light);">🧭</div>
+          <div>
+            <strong>ownership · 所有权边界</strong>
+            <p>「日期归属在 reviewWorkspace；kline 只做图表通用，不塞业务规则。」</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 4: DnD symptom → layer ───────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">症状 → 先看哪一层</h2>
+      <p>把症状芯片拖到对应职责区。船长先定位甲板，再下令维修。</p>
+
+      <div class="dnd-container" id="dnd-m6">
+        <div class="dnd-chips">
+          <div class="dnd-chip" draggable="true" data-answer="auth">401 Unauthorized</div>
+          <div class="dnd-chip" draggable="true" data-answer="db">图表空 bars / 无 K 线</div>
+          <div class="dnd-chip" draggable="true" data-answer="workspace">切标的后日期错乱</div>
+          <div class="dnd-chip" draggable="true" data-answer="publish">Pages 仍是旧日数据</div>
+        </div>
+        <div class="dnd-zones">
+          <div class="dnd-zone" data-correct="auth">
+            <p class="dnd-zone-label">鉴权 / token / 登录页</p>
+            <div class="dnd-zone-target">拖到这里</div>
+          </div>
+          <div class="dnd-zone" data-correct="db">
+            <p class="dnd-zone-label">DB / seed / rebuild / assemble 载荷</p>
+            <div class="dnd-zone-target">拖到这里</div>
+          </div>
+          <div class="dnd-zone" data-correct="workspace">
+            <p class="dnd-zone-label">reviewWorkspace 纯函数（选日 / 切 ticker）</p>
+            <div class="dnd-zone-target">拖到这里</div>
+          </div>
+          <div class="dnd-zone" data-correct="publish">
+            <p class="dnd-zone-label">export 静态 JSON → 构建 → Pages 工作流</p>
+            <div class="dnd-zone-target">拖到这里</div>
+          </div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkDnD('dnd-m6')">检查匹配</button>
+        <button class="quiz-reset-btn" onclick="resetDnD('dnd-m6')">重置</button>
+      </div>
+    </div>
+
+    <!-- ── Screen 5: switchTicker translation ──────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">switchTicker：不捏造日期</h2>
+      <p>
+        切标的时：目标 ticker
+        <strong>拥有</strong>同一天就留在那天；否则选该 ticker
+        <strong>真实存在</strong>的最新日。没有天数的 ticker 绝不虚构——保持当前上下文并上报。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>// Ticker switch: keep the same date only when
+// the target ticker owns it, otherwise select
+// the target ticker's newest real date. A ticker
+// without days is never fabricated; the current
+// context is kept and reported.
+export function switchTicker(
+  days = [], current = {}, nextTicker = ''
+) {
+  const ordered = [...array(days)]
+    .sort(compareWorkspaceDays);
+  const wanted = cleanText(nextTicker).toUpperCase();</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">注释契约 — 同日仅当目标拥有；否则用真实最新日</div>
+            <div class="tl">无天数 → 不捏造；保留当前上下文并报告</div>
+            <div class="tl"><code>switchTicker</code> — 纯函数：输入 days/current/next，输出 transition</div>
+            <div class="tl"><code>ordered</code> — 按工作区规则排序，结果可复现</div>
+            <div class="tl"><code>wanted</code> — 规范化后的目标 ticker 大写代码</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>const sameDate = currentDay
+  ? targetDays.find(
+      (day) => day.trade_date === currentDay.trade_date
+    )
+  : null;
+if (sameDate) {
+  return transition(
+    sameDate,
+    { kind: 'same-date', requested: wanted, reason: '' },
+    previousContext
+  );
+}
+return transition(
+  targetDays[0],
+  {
+    kind: 'newest-date',
+    requested: wanted,
+    reason: 'date-not-owned',
+  },
+  previousContext
+);</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl"><code>sameDate</code> — 目标 ticker 是否也有当前 trade_date</div>
+            <div class="tl"><code>kind: 'same-date'</code> — 拥有同日：平滑切换，不跳日</div>
+            <div class="tl"><code>targetDays[0]</code> — 排序后的「最新真实日」（非臆造）</div>
+            <div class="tl"><code>date-not-owned</code> — 原因码：当前日不属于目标 ticker</div>
+            <div class="tl"><code>previousContext</code> — 保留上下文 token，便于 UI 解释发生了什么</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 6: selectWorkspaceDay ────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">selectWorkspaceDay：缺日就报，不偷换</h2>
+      <p>
+        显式点选日期 rail 或对账时：只有真实 day 可选。找不到就保持当前日，并带上
+        <code>missing-date</code> / <code>no-such-day</code>——这是前端的 fail-closed。
+      </p>
+
+      <div class="translation-block">
+        <div class="translation-code">
+          <span class="translation-label">Code</span>
+          <pre>export function selectWorkspaceDay(
+  days = [],
+  current = {},
+  { ticker = '', tradeDate = '', key = '' } = {}
+) {
+  const previousContext =
+    cleanText(current.context) || contextToken(current.day);
+  const currentDay = current.day || null;
+  const target = key
+    ? findDayByKey(days, key)
+    : findDay(days, { ticker, tradeDate });
+  if (!target) {
+    return transition(currentDay, {
+      kind: 'missing-date',</pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">Plain English</span>
+          <div class="translation-lines">
+            <div class="tl">可用 key，或 ticker + tradeDate 查找</div>
+            <div class="tl"><code>previousContext</code> — 失败时仍能解释「你刚才在哪」</div>
+            <div class="tl"><code>target</code> — 只认列表里真实存在的 day</div>
+            <div class="tl"><code>!target</code> — 不静默换成邻近日</div>
+            <div class="tl"><code>kind: 'missing-date'</code> — 上报缺失，currentDay 原位不动</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 7: Quiz ─────────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">船长情景测验</h2>
+
+      <div class="quiz-container" id="quiz-m6">
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对。日期 rail 的归属与排序属于 reviewWorkspace 纯函数，不是 kline 绘图层。"
+             data-explanation-wrong="日期「谁拥有哪一天」是工作区逻辑。kline 只负责画，不决定业务日选择。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 1</span>
+              <p>用户反馈：切换 SPY → QQQ 后，日期条跳到了错误的一天，且没有说明原因。</p>
+            </div>
+          </div>
+          <p class="quiz-question">你该让 AI 先打开哪里？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              kline-engine 的拖拽与缩放代码
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              reviewWorkspace 的 switchTicker / selectWorkspaceDay
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              GitHub Pages 发布工作流
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="对。交易标记颜色与业务语义属于 Review 业务层；kline 提供通用绘制，不拥有「这笔单什么颜色」的产品规则。"
+             data-explanation-wrong="marker 颜色是业务语义。引擎可渲染，但规则所有权在 Review / 交易记录层。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 2</span>
+              <p>产品要求：多空标记颜色跟交易方向走，而不是跟 K 线涨跌色盘走。</p>
+            </div>
+          </div>
+          <p class="quiz-question">所有权在哪一层？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              Review 业务层（标记语义）+ 明确不把规则塞进图表通用核
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              backend promote_candidate
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              content/traders/index.json 的 registry 顺序
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="对。本地 commit 只固化工作区；push / PR / Pages 永远需要单独、明确的用户授权。"
+             data-explanation-wrong="任务默认的本地 commit 不含任何远程动作。发布必须你另行授权。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 3</span>
+              <p>你让 AI 修完一个前端 bug。它 commit 后问：「要不要顺便 push 并触发 Pages？»</p>
+            </div>
+          </div>
+          <p class="quiz-question">正确回应？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              可以，本地 commit 默认包含发布权
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              只允许 push，Pages 工作流会自己决定
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              拒绝：本地 commit ≠ push/PR/Pages；远程动作需单独授权
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="对。401 先鉴权；空 bars 先 DB/assemble；Pages 旧数据先 export/publish 链。症状分层，避免一把梭。"
+             data-explanation-wrong="三种症状落在三层：auth、数据组装、发布链路。不要一上来就改 kline。">
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Scenario 4</span>
+              <p>同事同时报了三件事：登录后 401、某日图表无 bars、公开站还是上周数据。</p>
+            </div>
+          </div>
+          <p class="quiz-question">你给 AI 的排查顺序？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              全部先改 kline-engine，因为都和「图」有关
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              401→鉴权；空 bars→DB/seed/assemble；旧 Pages→export/publish
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              先 --allow-date-loss rebuild，再看前端
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m6')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m6')">重置</button>
+      </div>
+    </div>
+
+    <!-- ── Screen 8: Closing ───────────────────────────────────── -->
+    <div class="screen animate-in">
+      <h2 class="screen-heading">航程结束</h2>
+
+      <div class="callout callout-accent">
+        <div class="callout-icon">🎉</div>
+        <div class="callout-content">
+          <span class="callout-title">恭喜完成本课</span>
+          <p>
+            你已经能：描述复盘链路、点名前后端与金库、用 fail-closed 语言挡住危险写入，
+            并用所有权地图指挥 AI。回到顶部任意模块复习，或打开仓库里的真实路径对照。
+          </p>
+        </div>
+      </div>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-accent-light);">①</div>
+          <div>
+            <strong>旅程</strong>
+            <p>一页复盘 = 一次 assemble 载荷 + 前端绘制。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-info-light);">②</div>
+          <div>
+            <strong>金库</strong>
+            <p>tracked SQLite 是运行时真相；Pages 从 DB 导出，不从草稿。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:var(--color-success-light);">③</div>
+          <div>
+            <strong>安全阀</strong>
+            <p>成对更新、CAS promote、backup 回滚、日常禁止丢日期。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background:#F5E8F5;">④</div>
+          <div>
+            <strong>船长权</strong>
+            <p>ownership 分层下指令；本地 commit 永不偷偷等于远程授权。</p>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:var(--space-8);text-align:center;color:var(--color-text-secondary);">
+        Tang Strategy 拆解课 · 完 · 欢迎从 Module 1 再航一程
+      </p>
+    </div>
+
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

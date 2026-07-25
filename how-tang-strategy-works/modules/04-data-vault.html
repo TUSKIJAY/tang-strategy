@@ -1,0 +1,274 @@
+<section class="module" id="module-4">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h2 class="module-title">数据保险库</h2>
+      <p class="module-subtitle">银行金库：草稿纸是 seed，总账是 SQLite，公开宣传册是 Pages。</p>
+    </header>
+
+    <!-- Screen 1: Opening -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">复盘包从哪装货？</h3>
+      <p class="animate-in">上一课：API 从库里打包。这一课：库本身怎么进货，公开静态站又读谁。</p>
+      <p class="animate-in">唯一运行时真相是被 Git 跟踪的 <span class="term" data-definition="被仓库跟踪的运行时数据库文件，路径 data/sqlite/tang_strategy_live_extended.db。">tracked SQLite</span>。seed 只是本地抓取输入；Pages 是从同一本总账导出后再构建。</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder">
+          <span class="ft-name">data/</span>
+          <div class="ft-children">
+            <div class="ft-folder">
+              <span class="ft-name">seed/market-data/live_extended/</span>
+              <span class="ft-desc">受理窗口的临时单据（抓取输入）</span>
+            </div>
+            <div class="ft-folder">
+              <span class="ft-name">sqlite/</span>
+              <div class="ft-children">
+                <div class="ft-file">
+                  <span class="ft-name">tang_strategy_live_extended.db</span>
+                  <span class="ft-desc">金库总账 · 运行时真相</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">content/trades/</span>
+          <span class="ft-desc">规范交易原文（canonical），不是草稿</span>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">frontend/public/reviews/</span>
+          <span class="ft-desc">导出 JSON · 构建输入，不是真相源</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Pipeline -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">进货流水线：从单据到宣传册</h3>
+      <p class="animate-in">默认路径永远是「候选库 → 校验 → 原子晋升」。不许跳步把半成品直接当总账。</p>
+
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Seed JSON</strong>
+            <p><code>live_extended/&lt;date&gt;/</code> 成对 SPY/QQQ 单据；本地抓取写入，不进公开站。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Candidate DB</strong>
+            <p>重建先写候选库；日期缩水等硬门一失败就拒收。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Live tracked DB</strong>
+            <p>校验通过后原子 <span class="term" data-definition="把通过校验的候选库替换为正式 tracked DB 的动作。">promote</span>——这才是 runtime 真相。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Export static JSON</strong>
+            <p>从 live DB 导出 slug 文件；Pages 读的是这份拷贝，不是 seed。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>StaticReviewsApp</strong>
+            <p>静态模式挂载公开宣传册：无登录、无编辑，只浏览导出结果。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">🚫</div>
+        <div class="callout-content">
+          <span class="callout-title">生成物不进 docs/</span>
+          <p>静态 review JSON、Vite dist、Pages 产物都不是文档。故意存档的 OPT 截图/验收钉可以跟记录走；构建输出禁止写回 <code>docs/</code>。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: dual mode + badge boundary -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">两种营业方式</h3>
+      <p class="animate-in">同一个前端仓库，环境变量决定开「柜台」还是发「宣传册」。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-function">createRoot</span>(document.getElementById(<span class="code-string">'root'</span>)).render(</span>
+<span class="code-line">  import.meta.env.VITE_STATIC_REVIEWS === <span class="code-string">'true'</span></span>
+<span class="code-line">    ? &lt;StaticReviewsApp /&gt;</span>
+<span class="code-line">    : &lt;App /&gt;,</span>
+<span class="code-line">);</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">白话对照</span>
+          <div class="translation-lines">
+            <p class="tl"><code>VITE_STATIC_REVIEWS=true</code> → 只开宣传册浏览壳。</p>
+            <p class="tl">否则 → 完整交互 App（登录、API、编辑能力）。</p>
+            <p class="tl">两套壳，同一套导出/总账约定，不要混着改。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="badge-list animate-in">
+        <div class="badge-item">
+          <code class="badge-code">interactive</code>
+          <span class="badge-desc">登录 + Bearer + 调 live API；可编辑/导入（视角色）</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">static / Pages</code>
+          <span class="badge-desc">无登录、无写接口；只读导出 JSON + hash 选日</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">content/trades</code>
+          <span class="badge-desc">交易规范原文；入库是投影，改交易先改这里</span>
+        </div>
+        <div class="badge-item">
+          <code class="badge-code">seed JSON</code>
+          <span class="badge-desc">本地抓取输入；只改 seed 不 rebuild = 总账不变</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: slugify + resolve workspace -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">宣传册怎么写页码</h3>
+      <p class="animate-in">导出用确定性 slug；打开静态站时按 key / hash / 默认日解析——hash 坏了要会回落，不能空白死页。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">def</span> <span class="code-function">slugify_day</span>(day: dict[str, Any]) -&gt; str:</span>
+<span class="code-line">    ticker = str(day[<span class="code-string">"ticker"</span>]).lower()</span>
+<span class="code-line">    session = str(day[<span class="code-string">"session_mode"</span>] <span class="code-keyword">or</span> <span class="code-string">"session"</span>).lower().replace(<span class="code-string">"_"</span>, <span class="code-string">"-"</span>)</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-string">f"{ticker}-{day['trade_date']}-{session}"</span></span>
+<span class="code-line">&nbsp;</span>
+<span class="code-line"><span class="code-keyword">export function</span> <span class="code-function">resolveInitialWorkspace</span>({ days = [], explicitKey = <span class="code-string">''</span>, hash = <span class="code-string">''</span> } = {}) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> ordered = [...array(days)].sort(compareWorkspaceDays);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!ordered.length) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">transition</span>(null, { kind: <span class="code-string">'empty'</span>, requested: <span class="code-string">''</span>, reason: <span class="code-string">'no-days'</span> });</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">const</span> explicit = <span class="code-function">findDayByKey</span>(ordered, explicitKey);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (explicit) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-function">transition</span>(explicit, { kind: <span class="code-string">'explicit'</span>, requested: explicit.key, reason: <span class="code-string">''</span> });</span>
+<span class="code-line">  }</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">白话对照</span>
+          <div class="translation-lines">
+            <p class="tl"><strong>slugify_day</strong>：把一天编成 <code>spy-2026-07-17-extended</code> 这类页码。</p>
+            <p class="tl">ticker 小写 + 日期 + session（下划线变连字符）。</p>
+            <p class="tl"><strong>resolveInitialWorkspace</strong>：先排序可用日列表。</p>
+            <p class="tl">一个交易日都没有 → kind=empty，别假装有数据。</p>
+            <p class="tl">有 explicitKey 且能匹配 → 精确打开那一天。</p>
+            <p class="tl">（后续）hash 无效会 fallback 默认日，而不是白屏卡死。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🏦</div>
+        <div class="callout-content">
+          <span class="callout-title">三层分清就不怕 AI 写错地方</span>
+          <p><strong>seed</strong> = 受理单据 · <strong>SQLite</strong> = 金库总账 · <strong>Pages JSON</strong> = 宣传册复印件。改单据却不 rebuild，宣传册和柜台都还是旧账。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Quiz -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">场景测验：数据源与回落</h3>
+      <p class="animate-in">发布错数据，多半是把 seed、总账、宣传册搞混了。做完这三题再指挥 AI。</p>
+
+      <div class="quiz-container animate-in" id="quiz-module4">
+
+        <div class="quiz-question-block"
+             data-correct="b"
+             data-explanation-right="GitHub Pages 读的是从 tracked SQLite 导出的静态 JSON，不是 gitignored 的 seed，也不是直接挂载 .db 文件。"
+             data-explanation-wrong="seed 只是抓取输入；浏览器不会直接打开仓库里的 .db。发布链路是 DB → export → 静态构建。">
+          <p class="quiz-question">1. 公开 Pages 上的 SPY 复盘，数据源实际是什么？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>浏览器直接 fetch 仓库里的 seed JSON</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>从 tracked live DB 导出的静态 review JSON</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>运行时再连一次 IB Gateway 现拉</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="a"
+             data-explanation-right="resolveInitialWorkspace 在 hash 无法匹配时会 fallback 到默认日（并带上 reason），而不是留下空白工作区硬崩。"
+             data-explanation-wrong="无效 hash 不该清掉全部 days，也不该要求用户必须重新登录——静态站根本没有登录。">
+          <p class="quiz-question">2. 静态站 URL hash 写成不存在的日期时，合理行为是？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>fallback 到默认交易日，并标记 reason（如 unknown-day）</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>清空 days 列表，显示「请登录后重试」</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>静默改写 seed 目录，补上缺失日期</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="c"
+             data-explanation-right="content/trades 是规范原文；DB 里的交易是投影。只改 seed 行情或只改前端临时 state，都不会正确更新发布用的交易真相。"
+             data-explanation-wrong="seed 管行情抓取输入；前端 state 一刷新就没了。要改规范交易，落到 content/trades 再走投影/晋升。">
+          <p class="quiz-question">3. 要修正某日公开复盘上的成交点位，第一落点应是？</p>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="a" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>只改 data/seed 里某日 JSON，不 rebuild</span>
+            </button>
+            <button class="quiz-option" data-value="b" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>只在浏览器 React state 里改 marker，然后截图</span>
+            </button>
+            <button class="quiz-option" data-value="c" onclick="selectOption(this)">
+              <span class="quiz-option-radio"></span>
+              <span>改 content/trades 规范原文，再投影进 DB / 导出</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">核对答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">再试一次</button>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">📋</div>
+        <div class="callout-content">
+          <span class="callout-title">指挥 AI 的正确词</span>
+          <p>用 <code>candidate</code>、<code>promote</code>、<code>export</code>、<code>manifest</code>、<code>content/trades</code>——别说「把数据随便写进 docs 就行」。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

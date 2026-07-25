@@ -1,0 +1,310 @@
+<section class="module" id="module-1">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h2 class="module-title">点开复盘</h2>
+      <p class="module-subtitle">像进电影院：选好片子，胶片和字幕一起上映。</p>
+    </header>
+
+    <!-- Screen 1: Hook -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">一页复盘从哪里来？</h3>
+      <p class="animate-in">你打开 Tang Strategy，登录后点「复盘」，选一个交易日——图表和交易标记就出现了。</p>
+      <p class="animate-in">下面拆开这一秒里发生了什么：谁在要数据，谁在打包，谁在画图。</p>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎬</div>
+        <div class="callout-content">
+          <span class="callout-title">电影院隐喻</span>
+          <p>你选片子（标的 + 日期）；放映员把胶片（K 线）和字幕（交易点位）一起装进放映机。</p>
+        </div>
+      </div>
+
+      <div class="pattern-cards stagger-children animate-in">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">🎞️</div>
+          <div class="pattern-title">胶片 = bars</div>
+          <p class="pattern-desc">分钟级行情 K 线，从库里读出再送给画布。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light);">💬</div>
+          <div class="pattern-title">字幕 = 交易点</div>
+          <p class="pattern-desc">买卖标记叠在图上，让人一眼看到进出场。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light);">🎟️</div>
+          <div class="pattern-title">票根 = 选择</div>
+          <p class="pattern-desc">标的、交易日、策略——三者定了才开映。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: User journey steps -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">用户旅程：五步到图</h3>
+      <p class="animate-in">整条链路很短。记住顺序，排查时就不会乱枪打鸟。</p>
+
+      <div class="step-cards stagger-children">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>登录</strong>
+            <p>未认证时只渲染 <span class="term" data-definition="登录页组件：未通过认证时唯一可见的界面。">LoginPage</span>，进不了复盘。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>点「复盘」</strong>
+            <p><span class="term" data-definition="外壳布局组件：顶部/侧栏导航，根据 active 切换子页面。">Layout</span> 把 <span class="term" data-definition="当前激活的导航标签，例如 dashboard / review / backtest。">active</span> 切到 <code>review</code>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>选日 + 选策略</strong>
+            <p><span class="term" data-definition="复盘页主组件：选交易日与策略，请求 assemble，并把结果交给图表。">ReviewPage</span> 等你选好 <span class="term" data-definition="市场交易日记录，通常含 id、ticker、日期等元数据。">selectedDay</span> 和 <span class="term" data-definition="策略定义的标识与元数据，用来决定信号与标记如何组装。">selectedStrategy</span>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>调用 assemble</strong>
+            <p>前端打 <span class="term" data-definition="Application Programming Interface：前后端约定好的请求入口。">API</span> 的 <span class="term" data-definition="把行情、策略与交易记录打成一份复盘数据包的接口路径。">/reviews/assemble</span>，拿回一份 <span class="term" data-definition="JavaScript Object Notation：前后端交换的结构化文本数据包。">JSON</span>。</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>画图</strong>
+            <p><span class="term" data-definition="K 线画布引擎：吃 bars 与标记数据，负责缩放、平移与绘制。">KlineEngine</span> 把 <span class="term" data-definition="接口返回的完整数据包，前端用它更新 state 再渲染。">payload</span> 画成蜡烛图与交易点。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">💡</div>
+        <div class="callout-content">
+          <span class="callout-title">Aha：一页 = 一次组装</span>
+          <p>屏幕上的「一页复盘」不是魔法，是后端把行情 + 策略 + 交易记录打包成一份 JSON，前端再画出来。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Flow animation -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">消息怎么走</h3>
+      <p class="animate-in">点「下一步」看数据包在五个演员之间传递。先认脸，再记方向。</p>
+
+      <div class="flow-animation animate-in" data-steps='[{"highlight":"flow-actor-1","label":"你选好标的与交易日"},{"highlight":"flow-actor-2","label":"ReviewPage 发起 assemble 请求","packet":true,"from":"actor-1","to":"actor-2"},{"highlight":"flow-actor-3","label":"请求到达 FastAPI 的 assemble 端点","packet":true,"from":"actor-2","to":"actor-3"},{"highlight":"flow-actor-4","label":"FastAPI 向 SQLite 查询 bars 与交易","packet":true,"from":"actor-3","to":"actor-4"},{"highlight":"flow-actor-3","label":"SQLite 返回原始数据，后端打包 JSON","packet":true,"from":"actor-4","to":"actor-3"},{"highlight":"flow-actor-2","label":"payload 回到 ReviewPage","packet":true,"from":"actor-3","to":"actor-2"},{"highlight":"flow-actor-5","label":"KlineEngine 把 bars 与标记画上画布","packet":true,"from":"actor-2","to":"actor-5"}]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-actor-1">
+            <div class="flow-actor-icon" style="background: var(--color-accent-light); color: var(--color-actor-1);">你</div>
+            <span>You</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-2">
+            <div class="flow-actor-icon" style="background: var(--color-info-light); color: var(--color-actor-2);">R</div>
+            <span>ReviewPage</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-3">
+            <div class="flow-actor-icon" style="background: #F0EDF7; color: var(--color-actor-3);">F</div>
+            <span>FastAPI</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-4">
+            <div class="flow-actor-icon" style="background: #FBF5E4; color: var(--color-actor-4);">S</div>
+            <span>SQLite</span>
+          </div>
+          <div class="flow-actor" id="flow-actor-5">
+            <div class="flow-actor-icon" style="background: var(--color-success-light); color: var(--color-actor-5);">K</div>
+            <span>KlineEngine</span>
+          </div>
+        </div>
+        <div class="flow-packet" id="flow-packet"></div>
+        <div class="flow-step-label" id="flow-label">点击「下一步」开始</div>
+        <div class="flow-controls">
+          <button class="btn flow-next-btn btn-primary">下一步</button>
+          <button class="btn flow-reset-btn">重来</button>
+          <span class="flow-progress"></span>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-content">
+          <span class="callout-title">为什么要关心？</span>
+          <p>知道这条链路后，你才能对 AI 说「改的是组装接口，还是画图引擎」，而不是「图坏了你看着办」。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Code translations -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：路由切换</h3>
+      <p class="animate-in">
+        <span class="term" data-definition="用于构建用户界面的 JavaScript 库；本项目前端页面都是 React 组件。">React</span>
+        入口用 <code>active</code> 决定渲染哪一页——复盘只是其中一个分支。
+      </p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">  <span class="code-keyword">if</span> (!authenticated) <span class="code-keyword">return</span> &lt;LoginPage onLogin={() =&gt; setAuthenticated(<span class="code-keyword">true</span>)} /&gt;;</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-keyword">return</span> (</span>
+<span class="code-line">    &lt;Layout active={active} onNavigate={setActive}&gt;</span>
+<span class="code-line">      {active === <span class="code-string">'dashboard'</span> &amp;&amp; &lt;DashboardPage state={state} setState={setState} onNavigate={setActive} /&gt;}</span>
+<span class="code-line">      {active === <span class="code-string">'review'</span> &amp;&amp; &lt;ReviewPage state={state} setState={setState} onNavigate={setActive} /&gt;}</span>
+<span class="code-line">      {active === <span class="code-string">'backtest'</span> &amp;&amp; &lt;BacktestPage state={state} setState={setState} /&gt;}</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">没登录？只显示登录页，别的全挡在外面。</p>
+            <p class="tl">已登录：用 Layout 包住内容，并记下当前标签。</p>
+            <p class="tl">active 是 dashboard 就渲染仪表盘页。</p>
+            <p class="tl">active 是 review 才挂上 ReviewPage——复盘从这里开始。</p>
+            <p class="tl">active 是 backtest 则挂上回测页。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：请求 assemble</h3>
+      <p class="animate-in">选日与策略就绪后，<code>useEffect</code> 触发一次 <span class="term" data-definition="HTTP 接口地址；这里是 /reviews/assemble。">endpoint</span> 调用。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">  useEffect(() =&gt; {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (!selectedDay || !selectedStrategy) <span class="code-keyword">return</span>;</span>
+<span class="code-line">    setLoading(<span class="code-keyword">true</span>);</span>
+<span class="code-line">    setError(<span class="code-string">''</span>);</span>
+<span class="code-line">    Api.review(selectedDay.id, selectedStrategy.id)</span>
+<span class="code-line">      .then((payload) =&gt; {</span>
+<span class="code-line">        setReview(payload);</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">当选中的日或策略变化时，跑这段副作用。</p>
+            <p class="tl">缺日或缺策略？直接退出，不发请求。</p>
+            <p class="tl">开 loading，清空旧错误，准备新请求。</p>
+            <p class="tl">用日 id 和策略 id 调用 Api.review。</p>
+            <p class="tl">成功拿到 payload 后写入 review 状态，供图表使用。</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="animate-in" style="margin-top: var(--space-6);">真正的 URL 写在客户端封装里——注意查询参数名字。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line"><span class="code-keyword">export const</span> Api = {</span>
+<span class="code-line">  tickers: () =&gt; api(<span class="code-string">'/tickers'</span>),</span>
+<span class="code-line">  marketDays: (params = {}) =&gt; api(<span class="code-string">`/market-days?${new URLSearchParams(params)}`</span>),</span>
+<span class="code-line">  bars: (id, timeframe) =&gt; api(<span class="code-string">`/market-days/${id}/bars?timeframe=${timeframe}`</span>),</span>
+<span class="code-line">  strategies: () =&gt; api(<span class="code-string">'/strategies'</span>),</span>
+<span class="code-line">  review: (marketDayId, strategyId) =&gt; api(<span class="code-string">`/reviews/assemble?market_day_id=${marketDayId}&amp;strategy_id=${strategyId}`</span>),</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">Api 是一小组命名好的请求助手。</p>
+            <p class="tl">tickers / marketDays / bars / strategies 各管一类列表或明细。</p>
+            <p class="tl">review 才是复盘核心：打 assemble，带上 market_day_id 与 strategy_id。</p>
+            <p class="tl">缺任一参数，后端装不齐「一页复盘」。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Quiz -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">场景测验：你会指挥谁？</h3>
+      <p class="animate-in">三道题对应真实排障场景。先想链路，再选层。</p>
+
+      <div class="quiz-container animate-in" id="quiz-module1">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="对。先确认 assemble 是否返回完整 payload；图引擎只在有数据后才画。"
+             data-explanation-wrong="图空白时先查组装与 payload，而不是一上来改 KlineEngine 样式。">
+          <h3 class="quiz-question">1. 用户登录后选了日和策略，但图表空白。你优先查哪一层？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. 立刻改 KlineEngine 的颜色与线宽</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. 看 /reviews/assemble 是否返回完整 payload</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. 重写 LoginPage 的表单校验</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="对。assemble 需要 market_day_id 与 strategy_id；缺一就装不齐复盘包。"
+             data-explanation-wrong="再看 client.js：review 调用显式拼接了 market_day_id 和 strategy_id。">
+          <h3 class="quiz-question">2. Api.review 打 assemble 时，缺什么会让组装失败？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. 只缺浏览器窗口宽度</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. 只缺 CSS 主题变量</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. 缺 market_day_id 或 strategy_id</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="对。LoginPage 管认证门禁；ReviewPage 管选日、assemble 与画图数据流。"
+             data-explanation-wrong="main.jsx 里未认证只渲染 LoginPage；ReviewPage 只在 active === review 时挂载。">
+          <h3 class="quiz-question">3. LoginPage 与 ReviewPage 的职责怎么分？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. Login 管进门；Review 管选日/策略并请求 assemble</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. Login 负责画 K 线；Review 只负责改密码</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. 两者都直接读写 SQLite 文件</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">核对答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">再试一次</button>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">📌</div>
+        <div class="callout-content">
+          <span class="callout-title">带走一句话</span>
+          <p>一页复盘 = 一次 assemble JSON + 一次前端绘制。下一课认识整组演员与目录边界。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

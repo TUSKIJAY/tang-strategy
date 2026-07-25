@@ -1,0 +1,404 @@
+<section class="module" id="module-2">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h2 class="module-title">认识演员</h2>
+      <p class="module-subtitle">剧组分工清楚，你才能指挥 AI「改 X 别动 Y」。</p>
+    </header>
+
+    <!-- Screen 1: Metaphor + key insight -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">全栈 monorepo，一个剧组</h3>
+      <p class="animate-in">上一课你看到「复盘一键出来」。这一课认识是谁在干活。</p>
+      <p class="animate-in">
+        Tang Strategy 是<span class="term" data-definition="单一仓库同时放前端、后端、数据与内容，便于共享约定与一起发布。">全栈 monorepo</span>：
+        浏览器里的 <span class="term" data-definition="前端 UI 库；页面与状态主要在 frontend/src。">React</span> +
+        服务器上的 <span class="term" data-definition="Python Web 框架；本项目 API 服务入口。">FastAPI</span> +
+        被 Git 跟踪的 <span class="term" data-definition="嵌入式数据库文件；交互运行时与 Pages 导出都读它。">SQLite</span> +
+        规范 <span class="term" data-definition="结构化文本数据格式，用于交易记录与教学资产。">JSON</span> 内容。
+      </p>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">🎥</div>
+        <div class="callout-content">
+          <span class="callout-title">剧组隐喻</span>
+          <p>前台演员是页面；场务是 API；片库是 SQLite；剧本是 strategies；场记本是 content。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">🧭</div>
+        <div class="callout-content">
+          <span class="callout-title">为什么要关心？</span>
+          <p>指错目录 = AI 改错层。能说出「这是 kline 引擎职责」就等于获得架构否决权。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: Six actors -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">六位主角，一句话职责</h3>
+      <p class="animate-in">先记名字与边界，细节后面再展开。</p>
+
+      <div class="icon-rows stagger-children">
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-accent-light); color: var(--color-actor-1);">L</div>
+          <div>
+            <strong>Layout</strong>
+            <p>导航壳：根据 active 切换 Dashboard / Review / Backtest，自己不装行情包。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-info-light); color: var(--color-actor-2);">R</div>
+          <div>
+            <strong>ReviewPage</strong>
+            <p>复盘业务页：选日、选策略、调 assemble、把 payload 交给画布。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #F0EDF7; color: var(--color-actor-3);">F</div>
+          <div>
+            <strong>FastAPI</strong>
+            <p>场务 API：鉴权、读库、组装 <span class="term" data-definition="后端组装后返回前端的复盘数据包。">payload</span>，不画一像素。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: #FBF5E4; color: var(--color-actor-4);">S</div>
+          <div>
+            <strong>SQLite</strong>
+            <p>片库：跟踪在仓库里的运行时数据库，Pages 导出也读它。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-success-light); color: var(--color-actor-5);">K</div>
+          <div>
+            <strong>KlineEngine</strong>
+            <p>放映机：只负责缩放、平移与绘制；业务筛选归 Review 控件。</p>
+          </div>
+        </div>
+        <div class="icon-row animate-in">
+          <div class="icon-circle" style="background: var(--color-bg-warm); color: var(--color-text);">$</div>
+          <div>
+            <strong>StaticReviewsApp</strong>
+            <p>静态放映厅：GitHub Pages 模式入口，读预导出 JSON，不走登录与动态 API。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-cards stagger-children animate-in">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-accent-light);">📜</div>
+          <div class="pattern-title">strategies/</div>
+          <p class="pattern-desc">剧本：策略定义与信号意图文档，决定「演什么戏」。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-info-light);">📋</div>
+          <div class="pattern-title">content/</div>
+          <p class="pattern-desc">场记本：交易记录、教学案例与规范 JSON，是权威内容源。</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: var(--color-success-light);">🗂️</div>
+          <div class="pattern-title">data/sqlite/</div>
+          <p class="pattern-desc">片库文件：候选构建后原子晋升，交互与发布共用这份 DB。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: File tree -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">仓库地图：该进哪扇门</h3>
+      <p class="animate-in">改 UI 进 frontend；改接口进 backend；改权威交易内容进 content——别混。</p>
+
+      <div class="file-tree animate-in">
+        <div class="ft-folder">
+          <span class="ft-name">backend/app</span>
+          <span class="ft-desc">FastAPI 路由、鉴权、assemble、SQLite 访问</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">main.py</span>
+              <span class="ft-desc">应用入口与中间件</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">services/…</span>
+              <span class="ft-desc">组装、导入、交易校验等服务</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">frontend/src</span>
+          <span class="ft-desc">React 页面、API 客户端、图表引擎</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">main.jsx</span>
+              <span class="ft-desc">双模式入口：App 或 StaticReviewsApp</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">pages/ReviewPage.jsx</span>
+              <span class="ft-desc">复盘业务控件与数据请求</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">…/kline-engine.js</span>
+              <span class="ft-desc">画布绘制，不拥有业务筛选语义</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">data/sqlite</span>
+          <span class="ft-desc">跟踪的运行时 DB（Pages 输入）</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">tang_strategy_live_extended.db</span>
+              <span class="ft-desc">唯一被晋升的 live 库文件</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">content/</span>
+          <span class="ft-desc">场记本：traders、trades、教学资产</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">trades/*.json</span>
+              <span class="ft-desc">规范化交易日记录（权威）</span>
+            </div>
+            <div class="ft-file">
+              <span class="ft-name">traders/index.json</span>
+              <span class="ft-desc">交易员注册表</span>
+            </div>
+          </div>
+        </div>
+        <div class="ft-folder">
+          <span class="ft-name">strategies/</span>
+          <span class="ft-desc">剧本：策略 JSON 与 STRATEGY.md</span>
+          <div class="ft-children">
+            <div class="ft-file">
+              <span class="ft-name">json/…</span>
+              <span class="ft-desc">可加载的策略定义</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4: Dual-mode code translation -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：双模式入口</h3>
+      <p class="animate-in">同一个仓库能跑两种「放映厅」：交互 App，或静态 Pages。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">createRoot(document.getElementById(<span class="code-string">'root'</span>)).render(</span>
+<span class="code-line">  import.meta.env.VITE_STATIC_REVIEWS === <span class="code-string">'true'</span> ? &lt;StaticReviewsApp /&gt; : &lt;App /&gt;,</span>
+<span class="code-line">);</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">在页面 root 节点挂上 React 根。</p>
+            <p class="tl">若环境变量 VITE_STATIC_REVIEWS 为 true → 渲染 StaticReviewsApp。</p>
+            <p class="tl">否则渲染完整 App（含登录与动态 API）。</p>
+            <p class="tl">静态模式不该去改 LoginPage 流程——那条路根本不走。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <span class="callout-title">所有权提醒</span>
+          <p>静态 Pages 路径吃的是导出 JSON + StaticReviewsApp；交互路径才有 Login 与 FastAPI 实时 assemble。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: FastAPI bootstrap -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">代码在说什么：FastAPI 登场</h3>
+      <p class="animate-in">后端先创建应用并挂上 <span class="term" data-definition="跨域资源共享：允许浏览器从另一域名访问 API。">CORS</span>，再注册各业务路由。</p>
+
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">CODE</span>
+          <pre><code><span class="code-line">app = FastAPI(title=<span class="code-string">"Tang Strategy API"</span>)</span>
+<span class="code-line">app.add_middleware(</span>
+<span class="code-line">    CORSMiddleware,</span>
+<span class="code-line">    allow_origins=[<span class="code-string">"*"</span>],</span>
+<span class="code-line">    allow_credentials=<span class="code-keyword">False</span>,</span>
+<span class="code-line">    allow_methods=[<span class="code-string">"*"</span>],</span>
+<span class="code-line">    allow_headers=[<span class="code-string">"*"</span>],</span>
+<span class="code-line">)</span></code></pre>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">PLAIN ENGLISH</span>
+          <div class="translation-lines">
+            <p class="tl">创建名为 Tang Strategy API 的 FastAPI 应用。</p>
+            <p class="tl">挂上 CORS 中间件，让浏览器前端能跨源访问。</p>
+            <p class="tl">允许任意来源、方法与头；不携带凭证 cookie。</p>
+            <p class="tl">这是场务的「开机仪式」——真正的 assemble 路由在别处注册。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 6: Group chat -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">幕后对白：一页复盘怎么开映</h3>
+      <p class="animate-in">点「下一条」听剧组对话。注意谁开口、谁只负责搬运数据。</p>
+
+      <div class="chat-window animate-in" id="chat-module2">
+        <div class="chat-messages">
+          <div class="chat-message" data-msg="0" data-sender="layout" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-1)">L</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-1)">Layout</span>
+              <p>用户点了「复盘」。我把 active 切到 review，把舞台让给 ReviewPage。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="1" data-sender="review" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">R</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">ReviewPage</span>
+              <p>日和策略都齐了。我去叫 FastAPI 要一份 assemble 包。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="2" data-sender="fastapi" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">F</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">FastAPI</span>
+              <p>收到 market_day_id 和 strategy_id。SQLite，把 bars 和交易记录给我。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="3" data-sender="sqlite" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-4)">S</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-4)">SQLite</span>
+              <p>片库在此。当日行情与投影交易都查到了，原样交还。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="4" data-sender="fastapi" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-3)">F</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-3)">FastAPI</span>
+              <p>打包成 JSON payload，发回 ReviewPage。我不碰画布。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="5" data-sender="review" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-2)">R</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-2)">ReviewPage</span>
+              <p>包到了。筛选与业务控件归我；绘制交给 KlineEngine。</p>
+            </div>
+          </div>
+          <div class="chat-message" data-msg="6" data-sender="kline" style="display:none">
+            <div class="chat-avatar" style="background: var(--color-actor-5)">K</div>
+            <div class="chat-bubble">
+              <span class="chat-sender" style="color: var(--color-actor-5)">KlineEngine</span>
+              <p>胶片与字幕上机。我只画：缩放、平移、蜡烛和标记位置。</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display:none">
+          <div class="chat-avatar" id="chat-module2-typing-avatar">?</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn chat-next-btn btn-primary">下一条</button>
+          <button class="btn chat-all-btn">全部播放</button>
+          <button class="btn chat-reset-btn">重播</button>
+          <span class="chat-progress"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 7: Quiz -->
+    <div class="screen">
+      <h3 class="screen-heading animate-in">所有权测验：该改谁？</h3>
+      <p class="animate-in">三道题练「指对人」。答错通常意味着会让 AI 改错目录。</p>
+
+      <div class="quiz-container animate-in" id="quiz-module2">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="对。静态 Pages 走 StaticReviewsApp，不渲染 LoginPage；改登录对静态模式无效。"
+             data-explanation-wrong="main.jsx 在 VITE_STATIC_REVIEWS=true 时直接挂 StaticReviewsApp，登录链路不在这条路上。">
+          <h3 class="quiz-question">1. 只修 GitHub Pages 静态复盘展示，不该优先改谁？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. StaticReviewsApp 与静态导出 JSON</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. 交互模式的 LoginPage 登录流程</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. 导出用的 tracked SQLite 内容是否齐全</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-a"
+             data-explanation-right="对。权威交易记录落在 content/ 的规范化 JSON；前端 state 只是临时 UI 状态。"
+             data-explanation-wrong="持久、可发布的交易真相在 content（再投影进 DB），不是 React 组件里的临时 state。">
+          <h3 class="quiz-question">2. 要永久改正一笔交易记录，应落在哪里？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. content/ 下的规范化交易 JSON</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. ReviewPage 组件里的临时 UI state</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. KlineEngine 的颜色常量</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-c"
+             data-explanation-right="对。业务筛选与控件语义归 ReviewPage；KlineEngine 只负责绘制与交互手势。"
+             data-explanation-wrong="把业务规则塞进画布引擎会搅乱所有权——筛选状态应在 Review 层。">
+          <h3 class="quiz-question">3. 「按交易员过滤标记」这类业务控件，所有权在谁？</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>A. 只在 KlineEngine 内部硬编码</span>
+            </button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>B. 只改 strategies/STRATEGY.md 文案</span>
+            </button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+              <div class="quiz-option-radio"></div>
+              <span>C. ReviewPage 业务控件；引擎只按结果绘制</span>
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">核对答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">再试一次</button>
+      </div>
+
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">📌</div>
+        <div class="callout-content">
+          <span class="callout-title">带走一句话</span>
+          <p>认目录 = 认职责。下一课看它们怎么用 token 与 assemble 细节真正对话。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

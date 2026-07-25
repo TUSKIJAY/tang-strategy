@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tang Strategy 拆解课</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    CUSTOMIZE PER COURSE — forest accent for markets / charts.
+      forest      #2D8B55 / #226B41 / #E8F5EE / #5AAD7A
+  -->
+  <style>
+    :root {
+      --color-accent:       #2D8B55;
+      --color-accent-hover: #226B41;
+      --color-accent-light: #E8F5EE;
+      --color-accent-muted: #5AAD7A;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">Tang Strategy 拆解课</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="点开复盘" role="tab" aria-label="Module 1: 点开复盘"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="认识演员" role="tab" aria-label="Module 2: 认识演员"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="它们怎么对话" role="tab" aria-label="Module 3: 它们怎么对话"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="数据保险库" role="tab" aria-label="Module 4: 数据保险库"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="宁可失败也不乱写" role="tab" aria-label="Module 5: 宁可失败也不乱写"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="像船长一样指挥 AI" role="tab" aria-label="Module 6: 像船长一样指挥 AI"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
