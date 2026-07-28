@@ -12,7 +12,7 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Next gate: `closed`
 <!-- operating-modes-state:end -->
 
-- Last updated: 2026-07-23
+- Last updated: 2026-07-28
 - Branch: `codex/project-harness`
 - Completed plan: `docs/exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md`, revision `v2-review-foldback-2026-07-22`, implementation commit `da12e1b03715be3de75fcafd8d47aa1a35554942`, `implementation-review-001: accept/high`, final disposition `Completed`, next gate `closed`
 - Source OPT of that plan: `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/` OPT-001…003 `completed`

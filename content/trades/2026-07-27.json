@@ -1,0 +1,97 @@
+{
+  "schema_version": "trades-day-v1",
+  "trade_date": "2026-07-27",
+  "timezone": "America/New_York",
+  "trade_groups": [
+    {
+      "trade_group_id": "tg_20260727_tang_spy_001",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-07-27",
+      "direction": "PUT",
+      "status": "active",
+      "review_status": "verified",
+      "display_eligible": true,
+      "reported_stats_eligible": false,
+      "calculated_stats_eligible": false,
+      "supersedes_trade_group_id": null,
+      "legs": [
+        {
+          "leg_id": "tg_20260727_tang_spy_001_l1",
+          "instrument_type": "option",
+          "position_side": "long",
+          "option_type": "PUT",
+          "strike": null,
+          "expiry": "2026-07-27",
+          "expiry_provenance": "rule_default",
+          "contract_multiplier": 100,
+          "contract_multiplier_provenance": "rule_default",
+          "events": [
+            {
+              "event_id": "tg_20260727_tang_spy_001_l1_e1",
+              "sequence": 1,
+              "action": "buy_open",
+              "occurred_at": "2026-07-27T09:55-04:00",
+              "time_precision": "minute",
+              "time_incomplete": false,
+              "premium": null,
+              "quantity": null,
+              "fees": null,
+              "note": null,
+              "fact_provenance": {
+                "occurred_at": "user_provided",
+                "premium": "unknown",
+                "quantity": "unknown",
+                "fees": "unknown"
+              }
+            }
+          ]
+        }
+      ],
+      "reported_outcome": {
+        "return_pct": 35.0,
+        "gross_pnl": null,
+        "net_pnl": null,
+        "provenance": "user_provided",
+        "note": "用户口述 Tang 9:55 Put 交易收益率 +35%"
+      },
+      "calculated_outcome": null,
+      "result_conflict": false,
+      "notes": [
+        {
+          "text": "9:55 put，收益 +35%。未提供具体 option strike。",
+          "provenance": "user_provided"
+        },
+        {
+          "text": "盘前分析：4h在ma200处reject，盘前几根打不上去。判断大环境偏空，15min跌破ma50，5min盘前走出空头排列reject形态。9:55 5min ma200走出非强支撑，1min跌破回ma10以下判断空头趋势延续，15min无阻。",
+          "provenance": "user_provided"
+        }
+      ],
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "chat_screenshot",
+        "source_path": "chat_screenshot",
+        "source_index": null,
+        "review_flags": []
+      }
+    }
+  ],
+  "note_contexts": [
+    {
+      "context_id": "ctx_20260727_tang_spy_001",
+      "trader_id": "tang",
+      "underlying": "SPY",
+      "trade_date": "2026-07-27",
+      "text": "Tang盘前分析：4h在ma200处reject，盘前几根都打不上去。判断大环境偏空，15min跌破ma50，5min盘前走出漂亮的空头排列reject形态。只需等1min机会。9:55处5min ma200走出的不是强支撑，1min跌破回ma10以下判断空头趋势延续，15min无阻。交易点位：09:55 Put，收益率 +35%。",
+      "status": "active",
+      "review_status": "verified",
+      "normalization": {
+        "method": "manual_normalization",
+        "source": "chat_screenshot",
+        "source_path": "chat_screenshot",
+        "source_index": null,
+        "review_flags": []
+      }
+    }
+  ]
+}
