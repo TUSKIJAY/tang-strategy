@@ -25,6 +25,9 @@
         allowVerticalDrag: true,
         storageNamespace: 'klineEngineV2',
         showClippedMAIndicators: false,
+        // 'default' = width-based tail window (existing behavior).
+        // 'full' = first paint / data load fits every available bar (see fitAllAvailableBars()).
+        initialViewport: 'default',
       };
 
       function clamp(value, min, max) {
@@ -795,7 +798,11 @@
         }
 
         getViewLimits(timeframe, totalBars) {
-          const maxBars = timeframe === '5m' ? Math.min(78, totalBars || 78) : Math.min(390, totalBars || 390);
+          // Max zoom-out always reaches every bar the payload actually has (early
+          // closes, extended sessions, etc.); the 390/78 RTH sizes are only a
+          // fallback for when totalBars isn't known yet (e.g. before data loads).
+          const fallback = timeframe === '5m' ? 78 : 390;
+          const maxBars = totalBars > 0 ? totalBars : fallback;
           const minBars = Math.min(10, maxBars || 10);
           return { minBars, maxBars: Math.max(1, maxBars) };
         }
@@ -965,6 +972,7 @@
             storageNamespace: input.storageNamespace || DEFAULT_ENGINE_OPTIONS.storageNamespace,
             allowVerticalDrag: input.allowVerticalDrag !== false,
             showClippedMAIndicators: Boolean(input.showClippedMAIndicators),
+            initialViewport: input.initialViewport === 'full' ? 'full' : DEFAULT_ENGINE_OPTIONS.initialViewport,
           };
         }
 
@@ -2663,18 +2671,37 @@
           };
         }
 
+        /**
+         * Engine-owned "fit all available bars" operation: sets the viewport to
+         * show every bar currently held for `timeframe` (index 0..length-1),
+         * whatever that length actually is (390/78 RTH, a short early close, an
+         * extended-hours window, etc. — never a hard-coded count). Delegates to
+         * fitRange() with zero padding so the two operations share one viewport
+         * math path.
+         */
+        fitAllAvailableBars(timeframe = this.currentTimeframe) {
+          const bars = this.dataManager.getBars(timeframe);
+          if (!bars.length) return null;
+          return this.fitRange({
+            timeframe,
+            startIndex: 0,
+            endIndex: bars.length - 1,
+            paddingRatio: 0,
+            minPadding: 0,
+          });
+        }
+
         overview() {
           // Engine-owned fit/overview action: reveal everything, clear teaching
-          // cutoffs and highlights, then reset the viewport (zoom/follow) and
-          // return to the latest bar at the default window — the same view a
-          // fresh data load produces.
+          // cutoffs and highlights, then fit every available bar for the current
+          // timeframe — matching the toolbar's "fit the full day" contract.
           this.setReplayReveal(false);
           this.setRevealCutoff(null);
           this.setHighlightRanges(null);
           const bars = this.dataManager.getBars(this.currentTimeframe);
           if (!bars.length) return this.currentIndex;
-          this.viewportManager.reset();
-          return this.setCurrentIndex(bars.length - 1, { follow: true });
+          this.fitAllAvailableBars();
+          return this.currentIndex;
         }
 
         setCurrentIndex(nextIndex, { follow = true } = {}) {
@@ -2709,7 +2736,13 @@
           const summary = this.dataManager.loadData(json);
           this.currentTimeframe = this.dataManager.getTimeframe();
           this.currentIndex = this._resolveInitialIndex(this.currentTimeframe);
-          this.viewportManager.reset();
+          if (this.options.initialViewport === 'full') {
+            // Real bar lengths are known now (dataManager.loadData() just ran);
+            // fit every available bar instead of the default tail window.
+            this.fitAllAvailableBars();
+          } else {
+            this.viewportManager.reset();
+          }
           this._updateToolbarState();
           this._updatePlaybackUI();
 
@@ -2983,16 +3016,24 @@
             this.currentTimeframe,
             chartWidth,
           );
-          const maxStart = Math.max(0, nextBars.length - viewInfo.count);
-          const mappedStart = previousStartBar
-            ? this.dataManager.findNearestIndexByTime(
-              this.currentTimeframe,
-              this.dataManager._timeValue(previousStartBar),
-            )
-            : 0;
           this.currentIndex = clamp(nextIndex, 0, Math.max(0, nextBars.length - 1));
-          this.viewportManager.viewStart = clamp(mappedStart, 0, maxStart);
-          this.viewportManager.setFollowMode(this.viewportManager.viewStart >= maxStart);
+          if (this.options.initialViewport === 'full' && nextBars.length) {
+            // A timeframe switch is a context reload, not a manual zoom/pan —
+            // every available bar stays in view, same as first paint/Overview.
+            this.viewportManager.zoomScale = nextBars.length / Math.max(1, viewInfo.base);
+            this.viewportManager.viewStart = 0;
+            this.viewportManager.setFollowMode(false);
+          } else {
+            const maxStart = Math.max(0, nextBars.length - viewInfo.count);
+            const mappedStart = previousStartBar
+              ? this.dataManager.findNearestIndexByTime(
+                this.currentTimeframe,
+                this.dataManager._timeValue(previousStartBar),
+              )
+              : 0;
+            this.viewportManager.viewStart = clamp(mappedStart, 0, maxStart);
+            this.viewportManager.setFollowMode(this.viewportManager.viewStart >= maxStart);
+          }
           this.emit('viewport:changed', this._getViewportPayload());
           this.scheduleRender();
           return result;

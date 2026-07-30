@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { generateTrendAnnotations, scanSignals, summarizeAnnotations } from '../features/review/scanner.js';
 import { setupForAnnotation, summarizeSetups, traceSetups } from '../features/review/lifecycle.js';
-import { DAILY_REVIEW_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
+import { REVIEW_STATIC_ENGINE_OPTIONS } from '../features/review/engineOptions.js';
 import { ReviewContextPanel } from '../features/review/ReviewContextPanel.jsx';
 import { ReviewSignalList } from '../features/review/ReviewSignalList.jsx';
 import { TraderFilters } from '../features/review/TraderFilters.jsx';
@@ -625,7 +625,7 @@ export function StaticReviewsApp() {
                 payload={enginePayload}
                 annotations1m={engineAnnotations1m}
                 annotations5m={chartAnnotations5m}
-                engineOptions={DAILY_REVIEW_ENGINE_OPTIONS}
+                engineOptions={REVIEW_STATIC_ENGINE_OPTIONS}
                 replayStartTime={showExtendedKBars ? '09:00' : '09:30'}
                 onAnnotationClick={(annotation) => {
                   if (annotation.type === 'trade_record') {

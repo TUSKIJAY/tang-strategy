@@ -219,9 +219,11 @@ test('fit/overview is owned once by the engine toolbar with accessible labeling'
   assert.match(engineSource, /data-action="overview"[^>]*aria-label="[^"]+"/);
   assert.match(engineSource, /overview\(\) \{/);
   assert.match(engineSource, /action === 'overview'/);
-  // The engine overview action resets the viewport (zoom/follow) to the
-  // default window, not just the cursor position.
-  assert.match(engineSource, /this\.viewportManager\.reset\(\);\s*\n\s*return this\.setCurrentIndex\(bars\.length - 1, \{ follow: true \}\);/);
+  // The engine overview action fits every available bar (start=0..length-1),
+  // not the default width-based tail window.
+  assert.match(engineSource, /fitAllAvailableBars\(timeframe = this\.currentTimeframe\) \{/);
+  assert.match(engineSource, /startIndex: 0,\s*\n\s*endIndex: bars\.length - 1,/);
+  assert.match(engineSource, /this\.fitAllAvailableBars\(\);\s*\n\s*return this\.currentIndex;/);
   // Embedding the reused engine must not restyle the host application. Theme
   // variables belong to the engine container; the standalone demo may style
   // its own wrapper without a global html/body selector.
