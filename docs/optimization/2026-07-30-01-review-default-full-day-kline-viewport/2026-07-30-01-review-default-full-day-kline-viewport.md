@@ -6,7 +6,7 @@
 
 | ID | Title | Area | Status | Lifecycle link | Notes |
 | --- | --- | --- | --- | --- | --- |
-| OPT-001 | Open Review with the complete current-day K-line session in view | Review + Static Review shared K-line viewport | recorded | none | Current first paint shows only a tail window; target is the whole displayed day without manual zooming |
+| OPT-001 | Open Review with the complete current-day K-line session in view | Review + Static Review shared K-line viewport | active-plan | [active plan](../../exec-plans/active/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md) | Active at `phase-0:not-started`; implementation has not begun |
 
 ## Scope Lock
 
@@ -73,8 +73,8 @@
 - Boundary that must not change:
   - Do not change chart data, session filtering, signals, trade markers, strategies, storage, backend/API behavior, or publication flow.
   - Do not treat this record as implementation or plan authority.
-- Lifecycle status: `recorded`; no proposed plan.
+- Lifecycle status: `active-plan`; [Tang Strategy Default Full-Day K-Line Viewport](../../exec-plans/active/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md) revision `v1-active-2026-07-30` is Active at `phase-0:not-started`. The user explicitly skipped a separate design-review round for this bounded plan; implementation still requires a later explicit execution instruction.
 
 ## Explicit Non-Authorization
 
-This OPT batch records one user-visible viewport requirement and its evidence. It does **not** authorize source changes, proposed-plan creation, activation, implementation, DB/data mutation, push, PR, merge, Pages, provider/broker access, hosted verification, or any remote action.
+This OPT batch records one user-visible viewport requirement and its evidence. Its linked Active plan has not started Phase 0; neither artifact authorizes implementation without the next explicit execution instruction, nor DB/data mutation, push, PR, merge, Pages, provider/broker access, hosted verification, or any remote action.

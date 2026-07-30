@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-None.
+- [Tang Strategy Default Full-Day K-Line Viewport](./active/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md) — Active; revision `v1-active-2026-07-30`; direct user activation for bounded plan; `phase-0:not-started`; next gate `phase-0-start`
 
 ## Proposed Plans
 

@@ -3,14 +3,16 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan`
-- Lifecycle status: `Completed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `closed`
+- Current plan: `2026-07-30-tang-strategy-default-full-day-kline-viewport-plan`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `not-started`
+- Next gate: `phase-0-start`
 <!-- operating-modes-state:end -->
 
 Maintenance rule: when a plan closes, its per-step lifecycle entries move to `docs/progress-archive/` and only the final disposition summary stays here; when this file exceeds 10 body entries, archive the oldest closed entries before appending. Rules and index: [`docs/progress-archive/index.md`](./docs/progress-archive/index.md).
+
+2026-07-30: OPT-001 from [`2026-07-30-01-review-default-full-day-kline-viewport`](./docs/optimization/2026-07-30-01-review-default-full-day-kline-viewport/2026-07-30-01-review-default-full-day-kline-viewport.md) converted to a proposed plan and then directly activated by the user's bounded-simple-change instruction as [`2026-07-30-tang-strategy-default-full-day-kline-viewport-plan`](./docs/exec-plans/active/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md), revision `v1-active-2026-07-30`. The user explicitly skipped a separate design-review round and will direct another agent to execute. Scope is limited to Review/Static full-day first paint and Overview for truthful 1m/5m payload lengths, with manual controls and Teaching behavior preserved. Status `Active`, `phase-0:not-started`; next gate `phase-0-start`. No implementation, product source, DB/data, publication, or remote action.
 
 2026-07-30: OPT batch [`2026-07-30-01-review-default-full-day-kline-viewport`](./docs/optimization/2026-07-30-01-review-default-full-day-kline-viewport/2026-07-30-01-review-default-full-day-kline-viewport.md) recorded as record-only intake. User evidence shows the current Review/Static first paint exposes only a latest-bar tail window while the target is the complete truthful day/session. Read-only code anchors identify the 1m 96-bar / 5m 72-bar default cap, tail-follow reset, payload-load reset, and the `Overview` label/behavior mismatch. OPT-001 remains `recorded`; no product source, plan, activation, DB/data, publication, or remote change. Next gate: none unless the user explicitly requests promotion or implementation.
 
