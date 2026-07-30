@@ -54,6 +54,13 @@ jobs:
           VITE_STATIC_REVIEWS: "true"
         run: npm run build:static-reviews
 
+      - name: Bind build provenance to source commit
+        run: |
+          python scripts/write-build-provenance.py \
+            --output frontend/dist/build-manifest.json \
+            --commit-sha "$GITHUB_SHA" \
+            --built-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
       - name: Prepare Pages artifact
         run: |
           touch frontend/dist/.nojekyll
