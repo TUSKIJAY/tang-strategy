@@ -12,14 +12,15 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Next gate: `closed`
 <!-- operating-modes-state:end -->
 
-- Last updated: 2026-07-28
-- Branch: `codex/project-harness`
+- Last updated: 2026-07-30
+- Branch: `main`
 - Completed plan: `docs/exec-plans/completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md`, revision `v2-review-foldback-2026-07-22`, implementation commit `da12e1b03715be3de75fcafd8d47aa1a35554942`, `implementation-review-001: accept/high`, final disposition `Completed`, next gate `closed`
 - Source OPT of that plan: `docs/optimization/2026-07-22-01-review-date-rail-and-trade-quantity-session/` OPT-001…003 `completed`
 - No active or proposed plan exists.
 
 ## Open Threads
 
+- Review/Static full-day viewport OPT batch `docs/optimization/2026-07-30-01-review-default-full-day-kline-viewport/`: OPT-001 `recorded` with user current/target screenshots and read-only engine anchors. Target: show every truthful current-day/session bar on first paint and make `Overview` restore the complete day; keep Teaching replay semantics separate. No proposed plan or implementation authority. Next gate: none unless the user explicitly requests promotion or implementation.
 - Mobile Review/Static OPT batch `docs/optimization/2026-07-22-02-review-mobile-chart-canvas-and-floating-filter-dock/`: OPT-001…003 `recorded`, self-contained `mock.html` passed coarse-pointer Playwright acceptance, and a read-only Touch-contract Gap Evidence subsection records that the touch contract has no existing implementation to extend. No proposed plan, no implementation authority. Next gate: none unless the user explicitly requests promotion.
 - Blocked on the user: two mock design decisions gate any engine scoping — whether to remove the header/dock ticker+date duplication (needs two Scope Lock rows amended), and whether trade markers leave the candle up/down palette (`direction-owned color` is a hard lock).
 - Recorded, not fixed: eight `with connect()` API handlers in `backend/app/main.py` still rely on GC to close the SQLite handle.
