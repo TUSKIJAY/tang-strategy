@@ -6,6 +6,7 @@
 | --- | --- | --- | --- |
 | 2026-07-21 → 2026-07-22 closed-plan lifecycles | Per-step entries of the date-rail plan (final summary retained) plus full lifecycles of the three 2026-07-21 completed plans and their OPT batch session records | [`2026-07-21-to-2026-07-22-plan-lifecycle-history.md`](./2026-07-21-to-2026-07-22-plan-lifecycle-history.md) | `../../PROGRESS.md` / `../../HANDOFF.md` |
 | 2026-07-23 governance and documentation housekeeping | Six closed docs/governance entries with no open follow-up: `PROGRESS.md` history migration, documentation audit, receipt path normalization, `output/` retention, OPT mock containment, OPT batch renumbering | [`2026-07-23-governance-and-docs-housekeeping.md`](./2026-07-23-governance-and-docs-housekeeping.md) | `../../PROGRESS.md` / `../../HANDOFF.md` |
+| 2026-07-22 Date Rail Ascending And Trade Quantity completion | The plan's final-disposition summary entry, superseded as the oldest `PROGRESS.md` body entry when the default full-day K-line viewport plan's completion entry pushed the count to 11 | [`2026-07-22-date-rail-plan-completion.md`](./2026-07-22-date-rail-plan-completion.md) | `../../PROGRESS.md` / `../../HANDOFF.md` |
 
 ## Archive Triggers
 

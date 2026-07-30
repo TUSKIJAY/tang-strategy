@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-- [Tang Strategy Default Full-Day K-Line Viewport](./active/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md) — Active; revision `v1-active-2026-07-30`; direct user activation for bounded plan; `phase-0:not-started`; next gate `phase-0-start`
+None.
 
 ## Proposed Plans
 
@@ -39,6 +39,7 @@ None.
 
 ## Completed Plans
 
+- [Tang Strategy Default Full-Day K-Line Viewport](./completed/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md) — Completed; revision `v1-active-2026-07-30`; `implementation-review-001: accept/high`; product commit `f667867c3e511d2eaaf77f673c96f3e7ed1f70e2`; next gate `closed`
 - [Tang Strategy Date Rail Ascending And Trade Quantity](./completed/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) — Completed; revision `v2-review-foldback-2026-07-22`; `implementation-review-001: accept/high`; product commit `da12e1b03715be3de75fcafd8d47aa1a35554942`; next gate `closed`
 - [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./completed/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) — Completed; revision `v2-review-foldback-2026-07-21`; `implementation-review-001: accept/high`; product commit `5f36d29a44fb12aee2319ae147303cc970d83193`; next gate `closed`
 - [Tang Strategy Trade Tools, Group Span, Viewport, And Data Rail](./completed/2026-07-21-tang-strategy-trade-tools-group-span-viewport-data-rail-plan.md) — Completed; canonical details: [completed index](./completed/index.md)

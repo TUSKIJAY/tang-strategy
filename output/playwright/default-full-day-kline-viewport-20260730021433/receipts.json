@@ -1,0 +1,272 @@
+[
+  {
+    "id": "Review-1m-first-paint",
+    "title": "Review 1m first paint fits every available bar",
+    "status": "PASS",
+    "details": {
+      "bars1m": 390,
+      "debug": {
+        "timeframe": "1m",
+        "start": 0,
+        "end": 389,
+        "count": 390,
+        "base": 72,
+        "zoomScale": 5.416666666666667,
+        "followMode": false,
+        "chartWidth": 1012
+      }
+    },
+    "ts": "2026-07-30T02:14:34.638Z"
+  },
+  {
+    "id": "Review-5m-first-paint",
+    "title": "Review 5m (timeframe switch) fits every available bar",
+    "status": "PASS",
+    "details": {
+      "bars5m": 78,
+      "debug": {
+        "timeframe": "5m",
+        "start": 0,
+        "end": 77,
+        "count": 78,
+        "base": 56,
+        "zoomScale": 1.3928571428571428,
+        "followMode": false,
+        "chartWidth": 1012
+      }
+    },
+    "ts": "2026-07-30T02:14:34.795Z"
+  },
+  {
+    "id": "V1",
+    "title": "Review 5m full-day first paint",
+    "status": "PASS",
+    "details": {
+      "path": "output/playwright/default-full-day-kline-viewport-20260730021433/v1-review-5m-full-day.png"
+    },
+    "ts": "2026-07-30T02:14:34.873Z"
+  },
+  {
+    "id": "Review-1m-after-tf-roundtrip",
+    "title": "1m -> 5m -> 1m roundtrip still fits every bar",
+    "status": "PASS",
+    "details": {
+      "debug": {
+        "timeframe": "1m",
+        "start": 0,
+        "end": 389,
+        "count": 390,
+        "base": 72,
+        "zoomScale": 5.416666666666667,
+        "followMode": false,
+        "chartWidth": 1012
+      }
+    },
+    "ts": "2026-07-30T02:14:35.028Z"
+  },
+  {
+    "id": "Manual-zoom-narrows",
+    "title": "Manual +Zoom produces a narrower viewport than full-day",
+    "status": "PASS",
+    "details": {
+      "debug": {
+        "timeframe": "1m",
+        "start": 108,
+        "end": 385,
+        "count": 278,
+        "base": 72,
+        "zoomScale": 3.861111111111111,
+        "followMode": true,
+        "chartWidth": 1012
+      }
+    },
+    "ts": "2026-07-30T02:14:35.467Z"
+  },
+  {
+    "id": "V2",
+    "title": "Review after manual zoom-in (narrower than full day)",
+    "status": "PASS",
+    "details": {
+      "path": "output/playwright/default-full-day-kline-viewport-20260730021433/v2-review-zoomed-in.png"
+    },
+    "ts": "2026-07-30T02:14:35.517Z"
+  },
+  {
+    "id": "Overview-restores-full-day",
+    "title": "Overview restores the full day after a manual zoom",
+    "status": "PASS",
+    "details": {
+      "debug": {
+        "timeframe": "1m",
+        "start": 0,
+        "end": 389,
+        "count": 390,
+        "base": 72,
+        "zoomScale": 5.416666666666667,
+        "followMode": false,
+        "chartWidth": 1012
+      }
+    },
+    "ts": "2026-07-30T02:14:35.674Z"
+  },
+  {
+    "id": "V3",
+    "title": "Review after clicking Overview (restored full day)",
+    "status": "PASS",
+    "details": {
+      "path": "output/playwright/default-full-day-kline-viewport-20260730021433/v3-review-after-overview.png"
+    },
+    "ts": "2026-07-30T02:14:35.728Z"
+  },
+  {
+    "id": "Variable-length-fits-actual-count",
+    "title": "A non-390/78 payload (Ext-K window) fits its own actual bar count, not a fixed 390/78",
+    "status": "PASS",
+    "details": {
+      "rthBars1m": 390,
+      "extKBars1m": 450,
+      "debug": {
+        "timeframe": "1m",
+        "start": 0,
+        "end": 449,
+        "count": 450,
+        "base": 72,
+        "zoomScale": 6.25,
+        "followMode": false,
+        "chartWidth": 1012
+      }
+    },
+    "ts": "2026-07-30T02:14:36.401Z"
+  },
+  {
+    "id": "Variable-length-synthetic",
+    "title": "A synthetic 53/11-bar payload fits its exact actual length (no 390/78 hard-coding)",
+    "status": "PASS",
+    "details": {
+      "N1M": 53,
+      "N5M": 11,
+      "first1m": {
+        "timeframe": "1m",
+        "start": 0,
+        "end": 52,
+        "count": 53,
+        "base": 72,
+        "zoomScale": 0.7361111111111112,
+        "followMode": false,
+        "chartWidth": 1012
+      },
+      "after5m": {
+        "timeframe": "5m",
+        "start": 0,
+        "end": 10,
+        "count": 11,
+        "base": 56,
+        "zoomScale": 0.19642857142857142,
+        "followMode": false,
+        "chartWidth": 1012
+      }
+    },
+    "ts": "2026-07-30T02:14:36.861Z"
+  },
+  {
+    "id": "V4",
+    "title": "Static Review full-day parity (1m/5m first paint, zoom, Overview)",
+    "status": "PASS",
+    "details": {
+      "path": "output/playwright/default-full-day-kline-viewport-20260730021433/v4-static-review-full-day.png"
+    },
+    "ts": "2026-07-30T02:14:39.807Z"
+  },
+  {
+    "id": "Static-parity",
+    "title": "Static Review matches interactive Review for first paint, TF switch, zoom, and Overview",
+    "status": "PASS",
+    "details": {
+      "staticCounts": {
+        "bars1m": 390,
+        "bars5m": 78
+      },
+      "staticDebug1m": {
+        "timeframe": "1m",
+        "start": 0,
+        "end": 389,
+        "count": 390,
+        "base": 92,
+        "zoomScale": 4.239130434782608,
+        "followMode": false,
+        "chartWidth": 1292
+      },
+      "staticDebug5m": {
+        "timeframe": "5m",
+        "start": 0,
+        "end": 77,
+        "count": 78,
+        "base": 71,
+        "zoomScale": 1.0985915492957747,
+        "followMode": false,
+        "chartWidth": 1292
+      },
+      "staticDebugZoomed": {
+        "timeframe": "5m",
+        "start": 16,
+        "end": 77,
+        "count": 62,
+        "base": 71,
+        "zoomScale": 0.8732394366197183,
+        "followMode": true,
+        "chartWidth": 1292
+      },
+      "staticDebugOverview": {
+        "timeframe": "5m",
+        "start": 0,
+        "end": 77,
+        "count": 78,
+        "base": 71,
+        "zoomScale": 1.0985915492957747,
+        "followMode": false,
+        "chartWidth": 1292
+      }
+    },
+    "ts": "2026-07-30T02:14:39.807Z"
+  },
+  {
+    "id": "Teaching-reveal-cutoff-preserved",
+    "title": "Teaching keeps its default engine options, reveal cutoff, and bounded current index",
+    "status": "PASS",
+    "details": {
+      "totalBars": 919,
+      "revealCutoff1m": 30,
+      "currentIndex": 30,
+      "options": "default"
+    },
+    "ts": "2026-07-30T02:14:40.347Z"
+  },
+  {
+    "id": "Teaching-step-bounded",
+    "title": "Advance one bar moves the cutoff forward and keeps currentIndex bounded by it",
+    "status": "PASS",
+    "details": {
+      "revealCutoff1m": 31,
+      "currentIndex": 31
+    },
+    "ts": "2026-07-30T02:14:40.544Z"
+  },
+  {
+    "id": "V5",
+    "title": "Teaching replay reveal-cutoff intact after the viewport change",
+    "status": "PASS",
+    "details": {
+      "path": "output/playwright/default-full-day-kline-viewport-20260730021433/v5-teaching-reveal-cutoff.png"
+    },
+    "ts": "2026-07-30T02:14:40.590Z"
+  },
+  {
+    "id": "Data-safety-db-hash-unchanged",
+    "title": "Tracked SQLite DB SHA-256 unchanged across the acceptance run",
+    "status": "PASS",
+    "details": {
+      "sha256": "383cf9012ad7a158901ce9b7bac8a4475b7948d6fef99e8077fcdafa285c830e"
+    },
+    "ts": "2026-07-30T02:14:40.612Z"
+  }
+]

@@ -1,7 +1,7 @@
 # Tang Strategy Default Full-Day K-Line Viewport
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-07-30-tang-strategy-default-full-day-kline-viewport-plan`
 - Revision: `v1-active-2026-07-30`
 - Plan author ID: `codex-root`
@@ -9,18 +9,18 @@
 - Latest design verdict: none
 - Review independence: none
 - Activation evidence: `user-instruction:2026-07-30-direct-activate-default-full-day-kline-viewport-plan`
-- Current phase: phase-0
-- Phase state: not-started
+- Current phase: none
+- Phase state: none
 - Phase entry gate: none
-- Next gate: `phase-0-start`
-- Implementation review: none
-- Final disposition: none
-- Verified implementation commit: none
+- Next gate: closed
+- Implementation review: `../reviews/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan/implementation-review-001.md@accept`
+- Final disposition: Completed
+- Verified implementation commit: f667867c3e511d2eaaf77f673c96f3e7ed1f70e2
 - Lifecycle reconciliation commit: none
 - Owner: another agent after explicit execution authority
 - Created: 2026-07-30
-- Scope authority: lifecycle activation only; implementation has not started
-- Local commit: task-scoped default; does not authorize implementation, push, or remote action
+- Scope authority: implementation executed under `user-instruction:2026-07-30-execute-default-full-day-kline-viewport-plan` (直接执行这个 plan)
+- Local commit: task-scoped default; implementation commit `f667867c3e511d2eaaf77f673c96f3e7ed1f70e2`; no push, PR, merge, Pages, provider/broker, or remote action
 
 ## 1. Context
 
@@ -122,22 +122,25 @@ Verification:
 - Move the plan to `completed/` and mark source OPT-001 `completed` only after verified implementation.
 - Exit gate: `closed`.
 
-## 6. Current Gate And Handoff
+## 6. Closeout
 
-- Current state: Active, `phase-0:not-started`.
-- Next gate: `phase-0-start`.
+- Current state: Completed, `next gate: closed`.
 - Design review: explicitly skipped by direct user instruction; no verdict is claimed.
-- Implementation has not started.
-- The executing agent must receive an explicit start/execute instruction before changing product files.
-- No push, PR, merge, Pages, provider/broker, DB/content mutation, or remote authority exists.
+- Implementation: user instruction `执行这个plan` (2026-07-30) opened Phase 0/1 and authorized full local execution. Phase 0 recorded baseline HEAD `8b80ae48e66655f2e2140c48becc9c5a4836b546` and tracked DB SHA-256 `383cf9012ad7a158901ce9b7bac8a4475b7948d6fef99e8077fcdafa285c830e` (unrelated pre-existing dirty file, preserved and never staged).
+- Implementation commit `f667867c3e511d2eaaf77f673c96f3e7ed1f70e2`: `frontend/src/kline/kline-engine.js` gained `fitAllAvailableBars()` (delegates to the existing `fitRange()` with zero padding over the full bar array), `overview()` and `setTimeframe()` now use it, `loadData()` uses it when the engine option `initialViewport==='full'`, and `getViewLimits()` derives max zoom-out from the actual payload bar count instead of a hard-coded 390/78 RTH ceiling (kept only as a fallback before any data loads). `frontend/src/features/review/engineOptions.js` adds `REVIEW_STATIC_ENGINE_OPTIONS` (spreads `DAILY_REVIEW_ENGINE_OPTIONS` plus `initialViewport:'full'`); `ReviewPage.jsx` and `StaticReviewsApp.jsx` adopt it. `TraderPointEditor.jsx` (Admin), Teaching, and Backtest keep the unmodified default tail-window first paint. `UnifiedKlineEngine.jsx` required no change — it already forwards `engineOptions` opaquely.
+- Acceptance: every §4 row verified against a real running app via the engine's `getViewportDebug()` seam, including a committed, repeatable Playwright script (`frontend/scripts/playwright/default-full-day-kline-viewport-acceptance.mjs`) whose run copies the tracked DB to a scratch temp DB (never mutates it), drives interactive Review, Static Review, and Teaching, and writes durable receipts. Cited run: `output/playwright/default-full-day-kline-viewport-20260730021433/receipts.json` (committed; run screenshots and the scratch DB stayed local/gitignored per `docs/operating-modes.md` §8 and were deleted once this plan reached `Completed`). `npm run test:trade-records` 69/69, normal build, static-reviews build, `python scripts/check-project-harness.py --root . --profile auto`, and `git diff --check` all passed. Tracked SQLite DB hash confirmed unchanged after implementation and after the acceptance run.
+- Implementation review: independent `implementation-review-001: accept/high` (`docs/exec-plans/reviews/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan/implementation-review-001.md`). One P2, non-blocking finding (the sole test touched by the commit is a source-shape pin, not a runtime assertion) — closed by the committed Playwright acceptance script and receipts added after the review, rather than by a design-revision foldback, since the review's verdict was already `accept` and the addition only strengthens durable evidence.
+- Adjacent, recorded not fixed: `frontend/src/kline/UnifiedKlineEngine.jsx`'s `annotations1m`/`annotations5m` default parameters (`= []`) get a new array identity on every render of any page (e.g. `TeachingPage.jsx`) that omits those props, which re-triggers `loadData()` on unrelated re-renders. This is pre-existing (predates this plan) and does not affect Review/Static, which both pass stable `useMemo`-derived annotation props. Diagnosed and independently confirmed during this plan's acceptance work; out of this plan's scope to fix.
+- No push, PR, merge, Pages, provider/broker, DB/content mutation, or remote authority was exercised or is granted by this closeout.
 
-Lifecycle paths owned by this activation:
+Lifecycle paths owned by this closeout:
 
-- `docs/exec-plans/active/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md`
+- `docs/exec-plans/completed/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md` (moved from `active/`)
 - `docs/exec-plans/active/index.md`
+- `docs/exec-plans/completed/index.md`
 - `docs/exec-plans/roadmap.md`
 - `docs/exec-plans/reviews/index.md`
-- `docs/exec-plans/reviews/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan/.gitkeep`
+- `docs/exec-plans/reviews/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan/implementation-review-001.md`
 - source OPT batch and `docs/optimization/index.md`
 - `PROGRESS.md`
 - `HANDOFF.md`

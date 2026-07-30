@@ -5,35 +5,34 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-07-30-tang-strategy-default-full-day-kline-viewport-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-0`
-- Phase state: `not-started`
-- Next gate: `phase-0-start`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-07-30
-- Branch: `main`
-- Active plan: `docs/exec-plans/active/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md`, revision `v1-active-2026-07-30`, direct user activation for a bounded simple change, `phase-0:not-started`, next gate `phase-0-start`
-- Source OPT: `docs/optimization/2026-07-30-01-review-default-full-day-kline-viewport/` OPT-001 `active-plan`
-- The user explicitly skipped a separate design-review round and intends another agent to execute. This activation did not start Phase 0.
+- Branch: `main`, 4 commits ahead of `origin/main` (none pushed)
+- No active plan. The default full-day K-line viewport plan closed `Completed`; see `PROGRESS.md` and `docs/exec-plans/completed/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md`.
 
 ## Open Threads
 
-- Review/Static full-day viewport plan is Active at exact revision `v1-active-2026-07-30`, `phase-0:not-started`. Scope is limited to truthful full-day first paint and Overview for 1m/5m, with manual controls and Teaching replay preserved. Next gate: a later explicit execution instruction opens `phase-0-start`.
 - Mobile Review/Static OPT batch `docs/optimization/2026-07-22-02-review-mobile-chart-canvas-and-floating-filter-dock/`: OPT-001…003 `recorded`, self-contained `mock.html` passed coarse-pointer Playwright acceptance, and a read-only Touch-contract Gap Evidence subsection records that the touch contract has no existing implementation to extend. No proposed plan, no implementation authority. Next gate: none unless the user explicitly requests promotion.
 - Blocked on the user: two mock design decisions gate any engine scoping — whether to remove the header/dock ticker+date duplication (needs two Scope Lock rows amended), and whether trade markers leave the candle up/down palette (`direction-owned color` is a hard lock).
 - Recorded, not fixed: eight `with connect()` API handlers in `backend/app/main.py` still rely on GC to close the SQLite handle.
 - Recorded, not fixed: the `HANDOFF.md` dated-entry check is a shape heuristic; undated history prose still passes it.
+- Recorded, not fixed: `frontend/src/kline/UnifiedKlineEngine.jsx`'s `annotations1m`/`annotations5m` default parameters (`= []`) get a new array identity every render on any page that omits those props (e.g. `TeachingPage.jsx`), re-triggering `loadData()` on unrelated re-renders. Pre-existing; does not affect Review/Static, which pass stable `useMemo`-derived annotation props. Diagnosed during the full-day viewport plan's acceptance work.
+- Recorded, not fixed: several `output/playwright/*` run directories from already-`Completed` plans (`date-rail-qty-20260722023705`, `review-workspaces-phase3/4/5-20260720`, `trade-panel-polish-20260721`, `trade-points-marker-labels-20260721`) were left on disk past their plan's closure, though `docs/operating-modes.md` §8 says a closed plan's cited-run screenshots should be deleted at `Completed`. Untracked/gitignored, no repository-state risk; left alone this session to avoid touching other plans' artifacts.
 
 ## Verification Baseline
 
 - `python scripts/verify.py` — runs the full battery from `.harness/config.json` (`verification_commands` is the only command list).
-- Last full battery: 11/11 on 2026-07-23, including backend 78/78 and frontend `test:trade-records` 69/69.
+- Last full battery: 11/11 on 2026-07-23, including backend 78/78 and frontend `test:trade-records` 69/69. Frontend `test:trade-records` re-confirmed 69/69 on 2026-07-30 as part of the full-day viewport plan closeout.
 
 ## Resume Rules
 
 1. Re-run startup Git status. Untracked `output/` trees are preserved only while their plan is open; closed plans' runs are deleted per `docs/operating-modes.md` §8.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. Current plan is **Active** at `phase-0:not-started`; next gate `phase-0-start`. Do not infer implementation start from activation alone.
+3. No active plan. A new task starts in Coding Lane 1/2 or requires a fresh proposed Exec Plan per `docs/operating-modes.md`.
 4. No remote actions without explicit user request.
