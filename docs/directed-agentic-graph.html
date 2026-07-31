@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<!--
+  Tang Strategy · Directed Agentic Graph 有向代理图（手工维护的文档页，非构建产物）
+  数据为时点快照（2026-07-31），来源：
+    - AGENTS.md（启动契约 / 本地提交默认 / 每日发布触发语）
+    - docs/operating-modes.md（双模式路由 / Lane 1-3 / 治理生命周期 / 权限门）
+    - docs/architecture.md / docs/daily-publish-runbook.md（数据管线 / Pages 流）
+    - INSTRUCTIONS.md / .harness/config.json（稳定契约 / 验证电池）
+  页面图形为内联 SVG，由下方 NODES/EDGES 数据驱动；结构变化时手工同步数据。
+  自包含单文件，无外部依赖，浏览器直接打开即可。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tang Strategy · Directed Agentic Graph</title>
+<style>
+  :root {
+    --bg: #F3F5F7;
+    --surface: #FFFFFF;
+    --ink: #16232E;
+    --muted: #5A6B78;
+    --line: #D8DFE5;
+    --accent: #23617A;
+    --accent-ink: #1A4A5E;
+    --accent-soft: #E3EEF3;
+    --warn: #A8741F;
+    --warn-soft: #F6EDDA;
+    --rail: #EAEFF2;
+    --mono: "Cascadia Code", "SF Mono", "JetBrains Mono", ui-monospace, Consolas, "Microsoft YaHei", monospace;
+    --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F151B; --surface: #161E26; --ink: #DEE7EE; --muted: #8FA1AF;
+      --line: #2A3540; --accent: #6FB0CC; --accent-ink: #9CCBDF; --accent-soft: #1C303C;
+      --warn: #D5A34C; --warn-soft: #33291280; --rail: #1B242D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F151B; --surface: #161E26; --ink: #DEE7EE; --muted: #8FA1AF;
+    --line: #2A3540; --accent: #6FB0CC; --accent-ink: #9CCBDF; --accent-soft: #1C303C;
+    --warn: #D5A34C; --warn-soft: #33291280; --rail: #1B242D;
+  }
+
+  /* 分组配色：浅色默认，深色覆盖 */
+  .g-authority { --gc: #A8741F; }
+  .g-entry     { --gc: #23617A; }
+  .g-mode      { --gc: #5B6ABF; }
+  .g-lane      { --gc: #2E7D5B; }
+  .g-lifecycle { --gc: #8A4FA3; }
+  .g-datapipe  { --gc: #B0552F; }
+  .g-verify    { --gc: #0F766E; }
+  .g-artifact  { --gc: #5A6B78; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .g-authority { --gc: #D5A34C; }
+    :root:not([data-theme="light"]) .g-entry     { --gc: #6FB0CC; }
+    :root:not([data-theme="light"]) .g-mode      { --gc: #8B9AE8; }
+    :root:not([data-theme="light"]) .g-lane      { --gc: #5CC08D; }
+    :root:not([data-theme="light"]) .g-lifecycle { --gc: #B98ACB; }
+    :root:not([data-theme="light"]) .g-datapipe  { --gc: #D98E63; }
+    :root:not([data-theme="light"]) .g-verify    { --gc: #45B8AC; }
+    :root:not([data-theme="light"]) .g-artifact  { --gc: #8FA1AF; }
+  }
+  :root[data-theme="dark"] .g-authority { --gc: #D5A34C; }
+  :root[data-theme="dark"] .g-entry     { --gc: #6FB0CC; }
+  :root[data-theme="dark"] .g-mode      { --gc: #8B9AE8; }
+  :root[data-theme="dark"] .g-lane      { --gc: #5CC08D; }
+  :root[data-theme="dark"] .g-lifecycle { --gc: #B98ACB; }
+  :root[data-theme="dark"] .g-datapipe  { --gc: #D98E63; }
+  :root[data-theme="dark"] .g-verify    { --gc: #45B8AC; }
+  :root[data-theme="dark"] .g-artifact  { --gc: #8FA1AF; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 1500px; margin: 0 auto; padding: 36px 24px 56px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin: 0 0 6px;
+  }
+  .masthead { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .masthead p { margin: 0; color: var(--muted); max-width: 64ch; }
+  .mast-side { display: flex; align-items: flex-start; gap: 10px; flex-shrink: 0; }
+
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 18px; }
+  .stat {
+    font-family: var(--mono); font-size: 12px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+    padding: 5px 12px; color: var(--muted);
+  }
+  .stat strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .theme-btn {
+    width: 38px; height: 38px;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--surface); color: var(--muted);
+    font-size: 16px; cursor: pointer;
+  }
+  .theme-btn:hover { color: var(--ink); border-color: var(--accent); }
+
+  .toolbar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin: 0 0 12px;
+  }
+  .toolbar .spacer { flex: 1; }
+  .zoom-btn {
+    min-width: 32px; height: 32px; padding: 0 10px;
+    border: 1px solid var(--line); border-radius: 6px;
+    background: var(--surface); color: var(--muted);
+    font-family: var(--mono); font-size: 13px; cursor: pointer;
+  }
+  .zoom-btn:hover { color: var(--ink); border-color: var(--accent); }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--line); border-radius: 999px;
+    background: var(--surface); color: var(--muted);
+    font-family: var(--mono); font-size: 11.5px;
+    padding: 4px 12px; cursor: pointer; user-select: none;
+  }
+  .chip .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gc, var(--muted)); flex-shrink: 0; }
+  .chip:hover { border-color: var(--accent); color: var(--ink); }
+  .chip.off { opacity: 0.42; }
+  .chip.all { font-weight: 600; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+  @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+
+  .graph-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; position: relative;
+  }
+  .graph-card svg { display: block; width: 100%; height: min(76vh, 880px); cursor: grab; touch-action: none; }
+  .graph-card svg.panning { cursor: grabbing; }
+  .hint {
+    position: absolute; left: 12px; bottom: 10px;
+    font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px;
+    pointer-events: none;
+  }
+
+  /* SVG 元素 */
+  .swim { fill: color-mix(in srgb, var(--gc) 5%, transparent); stroke: var(--gc); stroke-opacity: 0.35; stroke-dasharray: 5 5; }
+  .swim-label { font-family: var(--mono); font-size: 11px; fill: var(--gc); font-weight: 600; letter-spacing: 0.02em; }
+
+  .edge path { fill: none; stroke: var(--muted); stroke-opacity: 0.5; stroke-width: 1.6; }
+  .edge.dashed path { stroke-dasharray: 6 5; stroke-opacity: 0.45; }
+  .edge text {
+    font-family: var(--mono); font-size: 10px; fill: var(--muted);
+    paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round;
+  }
+  .edge.adj path { stroke: var(--accent); stroke-opacity: 1; stroke-width: 2.4; }
+  .edge.adj text { fill: var(--accent); font-weight: 600; }
+
+  .node { cursor: pointer; }
+  .node rect.box {
+    fill: var(--surface); stroke: var(--line); stroke-width: 1.2;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.06));
+  }
+  .node rect.bar { fill: var(--gc); }
+  .node text { pointer-events: none; }
+  .node .n-t { font-size: 13px; font-weight: 650; fill: var(--ink); font-family: var(--sans); }
+  .node .n-s { font-size: 10px; fill: var(--muted); font-family: var(--mono); }
+  .node:hover rect.box, .node.selected rect.box { stroke: var(--accent); stroke-width: 2; }
+  .node.selected rect.box { filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--accent) 35%, transparent)); }
+  .badge rect { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 0.8; }
+  .badge text { font-family: var(--mono); font-size: 9px; fill: var(--warn); font-weight: 600; }
+
+  svg.hovering .node:not(.adj) { opacity: 0.22; }
+  svg.hovering .edge:not(.adj) { opacity: 0.1; }
+  svg .node, svg .edge { transition: opacity 0.15s ease; }
+  svg.filtering .node.filtered, svg.filtering .edge.filtered { opacity: 0.09; pointer-events: none; }
+
+  aside.panel {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; position: sticky; top: 16px;
+    max-height: min(76vh, 880px); overflow: auto;
+  }
+  .panel h2 { font-family: var(--mono); font-size: 15px; margin: 0 0 2px; }
+  .panel .p-en { font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 0 0 10px; }
+  .panel .grouptag {
+    display: inline-block; font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    color: var(--gc, var(--muted)); border: 1px solid var(--gc, var(--line));
+    border-radius: 999px; padding: 2px 10px; margin: 0 0 12px;
+  }
+  .panel p.desc { margin: 0 0 14px; font-size: 13.5px; }
+  .panel h4 {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); margin: 14px 0 6px; border-top: 1px solid var(--rail); padding-top: 12px;
+  }
+  .panel ul { margin: 0; padding: 0; list-style: none; }
+  .panel ul.src li { margin: 0 0 5px; }
+  .panel code {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--accent-soft); color: var(--accent-ink);
+    border-radius: 4px; padding: 2px 6px; word-break: break-all;
+  }
+  .nbr {
+    display: inline-block; margin: 0 6px 6px 0; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px;
+    font-size: 12px; background: var(--bg);
+  }
+  .nbr:hover { border-color: var(--accent); color: var(--accent-ink); }
+  .nbr::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--gc, var(--muted)); margin-right: 6px; }
+  .panel .muted { color: var(--muted); font-size: 12.5px; }
+
+  footer {
+    margin-top: 26px; color: var(--muted); font-size: 12px; line-height: 1.8;
+    border-top: 1px solid var(--line); padding-top: 16px;
+  }
+  footer code { font-family: var(--mono); font-size: 11px; background: var(--accent-soft); color: var(--accent-ink); border-radius: 4px; padding: 1px 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <div>
+      <p class="eyebrow">Tang Strategy · Agentic Topology</p>
+      <h1>Directed Agentic Graph 有向代理图</h1>
+      <p>仓库代理工作契约的有向图：权威来源 → 模式路由 → 泳道 / 数据管线 → 验证 → 状态与产物。节点与边取自 AGENTS.md、operating-modes.md、architecture.md 与 harness 配置的时点快照。</p>
+    </div>
+    <div class="mast-side">
+      <button class="theme-btn" id="themeBtn" title="切换主题（自动/浅色/深色）">◐</button>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar" id="legend"></div>
+
+  <div class="layout">
+    <div class="graph-card">
+      <svg id="graph" role="img" aria-label="Tang Strategy directed agentic graph"></svg>
+      <div class="hint">拖拽平移 · 滚轮缩放 · 悬停追溯上下游 · 点击节点查看仓库来源</div>
+    </div>
+    <aside class="panel" id="panel"></aside>
+  </div>
+
+  <footer>
+    手工维护文档页，非构建产物；快照日期 2026-07-31。结构变化时同步本文件 NODES/EDGES 数据与 <code>docs/README.md</code> 路由行。<br>
+    主要来源：<code>AGENTS.md</code> · <code>docs/operating-modes.md</code> · <code>docs/architecture.md</code> · <code>docs/daily-publish-runbook.md</code> · <code>INSTRUCTIONS.md</code> · <code>.harness/config.json</code>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- 数据：分组 ---------- */
+  const GROUPS = {
+    authority: "权威来源",
+    entry: "入口 / 路由",
+    mode: "对等模式",
+    lane: "编码泳道",
+    lifecycle: "治理生命周期",
+    datapipe: "数据更新管线",
+    verify: "验证层",
+    artifact: "状态 / 产物"
+  };
+
+  /* ---------- 数据：节点（坐标为画布中心点，画布 1660×1120） ---------- */
+  const NODES = [
+    { id: "user",      t: "用户指令",             s: "User Instruction",              g: "authority", x: 700,  y: 60,   w: 190,
+      desc: "一切仓库变更与远程动作的权威来源。模式路由、计划激活、发布与任何远程操作都要求显式用户指令；聊天历史与代理私有记忆不是规范仓库状态。",
+      src: ["docs/operating-modes.md", "AGENTS.md"] },
+    { id: "trigger",   t: "每日发布触发语",       s: "Daily Publish Trigger",         g: "authority", x: 1330, y: 60,   w: 230,
+      desc: "“发布 SPY YYYY-MM-DD”等触发语即用户已授权完整日常发布流程（验证内容 → 抓取 → 候选库 → 验收 → 提交 → 推送 → Pages）。省略日期时按真实美股交易日历与当前 ET 解析最近已完成会话，不用 weekday 猜测。",
+      src: ["AGENTS.md", "docs/daily-publish-runbook.md"] },
+    { id: "startup",   t: "启动链",               s: "Startup Chain",                 g: "entry",     x: 700,  y: 165,  w: 190,
+      desc: "每个任务开始：确认仓库根 / 分支 / git status，按序读 AGENTS.md → INSTRUCTIONS.md → PROGRESS.md → HANDOFF.md，并用 .harness/config.json 与 check-project-harness.py 确认验证基线。",
+      src: ["AGENTS.md", "scripts/check-project-harness.py"] },
+    { id: "router",    t: "模式路由器",           s: "Operating Modes Router",        g: "entry",     x: 700,  y: 265,  w: 200,
+      desc: "单一规范性路由与生命周期契约。Coding Mode 与 Data Update Mode 为对等模式；只读 / 模糊工作从 Lane 1 开始；DB、行情数据、发布、安全、跨契约或难回滚变更必须走 Lane 3。",
+      src: ["docs/operating-modes.md"] },
+    { id: "coding",    t: "Coding Mode",          s: "编码模式",                      g: "mode",      x: 540,  y: 365,  w: 160,
+      desc: "编码、文档与治理类工作的容器模式，按风险与文件面分派到 Lane 1 / 2 / 3。用户授权的变更默认包含一次任务域本地提交，绝不含推送等远程动作。",
+      src: ["docs/operating-modes.md"] },
+    { id: "data",      t: "Data Update Mode",     s: "数据更新模式",                  g: "mode",      x: 1170, y: 365,  w: 170,
+      desc: "例行使用既有抓取 / 重建 / 验收工具链，无需 Exec Plan。本地验收后即停；只有每日发布触发语或显式授权才进入发布段。工具链本身需要改动时退回 Coding Mode。",
+      src: ["docs/operating-modes.md"] },
+    { id: "lane1",     t: "Lane 1 · 只读检查",    s: "read-only inspection",          g: "lane",      x: 100,  y: 470,  w: 160,
+      desc: "解释、诊断、验证、模糊工作与异常调查。不修改仓库文件，不产生提交——图上的叶子节点。",
+      src: ["docs/operating-modes.md"] },
+    { id: "lane2",     t: "Lane 2 · 有界维护",    s: "bounded maintenance",           g: "lane",      x: 300,  y: 470,  w: 160,
+      desc: "全部条件成立时无需计划与独立评审：单一结果、有界文件面、本地可逆、比例可验证、不触碰安全 / DB / 行情 / 发布 / 跨模块契约，且能保留无关用户改动。",
+      src: ["docs/operating-modes.md"] },
+    { id: "lane3",     t: "Lane 3 · 受治理计划",  s: "governed Exec Plan",            g: "lane",      x: 540,  y: 470,  w: 170,
+      desc: "DB / 行情数据 / 发布 / 安全 / 跨契约 / 大范围或难回滚变更，进入完整治理生命周期。不因相邻发现而扩scope；验证与真实风险成比例。",
+      src: ["docs/operating-modes.md", "docs/exec-plans/"] },
+    { id: "opt",       t: "OPT 记录",             s: "record-only intake",            g: "lifecycle", x: 280,  y: 570,  w: 150,
+      desc: "record-only 改进 intake。记录本身不授权实施；只有用户明确要求时才晋升为提议计划。",
+      src: ["docs/optimization/", "docs/operating-modes.md"] },
+    { id: "proposed",  t: "提议计划",             s: "exec-plans/proposed/",          g: "lifecycle", x: 460,  y: 570,  w: 150,
+      desc: "仅在用户要求时创建，带完整元数据头（状态 / 修订 / 评审 / 门禁），写入 proposed/ 并同步索引与 roadmap，一次本地提交。",
+      src: ["docs/exec-plans/proposed/", "docs/operating-modes.md"] },
+    { id: "design-review", t: "独立设计评审",     s: "design review",                 g: "lifecycle", x: 640,  y: 570,  w: 160, badge: "独立",
+      desc: "一次评审产出一个 artifact：approve / revise / reject + confidence + 独立性声明。评审通过不等于激活；revise / reject 回到提议计划迭代。",
+      src: ["docs/exec-plans/reviews/", "docs/operating-modes.md"] },
+    { id: "activation", t: "显式激活",            s: "exec-plans/active/",            g: "lifecycle", x: 820,  y: 570,  w: 150,
+      desc: "激活需要显式用户指令：计划移入 active/，对账直接生命周期表面（索引 / roadmap / PROGRESS / HANDOFF），一次本地提交。",
+      src: ["docs/operating-modes.md"] },
+    { id: "impl",      t: "实施 + 比例验证",      s: "implementation",                g: "lifecycle", x: 640,  y: 690,  w: 150,
+      desc: "仅在显式执行指令后实施授权范围；验证与风险成比例（聚焦测试 / 构建 / 浏览器验收）；实施结果一次本地提交。",
+      src: ["docs/operating-modes.md"] },
+    { id: "impl-review", t: "独立实施评审",       s: "implementation review",         g: "lifecycle", x: 460,  y: 690,  w: 160, badge: "独立",
+      desc: "Lane 3 实施在 Completed 前需独立实施评审 accept（除非用户明确指示简化收尾）。验证收据（含 Playwright receipts）是其证据。",
+      src: ["docs/exec-plans/reviews/", "docs/operating-modes.md"] },
+    { id: "completed", t: "完成迁移",             s: "exec-plans/completed/",         g: "lifecycle", x: 280,  y: 690,  w: 150,
+      desc: "计划移入 completed/，对账索引 / roadmap / PROGRESS / HANDOFF，旧条目归档 progress-archive，一次本地提交。生命周期裁决永不授予远程权限。",
+      src: ["docs/exec-plans/completed/", "docs/progress-archive/"] },
+    { id: "session",   t: "解析交易日",           s: "NYSE calendar + ET",            g: "datapipe",  x: 1170, y: 470,  w: 170,
+      desc: "按真实美股交易日历（含计划内提前收盘）与当前 ET 解析目标会话。",
+      src: ["AGENTS.md", "docs/daily-publish-runbook.md"] },
+    { id: "fetch",     t: "TV 拉取 SPY/QQQ 对",   s: "update_spy_qqq_market_day.py",  g: "datapipe",  x: 1170, y: 580,  w: 190,
+      desc: "TradingView 为默认每日来源，SPY/QQQ 同一 provider 原子对：任一标的失败则两只都不写，种子与 DB 保持上一对。Gateway 未开是常态，不阻塞。",
+      src: ["backend/scripts/update_spy_qqq_market_day.py", "AGENTS.md"] },
+    { id: "gates",     t: "硬质量门",             s: "OHLCV · RTH · 5m · VWAP",       g: "datapipe",  x: 1170, y: 690,  w: 170, badge: "fail-closed",
+      desc: "NYSE / session / OHLCV / RTH / 5m / VWAP 与 same-provider 硬门。任何一门失败即 fail-closed，报告具体失败的标的与门。",
+      src: ["docs/architecture.md", "docs/daily-publish-runbook.md"] },
+    { id: "ibkr",      t: "IB Gateway 兜底",      s: "--provider ibkr",               g: "datapipe",  x: 1390, y: 690,  w: 150,
+      desc: "仅在 TV 重试耗尽或命名硬门失败后启用：live 端口 4002，等 HMDS 2106，整对重跑；同一接受对绝不混 provider。",
+      src: ["AGENTS.md", "docs/architecture.md"] },
+    { id: "candidate", t: "候选 DB 构建",         s: "candidate-first rebuild",       g: "datapipe",  x: 1170, y: 800,  w: 180,
+      desc: "candidate-first：双 payload 与规范交易库导入候选库，通过 preservation / 完整性 / 漂移校验前不动现网 DB。默认拒绝日期缩减，日常路径绝不用 --allow-date-loss。",
+      src: ["backend/scripts/rebuild_live_extended_db.py", "INSTRUCTIONS.md"] },
+    { id: "promote",   t: "原子提升 + 本地验收",  s: "atomic promote",                g: "datapipe",  x: 1170, y: 910,  w: 170,
+      desc: "候选全部通过后原子替换受跟踪 DB 与种子对，并通过运行时验证目标交易日。无发布授权则到此停止。",
+      src: ["docs/daily-publish-runbook.md", "docs/operating-modes.md"] },
+    { id: "publish",   t: "发布门",               s: "commit DB + push main",         g: "datapipe",  x: 1390, y: 910,  w: 150, badge: "仅触发语授权",
+      desc: "触发语授权下：提交 DB（与当日内容 JSON）并 push origin main。只允许 runbook 的域内提交序列，不含代码变更、gate 弱化、PR 或合并。",
+      src: ["AGENTS.md", "docs/daily-publish-runbook.md"] },
+    { id: "verify",    t: "verify.py 验证电池",   s: ".harness/config.json · 11 条",  g: "verify",    x: 160,  y: 915,  w: 190, badge: "唯一命令清单",
+      desc: "11 条命令唯一清单在 .harness/config.json：harness 结构 / 生命周期 / 文档预算检查、backend 78 tests、前端 test:trade-records 69、双构建、git diff --check。",
+      src: [".harness/config.json", "scripts/verify.py"] },
+    { id: "playwright", t: "浏览器验收",          s: "output/playwright receipts",    g: "verify",    x: 700,  y: 815,  w: 170,
+      desc: "UI 计划的浏览器验收写入 output/playwright/<run>/receipts.json 并提交收据作为持久证据；截图本地留存、随计划关闭清理，output/ 树不存活过其计划。",
+      src: ["docs/operating-modes.md", "frontend/scripts/playwright/"] },
+    { id: "harness-ci", t: "GitHub PR 检查",      s: "evidence ≠ authority",          g: "verify",    x: 1575, y: 1030, w: 150,
+      desc: "PR 到 main 触发 project-harness.yml：Harness structure / Backend checks / Frontend build。绿色只是验证证据，不是合并或发布授权。",
+      src: [".github/workflows/project-harness.yml", ".harness/config.json"] },
+    { id: "commit",    t: "任务域本地提交",       s: "one scoped local commit",       g: "artifact",  x: 420,  y: 915,  w: 190, badge: "禁 git add .",
+      desc: "每个用户授权的变更步骤默认一次本地提交：只暂存任务自有字面路径，提交前检查暂存集并跑 git diff --cached --check；禁 git add . / -A / 目录暂存 / 隐式暂存。本地提交永不包含远程权限。",
+      src: ["docs/operating-modes.md", "AGENTS.md"] },
+    { id: "state",     t: "生命周期状态面",       s: "PROGRESS · HANDOFF · 索引",     g: "artifact",  x: 640,  y: 915,  w: 190,
+      desc: "PROGRESS.md = 生命周期日志（按触发器归档）；HANDOFF.md = 唯一恢复点（覆写不追加，禁 dated 条目）；proposed / active / completed / reviews 索引与 roadmap 由 check-operating-modes.py 机器校验一致。",
+      src: ["PROGRESS.md", "HANDOFF.md", "scripts/check-operating-modes.py"] },
+    { id: "db",        t: "受跟踪 SQLite DB",     s: "runtime + Pages 输入",          g: "artifact",  x: 880,  y: 1030, w: 200,
+      desc: "data/sqlite/tang_strategy_live_extended.db：交互运行时与 Pages 导出的唯一数据输入，受 git 跟踪；重建永远 candidate-first、fail closed。",
+      src: ["data/sqlite/", "docs/architecture.md"] },
+    { id: "remote",    t: "远程动作门",           s: "push · PR · merge · broker",    g: "artifact",  x: 1390, y: 1030, w: 150, badge: "需单独授权",
+      desc: "push / PR / merge / Pages / provider / broker 永远需要单独显式授权。本地提交、绿色检查、生命周期裁决都不授予远程权限——图上 commit 与 remote 之间因此没有边。",
+      src: ["docs/operating-modes.md", "AGENTS.md"] },
+    { id: "pages",     t: "gh-pages 静态站点",    s: "publish-static-reviews.yml",    g: "artifact",  x: 1150, y: 1030, w: 180,
+      desc: "唯一 Pages 发布器：checkout 受跟踪 DB → export_static_reviews.py → Vite 静态构建 → force-push gh-pages，仅从 main 按日常发布契约运行。",
+      src: [".github/workflows/publish-static-reviews.yml", "docs/architecture.md"] }
+  ];
+
+  /* ---------- 数据：有向边（via = 手工路由拐点；dashed = 条件 / 回退 / 跨层权威边） ---------- */
+  const EDGES = [
+    { a: "user",      b: "startup" },
+    { a: "startup",   b: "router" },
+    { a: "user",      b: "activation", label: "显式激活指令", dashed: 1, via: [[985, 250], [985, 480]], to: "right" },
+    { a: "trigger",   b: "data",       label: "授权完整发布流程" },
+    { a: "trigger",   b: "publish",    label: "发布授权", dashed: 1, via: [[1520, 480]] },
+    { a: "router",    b: "coding", from: "bottom", to: "top" },
+    { a: "router",    b: "data" },
+    { a: "coding",    b: "lane1",      label: "只读 / 模糊" },
+    { a: "coding",    b: "lane2",      label: "有界变更" },
+    { a: "coding",    b: "lane3",      label: "高风险 / 跨契约" },
+    { a: "lane3",     b: "opt" },
+    { a: "opt",       b: "proposed",   label: "用户要求晋升" },
+    { a: "proposed",  b: "design-review" },
+    { a: "design-review", b: "proposed", label: "revise / reject", dashed: 1, via: [[640, 632], [460, 632]], from: "bottom", to: "bottom" },
+    { a: "design-review", b: "activation", label: "approve" },
+    { a: "activation", b: "impl" },
+    { a: "impl",      b: "impl-review" },
+    { a: "impl",      b: "playwright", label: "UI 验收", dashed: 1 },
+    { a: "playwright", b: "impl-review", label: "receipts 证据", dashed: 1, from: "left", to: "bottom" },
+    { a: "impl-review", b: "completed", label: "accept" },
+    { a: "completed", b: "state",      label: "对账 + 归档" },
+    { a: "state",     b: "startup",    label: "会话恢复", dashed: 1, via: [[1000, 760], [1000, 340]], from: "right", to: "right" },
+    { a: "lane2",     b: "verify",     label: "比例验证", via: [[150, 700]] },
+    { a: "verify",    b: "commit",     label: "通过后一次提交" },
+    { a: "data",      b: "session" },
+    { a: "session",   b: "fetch" },
+    { a: "fetch",     b: "gates" },
+    { a: "gates",     b: "candidate",  label: "硬门全过" },
+    { a: "gates",     b: "ibkr",       label: "TV 失败兜底", dashed: 1 },
+    { a: "ibkr",      b: "fetch",      label: "整对重跑 · 不混 provider", dashed: 1, from: "top", to: "right" },
+    { a: "candidate", b: "promote",    label: "完整性 / 漂移校验" },
+    { a: "promote",   b: "db",         label: "原子提升", from: "bottom", to: "top" },
+    { a: "promote",   b: "publish",    label: "有授权时" },
+    { a: "publish",   b: "remote",     label: "scoped commit + push" },
+    { a: "remote",    b: "pages",      label: "触发 workflow", labelDy: -16 },
+    { a: "db",        b: "pages",      label: "数据输入", dashed: 1, labelDy: -16 },
+    { a: "remote",    b: "harness-ci", dashed: 1 }
+  ];
+
+  const SWIMS = [
+    { x: 195, y: 512, w: 740, h: 248, g: "lifecycle", label: "Lane 3 受治理生命周期 · 每个步骤一次任务域本地提交（§2/§4）" },
+    { x: 1060, y: 412, w: 240, h: 558, g: "datapipe", label: "Data Update 管线 · fail-closed · TV 优先" }
+  ];
+
+  const NW = 170, NH = 64;
+  const nodeById = {};
+  NODES.forEach(n => { nodeById[n.id] = n; });
+
+  /* ---------- 主题 ---------- */
+  const root = document.documentElement;
+  const themeBtn = document.getElementById("themeBtn");
+  const THEME_ICONS = { auto: "◐", light: "☀", dark: "☾" };
+  let theme = localStorage.getItem("dag-theme") || "auto";
+  function applyTheme() {
+    if (theme === "auto") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", theme);
+    themeBtn.textContent = THEME_ICONS[theme];
+    themeBtn.title = "主题：" + (theme === "auto" ? "自动" : theme === "light" ? "浅色" : "深色");
+  }
+  themeBtn.addEventListener("click", () => {
+    theme = theme === "auto" ? "light" : theme === "light" ? "dark" : "auto";
+    localStorage.setItem("dag-theme", theme);
+    applyTheme();
+  });
+  applyTheme();
+
+  /* ---------- 统计 ---------- */
+  document.getElementById("stats").innerHTML =
+    '<span class="stat"><strong>' + NODES.length + '</strong> 节点</span>' +
+    '<span class="stat"><strong>' + EDGES.length + '</strong> 有向边</span>' +
+    '<span class="stat"><strong>2</strong> 对等模式</span>' +
+    '<span class="stat"><strong>3</strong> 编码泳道</span>' +
+    '<span class="stat">快照 <strong>2026-07-31</strong></span>';
+
+  /* ---------- 图例 / 分组过滤 ---------- */
+  const legend = document.getElementById("legend");
+  const activeFilters = new Set();
+  Object.keys(GROUPS).forEach(g => {
+    const count = NODES.filter(n => n.g === g).length;
+    const chip = document.createElement("button");
+    chip.className = "chip g-" + g;
+    chip.innerHTML = '<span class="dot"></span>' + GROUPS[g] + " · " + count;
+    chip.title = "点击过滤该分组";
+    chip.addEventListener("click", () => {
+      if (activeFilters.has(g)) activeFilters.delete(g); else activeFilters.add(g);
+      chip.classList.toggle("off", activeFilters.has(g));
+      applyFilter();
+    });
+    legend.appendChild(chip);
+  });
+  const spacer = document.createElement("span");
+  spacer.className = "spacer";
+  legend.appendChild(spacer);
+  [["＋", () => zoomBy(1.25)], ["－", () => zoomBy(0.8)], ["复位", fitView]].forEach(([label, fn]) => {
+    const b = document.createElement("button");
+    b.className = "zoom-btn";
+    b.textContent = label;
+    b.addEventListener("click", fn);
+    legend.appendChild(b);
+  });
+
+  function applyFilter() {
+    const svg = document.getElementById("graph");
+    svg.classList.toggle("filtering", activeFilters.size > 0);
+    document.querySelectorAll(".node").forEach(el => {
+      el.classList.toggle("filtered", activeFilters.has(nodeById[el.dataset.id].g));
+    });
+    document.querySelectorAll(".edge").forEach(el => {
+      const e = EDGES[el.dataset.idx];
+      el.classList.toggle("filtered", activeFilters.has(nodeById[e.a].g) && activeFilters.has(nodeById[e.b].g));
+    });
+  }
+
+  /* ---------- SVG 构建 ---------- */
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("graph");
+  const VIEW_W = 1660, VIEW_H = 1120;
+  svg.setAttribute("viewBox", "0 0 " + VIEW_W + " " + VIEW_H);
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  const defs = el("defs", {}, svg);
+  const marker = el("marker", { id: "arrow", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" }, defs);
+  el("path", { d: "M0,0 L10,5 L0,10 z", fill: "#8FA1AF", style: "fill:context-stroke" }, marker);
+
+  const viewport = el("g", { id: "viewport" }, svg);
+  const swimLayer = el("g", {}, viewport);
+  const edgeLayer = el("g", {}, viewport);
+  const labelLayer = el("g", {}, viewport);
+  const nodeLayer = el("g", {}, viewport);
+
+  /* 泳道 */
+  SWIMS.forEach(s => {
+    const gEl = el("g", { class: "g-" + s.g }, swimLayer);
+    el("rect", { class: "swim", x: s.x, y: s.y, width: s.w, height: s.h, rx: 14 }, gEl);
+    const t = el("text", { class: "swim-label", x: s.x + 14, y: s.y + 20 }, gEl);
+    t.textContent = s.label;
+  });
+
+  /* 边路径计算 */
+  function port(n, side) {
+    const w = n.w || NW, h = n.h || NH;
+    if (side === "top") return [n.x, n.y - h / 2];
+    if (side === "bottom") return [n.x, n.y + h / 2];
+    if (side === "left") return [n.x - w / 2, n.y];
+    return [n.x + w / 2, n.y];
+  }
+  function autoSides(A, B) {
+    const dx = B.x - A.x, dy = B.y - A.y;
+    if (Math.abs(dx) > Math.abs(dy) * 1.2) return dx > 0 ? ["right", "left"] : ["left", "right"];
+    return dy > 0 ? ["bottom", "top"] : ["top", "bottom"];
+  }
+  function roundedPoly(pts, r) {
+    r = r || 26;
+    let d = "M " + pts[0][0] + " " + pts[0][1];
+    for (let i = 1; i < pts.length - 1; i++) {
+      const p = pts[i], a = pts[i - 1], b = pts[i + 1];
+      const va = [a[0] - p[0], a[1] - p[1]], vb = [b[0] - p[0], b[1] - p[1]];
+      const la = Math.hypot(va[0], va[1]), lb = Math.hypot(vb[0], vb[1]);
+      const rr = Math.min(r, la / 2, lb / 2);
+      const p1 = [p[0] + va[0] / la * rr, p[1] + va[1] / la * rr];
+      const p2 = [p[0] + vb[0] / lb * rr, p[1] + vb[1] / lb * rr];
+      d += " L " + p1[0].toFixed(1) + " " + p1[1].toFixed(1) + " Q " + p[0] + " " + p[1] + " " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+    }
+    d += " L " + pts[pts.length - 1][0] + " " + pts[pts.length - 1][1];
+    return d;
+  }
+  function edgePath(e) {
+    const A = nodeById[e.a], B = nodeById[e.b];
+    const sides = e.from ? [e.from, e.to || "top"] : autoSides(A, B);
+    const p0 = port(A, sides[0]), p1 = port(B, sides[1]);
+    if (e.via) return roundedPoly([p0].concat(e.via, [p1]));
+    const dx = p1[0] - p0[0], dy = p1[1] - p0[1];
+    if (sides[0] === "bottom" || sides[0] === "top") {
+      const s = sides[0] === "bottom" ? 1 : -1;
+      const k = Math.max(36, Math.abs(dy) * 0.45);
+      return "M " + p0 + " C " + p0[0] + " " + (p0[1] + s * k) + " " + p1[0] + " " + (p1[1] - s * k) + " " + p1;
+    }
+    const s2 = sides[0] === "right" ? 1 : -1;
+    const k2 = Math.max(36, Math.abs(dx) * 0.45);
+    return "M " + p0 + " C " + (p0[0] + s2 * k2) + " " + p0[1] + " " + (p1[0] - s2 * k2) + " " + p1[1] + " " + p1;
+  }
+
+  const edgeEls = [];
+  EDGES.forEach((e, i) => {
+    const gEl = el("g", { class: "edge" + (e.dashed ? " dashed" : ""), "data-idx": i }, edgeLayer);
+    const p = el("path", { d: edgePath(e), "marker-end": "url(#arrow)" }, gEl);
+    edgeEls.push({ gEl, p, e });
+  });
+  /* 边标签放在路径中点 */
+  edgeEls.forEach(({ gEl, p, e }) => {
+    if (!e.label) return;
+    const len = p.getTotalLength();
+    const pt = p.getPointAtLength(len * 0.5);
+    const t = el("text", { x: pt.x, y: pt.y + (e.labelDy || -4), "text-anchor": "middle" }, gEl);
+    t.textContent = e.label;
+    labelLayer.appendChild(gEl); /* 标签层在上 */
+  });
+
+  /* 节点 */
+  NODES.forEach(n => {
+    const w = n.w || NW, h = n.h || NH;
+    const gEl = el("g", { class: "node g-" + n.g, "data-id": n.id, transform: "translate(" + (n.x - w / 2) + "," + (n.y - h / 2) + ")" }, nodeLayer);
+    el("rect", { class: "box", width: w, height: h, rx: 10 }, gEl);
+    el("rect", { class: "bar", width: 5, height: h - 16, x: 7, y: 8, rx: 2.5 }, gEl);
+    const t = el("text", { class: "n-t", x: w / 2 + 3, y: h / 2 - 4, "text-anchor": "middle" }, gEl);
+    t.textContent = n.t;
+    const s = el("text", { class: "n-s", x: w / 2 + 3, y: h / 2 + 15, "text-anchor": "middle" }, gEl);
+    s.textContent = n.s;
+    if (n.badge) {
+      const bw = n.badge.length * 11 + 12;
+      const bg = el("g", { class: "badge", transform: "translate(" + (w - bw + 4) + ",-9)" }, gEl);
+      el("rect", { width: bw, height: 17, rx: 8.5 }, bg);
+      const bt = el("text", { x: bw / 2, y: 12, "text-anchor": "middle" }, bg);
+      bt.textContent = n.badge;
+    }
+    gEl.addEventListener("mouseenter", () => hoverNode(n.id, true));
+    gEl.addEventListener("mouseleave", () => hoverNode(n.id, false));
+    gEl.addEventListener("click", ev => { ev.stopPropagation(); selectNode(n.id); });
+  });
+
+  /* ---------- 悬停追溯 ---------- */
+  const adj = {};
+  NODES.forEach(n => { adj[n.id] = { nodes: new Set([n.id]), edges: new Set() }; });
+  EDGES.forEach((e, i) => {
+    adj[e.a].nodes.add(e.b); adj[e.a].edges.add(i);
+    adj[e.b].nodes.add(e.a); adj[e.b].edges.add(i);
+  });
+  function hoverNode(id, on) {
+    svg.classList.toggle("hovering", on);
+    document.querySelectorAll(".node").forEach(el => el.classList.toggle("adj", on && adj[id].nodes.has(el.dataset.id)));
+    document.querySelectorAll(".edge").forEach(el => el.classList.toggle("adj", on && adj[id].edges.has(+el.dataset.idx)));
+  }
+
+  /* ---------- 详情面板 ---------- */
+  const panel = document.getElementById("panel");
+  function defaultPanel() {
+    panel.innerHTML =
+      '<h2>如何读图</h2>' +
+      '<p class="p-en">Directed Agentic Graph · snapshot 2026-07-31</p>' +
+      '<p class="desc">箭头方向 = 权威 / 数据流向。实线 = 主流程；虚线 = 条件、回退或跨层权威边。' +
+      '顶部是权威来源与模式路由；左侧是 Coding Mode 三条泳道与 Lane 3 治理生命周期；右侧是 Data Update 管线；底部是验证层、状态面与产物。</p>' +
+      '<h4>关键不变量</h4>' +
+      '<ul class="src">' +
+      '<li><code>commit → remote</code> 无边：本地提交不授予远程权限</li>' +
+      '<li><code>design-review</code> approve ≠ 激活：激活需显式用户指令</li>' +
+      '<li>数据管线 fail-closed：硬门失败保持上一对</li>' +
+      '<li>绿色 CI = 证据，不是合并 / 发布授权</li>' +
+      '</ul>' +
+      '<h4>交互</h4>' +
+      '<p class="muted">悬停节点高亮其上下游；点击节点查看说明与仓库来源；图例 chips 可按分组过滤；拖拽平移、滚轮缩放。</p>';
+  }
+  function selectNode(id) {
+    const n = nodeById[id];
+    document.querySelectorAll(".node").forEach(el => el.classList.toggle("selected", el.dataset.id === id));
+    const ins = EDGES.filter(e => e.b === id).map(e => e.a);
+    const outs = EDGES.filter(e => e.a === id).map(e => e.b);
+    let html =
+      '<h2>' + n.t + '</h2>' +
+      '<p class="p-en">' + n.s + '</p>' +
+      '<span class="grouptag g-' + n.g + '">' + GROUPS[n.g] + '</span>' +
+      '<p class="desc">' + n.desc + '</p>' +
+      '<h4>仓库来源</h4><ul class="src">' + n.src.map(s => '<li><code>' + s + '</code></li>').join("") + '</ul>' +
+      '<h4>入边 · ' + ins.length + '</h4><div>' + (ins.map(x => nbrHtml(x)).join("") || '<span class="muted">无（源头节点）</span>') + '</div>' +
+      '<h4>出边 · ' + outs.length + '</h4><div>' + (outs.map(x => nbrHtml(x)).join("") || '<span class="muted">无（叶子节点）</span>') + '</div>';
+    panel.innerHTML = html;
+    panel.querySelectorAll(".nbr").forEach(elb => elb.addEventListener("click", () => selectNode(elb.dataset.id)));
+  }
+  function nbrHtml(id) {
+    const n = nodeById[id];
+    return '<span class="nbr g-' + n.g + '" data-id="' + id + '">' + n.t + '</span>';
+  }
+  svg.addEventListener("click", () => {
+    document.querySelectorAll(".node.selected").forEach(el => el.classList.remove("selected"));
+    defaultPanel();
+  });
+  defaultPanel();
+
+  /* ---------- 平移缩放 ---------- */
+  let scale = 1, tx = 0, ty = 0;
+  function setTransform() { viewport.setAttribute("transform", "translate(" + tx + "," + ty + ") scale(" + scale + ")"); }
+  function fitView() {
+    const r = svg.getBoundingClientRect();
+    scale = Math.min((r.width - 24) / VIEW_W, (r.height - 24) / VIEW_H, 1.4);
+    tx = (r.width - VIEW_W * scale) / 2;
+    ty = (r.height - VIEW_H * scale) / 2;
+    setTransform();
+  }
+  function zoomBy(f, cx, cy) {
+    const r = svg.getBoundingClientRect();
+    cx = cx == null ? r.width / 2 : cx;
+    cy = cy == null ? r.height / 2 : cy;
+    const ns = Math.min(2.5, Math.max(0.25, scale * f));
+    tx = cx - (cx - tx) * (ns / scale);
+    ty = cy - (cy - ty) * (ns / scale);
+    scale = ns;
+    setTransform();
+  }
+  svg.addEventListener("wheel", ev => {
+    ev.preventDefault();
+    const r = svg.getBoundingClientRect();
+    zoomBy(ev.deltaY < 0 ? 1.15 : 1 / 1.15, ev.clientX - r.left, ev.clientY - r.top);
+  }, { passive: false });
+  let panning = false, sx = 0, sy = 0;
+  svg.addEventListener("pointerdown", ev => {
+    panning = true; sx = ev.clientX - tx; sy = ev.clientY - ty;
+    svg.classList.add("panning");
+    svg.setPointerCapture(ev.pointerId);
+  });
+  svg.addEventListener("pointermove", ev => {
+    if (!panning) return;
+    tx = ev.clientX - sx; ty = ev.clientY - sy;
+    setTransform();
+  });
+  ["pointerup", "pointercancel"].forEach(t => svg.addEventListener(t, () => {
+    panning = false;
+    svg.classList.remove("panning");
+  }));
+  window.addEventListener("resize", fitView);
+  fitView();
+})();
+</script>
+</body>
+</html>
