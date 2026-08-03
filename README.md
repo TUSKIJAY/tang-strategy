@@ -24,6 +24,12 @@ Tang Strategy 做的事，就是把这些碎片重新放回同一张图里：
 
 `Review` 页面把全天 K 线、策略信号和真实交易节点放在一起。你可以在 1 分钟 / 5 分钟周期之间切换，查看不同交易员的进出场过程，也可以沿着完整时间轴回到当时的市场位置，而不是只看一张事后截图。
 
+下面是 2026-07-31 生产发布后的 `Daily Review` 实际页面（点击图片可查看原图）：
+
+| SPY Daily Review | QQQ Daily Review |
+| --- | --- |
+| [![SPY 2026-07-31 Daily Review](./docs/assets/readme/daily-review-spy-2026-07-31.png)](./docs/assets/readme/daily-review-spy-2026-07-31.png) | [![QQQ 2026-07-31 Daily Review](./docs/assets/readme/daily-review-qqq-2026-07-31.png)](./docs/assets/readme/daily-review-qqq-2026-07-31.png) |
+
 ### 策略回测
 
 `Backtest` 页面可以在选定交易日上运行仓库里的策略规则，用同一套行情数据检查信号出现在哪里。它更适合回答“这套规则在这一天是怎么工作的”，而不是承诺未来收益。
