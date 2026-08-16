@@ -12,7 +12,7 @@
 - Current phase: phase-3
 - Phase state: in-progress
 - Phase entry gate: `phase-2-exit`
-- Next gate: `implementation-review`
+- Next gate: `implementation-fix`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -136,3 +136,10 @@ The constrained metadata above is authoritative. Follow [`docs/operating-modes.m
 - Amendment: after implementation review, disable the fixed cron, rebind only the runner commit/tree in the existing authority receipt, update only its hash in deployment config as the sole descendant commit, then restore and verify the byte-equivalent cron declaration before circuit reset or Discord work.
 - Safety: if the disabled-job readback, receipt field-preservation comparison, config-only partition, runtime authority validation, or final cron readback fails, leave the circuit open and do not capture or deliver a daily report.
 - Review gate: this amendment requires independent approval before implementation commits or production rebind.
+
+## 9. Implementation-Review-001 Resolution Gate
+
+- Review result: `implementation-review-001` returned `revise/high`; it is evidence only and does not satisfy the accepted implementation-review metadata gate.
+- Scanner correction: required color and MA10 inputs must be numerically valid before a later bar can count as an activation probe. Any incomplete required probe keeps the setup pending; ordinary timeout is permitted only after eight valid observed probes and cannot produce a shortened `x/8` expiry.
+- Runner correction: an explicit expected renderer commit must match lowercase 40-hex at the production command boundary before runtime evidence, Pages lookup, capture, or delivery work.
+- Re-entry gate: commit both scoped corrections, rerun synthetic and actual-payload baselines, then obtain a new independent implementation review artifact. Production rebind and remote publication remain blocked until that verdict is `accept`.
