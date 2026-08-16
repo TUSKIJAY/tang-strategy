@@ -35,7 +35,7 @@ None.
 
 ## Proposed Plans
 
-- [Tang Strategy EOD Pending Activation Hotfix](./proposed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) — Proposed; revision `v1-proposed-2026-08-16`; live QQQ 15:59 pending lifecycle reproduced; next gate `design-review`
+- [Tang Strategy EOD Pending Activation Hotfix](./proposed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) — Proposed; revision `v2-proposed-2026-08-16`; review-001 findings folded into complete-session and pre-delivery renderer gates; next gate `design-review`
 
 ## Completed Plans
 
