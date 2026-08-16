@@ -4,4 +4,4 @@ User-approved plans belong here. A reviewed plan cites its matching approval; a 
 
 | Plan | Current phase | Evidence | Next gate |
 | --- | --- | --- | --- |
-| [Tang Strategy EOD Pending Activation Hotfix](./2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) | phase-3 / in-progress | `implementation-review-002: accept/high`; Tang `1ada601`; runner `23285ab` | runtime-rebind |
+| [Tang Strategy EOD Pending Activation Hotfix](./2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) | phase-3 / in-progress | live renderer `f937c03`; Sunday recovery no-op preserved the transaction and reopened the circuit | recovery-route-review |

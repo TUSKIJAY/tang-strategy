@@ -12,7 +12,7 @@
 - Current phase: phase-3
 - Phase state: in-progress
 - Phase entry gate: `phase-2-exit`
-- Next gate: `runtime-rebind`
+- Next gate: `recovery-route-review`
 - Implementation review: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/implementation-review-002.md@accept`
 - Final disposition: none
 - Verified implementation commit: none
@@ -144,3 +144,10 @@ The constrained metadata above is authoritative. Follow [`docs/operating-modes.m
 - Runner correction: an explicit expected renderer commit must match lowercase 40-hex at the production command boundary before runtime evidence, Pages lookup, capture, or delivery work.
 - Re-entry gate: commit both scoped corrections, rerun synthetic and actual-payload baselines, then obtain a new independent implementation review artifact. Production rebind and remote publication remain blocked until that verdict is `accept`.
 - Correction evidence: Tang follow-up commit `1ada601` and runner follow-up commit `23285ab`; frontend `77/77`, runner `221/221`, both frontend builds, lifecycle/harness checks, and the actual 2026-08-14 normalized baseline pass. SPY remains unchanged; QQQ adds only `expired-6-389` at 15:59 with `session_end` and `0/8`.
+
+## 10. Recovery-Date Routing Correction
+
+- Deployment evidence: runner authority was rebound to `23285ab` with unique config-only descendant `deb2383`; cron disable/re-enable readback and runtime authority validation passed. Tang renderer `f937c03` was pushed, Pages workflow `31953999440` succeeded, live provenance bracket and SPY/QQQ hosted acceptance passed, and the latest-20 Discord receipt-key precheck found no daily report.
+- Execution discovery: after the circuit reset, the exact authorized recovery command returned `not_completed_nyse_session` on Sunday before inspecting the preserved transaction. The manifest stayed `pages_verified` with empty delivery IDs, and the circuit was reopened as `recovery_trade_date_unresolved`.
+- Minimal amendment: when and only when `--expected-renderer-sha` is explicitly supplied, the production coordinator must resolve the run/lease trade date from the single active transaction. If no active transaction exists, fail immediately as `expected_renderer_sha_unused`. Without that argument, the fixed cron retains the existing current-day completed-NYSE-session rule with no prior-session fallback.
+- Safety and re-entry: the amendment may not alter transaction discovery, normal cron argv, session resolution, capture/delivery order, or idempotency. Add focused weekend-recovery and no-active negative tests, obtain independent `implementation-review-003`, then repeat the reviewed runtime receipt/config rebind before a new digest-bound circuit reset.

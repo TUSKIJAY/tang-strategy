@@ -9,12 +9,12 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Lifecycle status: `Active`
 - Current phase: `phase-3`
 - Phase state: `in-progress`
-- Next gate: `runtime-rebind`
+- Next gate: `recovery-route-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
 - Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Independent `implementation-review-002` accepted the Tang `551e9a1` + `1ada601` and runner `8c96984` + `23285ab` chains with high confidence after reproducing both negative cases, 77/77 frontend tests, 221/221 runner tests, both builds, actual-payload baseline, and DB invariance. Production state is still untouched. Next gate: reviewed runtime rebind, then push and Pages acceptance.
+- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Runner rebind `23285ab` + `deb2383`, cron readback, Tang push `f937c03`, Pages workflow `31953999440`, live provenance/hosted acceptance, and latest-20 duplicate precheck passed. The first Sunday recovery command safely returned `not_completed_nyse_session` before inspecting the old transaction; manifest and delivery IDs are unchanged, and circuit is reopened. Next gate: bounded explicit-recovery trade-date routing fix and independent `implementation-review-003`.
 
 ## Open Threads
 
