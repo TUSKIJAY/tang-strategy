@@ -80,6 +80,12 @@ function activationRequirementText(value, isCall) {
   return isCall ? '收盘突破' : '收盘跌破';
 }
 
+function observedBars(outcome) {
+  return Number.isFinite(Number(outcome?._activation_observed_bars))
+    ? Number(outcome._activation_observed_bars)
+    : Number(outcome?._activation_window_bars || 8);
+}
+
 function lifecycleSummary(outcome, status) {
   const isCall = outcome?.direction !== 'PUT';
   if (status === 'activated') {
@@ -89,7 +95,10 @@ function lifecycleSummary(outcome, status) {
   if (status === 'expired') {
     const req = activationRequirementText(outcome._activation_confirm_price, isCall);
     const miss = Number.isFinite(Number(outcome._miss_by)) ? `，仍差 ${formatPrice(Math.max(0, Number(outcome._miss_by)))}` : '';
-    return `启动后观察 ${outcome._activation_window_bars || 8} 根，未${req}进场确认线 ${formatPrice(outcome._activation_level)}，过期${miss}`;
+    const observed = observedBars(outcome);
+    const window = outcome._activation_window_bars || 8;
+    const boundary = outcome._expiry_kind === 'session_end' ? '，完整交易窗口结束' : '';
+    return `启动后观察 ${observed}/${window} 根，未${req}进场确认线 ${formatPrice(outcome._activation_level)}${boundary}，过期${miss}`;
   }
   return `已启动：进入 ${outcome?._activation_window_bars || 8} 根观察窗口，等待进场确认`;
 }
@@ -112,8 +121,10 @@ function lifecycleRows(outcome, status) {
   if (status === 'expired') {
     const req = activationRequirementText(outcome._activation_confirm_price, isCall);
     const miss = Number.isFinite(Number(outcome._miss_by)) ? Math.max(0, Number(outcome._miss_by)) : null;
-    rows.push(['路径', `启动 ${outcome._setup_time || '?'} -> 观察 ${outcome._activation_window_bars || 8} 根 -> 过期 ${outcome._expire_time || '?'}`]);
-    rows.push(['观察窗口', `${outcome._activation_window_bars || 8}/${outcome._activation_window_bars || 8} 根未进场`]);
+    const observed = observedBars(outcome);
+    const window = outcome._activation_window_bars || 8;
+    rows.push(['路径', `启动 ${outcome._setup_time || '?'} -> 观察 ${observed}/${window} 根 -> 过期 ${outcome._expire_time || '?'}`]);
+    rows.push(['观察窗口', `${observed}/${window} 根未进场${outcome._expiry_kind === 'session_end' ? '（完整交易窗口结束）' : ''}`]);
     rows.push(['进场确认线', `${outcome.direction || ''} ${req} ${formatPrice(outcome._activation_level)}（启动后运行区间）`]);
     rows.push(['窗口最佳收盘', `${formatPrice(outcome._best_close_in_window)}${miss == null ? '' : `，仍差 ${formatPrice(miss)}`}`]);
     if (Number.isFinite(Number(outcome._best_wick_in_window))) {
@@ -154,6 +165,7 @@ const LABELS = {
 function translateValue(value) {
   return String(value ?? '')
     .replace(/\bActivation window expired\b/g, '观察窗口过期')
+    .replace(/\bSession ended before activation window completed\b/g, '完整交易窗口结束前未完成进场确认')
     .replace(/\b5m trend changed from\b/g, '5m 趋势切换：')
     .replace(/\bto\b/g, '->')
     .replace(/\bbullish\b/g, '多头')
@@ -238,7 +250,7 @@ function LifecycleFlow({ setup, outcome, status, bars1m, bars5m }) {
       : '观察中';
   const waitText = status === 'activated'
     ? `${outcome?._activation_delay_bars ?? '?'}min`
-    : `${outcome?._activation_window_bars || 8}根`;
+    : `${observedBars(outcome)}/${outcome?._activation_window_bars || 8}根`;
   return (
     <div className="dr-lifecycle-flow">
       <span className="dr-lifecycle-node setup">启</span><span>启动 {setupTime}</span>

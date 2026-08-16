@@ -55,6 +55,33 @@ function inSession(time, session = {}) {
   return time >= start && time < end;
 }
 
+function minuteOfDay(time) {
+  const match = String(time || '').match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > 23 || minute > 59) return null;
+  return hour * 60 + minute;
+}
+
+function completeSessionWindow(bars, session = {}) {
+  const start = minuteOfDay(session.start || '09:30');
+  const end = minuteOfDay(session.end || '16:00');
+  if (start == null || end == null || end <= start) return null;
+  const sessionBars = bars
+    .map((bar, index) => ({ bar, index, minute: minuteOfDay(timeOf(bar)) }))
+    .filter(({ minute }) => minute != null && minute >= start && minute < end);
+  if (sessionBars.length !== end - start) return null;
+  for (let offset = 0; offset < sessionBars.length; offset += 1) {
+    const { bar, minute } = sessionBars[offset];
+    if (
+      minute !== start + offset
+      || [bar?.O, bar?.H, bar?.L, bar?.C].some((value) => num(value) == null)
+    ) return null;
+  }
+  return sessionBars[sessionBars.length - 1];
+}
+
 export function detectTrendsRouted(bars5m = [], strategy = {}) {
   const trend = strategy.trend || {};
   const method = trend.method || 'relaxed';
@@ -433,6 +460,7 @@ function buildSetupAnnotation({ setup, setupId, maxWait }) {
     _activation_window_end_bar_index: setup.bar_index + maxWait,
     _raw_signal_id: setup._signal_id,
     _signal_style: setup.style,
+    _activation_observed_bars: 0,
     body: `${setup.title} candidate; waiting up to ${maxWait} bars for activation`,
   };
 }
@@ -465,13 +493,18 @@ function buildActivatedAnnotation({ pending, probe, bar, index, strategy }) {
       _activation_breakout_price: probe.breakoutLevel,
       _activation_close_position: probe.closePosition,
       _activation_window_bars: pending._activation_window_bars,
+      _activation_observed_bars: pending._activation_observed_bars || 0,
       _raw_signal_id: pending._signal_id,
       body: `Activated ${delay}m later by ${method} breakout ${fmt(probe.breakoutLevel)}`,
     },
   });
 }
 
-function buildExpiredAnnotation({ pending, bar, index, maxWait }) {
+function buildExpiredAnnotation({ pending, bar, index, maxWait, expiryKind = 'activation_window' }) {
+  const observedBars = pending._activation_observed_bars || 0;
+  const expiryReason = expiryKind === 'session_end'
+    ? 'Session ended before activation window completed'
+    : (pending.expiryGateReason || 'Activation window expired');
   return {
     ...pending,
     id: `expired-${pending._setup_id}-${index}`,
@@ -484,6 +517,7 @@ function buildExpiredAnnotation({ pending, bar, index, maxWait }) {
     _expire_bar_index: index,
     _expire_time: timeOf(bar),
     _activation_delay_bars: index - pending.bar_index,
+    _activation_observed_bars: observedBars,
     _activation_level: pending.lastBreakoutLevel,
     _best_close_in_window: pending.bestClose,
     _best_wick_in_window: pending.bestWick,
@@ -491,8 +525,11 @@ function buildExpiredAnnotation({ pending, bar, index, maxWait }) {
     _miss_by: pending.missBy,
     _last_checked_bar_index: pending.lastCheckedIndex,
     _last_checked_time: pending.lastCheckedTime,
-    _expiry_gate_reason: pending.expiryGateReason || 'Activation window expired',
-    body: `Expired after ${maxWait} bars; best close ${fmt(pending.bestClose)} missed ${fmt(Math.max(0, pending.missBy || 0))}`,
+    _expiry_kind: expiryKind,
+    _expiry_gate_reason: expiryReason,
+    body: expiryKind === 'session_end'
+      ? `Expired at session end after ${observedBars}/${maxWait} observed bars; best close ${fmt(pending.bestClose)} missed ${fmt(Math.max(0, pending.missBy || 0))}`
+      : `Expired after ${maxWait} bars; best close ${fmt(pending.bestClose)} missed ${fmt(Math.max(0, pending.missBy || 0))}`,
   };
 }
 
@@ -531,7 +568,10 @@ export function scanSignals({ bars1m = [], bars5m = [], strategy = {} }) {
         pending = null;
       } else {
         const probe = activationProbe(pending, bars1m, index, strategy);
-        if (probe) updatePendingActivationStats(pending, probe, bar, index);
+        if (probe) {
+          pending._activation_observed_bars = (pending._activation_observed_bars || 0) + 1;
+          updatePendingActivationStats(pending, probe, bar, index);
+        }
         if (probe?.isActivation) {
           const activated = buildActivatedAnnotation({ pending, probe, bar, index, strategy });
           annotations.push(activated);
@@ -572,6 +612,20 @@ export function scanSignals({ bars1m = [], bars5m = [], strategy = {} }) {
         lastSignalBar = index;
       }
       break;
+    }
+  }
+
+  if (useActivation && pending) {
+    const completed = completeSessionWindow(bars1m, session);
+    if (completed && completed.index >= pending.bar_index) {
+      const observedBars = pending._activation_observed_bars || 0;
+      annotations.push(buildExpiredAnnotation({
+        pending,
+        bar: completed.bar,
+        index: completed.index,
+        maxWait,
+        expiryKind: observedBars >= maxWait ? 'activation_window' : 'session_end',
+      }));
     }
   }
 
