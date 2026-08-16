@@ -9,12 +9,12 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Lifecycle status: `Active`
 - Current phase: `phase-0`
 - Phase state: `in-progress`
-- Next gate: `amendment-review`
+- Next gate: `phase-0-exit`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
 - Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. The scanner and renderer-gate code is locally green, but production runtime binds an older runner code tree; the v3 hash-only authority rebind amendment is awaiting independent review before any implementation commit or cron mutation.
+- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Independent `review-003` approved the runtime-binding amendment. Local scanner/renderer-gate code is green; baseline evidence is frozen and the next gate is `phase-0-exit`.
 
 ## Open Threads
 

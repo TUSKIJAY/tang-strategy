@@ -5,14 +5,14 @@
 - Plan slug: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
 - Revision: `v3-active-amendment-2026-08-16`
 - Plan author ID: `codex-root-01a00adc`
-- Design reviews: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-001.md`, `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-002.md`
+- Design reviews: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-001.md`, `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-002.md`, `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-003.md`
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-08-16-direct-takeover-eod-pending-hotfix`
 - Current phase: phase-0
 - Phase state: in-progress
 - Phase entry gate: `review-002@approve+user-instruction:2026-08-16-direct-takeover-eod-pending-hotfix`
-- Next gate: `amendment-review`
+- Next gate: `phase-0-exit`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none

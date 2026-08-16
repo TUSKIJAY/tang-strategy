@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-- [Tang Strategy EOD Pending Activation Hotfix](./active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) — Active; v3 runtime-binding amendment pending review; prior [review-002 approve](./reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-002.md); next gate `amendment-review`
+- [Tang Strategy EOD Pending Activation Hotfix](./active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) — Active; phase-0 in progress; [review-003 approve](./reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-003.md); next gate `phase-0-exit`
 
 ## Proposed Plans
 

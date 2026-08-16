@@ -7,7 +7,7 @@
 - Lifecycle status: `Active`
 - Current phase: `phase-0`
 - Phase state: `in-progress`
-- Next gate: `amendment-review`
+- Next gate: `phase-0-exit`
 <!-- operating-modes-state:end -->
 
 Maintenance rule: when a plan closes, its per-step lifecycle entries move to `docs/progress-archive/` and only the final disposition summary stays here; when this file exceeds 10 body entries, archive the oldest closed entries before appending. Rules and index: [`docs/progress-archive/index.md`](./docs/progress-archive/index.md).
