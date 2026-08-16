@@ -31,7 +31,7 @@
 
 ## Active Plans
 
-- [Tang Strategy EOD Pending Activation Hotfix](./active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) — Active; phase-3 in progress; live renderer `f937c03`; next gate `recovery-route-review`
+- [Tang Strategy EOD Pending Activation Hotfix](./active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) — Active; phase-3 in progress; runner recovery-route fix `a291432`; next gate `implementation-review-003`
 
 ## Proposed Plans
 

@@ -12,7 +12,7 @@
 - Current phase: phase-3
 - Phase state: in-progress
 - Phase entry gate: `phase-2-exit`
-- Next gate: `recovery-route-review`
+- Next gate: `implementation-review-003`
 - Implementation review: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/implementation-review-002.md@accept`
 - Final disposition: none
 - Verified implementation commit: none
@@ -151,3 +151,4 @@ The constrained metadata above is authoritative. Follow [`docs/operating-modes.m
 - Execution discovery: after the circuit reset, the exact authorized recovery command returned `not_completed_nyse_session` on Sunday before inspecting the preserved transaction. The manifest stayed `pages_verified` with empty delivery IDs, and the circuit was reopened as `recovery_trade_date_unresolved`.
 - Minimal amendment: when and only when `--expected-renderer-sha` is explicitly supplied, the production coordinator must resolve the run/lease trade date from the single active transaction. If no active transaction exists, fail immediately as `expected_renderer_sha_unused`. Without that argument, the fixed cron retains the existing current-day completed-NYSE-session rule with no prior-session fallback.
 - Safety and re-entry: the amendment may not alter transaction discovery, normal cron argv, session resolution, capture/delivery order, or idempotency. Add focused weekend-recovery and no-active negative tests, obtain independent `implementation-review-003`, then repeat the reviewed runtime receipt/config rebind before a new digest-bound circuit reset.
+- Correction evidence: runner commit `a291432` adds an explicit-only active-transaction date resolver; 19 runner boundary tests, 21 production tests, and the full 224-test suite pass. No Tang source/data, transaction manifest, Discord receipt, cron declaration, or normal no-argument session resolver changed.

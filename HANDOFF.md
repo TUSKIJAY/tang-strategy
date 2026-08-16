@@ -9,12 +9,12 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Lifecycle status: `Active`
 - Current phase: `phase-3`
 - Phase state: `in-progress`
-- Next gate: `recovery-route-review`
+- Next gate: `implementation-review-003`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
 - Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Runner rebind `23285ab` + `deb2383`, cron readback, Tang push `f937c03`, Pages workflow `31953999440`, live provenance/hosted acceptance, and latest-20 duplicate precheck passed. The first Sunday recovery command safely returned `not_completed_nyse_session` before inspecting the old transaction; manifest and delivery IDs are unchanged, and circuit is reopened. Next gate: bounded explicit-recovery trade-date routing fix and independent `implementation-review-003`.
+- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. The explicit prior-session recovery route is fixed in runner `a291432`: with renderer SHA it selects only the single active transaction's 2026-08-14 date; without the argument the normal cron still uses the current completed session; no active transaction fails before session lookup. Boundary 19/19, production 21/21, full runner 224/224. Circuit is open and transaction delivery IDs remain empty. Next gate: independent `implementation-review-003`, then runtime rebind and a new reset receipt.
 
 ## Open Threads
 
