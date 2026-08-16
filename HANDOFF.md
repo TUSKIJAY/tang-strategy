@@ -9,12 +9,12 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Lifecycle status: `Active`
 - Current phase: `phase-3`
 - Phase state: `in-progress`
-- Next gate: `implementation-review-002`
+- Next gate: `runtime-rebind`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
 - Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Review-001 corrections are committed as Tang `1ada601` and runner `23285ab`: invalid required probe inputs remain pending, renderer SHA rejects before runtime/Pages work, frontend `77/77`, runner `221/221`, both builds, and the actual 2026-08-14 normalized baseline pass. Production rebind, push, Pages, circuit reset, and Discord remain untouched. Next gate: independent `implementation-review-002`.
+- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Independent `implementation-review-002` accepted the Tang `551e9a1` + `1ada601` and runner `8c96984` + `23285ab` chains with high confidence after reproducing both negative cases, 77/77 frontend tests, 221/221 runner tests, both builds, actual-payload baseline, and DB invariance. Production state is still untouched. Next gate: reviewed runtime rebind, then push and Pages acceptance.
 
 ## Open Threads
 
