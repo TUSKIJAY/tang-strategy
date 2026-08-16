@@ -3,11 +3,11 @@
 ## Current Status
 
 <!-- operating-modes-state:start -->
-- Current plan: `none`
-- Lifecycle status: `None`
+- Current plan: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
+- Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `none`
+- Next gate: `design-review`
 <!-- operating-modes-state:end -->
 
 Maintenance rule: when a plan closes, its per-step lifecycle entries move to `docs/progress-archive/` and only the final disposition summary stays here; when this file exceeds 10 body entries, archive the oldest closed entries before appending. Rules and index: [`docs/progress-archive/index.md`](./docs/progress-archive/index.md).

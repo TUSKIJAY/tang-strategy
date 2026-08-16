@@ -1,0 +1,120 @@
+# Tang Strategy EOD Pending Activation Hotfix
+
+- Lifecycle schema: `operating-modes-v1`
+- Status: Proposed
+- Plan slug: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
+- Revision: `v1-proposed-2026-08-16`
+- Plan author ID: `codex-root-01a00adc`
+- Design reviews: none
+- Latest design verdict: none
+- Review independence: none
+- Activation evidence: none
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: `design-review`
+- Implementation review: none
+- Final disposition: none
+- Verified implementation commit: none
+- Lifecycle reconciliation commit: none
+- Owner: Codex
+- Created: 2026-08-16
+- Scope authority: user instruction `直接接手干吧` continues the authorized repair, publication, and existing-transaction recovery requested in task `01a00a96-8edd-7f63-82e9-89c179ae72d9`
+- Local commit: task-scoped commits are authorized; push, Pages verification, and existing-transaction recovery are explicitly authorized by the same user instruction chain
+
+## 1. Context And Evidence
+
+- Production run `production-d4f7bd7fb26e4960b1a5b5f00e242093` published trade date `2026-08-14` at commit `6f9a87c75f06a0ad03ec77b642a989d3cd22dae6`; transaction `production-d4f7bd7fb26e4960b1a5b5f00e242093-1` is preserved at `stage=pages_verified`, `push_confirmed=true`, Pages workflow `31853873121`, and `delivered_message_ids={}`.
+- Live hosted acceptance reproduces one QQQ lifecycle card at `setup_time=15:59`, `status=pending`, with no outcome time. All other SPY/QQQ lifecycle cards are `activated` or `expired`.
+- `scanSignals()` retains a pending activation when the supplied RTH bar array ends before `max_wait_bars` elapses. The 2026-08-14 QQQ dataset is a complete 390-bar RTH session ending at 15:59, so this is an end-of-session lifecycle gap rather than missing market data.
+- Hosted acceptance correctly rejects pending public lifecycle cards. This plan fixes the scanner lifecycle and keeps that fail-closed acceptance rule unchanged.
+- Failure notification `1537982342549872730` is the only Discord message recorded for this run. The daily report has not been sent.
+
+## 2. Objective
+
+- In scope:
+  - finalize a still-pending activation when the supplied scan window ends, using an explicit session-end expiry outcome at the last supplied bar;
+  - record actual observed bars separately from the configured maximum so a shortened observation window is truthful;
+  - render session-end expiry copy truthfully in Review and Static Review lifecycle surfaces;
+  - add direct scanner regression tests for ordinary activation-window expiry, session-end expiry, and activation-before-end preservation;
+  - publish the code-only fix to `main`, verify the new Pages build and live provenance, and resume only the preserved 2026-08-14 transaction;
+  - prove no duplicate Discord daily report through bounded precheck and exact receipt readback.
+- Out of scope:
+  - changing strategy JSON, signal eligibility, `max_wait_bars`, market data, tracked SQLite, normalized trade content, cron schedule/config, Discord adapter limits, or hosted acceptance criteria;
+  - rerunning the already-confirmed 2026-08-14 data commit or creating a second transaction;
+  - deleting or resending the existing failure notification.
+- Non-goal: suppressing late-session setups. The setup remains visible evidence; only its unresolved outcome is finalized.
+
+## 3. Constraints And Invariants
+
+- Existing full-window `activated` and `expired` outcomes must remain byte-semantically equivalent except for additive observed-window metadata.
+- End-of-input expiry must use the final supplied scan bar and must not fabricate future bars, prices, confirmation probes, or an eight-bar observation.
+- The configured activation window remains eight bars; `_activation_observed_bars` records how many later bars were actually available.
+- A session-end expiry carries a distinct `_expiry_kind=session_end` and reason; normal timeout expiry remains `_expiry_kind=activation_window`.
+- Hosted acceptance continues to require `activated|expired`, zero pending public lifecycle cards, and 1920x1080 capture. A separate fail-closed pre/post recovery check binds the live Pages renderer to the hotfix commit.
+- The tracked SQLite hash and all unrelated untracked `output/` trees must remain unchanged.
+- Recovery must reuse manifest commit `6f9a87c...`, its original data-publication workflow `31853873121`, and any persisted delivery IDs. The new hotfix Pages workflow is separate rendering evidence and must be live before recovery. Ambiguous provenance or duplicate Discord state fails closed.
+
+## 4. Phases
+
+### Phase 0 — Baseline And Scope Freeze
+
+- Entry gate: design review approves revision `v1-proposed-2026-08-16` and the current user instruction activates execution.
+- Work: preserve manifest/failure/cron evidence; record HEAD, status, DB hash, hosted QQQ pending reproduction, and Discord failure ID.
+- Verification: transaction remains `pages_verified`, daily delivery IDs remain empty, cron declaration remains `tang-publisher-daily-v1`.
+- Exit gate: `phase-0-exit`.
+
+### Phase 1 — Scanner And Lifecycle Copy
+
+- Entry gate: `phase-0-exit`.
+- Work: implement end-of-input expiry in `scanner.js`; add observed-window/session-end metadata; update lifecycle copy; add scanner tests and include them in the focused frontend test command.
+- Verification: synthetic tests cover normal expiry, session-end expiry at delay 0 and partial delay, and activation before end; existing frontend tests remain green.
+- Exit gate: `phase-1-exit`.
+
+### Phase 2 — Local And Hosted-Equivalent Acceptance
+
+- Entry gate: `phase-1-exit`.
+- Work: run focused tests/builds and reproduce the 2026-08-14 SPY/QQQ lifecycle snapshots against the local code and published payload.
+- Verification: QQQ 15:59 card becomes `expired` at 15:59 with `0/8` observed and a session-end reason; all earlier outcomes remain unchanged; no pending action remains; DB hash is unchanged.
+- Exit gate: `phase-2-exit`.
+
+### Phase 3 — Independent Implementation Review And Publish
+
+- Entry gate: `phase-2-exit`.
+- Work: create the scoped implementation commit; obtain independent implementation review; push `main`; wait for the authorized Pages workflow and validate provenance plus hosted SPY/QQQ snapshots.
+- Verification: review verdict `accept`; remote `main` equals the implementation commit; the new Pages workflow succeeds; live `build-manifest.json` equals the hotfix commit; hosted acceptance passes without relaxing gates.
+- Exit gate: `phase-3-exit`.
+
+### Phase 4 — Existing Transaction Recovery
+
+- Entry gate: `phase-3-exit`.
+- Work: bounded 20-message duplicate check; re-check live hotfix provenance; run only `bin/tang-publish run --mode production --trade-date auto --json`; read every persisted Discord ID exactly; re-check live provenance after recovery.
+- Verification: result is `transaction_recovered`/`finalized`; the transaction's original data commit and workflow evidence remain intact while screenshots come from the verified hotfix renderer; summary/SPY/QQQ bodies, author, order, and attachments match; no duplicate daily report; circuit closes.
+- Exit gate: `phase-4-exit`.
+
+### Phase 5 — Closeout
+
+- Entry gate: `phase-4-exit`.
+- Work: reconcile plan/index/progress/handoff records and retain production receipts.
+- Verification: lifecycle checker, harness checker, staged diff check, final Git/cron/transaction/circuit readback.
+- Exit gate: `closed`.
+
+## 5. Evidence And Commit Plan
+
+- Baseline commands: Git status/HEAD/DB SHA-256; live cron JSON; manifest/failure/circuit JSON; hosted Playwright snapshot.
+- Focused checks: `node --test frontend/src/features/review/scanner.test.js`; `npm --prefix frontend run test:trade-records`; normal and static frontend builds.
+- Full checks: repository verification battery as proportionate runtime permits; lifecycle and harness checks are mandatory.
+- Expected state/handoff updates: proposed -> reviewed -> active -> completed; only the current resume point remains in `HANDOFF.md`.
+- Task-owned product paths: `frontend/src/features/review/scanner.js`, `frontend/src/features/review/scanner.test.js`, `frontend/src/features/review/ReviewSignalList.jsx`, `frontend/package.json`.
+- Task-owned lifecycle paths: this plan, its review directory, the four lifecycle indexes/roadmap, `PROGRESS.md`, `HANDOFF.md`, and any required progress archive index/file.
+- No-commit condition: any failure to separate these paths from unrelated changes or any test showing altered earlier lifecycle outcomes.
+
+## 6. Review And Activation Gate
+
+- Review location: `docs/exec-plans/reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/`
+- Required verdict: `approve` from an independent reviewer of this exact revision.
+- Required user approval: already supplied by `修复一下然后发布吧` followed by `直接接手干吧`; activation is recorded only after design approval.
+- Implementation start is authorized after activation recording; no additional confirmation is required.
+- Remote publication and preserved-transaction recovery are authorized, but duplicate delivery and gate weakening remain forbidden.
+
+The constrained metadata above is authoritative. Follow [`docs/operating-modes.md`](../../operating-modes.md) for lifecycle transitions, review evidence, scoped commits, and closeout fields.
