@@ -9,12 +9,12 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `activation`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
 - Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Proposed plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/proposed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v2-proposed-2026-08-16`. Review-001 findings are folded into an explicit complete-session gate and a publisher-side pre-delivery renderer receipt. Next gate: independent design review of v2.
+- Proposed plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/proposed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v2-proposed-2026-08-16`. Independent `review-002` approved v2 with high confidence. The current user instruction supplies activation and execution authority; next gate: activation recording.
 
 ## Open Threads
 
