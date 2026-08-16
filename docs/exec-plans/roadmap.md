@@ -31,11 +31,11 @@
 
 ## Active Plans
 
-None.
+- [Tang Strategy EOD Pending Activation Hotfix](./active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) — Active; phase-0 in progress; [review-002 approve](./reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-002.md); next gate `phase-0-exit`
 
 ## Proposed Plans
 
-- [Tang Strategy EOD Pending Activation Hotfix](./proposed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) — Proposed; revision `v2-proposed-2026-08-16`; review-001 findings folded into complete-session and pre-delivery renderer gates; next gate `design-review`
+None.
 
 ## Completed Plans
 

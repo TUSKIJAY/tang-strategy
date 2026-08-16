@@ -1,18 +1,18 @@
 # Tang Strategy EOD Pending Activation Hotfix
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Proposed
+- Status: Active
 - Plan slug: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
-- Revision: `v2-proposed-2026-08-16`
+- Revision: `v2-active-2026-08-16`
 - Plan author ID: `codex-root-01a00adc`
 - Design reviews: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-001.md`, `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-002.md`
 - Latest design verdict: approve
 - Review independence: attested
-- Activation evidence: none
-- Current phase: none
-- Phase state: none
-- Phase entry gate: none
-- Next gate: `activation`
+- Activation evidence: `user-instruction:2026-08-16-direct-takeover-eod-pending-hotfix`
+- Current phase: phase-0
+- Phase state: in-progress
+- Phase entry gate: `review-002@approve+user-instruction:2026-08-16-direct-takeover-eod-pending-hotfix`
+- Next gate: `phase-0-exit`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none

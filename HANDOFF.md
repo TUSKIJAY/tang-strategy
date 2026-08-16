@@ -6,15 +6,15 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 
 <!-- operating-modes-state:start -->
 - Current plan: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
-- Lifecycle status: `Proposed`
-- Current phase: `none`
-- Phase state: `none`
-- Next gate: `activation`
+- Lifecycle status: `Active`
+- Current phase: `phase-0`
+- Phase state: `in-progress`
+- Next gate: `phase-0-exit`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
 - Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Proposed plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/proposed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v2-proposed-2026-08-16`. Independent `review-002` approved v2 with high confidence. The current user instruction supplies activation and execution authority; next gate: activation recording.
+- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v2-active-2026-08-16`. Independent `review-002` approved v2; the user takeover instruction activated execution. Phase 0 is freezing baseline and recovery evidence.
 
 ## Open Threads
 
