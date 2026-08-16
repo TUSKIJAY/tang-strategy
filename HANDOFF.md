@@ -7,14 +7,14 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 <!-- operating-modes-state:start -->
 - Current plan: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
 - Lifecycle status: `Active`
-- Current phase: `phase-0`
+- Current phase: `phase-3`
 - Phase state: `in-progress`
-- Next gate: `phase-0-exit`
+- Next gate: `implementation-review`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
 - Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Independent `review-003` approved the runtime-binding amendment. Local scanner/renderer-gate code is green; baseline evidence is frozen and the next gate is `phase-0-exit`.
+- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Tang implementation `551e9a1` and runner implementation `8c96984` are committed; the actual 2026-08-14 comparison preserves every prior annotation and adds only QQQ 15:59 `expired/session_end/0-of-8`. Next gate: independent implementation review.
 
 ## Open Threads
 

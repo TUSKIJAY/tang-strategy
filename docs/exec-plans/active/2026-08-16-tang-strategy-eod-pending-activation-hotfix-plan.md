@@ -9,10 +9,10 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-08-16-direct-takeover-eod-pending-hotfix`
-- Current phase: phase-0
+- Current phase: phase-3
 - Phase state: in-progress
-- Phase entry gate: `review-002@approve+user-instruction:2026-08-16-direct-takeover-eod-pending-hotfix`
-- Next gate: `phase-0-exit`
+- Phase entry gate: `phase-2-exit`
+- Next gate: `implementation-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
