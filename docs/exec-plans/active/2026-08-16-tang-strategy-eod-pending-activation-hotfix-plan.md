@@ -12,7 +12,7 @@
 - Current phase: phase-3
 - Phase state: in-progress
 - Phase entry gate: `phase-2-exit`
-- Next gate: `implementation-fix`
+- Next gate: `implementation-review-002`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -143,3 +143,4 @@ The constrained metadata above is authoritative. Follow [`docs/operating-modes.m
 - Scanner correction: required color and MA10 inputs must be numerically valid before a later bar can count as an activation probe. Any incomplete required probe keeps the setup pending; ordinary timeout is permitted only after eight valid observed probes and cannot produce a shortened `x/8` expiry.
 - Runner correction: an explicit expected renderer commit must match lowercase 40-hex at the production command boundary before runtime evidence, Pages lookup, capture, or delivery work.
 - Re-entry gate: commit both scoped corrections, rerun synthetic and actual-payload baselines, then obtain a new independent implementation review artifact. Production rebind and remote publication remain blocked until that verdict is `accept`.
+- Correction evidence: Tang follow-up commit `1ada601` and runner follow-up commit `23285ab`; frontend `77/77`, runner `221/221`, both frontend builds, lifecycle/harness checks, and the actual 2026-08-14 normalized baseline pass. SPY remains unchanged; QQQ adds only `expired-6-389` at 15:59 with `session_end` and `0/8`.
