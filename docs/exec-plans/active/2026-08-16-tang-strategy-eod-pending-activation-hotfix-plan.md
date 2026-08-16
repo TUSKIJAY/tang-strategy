@@ -12,8 +12,8 @@
 - Current phase: phase-3
 - Phase state: in-progress
 - Phase entry gate: `phase-2-exit`
-- Next gate: `implementation-review-003`
-- Implementation review: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/implementation-review-002.md@accept`
+- Next gate: `runtime-rebind-2`
+- Implementation review: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/implementation-review-003.md@accept`
 - Final disposition: none
 - Verified implementation commit: none
 - Lifecycle reconciliation commit: none
