@@ -5,14 +5,14 @@
 - Plan slug: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
 - Revision: `v1-proposed-2026-08-16`
 - Plan author ID: `codex-root-01a00adc`
-- Design reviews: none
-- Latest design verdict: none
-- Review independence: none
+- Design reviews: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-001.md`
+- Latest design verdict: revise
+- Review independence: attested
 - Activation evidence: none
 - Current phase: none
 - Phase state: none
 - Phase entry gate: none
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none

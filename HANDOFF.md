@@ -9,12 +9,12 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Lifecycle status: `Proposed`
 - Current phase: `none`
 - Phase state: `none`
-- Next gate: `design-review`
+- Next gate: `plan-revision`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
 - Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Proposed plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/proposed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v1-proposed-2026-08-16`. Live evidence pins the only bad lifecycle to QQQ 15:59 `pending`; production transaction remains `pages_verified` with no daily Discord delivery IDs. Next gate: independent design review.
+- Proposed plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/proposed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v1-proposed-2026-08-16`. Independent review `review-001` returned `revise`: incomplete inputs need an explicit completeness gate, and recovery must bind the hotfix renderer before Discord delivery. Next gate: plan revision.
 
 ## Open Threads
 
@@ -34,5 +34,5 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 
 1. Re-run startup Git status. Untracked `output/` trees are preserved only while their plan is open; closed plans' runs are deleted per `docs/operating-modes.md` §8.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. Review the proposed EOD pending-activation hotfix at its pinned revision; after `approve`, the current user instruction authorizes activation and execution without another confirmation.
+3. Revise the EOD pending-activation hotfix for `review-001`; after a matching `approve`, the current user instruction authorizes activation and execution without another confirmation.
 4. Push/Pages/existing-transaction recovery are explicitly authorized for this hotfix; duplicate Discord delivery, cron changes, data reruns, and gate weakening are not.
