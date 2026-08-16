@@ -5,16 +5,16 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 ## Current Snapshot
 
 <!-- operating-modes-state:start -->
-- Current plan: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
-- Lifecycle status: `Active`
-- Current phase: `phase-3`
-- Phase state: `in-progress`
-- Next gate: `runtime-rebind-2`
+- Current plan: `none`
+- Lifecycle status: `None`
+- Current phase: `none`
+- Phase state: `none`
+- Next gate: `none`
 <!-- operating-modes-state:end -->
 
 - Last updated: 2026-08-16
-- Branch: `main` at `6f9a87c`, aligned with `origin/main`; unrelated untracked `output/` evidence is preserved.
-- Active plan: [`2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`](./docs/exec-plans/active/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md), revision `v3-active-amendment-2026-08-16`. Independent `implementation-review-003` accepted runner `a291432` with high confidence after 40 focused and 224 full tests plus all three date-routing branches. Circuit remains open and transaction delivery IDs remain empty. Next gate: repeat the receipt/config-only runtime rebind, then create a new circuit reset receipt and recover only the preserved Friday transaction.
+- Branch: `main`; remote `origin/main` and Pages renderer are `f937c03`; local lifecycle closeout commits follow it. Unrelated untracked `output/` evidence is preserved.
+- No active exec plan. The EOD Pending Activation Hotfix is [Completed](./docs/exec-plans/completed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md): the preserved 2026-08-14 Friday transaction is finalized, its three Discord IDs are exact-readback verified with no duplicates, the circuit is closed, the fixed cron is enabled with its original declaration, and the tracked DB hash is unchanged.
 
 ## Open Threads
 
@@ -34,5 +34,5 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 
 1. Re-run startup Git status. Untracked `output/` trees are preserved only while their plan is open; closed plans' runs are deleted per `docs/operating-modes.md` §8.
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and this file.
-3. Review exact revision `v2-proposed-2026-08-16`; after a matching `approve`, the current user instruction authorizes activation and execution without another confirmation.
-4. Push/Pages/existing-transaction recovery are explicitly authorized for this hotfix; duplicate Discord delivery, cron changes, data reruns, and gate weakening are not.
+3. No exec plan is active; require normal proposal/review/activation gates before new Coding Mode work.
+4. Treat the completed 2026-08-14 publisher transaction and its Discord IDs as immutable recovery evidence; do not resend it.

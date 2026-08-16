@@ -1,7 +1,7 @@
 # Tang Strategy EOD Pending Activation Hotfix
 
 - Lifecycle schema: `operating-modes-v1`
-- Status: Active
+- Status: Completed
 - Plan slug: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
 - Revision: `v3-active-amendment-2026-08-16`
 - Plan author ID: `codex-root-01a00adc`
@@ -9,14 +9,14 @@
 - Latest design verdict: approve
 - Review independence: attested
 - Activation evidence: `user-instruction:2026-08-16-direct-takeover-eod-pending-hotfix`
-- Current phase: phase-3
-- Phase state: in-progress
-- Phase entry gate: `phase-2-exit`
-- Next gate: `runtime-rebind-2`
+- Current phase: none
+- Phase state: none
+- Phase entry gate: none
+- Next gate: closed
 - Implementation review: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/implementation-review-003.md@accept`
-- Final disposition: none
-- Verified implementation commit: none
-- Lifecycle reconciliation commit: none
+- Final disposition: Completed
+- Verified implementation commit: 1ada6016236663e6bb73fb1de45ba21358f9914d
+- Lifecycle reconciliation commit: 9cddf02a1a59d93c20e87b3c43d8971ec2407630
 - Owner: Codex
 - Created: 2026-08-16
 - Scope authority: user instruction `直接接手干吧` continues the authorized repair, publication, and existing-transaction recovery requested in task `01a00a96-8edd-7f63-82e9-89c179ae72d9`
@@ -152,3 +152,11 @@ The constrained metadata above is authoritative. Follow [`docs/operating-modes.m
 - Minimal amendment: when and only when `--expected-renderer-sha` is explicitly supplied, the production coordinator must resolve the run/lease trade date from the single active transaction. If no active transaction exists, fail immediately as `expected_renderer_sha_unused`. Without that argument, the fixed cron retains the existing current-day completed-NYSE-session rule with no prior-session fallback.
 - Safety and re-entry: the amendment may not alter transaction discovery, normal cron argv, session resolution, capture/delivery order, or idempotency. Add focused weekend-recovery and no-active negative tests, obtain independent `implementation-review-003`, then repeat the reviewed runtime receipt/config rebind before a new digest-bound circuit reset.
 - Correction evidence: runner commit `a291432` adds an explicit-only active-transaction date resolver; 19 runner boundary tests, 21 production tests, and the full 224-test suite pass. No Tang source/data, transaction manifest, Discord receipt, cron declaration, or normal no-argument session resolver changed.
+
+## 11. Closeout
+
+- Tang `main` and Pages are published at renderer commit `f937c03e259572ba036ccd24d699ac9705aa2c73`; workflow `31953999440` succeeded and live build provenance equals that SHA.
+- Runner production authority is bound to reviewed code commit `a2914323bdb7e89cf88fb82d77ff689b0730b872` with the sole config-only descendant `711af5b24f4a265d45e661d84f4c25db95610aee`; the fixed cron was restored byte-semantically with its original schedule and argv.
+- Preserved transaction `production-d4f7bd7fb26e4960b1a5b5f00e242093-1` recovered to `finalized` without a data rerun. Its original data commit/workflow remain `6f9a87c...` / `31853873121`; the renderer receipt separately binds `f937c03...` / `31953999440` before delivery.
+- Discord exact readback contains one summary `1538563874859515986`, one SPY report `1538563893096611922`, and one QQQ report `1538563912059064354`; repeated latest-20 receipt-key reconciliation reports no duplicates. SPY/QQQ attachments are 1920×1080 and authored by the frozen bot identity.
+- Circuit state is closed with no last failure. The tracked SQLite SHA-256 remains `94baf97160c5da2c3384842038e116f8e13b0226b6e394643fd7a0ccdb992b69`.

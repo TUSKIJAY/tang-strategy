@@ -4,6 +4,7 @@ Completed, terminated, rejected, superseded, or archived plans are indexed here 
 
 | Plan | Disposition | Verification | Final commit |
 | --- | --- | --- | --- |
+| [Tang Strategy EOD Pending Activation Hotfix](./2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md) | Completed | [implementation-review-003](../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/implementation-review-003.md); Pages `f937c03`; transaction finalized | 1ada6016236663e6bb73fb1de45ba21358f9914d |
 | [Tang Strategy Default Full-Day K-Line Viewport](./2026-07-30-tang-strategy-default-full-day-kline-viewport-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-30-tang-strategy-default-full-day-kline-viewport-plan/implementation-review-001.md) | f667867c3e511d2eaaf77f673c96f3e7ed1f70e2 |
 | [Tang Strategy Date Rail Ascending And Trade Quantity](./2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-22-tang-strategy-date-rail-ascending-and-trade-quantity-plan/implementation-review-001.md) | da12e1b03715be3de75fcafd8d47aa1a35554942 |
 | [Tang Strategy Review Sidebar Spacing And K-line Selection Band](./2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan.md) | Completed | [implementation-review-001](../reviews/2026-07-21-tang-strategy-review-sidebar-spacing-and-kline-selection-band-plan/implementation-review-001.md) | 5f36d29a44fb12aee2319ae147303cc970d83193 |
