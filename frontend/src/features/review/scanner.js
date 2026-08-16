@@ -3,6 +3,13 @@ function num(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+function hasNumericInput(value) {
+  return value !== null
+    && value !== undefined
+    && value !== ''
+    && Number.isFinite(Number(value));
+}
+
 function timeOf(bar) {
   return bar?.t || bar?.time || '';
 }
@@ -76,7 +83,7 @@ function completeSessionWindow(bars, session = {}) {
     const { bar, minute } = sessionBars[offset];
     if (
       minute !== start + offset
-      || [bar?.O, bar?.H, bar?.L, bar?.C].some((value) => num(value) == null)
+      || [bar?.O, bar?.H, bar?.L, bar?.C].some((value) => !hasNumericInput(value))
     ) return null;
   }
   return sessionBars[sessionBars.length - 1];
@@ -381,16 +388,29 @@ function activationProbe(pending, bars1m, index, strategy) {
   if (!bar) return null;
   const isCall = pending.direction === 'CALL';
   const rangeBars = bars1m.slice(pending.bar_index, index);
-  const highs = rangeBars.map((item) => num(item.H)).filter((value) => value != null);
-  const lows = rangeBars.map((item) => num(item.L)).filter((value) => value != null);
-  if (isCall && !highs.length) return null;
-  if (!isCall && !lows.length) return null;
+  const rangeInputs = rangeBars.map((item) => (isCall ? item.H : item.L));
+  if (!rangeInputs.length || rangeInputs.some((value) => !hasNumericInput(value))) return null;
+  const rangeValues = rangeInputs.map((value) => Number(value));
 
-  const breakoutLevel = isCall ? Math.max(...highs) : Math.min(...lows);
+  const breakoutLevel = isCall ? Math.max(...rangeValues) : Math.min(...rangeValues);
   const close = num(bar.C);
   const high = num(bar.H);
   const low = num(bar.L);
-  if (close == null || high == null || low == null) return null;
+  if (![bar.C, bar.H, bar.L].every(hasNumericInput)) return null;
+
+  if (cfg.require_same_direction_bar !== false) {
+    if (
+      !hasNumericInput(bar.hO ?? bar.O)
+      || !hasNumericInput(bar.hC ?? bar.C)
+    ) return null;
+  }
+  if (cfg.require_ma10_slope_still_aligned !== false) {
+    const lookback = Number(strategy.slope_filter?.lookback_bars || 1);
+    if (
+      !hasNumericInput(bar.m10)
+      || !hasNumericInput(bars1m[index - lookback]?.m10)
+    ) return null;
+  }
 
   const closeBreak = isCall ? close > breakoutLevel : close < breakoutLevel;
   const wickBreak = isCall ? high > breakoutLevel : low < breakoutLevel;
@@ -545,6 +565,7 @@ export function scanSignals({ bars1m = [], bars5m = [], strategy = {} }) {
   const useMa50Exit = Boolean(strategy.exit?.L2_hard_stops?.ma50_ha_close_break);
   const annotations = [];
   let pending = null;
+  let pendingProbeWindowComplete = true;
   let setupId = 0;
   let activePos = 0;
   let lastSignalBar = -Infinity;
@@ -563,16 +584,19 @@ export function scanSignals({ bars1m = [], bars5m = [], strategy = {} }) {
     }
 
     if (useActivation && pending) {
-      if ((index - pending.bar_index) > maxWait) {
+      const probe = activationProbe(pending, bars1m, index, strategy);
+      if (!probe) {
+        pendingProbeWindowComplete = false;
+        continue;
+      }
+      if (!pendingProbeWindowComplete) continue;
+      if ((pending._activation_observed_bars || 0) >= maxWait) {
         annotations.push(buildExpiredAnnotation({ pending, bar, index, maxWait }));
         pending = null;
       } else {
-        const probe = activationProbe(pending, bars1m, index, strategy);
-        if (probe) {
-          pending._activation_observed_bars = (pending._activation_observed_bars || 0) + 1;
-          updatePendingActivationStats(pending, probe, bar, index);
-        }
-        if (probe?.isActivation) {
+        pending._activation_observed_bars = (pending._activation_observed_bars || 0) + 1;
+        updatePendingActivationStats(pending, probe, bar, index);
+        if (probe.isActivation) {
           const activated = buildActivatedAnnotation({ pending, probe, bar, index, strategy });
           annotations.push(activated);
           if (usePosition) activePos = pending.direction === 'CALL' ? 1 : -1;
@@ -605,6 +629,7 @@ export function scanSignals({ bars1m = [], bars5m = [], strategy = {} }) {
       if (useActivation) {
         setupId += 1;
         pending = buildSetupAnnotation({ setup: raw, setupId, maxWait });
+        pendingProbeWindowComplete = true;
         annotations.push(pending);
       } else {
         annotations.push(raw);
@@ -617,7 +642,7 @@ export function scanSignals({ bars1m = [], bars5m = [], strategy = {} }) {
 
   if (useActivation && pending) {
     const completed = completeSessionWindow(bars1m, session);
-    if (completed && completed.index >= pending.bar_index) {
+    if (pendingProbeWindowComplete && completed && completed.index >= pending.bar_index) {
       const observedBars = pending._activation_observed_bars || 0;
       annotations.push(buildExpiredAnnotation({
         pending,

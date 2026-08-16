@@ -86,3 +86,26 @@ test('a gapped input remains pending even when its final timestamp is 15:59', ()
   assert.equal(annotations.some((item) => item.type === 'setup'), true);
   assert.equal(annotations.some((item) => item.type === 'expired'), false);
 });
+
+test('a missing required MA10 slope input keeps the setup pending', () => {
+  const bars1m = sessionBars({ setupOffset: 388 });
+  bars1m[389].m10 = null;
+  const slopeRequired = {
+    ...strategy,
+    entry_activation: {
+      ...strategy.entry_activation,
+      require_ma10_slope_still_aligned: true,
+    },
+  };
+  const annotations = scanSignals({ bars1m, bars5m, strategy: slopeRequired });
+  assert.equal(annotations.some((item) => item.type === 'setup'), true);
+  assert.equal(annotations.some((item) => item.type === 'expired'), false);
+});
+
+test('invalid OHLC in the activation window cannot create a shortened ordinary timeout', () => {
+  const bars1m = sessionBars({ setupOffset: 1 });
+  bars1m[5].H = null;
+  const annotations = outcomes(bars1m);
+  assert.equal(annotations.some((item) => item.type === 'setup'), true);
+  assert.equal(annotations.some((item) => item.type === 'expired'), false);
+});
