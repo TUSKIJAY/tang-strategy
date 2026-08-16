@@ -3,7 +3,7 @@
 - Lifecycle schema: `operating-modes-v1`
 - Status: Active
 - Plan slug: `2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan`
-- Revision: `v2-active-2026-08-16`
+- Revision: `v3-active-amendment-2026-08-16`
 - Plan author ID: `codex-root-01a00adc`
 - Design reviews: `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-001.md`, `../reviews/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan/review-002.md`
 - Latest design verdict: approve
@@ -12,7 +12,7 @@
 - Current phase: phase-0
 - Phase state: in-progress
 - Phase entry gate: `review-002@approve+user-instruction:2026-08-16-direct-takeover-eod-pending-hotfix`
-- Next gate: `phase-0-exit`
+- Next gate: `amendment-review`
 - Implementation review: none
 - Final disposition: none
 - Verified implementation commit: none
@@ -55,6 +55,7 @@
 - Hosted acceptance continues to require `activated|expired`, zero pending public lifecycle cards, and 1920x1080 capture. The publisher command accepts an explicit 40-hex expected renderer SHA; browser capture fetches live provenance before and after SPY/QQQ capture and refuses delivery unless both equal that SHA.
 - The tracked SQLite hash and all unrelated untracked `output/` trees must remain unchanged.
 - Recovery must reuse manifest commit `6f9a87c...`, its original data-publication workflow `31853873121`, and any persisted delivery IDs. Before the first Discord daily item, a redundant checksummed renderer receipt records distinct `data_commit_sha`, `data_workflow_run_id`, `renderer_commit_sha`, `renderer_workflow_run_id`, capture bounds, and screenshot hashes. Ambiguous provenance or duplicate Discord state fails closed.
+- The production authority currently binds runner code commit `690ee5c...` plus one config-only descendant. Deploying the renderer gate therefore requires one new scoped runner code commit, a temporarily disabled cron job, a replacement enable receipt bound to the new runner tree, one hash-only `config/deployment.json` commit, and exact re-enable readback. Schedule, argv, channel, model, and all other deployment values must be identical before and after.
 
 ## 4. Phases
 
@@ -82,8 +83,8 @@
 ### Phase 3 — Independent Implementation Review And Publish
 
 - Entry gate: `phase-2-exit`.
-- Work: create the scoped implementation commit; obtain independent implementation review; push `main`; wait for the authorized Pages workflow and validate provenance plus hosted SPY/QQQ snapshots.
-- Verification: review verdict `accept`; remote `main` equals the implementation commit; the new Pages workflow succeeds; live `build-manifest.json` equals the hotfix commit; hosted acceptance passes without relaxing gates.
+- Work: create scoped implementation commits in both repos; obtain independent implementation review; temporarily disable the fixed cron; replace the production-enable receipt with identical authority fields plus the reviewed runner commit/tree and current timestamp; commit only the new receipt hash in `config/deployment.json`; re-enable and read back the exact cron declaration; push Tang `main`; wait for the authorized Pages workflow and validate provenance plus hosted SPY/QQQ snapshots.
+- Verification: review verdict `accept`; runner HEAD is exactly one config-only commit after the reviewed runner code commit; runtime production evidence passes; cron pre/post declarations are identical and enabled; remote Tang `main` equals the implementation commit; the new Pages workflow succeeds; live `build-manifest.json` equals the hotfix commit; hosted acceptance passes without relaxing gates.
 - Exit gate: `phase-3-exit`.
 
 ### Phase 4 — Existing Transaction Recovery
@@ -107,7 +108,7 @@
 - Full checks: repository verification battery as proportionate runtime permits; lifecycle and harness checks are mandatory.
 - Expected state/handoff updates: proposed -> reviewed -> active -> completed; only the current resume point remains in `HANDOFF.md`.
 - Task-owned product paths: `frontend/src/features/review/scanner.js`, `frontend/src/features/review/scanner.test.js`, `frontend/src/features/review/ReviewSignalList.jsx`, `frontend/package.json`.
-- Task-owned publisher paths in `/Users/neowang/.openclaw/workspaces/tang-publisher`: `runner/tang_publish.py`, `runner/production.py`, `runner/hosted_acceptance.py`, and their focused existing test files. The cron declaration, deployment JSON, collector, pair/data pipeline, Discord formatting/adapter, and transaction data fields stay unchanged.
+- Task-owned publisher paths in `/Users/neowang/.openclaw/workspaces/tang-publisher`: `runner/tang_publish.py`, `runner/production.py`, `runner/hosted_acceptance.py`, their focused existing test files, and a hash-only `config/deployment.json` rebind commit. The external `phase-6-production-enable.json` receipt may change only `runner_commit`, `runner_sha256`, and `recorded_at`; all authority, boundary, prerequisite, job, and channel fields remain byte-equal. The collector, pair/data pipeline, Discord formatting/adapter, and transaction data fields stay unchanged.
 - Task-owned lifecycle paths: this plan, its review directory, the four lifecycle indexes/roadmap, `PROGRESS.md`, `HANDOFF.md`, and any required progress archive index/file.
 - No-commit condition: any failure to separate these paths from unrelated changes or any test showing altered earlier lifecycle outcomes.
 
@@ -128,3 +129,10 @@ The constrained metadata above is authoritative. Follow [`docs/operating-modes.m
 - Renderer binding: resolved with an explicit CLI SHA, in-browser before/after provenance bracket, successful workflow lookup, and a redundant checksummed receipt written before Discord delivery.
 - Baseline preservation: resolved with a normalized field-level annotation comparison for the actual 2026-08-14 SPY/QQQ payload.
 - Evidence naming: data publication and renderer deployment receive separate field names and workflow IDs; the original transaction manifest fields are not rewritten.
+
+## 8. V3 Runtime-Binding Amendment
+
+- Discovery: the existing production enable receipt binds runner code `690ee5c...`, and runtime validation requires HEAD to be exactly one config-only commit after that code commit. A new runner code commit would otherwise be rejected before recovery.
+- Amendment: after implementation review, disable the fixed cron, rebind only the runner commit/tree in the existing authority receipt, update only its hash in deployment config as the sole descendant commit, then restore and verify the byte-equivalent cron declaration before circuit reset or Discord work.
+- Safety: if the disabled-job readback, receipt field-preservation comparison, config-only partition, runtime authority validation, or final cron readback fails, leave the circuit open and do not capture or deliver a daily report.
+- Review gate: this amendment requires independent approval before implementation commits or production rebind.
