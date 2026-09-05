@@ -1,0 +1,1702 @@
+{
+  "generated_at": "2026-09-05T00:32:05.783413+00:00",
+  "limit": 250,
+  "ticker": null,
+  "strategy_families": "v3,v4,v5",
+  "strategies": [
+    {
+      "id": 3,
+      "name": "Tang v3",
+      "version": "0.4",
+      "slug": "tang-v3-0-4",
+      "description": "v3 基础 + 多周期冲突处理 / 假突破过滤 / 盘中单向与震荡执行细则 / 分批止盈纪律",
+      "file": "strategies/tang-v3-0-4.json"
+    },
+    {
+      "id": 4,
+      "name": "Tang v3.3.1 Flame",
+      "version": "3.3.1",
+      "slug": "tang-v3-3-1-flame-3-3-1",
+      "description": "由 docs/message (1).txt 转换：HA 内核 + 5m MA10/20/30 顺势过滤 + MA30 共振评分 + 0.15% 空间检测 + 普通/Strong 火焰信号 + MA50 灾难止损。",
+      "file": "strategies/tang-v3-3-1-flame-3-3-1.json"
+    },
+    {
+      "id": 5,
+      "name": "Tang v3.5.1 Full",
+      "version": "3.5.1",
+      "slug": "tang-v3-5-1-full-3-5-1",
+      "description": "由 Downloads/message (2).txt 转换：HA 用于颜色与影线判定，均线/VWAP/止损使用普通价格以对齐券商；5m MA10/20/30 顺势过滤；0.15% 空间检测；影线多线共振分级；MA50 实体贯穿止损。",
+      "file": "strategies/tang-v3-5-1-full-3-5-1.json"
+    },
+    {
+      "id": 6,
+      "name": "Tang v4.4 Activation",
+      "version": "4.4-activation",
+      "slug": "tang-v4-4-activation-4-4-activation",
+      "description": "由 Downloads/message (3).txt 转换：终极实战斜率修正版。HA 用于信号颜色、影线和 MA50 止损判定；均线/VWAP 使用普通 close 对齐券商；5m MA10/20/30 顺势过滤；加入 MA10 斜率过滤、持仓状态机、10 根 K 冷却，以及 MA10 叠加 MA50/MA200/VWAP 的 elite Strong 判定。 派生版：原 v4.4 信号先作为 setup 候选，8 根 1m K 内收盘突破 setup 后运行区间才生成正式 activation 入场信号。",
+      "file": "strategies/tang-v4-4-activation-4-4-activation.json"
+    },
+    {
+      "id": 7,
+      "name": "Tang v4.4 Activation Wick",
+      "version": "4.4-activation-wick",
+      "slug": "tang-v4-4-activation-wick-4-4-activation-wick",
+      "description": "由 Downloads/message (3).txt 转换：终极实战斜率修正版。HA 用于信号颜色、影线和 MA50 止损判定；均线/VWAP 使用普通 close 对齐券商；5m MA10/20/30 顺势过滤；加入 MA10 斜率过滤、持仓状态机、10 根 K 冷却，以及 MA10 叠加 MA50/MA200/VWAP 的 elite Strong 判定。 派生版：原 v4.4 信号先作为 setup 候选，8 根 1m K 内启动确认后才生成正式 activation 入场信号。实盘友好版：除收盘突破/跌破外，也允许强势刺破/下破确认线并收在顺向半边的 K 线触发 activation。",
+      "file": "strategies/tang-v4-4-activation-wick-4-4-activation-wick.json"
+    },
+    {
+      "id": 8,
+      "name": "Tang v4.4 Slope",
+      "version": "4.4",
+      "slug": "tang-v4-4-slope-4-4",
+      "description": "由 Downloads/message (3).txt 转换：终极实战斜率修正版。HA 用于信号颜色、影线和 MA50 止损判定；均线/VWAP 使用普通 close 对齐券商；5m MA10/20/30 顺势过滤；加入 MA10 斜率过滤、持仓状态机、10 根 K 冷却，以及 MA10 叠加 MA50/MA200/VWAP 的 elite Strong 判定。",
+      "file": "strategies/tang-v4-4-slope-4-4.json"
+    },
+    {
+      "id": 9,
+      "name": "Tang v4.5",
+      "version": "4.5",
+      "slug": "tang-v4-5-4-5",
+      "description": "基于终极对齐报警版 V4.8。HA 用于信号颜色、影线和 MA50 止损判定；均线使用普通 close 对齐券商，VWAP 使用每日 session 重置；5m MA10/20/30 顺势过滤；包含 MA10 斜率过滤、持仓状态机、10 根 K 冷却、叠加 MA50/MA200/VWAP 的 elite Strong 判定，并增加了原生报警支持。",
+      "file": "strategies/tang-v4-5-4-5.json"
+    },
+    {
+      "id": 10,
+      "name": "Tang v4.8.4 Hybrid VWAP",
+      "version": "4.8.4-hybrid-vwap",
+      "slug": "tang-v4-8-4-hybrid-vwap-4-8-4-hybrid-vwap",
+      "description": "由 Downloads/小汤系统 V4.8.4 - 30年老兵特供 混合VWAP+语法修复版.md 转换：30年老兵特供 混合 VWAP 版本。HA 用于信号颜色、影线和 MA50 止损判定；MA10/MA50/MA200 对齐券商 close；5m MA10>MA30 顺势过滤；1m MA10 斜率过滤；上一根 HA 区间触碰 MA10 即满足触碰条件；MA10 叠加 MA50/MA200/VWAP 任一条线决定 elite Strong；硬性 0.22% 空间门槛支撑 0DTE 期权 20% 盈利目标；持仓状态机 + 10 根 K 冷却。VWAP 使用混合逻辑：1m 用标准 ta.vwap(hlc3) 锚定，>1m 用 60min 锚点 20 周期滚动 VWAP。",
+      "file": "strategies/tang-v4-8-4-hybrid-vwap-4-8-4-hybrid-vwap.json"
+    },
+    {
+      "id": 11,
+      "name": "Tang v5.0",
+      "version": "5.0",
+      "slug": "tang-v5-0-5-0",
+      "description": "基于终极狙击版 V5.0。自适应缩放兼容 SPY/SPX/个股。放弃小均线纠缠，专注于单根 K 线的实体与成交量爆发（is_burst），要求价格瞬间穿透关键大均线，并在 5 分钟图上方/下方有足够的真空获利空间（min_space）。新增止盈目标位设定（基于距离大均线的提前量 tp_offset）以及强制止盈（tp_event）。防守为普通 close 跌破或突破 MA50。",
+      "file": "strategies/tang-v5-0-5-0.json"
+    }
+  ],
+  "reviews": [
+    {
+      "slug": "qqq-2026-09-04-extended",
+      "file": "days/qqq-2026-09-04-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-09-04",
+      "session_mode": "extended",
+      "title": "QQQ 2026-09-04 Full Day",
+      "bars_1m": 852,
+      "bars_5m": 188
+    },
+    {
+      "slug": "spy-2026-09-04-extended",
+      "file": "days/spy-2026-09-04-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-09-04",
+      "session_mode": "extended",
+      "title": "SPY 2026-09-04 Full Day",
+      "bars_1m": 777,
+      "bars_5m": 186
+    },
+    {
+      "slug": "qqq-2026-09-03-extended",
+      "file": "days/qqq-2026-09-03-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-09-03",
+      "session_mode": "extended",
+      "title": "QQQ 2026-09-03 Full Day",
+      "bars_1m": 862,
+      "bars_5m": 191
+    },
+    {
+      "slug": "spy-2026-09-03-extended",
+      "file": "days/spy-2026-09-03-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-09-03",
+      "session_mode": "extended",
+      "title": "SPY 2026-09-03 Full Day",
+      "bars_1m": 755,
+      "bars_5m": 188
+    },
+    {
+      "slug": "qqq-2026-09-02-extended",
+      "file": "days/qqq-2026-09-02-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-09-02",
+      "session_mode": "extended",
+      "title": "QQQ 2026-09-02 Full Day",
+      "bars_1m": 891,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-09-02-extended",
+      "file": "days/spy-2026-09-02-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-09-02",
+      "session_mode": "extended",
+      "title": "SPY 2026-09-02 Full Day",
+      "bars_1m": 823,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-09-01-extended",
+      "file": "days/qqq-2026-09-01-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-09-01",
+      "session_mode": "extended",
+      "title": "QQQ 2026-09-01 Full Day",
+      "bars_1m": 900,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-09-01-extended",
+      "file": "days/spy-2026-09-01-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-09-01",
+      "session_mode": "extended",
+      "title": "SPY 2026-09-01 Full Day",
+      "bars_1m": 832,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-08-31-extended",
+      "file": "days/qqq-2026-08-31-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-31",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-31 Full Day",
+      "bars_1m": 844,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-31-extended",
+      "file": "days/spy-2026-08-31-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-31",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-31 Full Day",
+      "bars_1m": 713,
+      "bars_5m": 182
+    },
+    {
+      "slug": "qqq-2026-08-28-extended",
+      "file": "days/qqq-2026-08-28-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-28",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-28 Full Day",
+      "bars_1m": 812,
+      "bars_5m": 191
+    },
+    {
+      "slug": "spy-2026-08-28-extended",
+      "file": "days/spy-2026-08-28-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-28",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-28 Full Day",
+      "bars_1m": 743,
+      "bars_5m": 182
+    },
+    {
+      "slug": "qqq-2026-08-27-extended",
+      "file": "days/qqq-2026-08-27-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-27",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-27 Full Day",
+      "bars_1m": 894,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-27-extended",
+      "file": "days/spy-2026-08-27-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-27",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-27 Full Day",
+      "bars_1m": 776,
+      "bars_5m": 188
+    },
+    {
+      "slug": "qqq-2026-08-26-extended",
+      "file": "days/qqq-2026-08-26-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-26",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-26 Full Day",
+      "bars_1m": 889,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-26-extended",
+      "file": "days/spy-2026-08-26-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-26",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-26 Full Day",
+      "bars_1m": 808,
+      "bars_5m": 188
+    },
+    {
+      "slug": "qqq-2026-08-25-extended",
+      "file": "days/qqq-2026-08-25-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-25",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-25 Full Day",
+      "bars_1m": 890,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-25-extended",
+      "file": "days/spy-2026-08-25-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-25",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-25 Full Day",
+      "bars_1m": 778,
+      "bars_5m": 189
+    },
+    {
+      "slug": "qqq-2026-08-24-extended",
+      "file": "days/qqq-2026-08-24-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-24",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-24 Full Day",
+      "bars_1m": 865,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-24-extended",
+      "file": "days/spy-2026-08-24-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-24",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-24 Full Day",
+      "bars_1m": 801,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-08-21-extended",
+      "file": "days/qqq-2026-08-21-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-21",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-21 Full Day",
+      "bars_1m": 863,
+      "bars_5m": 191
+    },
+    {
+      "slug": "spy-2026-08-21-extended",
+      "file": "days/spy-2026-08-21-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-21",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-21 Full Day",
+      "bars_1m": 848,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-08-20-extended",
+      "file": "days/qqq-2026-08-20-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-20",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-20 Full Day",
+      "bars_1m": 880,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-20-extended",
+      "file": "days/spy-2026-08-20-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-20",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-20 Full Day",
+      "bars_1m": 822,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-08-19-extended",
+      "file": "days/qqq-2026-08-19-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-19",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-19 Full Day",
+      "bars_1m": 885,
+      "bars_5m": 190
+    },
+    {
+      "slug": "spy-2026-08-19-extended",
+      "file": "days/spy-2026-08-19-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-19",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-19 Full Day",
+      "bars_1m": 793,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-08-18-extended",
+      "file": "days/qqq-2026-08-18-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-18",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-18 Full Day",
+      "bars_1m": 926,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-18-extended",
+      "file": "days/spy-2026-08-18-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-18",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-18 Full Day",
+      "bars_1m": 864,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-08-17-extended",
+      "file": "days/qqq-2026-08-17-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-17",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-17 Full Day",
+      "bars_1m": 869,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-17-extended",
+      "file": "days/spy-2026-08-17-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-17",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-17 Full Day",
+      "bars_1m": 812,
+      "bars_5m": 189
+    },
+    {
+      "slug": "qqq-2026-08-14-extended",
+      "file": "days/qqq-2026-08-14-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-14",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-14 Full Day",
+      "bars_1m": 826,
+      "bars_5m": 188
+    },
+    {
+      "slug": "spy-2026-08-14-extended",
+      "file": "days/spy-2026-08-14-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-14",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-14 Full Day",
+      "bars_1m": 770,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-08-13-extended",
+      "file": "days/qqq-2026-08-13-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-13",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-13 Full Day",
+      "bars_1m": 881,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-13-extended",
+      "file": "days/spy-2026-08-13-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-13",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-13 Full Day",
+      "bars_1m": 776,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-08-12-extended",
+      "file": "days/qqq-2026-08-12-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-12",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-12 Full Day",
+      "bars_1m": 890,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-12-extended",
+      "file": "days/spy-2026-08-12-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-12",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-12 Full Day",
+      "bars_1m": 791,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-08-11-extended",
+      "file": "days/qqq-2026-08-11-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-11",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-11 Full Day",
+      "bars_1m": 859,
+      "bars_5m": 191
+    },
+    {
+      "slug": "spy-2026-08-11-extended",
+      "file": "days/spy-2026-08-11-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-11",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-11 Full Day",
+      "bars_1m": 781,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-08-10-extended",
+      "file": "days/qqq-2026-08-10-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-10",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-10 Full Day",
+      "bars_1m": 898,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-10-extended",
+      "file": "days/spy-2026-08-10-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-10",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-10 Full Day",
+      "bars_1m": 798,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-08-07-extended",
+      "file": "days/qqq-2026-08-07-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-07",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-07 Full Day",
+      "bars_1m": 838,
+      "bars_5m": 191
+    },
+    {
+      "slug": "spy-2026-08-07-extended",
+      "file": "days/spy-2026-08-07-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-07",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-07 Full Day",
+      "bars_1m": 761,
+      "bars_5m": 188
+    },
+    {
+      "slug": "qqq-2026-08-06-extended",
+      "file": "days/qqq-2026-08-06-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-06",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-06 Full Day",
+      "bars_1m": 899,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-06-extended",
+      "file": "days/spy-2026-08-06-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-06",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-06 Full Day",
+      "bars_1m": 808,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-08-05-extended",
+      "file": "days/qqq-2026-08-05-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-05",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-05 Full Day",
+      "bars_1m": 942,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-05-extended",
+      "file": "days/spy-2026-08-05-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-05",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-05 Full Day",
+      "bars_1m": 873,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-08-04-extended",
+      "file": "days/qqq-2026-08-04-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-04",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-04 Full Day",
+      "bars_1m": 938,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-04-extended",
+      "file": "days/spy-2026-08-04-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-04",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-04 Full Day",
+      "bars_1m": 872,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-08-03-extended",
+      "file": "days/qqq-2026-08-03-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-08-03",
+      "session_mode": "extended",
+      "title": "QQQ 2026-08-03 Full Day",
+      "bars_1m": 931,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-08-03-extended",
+      "file": "days/spy-2026-08-03-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-08-03",
+      "session_mode": "extended",
+      "title": "SPY 2026-08-03 Full Day",
+      "bars_1m": 857,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-07-31-extended",
+      "file": "days/qqq-2026-07-31-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-31",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-31 Full Day",
+      "bars_1m": 935,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-31-extended",
+      "file": "days/spy-2026-07-31-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-31",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-31 Full Day",
+      "bars_1m": 863,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-30-extended",
+      "file": "days/qqq-2026-07-30-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-30",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-30 Full Day",
+      "bars_1m": 945,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-30-extended",
+      "file": "days/spy-2026-07-30-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-30",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-30 Full Day",
+      "bars_1m": 892,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-07-29-extended",
+      "file": "days/qqq-2026-07-29-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-29",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-29 Full Day",
+      "bars_1m": 958,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-29-extended",
+      "file": "days/spy-2026-07-29-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-29",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-29 Full Day",
+      "bars_1m": 893,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-07-28-extended",
+      "file": "days/qqq-2026-07-28-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-28",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-28 Full Day",
+      "bars_1m": 944,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-28-extended",
+      "file": "days/spy-2026-07-28-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-28",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-28 Full Day",
+      "bars_1m": 859,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-27-extended",
+      "file": "days/qqq-2026-07-27-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-27",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-27 Full Day",
+      "bars_1m": 919,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-27-extended",
+      "file": "days/spy-2026-07-27-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-27",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-27 Full Day",
+      "bars_1m": 835,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-07-24-extended",
+      "file": "days/qqq-2026-07-24-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-24",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-24 Full Day",
+      "bars_1m": 877,
+      "bars_5m": 183
+    },
+    {
+      "slug": "spy-2026-07-24-extended",
+      "file": "days/spy-2026-07-24-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-24",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-24 Full Day",
+      "bars_1m": 783,
+      "bars_5m": 180
+    },
+    {
+      "slug": "qqq-2026-07-23-extended",
+      "file": "days/qqq-2026-07-23-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-23",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-23 Full Day",
+      "bars_1m": 919,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-23-extended",
+      "file": "days/spy-2026-07-23-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-23",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-23 Full Day",
+      "bars_1m": 830,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-07-22-extended",
+      "file": "days/qqq-2026-07-22-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-22",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-22 Full Day",
+      "bars_1m": 918,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-22-extended",
+      "file": "days/spy-2026-07-22-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-22",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-22 Full Day",
+      "bars_1m": 838,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-07-21-extended",
+      "file": "days/qqq-2026-07-21-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-21",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-21 Full Day",
+      "bars_1m": 918,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-21-extended",
+      "file": "days/spy-2026-07-21-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-21",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-21 Full Day",
+      "bars_1m": 818,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-07-20-extended",
+      "file": "days/qqq-2026-07-20-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-20",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-20 Full Day",
+      "bars_1m": 906,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-20-extended",
+      "file": "days/spy-2026-07-20-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-20",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-20 Full Day",
+      "bars_1m": 826,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-07-17-extended",
+      "file": "days/qqq-2026-07-17-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-17",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-17 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-17-extended",
+      "file": "days/spy-2026-07-17-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-17",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-17 Full Day",
+      "bars_1m": 868,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-16-extended",
+      "file": "days/qqq-2026-07-16-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-16",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-16 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-16-extended",
+      "file": "days/spy-2026-07-16-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-16",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-16 Full Day",
+      "bars_1m": 823,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-07-15-extended",
+      "file": "days/qqq-2026-07-15-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-15",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-15 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-15-extended",
+      "file": "days/spy-2026-07-15-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-15",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-15 Full Day",
+      "bars_1m": 767,
+      "bars_5m": 190
+    },
+    {
+      "slug": "qqq-2026-07-14-extended",
+      "file": "days/qqq-2026-07-14-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-14",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-14 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-14-extended",
+      "file": "days/spy-2026-07-14-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-14",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-14 Full Day",
+      "bars_1m": 786,
+      "bars_5m": 191
+    },
+    {
+      "slug": "qqq-2026-07-13-extended",
+      "file": "days/qqq-2026-07-13-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-13",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-13 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-13-extended",
+      "file": "days/spy-2026-07-13-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-13",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-13 Full Day",
+      "bars_1m": 836,
+      "bars_5m": 189
+    },
+    {
+      "slug": "qqq-2026-07-10-extended",
+      "file": "days/qqq-2026-07-10-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-10",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-10 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-10-extended",
+      "file": "days/spy-2026-07-10-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-10",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-10 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-09-extended",
+      "file": "days/qqq-2026-07-09-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-09",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-09 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-09-extended",
+      "file": "days/spy-2026-07-09-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-09",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-09 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-08-extended",
+      "file": "days/qqq-2026-07-08-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-08",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-08 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-08-extended",
+      "file": "days/spy-2026-07-08-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-08",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-08 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-07-extended",
+      "file": "days/qqq-2026-07-07-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-07",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-07 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-07-extended",
+      "file": "days/spy-2026-07-07-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-07",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-07 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-06-extended",
+      "file": "days/qqq-2026-07-06-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-06",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-06 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-06-extended",
+      "file": "days/spy-2026-07-06-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-06",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-06 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-02-extended",
+      "file": "days/qqq-2026-07-02-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-02",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-02 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-02-extended",
+      "file": "days/spy-2026-07-02-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-02",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-02 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-07-01-extended",
+      "file": "days/qqq-2026-07-01-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-07-01",
+      "session_mode": "extended",
+      "title": "QQQ 2026-07-01 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-07-01-extended",
+      "file": "days/spy-2026-07-01-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-07-01",
+      "session_mode": "extended",
+      "title": "SPY 2026-07-01 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-30-extended",
+      "file": "days/qqq-2026-06-30-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-30",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-30 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-30-extended",
+      "file": "days/spy-2026-06-30-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-30",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-30 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-29-extended",
+      "file": "days/qqq-2026-06-29-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-29",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-29 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-29-extended",
+      "file": "days/spy-2026-06-29-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-29",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-29 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-26-extended",
+      "file": "days/qqq-2026-06-26-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-26",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-26 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-26-extended",
+      "file": "days/spy-2026-06-26-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-26",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-26 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-25-extended",
+      "file": "days/qqq-2026-06-25-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-25",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-25 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-25-extended",
+      "file": "days/spy-2026-06-25-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-25",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-25 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-24-extended",
+      "file": "days/qqq-2026-06-24-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-24",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-24 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-24-extended",
+      "file": "days/spy-2026-06-24-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-24",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-24 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-23-extended",
+      "file": "days/qqq-2026-06-23-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-23",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-23 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-23-extended",
+      "file": "days/spy-2026-06-23-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-23",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-23 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-22-extended",
+      "file": "days/qqq-2026-06-22-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-22",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-22 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-22-extended",
+      "file": "days/spy-2026-06-22-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-22",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-22 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-18-extended",
+      "file": "days/qqq-2026-06-18-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-18",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-18 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-18-extended",
+      "file": "days/spy-2026-06-18-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-18",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-18 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-17-extended",
+      "file": "days/qqq-2026-06-17-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-17",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-17 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-17-extended",
+      "file": "days/spy-2026-06-17-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-17",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-17 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-16-extended",
+      "file": "days/qqq-2026-06-16-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-16",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-16 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-16-extended",
+      "file": "days/spy-2026-06-16-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-16",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-16 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-15-extended",
+      "file": "days/qqq-2026-06-15-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-15",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-15 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-15-extended",
+      "file": "days/spy-2026-06-15-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-15",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-15 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-12-extended",
+      "file": "days/qqq-2026-06-12-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-12",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-12 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-12-extended",
+      "file": "days/spy-2026-06-12-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-12",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-12 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-11-extended",
+      "file": "days/qqq-2026-06-11-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-11",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-11 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-11-extended",
+      "file": "days/spy-2026-06-11-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-11",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-11 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-10-extended",
+      "file": "days/qqq-2026-06-10-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-10",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-10 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-10-extended",
+      "file": "days/spy-2026-06-10-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-10",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-10 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-09-extended",
+      "file": "days/qqq-2026-06-09-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-09",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-09 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-09-extended",
+      "file": "days/spy-2026-06-09-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-09",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-09 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-08-extended",
+      "file": "days/qqq-2026-06-08-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-08",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-08 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-08-extended",
+      "file": "days/spy-2026-06-08-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-08",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-08 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-05-extended",
+      "file": "days/qqq-2026-06-05-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-05",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-05 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-05-extended",
+      "file": "days/spy-2026-06-05-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-05",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-05 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-04-extended",
+      "file": "days/qqq-2026-06-04-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-04",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-04 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-04-extended",
+      "file": "days/spy-2026-06-04-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-04",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-04 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-03-extended",
+      "file": "days/qqq-2026-06-03-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-03",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-03 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-03-extended",
+      "file": "days/spy-2026-06-03-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-03",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-03 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-02-extended",
+      "file": "days/qqq-2026-06-02-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-02",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-02 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-02-extended",
+      "file": "days/spy-2026-06-02-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-02",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-02 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-06-01-extended",
+      "file": "days/qqq-2026-06-01-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-06-01",
+      "session_mode": "extended",
+      "title": "QQQ 2026-06-01 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-06-01-extended",
+      "file": "days/spy-2026-06-01-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-06-01",
+      "session_mode": "extended",
+      "title": "SPY 2026-06-01 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-29-extended",
+      "file": "days/qqq-2026-05-29-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-29",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-29 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-29-extended",
+      "file": "days/spy-2026-05-29-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-29",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-29 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-28-extended",
+      "file": "days/qqq-2026-05-28-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-28",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-28 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-28-extended",
+      "file": "days/spy-2026-05-28-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-28",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-28 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-27-extended",
+      "file": "days/qqq-2026-05-27-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-27",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-27 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-27-extended",
+      "file": "days/spy-2026-05-27-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-27",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-27 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-26-extended",
+      "file": "days/qqq-2026-05-26-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-26",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-26 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-26-extended",
+      "file": "days/spy-2026-05-26-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-26",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-26 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-22-extended",
+      "file": "days/qqq-2026-05-22-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-22",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-22 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-22-extended",
+      "file": "days/spy-2026-05-22-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-22",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-22 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-21-extended",
+      "file": "days/qqq-2026-05-21-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-21",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-21 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-21-extended",
+      "file": "days/spy-2026-05-21-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-21",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-21 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-20-extended",
+      "file": "days/qqq-2026-05-20-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-20",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-20 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-20-extended",
+      "file": "days/spy-2026-05-20-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-20",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-20 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-19-extended",
+      "file": "days/qqq-2026-05-19-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-19",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-19 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-19-extended",
+      "file": "days/spy-2026-05-19-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-19",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-19 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-18-extended",
+      "file": "days/qqq-2026-05-18-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-18",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-18 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-18-extended",
+      "file": "days/spy-2026-05-18-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-18",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-18 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-15-extended",
+      "file": "days/qqq-2026-05-15-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-15",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-15 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-15-extended",
+      "file": "days/spy-2026-05-15-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-15",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-15 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-14-extended",
+      "file": "days/qqq-2026-05-14-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-14",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-14 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-14-extended",
+      "file": "days/spy-2026-05-14-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-14",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-14 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "qqq-2026-05-13-extended",
+      "file": "days/qqq-2026-05-13-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-13",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-13 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-13-extended",
+      "file": "days/spy-2026-05-13-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-13",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-13 Full Day",
+      "bars_1m": 945,
+      "bars_5m": 189
+    },
+    {
+      "slug": "qqq-2026-05-12-extended",
+      "file": "days/qqq-2026-05-12-extended.json",
+      "ticker": "QQQ",
+      "trade_date": "2026-05-12",
+      "session_mode": "extended",
+      "title": "QQQ 2026-05-12 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    },
+    {
+      "slug": "spy-2026-05-12-extended",
+      "file": "days/spy-2026-05-12-extended.json",
+      "ticker": "SPY",
+      "trade_date": "2026-05-12",
+      "session_mode": "extended",
+      "title": "SPY 2026-05-12 Full Day",
+      "bars_1m": 960,
+      "bars_5m": 192
+    }
+  ]
+}
