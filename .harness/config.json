@@ -14,7 +14,7 @@
     "cd frontend && npm run test:trade-records",
     "cd frontend && npm run build",
     "cd frontend && VITE_STATIC_REVIEWS=true npm run build:static-reviews",
-    "git diff --check"
+    "git diff --check && git diff --cached --check"
   ],
   "github": {
     "repository": "TUSKIJAY/tang-strategy",
