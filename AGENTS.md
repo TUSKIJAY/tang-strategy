@@ -75,6 +75,7 @@ GitHub integration:
 - Use `.github/pull_request_template.md`; keep `PROGRESS.md` and `HANDOFF.md` truthful when the next gate changes.
 - A green GitHub check is verification evidence, not merge or publish authorization. Do not push, open/merge a PR, or change branch protection without an explicit user request.
 - The existing `Publish static reviews` workflow remains the only Pages publisher and runs from `main` under the daily publish contract.
+- On the maintainer's Mac, before any push to `main` (including the daily publish playbook), confirm the OpenClaw publisher is idle: `~/.openclaw/state/tang-publisher/locks/publisher.lease.json` is absent and no `Publish static reviews` run is in progress; otherwise wait. Its cron starts 20:30 America/New_York and may run up to 150 minutes; a push during a run fails it with `git_remote_race` or breaks its Pages provenance check. Never force-push `main`: the publisher accepts only fast-forwards.
 
 ## Security & Config Notes
 

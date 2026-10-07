@@ -12,8 +12,8 @@ This file is the latest resume point only. History belongs in `PROGRESS.md`, and
 - Next gate: `none`
 <!-- operating-modes-state:end -->
 
-- Last updated: 2026-08-16
-- Branch: `main`; remote `origin/main` and Pages renderer are `f937c03`; local lifecycle closeout commits follow it. Unrelated untracked `output/` evidence is preserved.
+- Last updated: 2026-10-07
+- Branch: `main`, tracking `origin/main`; the OpenClaw publisher advances `origin/main` and Pages with one DB-only commit per trading day. Unrelated untracked `output/` evidence is preserved.
 - No active exec plan. The EOD Pending Activation Hotfix is [Completed](./docs/exec-plans/completed/2026-08-16-tang-strategy-eod-pending-activation-hotfix-plan.md): the preserved 2026-08-14 Friday transaction is finalized, its three Discord IDs are exact-readback verified with no duplicates, the circuit is closed, the fixed cron is enabled with its original declaration, and the tracked DB hash is unchanged.
 
 ## Open Threads
