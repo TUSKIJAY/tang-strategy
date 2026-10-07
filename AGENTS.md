@@ -8,6 +8,8 @@ Before substantive work:
 2. Read `AGENTS.md`, `INSTRUCTIONS.md`, `PROGRESS.md`, and `HANDOFF.md` in that order.
 3. Use `.harness/config.json` and `scripts/check-project-harness.py` for the current verification baseline.
 
+Local checkout map (maintainer's Mac, verified 2026-10-07): interactive development happens only in `~/Code/tang-strategy-github`, including worktrees created under it. `~/Automation/tang-strategy-publisher` and its worktrees belong to the OpenClaw daily publisher and stay under the daily publish contract. `~/Code/_archive/tang-strategy-old-2026-05` is a stale May 2026 clone kept only for its uncommitted files; do not develop there. If an interactive session starts in any other checkout of this repository, tell the user and confirm before changing files.
+
 `AGENTS.md` is the authoritative instruction entry. `CLAUDE.md` is a compatibility pointer and must not become a second policy copy. Keep stable project facts in `INSTRUCTIONS.md`, current lifecycle truth in `PROGRESS.md`, and only the latest resume point in `HANDOFF.md`. Update the two state files when the working state or next gate materially changes.
 
 Preserve all unrelated user changes. Do not overwrite, revert, stage, or commit them as part of another task.
