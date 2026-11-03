@@ -459,6 +459,7 @@ export function ReviewPage({ state, setState }) {
           <div className="dr-title">Daily Review</div>
           <div className="dr-divider" />
           <Stat label="日期" value={meta.date || selectedDay?.trade_date || '--'} />
+          {meta.provider === 'ibkr_mcp' && <Stat label="来源" value="IBKR MCP · 近似 VWAP" />}
           <Stat label="进场" value={summary.total} />
           <Stat label="空" value={summary.puts} tone="red" />
           <Stat label="多" value={summary.calls} tone="green" />

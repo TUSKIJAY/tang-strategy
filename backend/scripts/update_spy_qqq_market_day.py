@@ -42,7 +42,7 @@ DEFAULT_DB_PATH = REPO_DIR / "data" / "sqlite" / "tang_strategy_live_extended.db
 DEFAULT_ACCEPTED_SEED_DIR = REPO_DIR / "data" / "seed" / "market-data" / "live_extended"
 PAIR = ("SPY", "QQQ")
 SESSION_MODE = "extended"
-PROVIDERS = {"tradingview", "ibkr"}
+PROVIDERS = {"tradingview", "ibkr", "ibkr_mcp"}
 TRADINGVIEW_EXCHANGES = {"SPY": "AMEX", "QQQ": "NASDAQ"}
 
 FetchOne = Callable[[str, str, Path, str], Path]
@@ -104,6 +104,8 @@ def capture_git_baseline(repo_dir: Path = REPO_DIR) -> dict[str, Any]:
 
 
 def fetch_one_symbol(symbol: str, trade_date: str, staging_dir: Path, provider: str) -> Path:
+    if provider == "ibkr_mcp":
+        raise ValueError("ibkr_mcp requires the explicit validated package entry point")
     if provider not in PROVIDERS:
         raise ValueError(f"Unsupported pair provider: {provider}")
     script = (
@@ -272,7 +274,7 @@ def _validate_payload_quality(
         raise RuntimeError(
             f"{symbol} quality gate failed: RTH 5m bars={len(actual_5m)}, expected={len(expected_5m)}"
         )
-    if provider == "tradingview":
+    if provider in {"tradingview", "ibkr_mcp"}:
         if str(meta.get("market_calendar") or "").upper() != "NYSE":
             raise RuntimeError(f"{symbol} quality gate failed: market_calendar must be NYSE")
         quality = meta.get("quality")
