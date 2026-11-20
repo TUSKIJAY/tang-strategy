@@ -537,7 +537,7 @@
       </div>
       <ul>
         <li>三个 job 显示名被 harness 检查器强制与 <code>config.github.checks</code> 精确匹配</li>
-        <li>与本地 battery 同构：11 条中 CI 显式跑 9 条 + 1 条内嵌覆盖；<code>git diff --check</code> 仅本地有意义</li>
+        <li>与本地 battery 同构：11 条中 CI 显式跑 9 条 + 1 条内嵌覆盖；<code>git diff --check &amp;&amp; git diff --cached --check</code> 仅本地有意义</li>
         <li>环境：Python 3.11 · Node 22 · 安装 <code>requirements-tv.txt</code></li>
       </ul>
     </div>
@@ -574,7 +574,7 @@
           <tr><td class="num">8</td><td><span class="pill">PASS</span></td><td class="time">0.9s<div class="tbar"><i style="width: 2.8%;"></i></div></td><td class="cmd">frontend npm run test:trade-records（69）</td></tr>
           <tr><td class="num">9</td><td><span class="pill">PASS</span></td><td class="time">1.4s<div class="tbar"><i style="width: 4.4%;"></i></div></td><td class="cmd">frontend npm run build</td></tr>
           <tr><td class="num">10</td><td><span class="pill">PASS</span></td><td class="time">1.1s<div class="tbar"><i style="width: 3.4%;"></i></div></td><td class="cmd">VITE_STATIC_REVIEWS=true build:static-reviews</td></tr>
-          <tr><td class="num">11</td><td><span class="pill">PASS</span></td><td class="time">0.1s<div class="tbar"><i style="width: 0%;"></i></div></td><td class="cmd">git diff --check</td></tr>
+          <tr><td class="num">11</td><td><span class="pill">PASS</span></td><td class="time">0.1s<div class="tbar"><i style="width: 0%;"></i></div></td><td class="cmd">git diff --check &amp;&amp; git diff --cached --check</td></tr>
           <tr class="sum"><td class="num"></td><td></td><td class="time"><b>≈ 38.1s</b></td><td class="cmd">合计 · python3 scripts/verify.py</td></tr>
         </table>
       </div>
@@ -671,7 +671,7 @@
       </g>
       <g class="map-node">
         <rect x="30" y="262" width="380" height="44" rx="6"/>
-        <text class="t" x="44" y="288">git diff --check</text>
+        <text class="t" x="44" y="288">git diff --check &amp;&amp; git diff --cached --check</text>
       </g>
 
       <!-- CI nodes -->
